@@ -38,13 +38,13 @@ export default async function Image({ params }: { params: Promise<{ username: st
     );
   }
 
-  const totalPnl = user.wallets.reduce((s, w) => s + (w.totalPnlUsd ?? 0), 0);
+  const totalPnl = user.wallets.reduce((s: number, w) => s + (w.totalPnlUsd ?? 0), 0);
   const walletsWithRate = user.wallets.filter((w) => w.winRate != null);
   const winRate =
     walletsWithRate.length > 0
-      ? walletsWithRate.reduce((s, w) => s + (w.winRate ?? 0), 0) / walletsWithRate.length
+      ? walletsWithRate.reduce((s: number, w) => s + (w.winRate ?? 0), 0) / walletsWithRate.length
       : 0;
-  const totalTrades = user.wallets.reduce((s, w) => s + (w.totalTrades ?? 0), 0);
+  const totalTrades = user.wallets.reduce((s: number, w) => s + (w.totalTrades ?? 0), 0);
   const pnlStr =
     totalPnl >= 1000 ? `+$${(totalPnl / 1000).toFixed(1)}K` : `+$${totalPnl.toFixed(0)}`;
 
