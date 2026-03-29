@@ -33,14 +33,22 @@ export default async function ProfilePage({ params }: Props) {
   });
   if (!user) notFound();
 
-  const walletsWithRate = user.wallets.filter(w => w.winRate != null);
+  let totalPnlUsd = 0;
+  let totalWinRate = 0;
+  let winRateCount = 0;
+  let totalTrades = 0;
+  for (const w of user.wallets) {
+    totalPnlUsd += w.totalPnlUsd ?? 0;
+    totalTrades += w.totalTrades ?? 0;
+    if (w.winRate != null) {
+      totalWinRate += w.winRate;
+      winRateCount++;
+    }
+  }
   const stats = {
-    totalPnlUsd: user.wallets.reduce((sum, w) => sum + (w.totalPnlUsd ?? 0), 0 as number),
-    winRate:
-      walletsWithRate.length > 0
-        ? walletsWithRate.reduce((sum, w) => sum + (w.winRate ?? 0), 0 as number) / walletsWithRate.length
-        : 0,
-    totalTrades: user.wallets.reduce((sum, w) => sum + (w.totalTrades ?? 0), 0 as number),
+    totalPnlUsd,
+    winRate: winRateCount > 0 ? totalWinRate / winRateCount : 0,
+    totalTrades,
   };
 
   const pinnedTrades = user.pinnedTrades.map((t) => ({

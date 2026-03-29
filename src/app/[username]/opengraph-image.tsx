@@ -38,13 +38,19 @@ export default async function Image({ params }: { params: Promise<{ username: st
     );
   }
 
-  const totalPnl = user.wallets.reduce((s, w) => s + (w.totalPnlUsd ?? 0), 0 as number);
-  const walletsWithRate = user.wallets.filter(w => w.winRate != null);
-  const winRate =
-    walletsWithRate.length > 0
-      ? walletsWithRate.reduce((s, w) => s + (w.winRate ?? 0), 0 as number) / walletsWithRate.length
-      : 0;
-  const totalTrades = user.wallets.reduce((s, w) => s + (w.totalTrades ?? 0), 0 as number);
+  let totalPnl = 0;
+  let totalWinRate = 0;
+  let winRateCount = 0;
+  let totalTrades = 0;
+  for (const w of user.wallets) {
+    totalPnl += w.totalPnlUsd ?? 0;
+    totalTrades += w.totalTrades ?? 0;
+    if (w.winRate != null) {
+      totalWinRate += w.winRate;
+      winRateCount++;
+    }
+  }
+  const winRate = winRateCount > 0 ? totalWinRate / winRateCount : 0;
   const pnlStr =
     totalPnl >= 1000 ? `+$${(totalPnl / 1000).toFixed(1)}K` : `+$${totalPnl.toFixed(0)}`;
 
