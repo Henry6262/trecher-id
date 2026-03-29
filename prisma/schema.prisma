@@ -1,0 +1,72 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id          String   @id @default(cuid())
+  username    String   @unique
+  displayName String
+  bio         String?
+  avatarUrl   String?
+  twitterId   String   @unique
+  privyUserId String   @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  links        Link[]
+  wallets      Wallet[]
+  pinnedTrades PinnedTrade[]
+}
+
+model Link {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  url       String
+  icon      String?
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([userId, order])
+}
+
+model Wallet {
+  id             String    @id @default(cuid())
+  userId         String
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  address        String
+  chain          String    @default("solana")
+  verified       Boolean   @default(false)
+  linkedAt       DateTime  @default(now())
+  totalPnlUsd    Float?
+  winRate        Float?
+  totalTrades    Int?
+  statsUpdatedAt DateTime?
+
+  @@unique([userId, address])
+  @@index([userId])
+}
+
+model PinnedTrade {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  walletAddress   String
+  tokenMint       String
+  tokenSymbol     String
+  tokenName       String?
+  tokenImageUrl   String?
+  totalPnlPercent Float
+  totalPnlSol     Float
+  order           Int      @default(0)
+  transactions    Json
+  pinnedAt        DateTime @default(now())
+
+  @@index([userId, order])
+}
