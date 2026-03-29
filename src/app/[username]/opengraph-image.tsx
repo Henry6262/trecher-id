@@ -1,6 +1,5 @@
 import { ImageResponse } from 'next/og';
 import { prisma } from '@/lib/prisma';
-import type { Wallet, PinnedTrade } from '@prisma/client';
 
 export const runtime = 'nodejs';
 export const alt = 'Trench ID Profile';
@@ -39,13 +38,13 @@ export default async function Image({ params }: { params: Promise<{ username: st
     );
   }
 
-  const totalPnl = user.wallets.reduce((s: number, w: Wallet) => s + (w.totalPnlUsd ?? 0), 0);
-  const walletsWithRate = user.wallets.filter((w: Wallet) => w.winRate != null);
+  const totalPnl = user.wallets.reduce((s, w) => s + (w.totalPnlUsd ?? 0), 0 as number);
+  const walletsWithRate = user.wallets.filter(w => w.winRate != null);
   const winRate =
     walletsWithRate.length > 0
-      ? walletsWithRate.reduce((s: number, w: Wallet) => s + (w.winRate ?? 0), 0) / walletsWithRate.length
+      ? walletsWithRate.reduce((s, w) => s + (w.winRate ?? 0), 0 as number) / walletsWithRate.length
       : 0;
-  const totalTrades = user.wallets.reduce((s: number, w: Wallet) => s + (w.totalTrades ?? 0), 0);
+  const totalTrades = user.wallets.reduce((s, w) => s + (w.totalTrades ?? 0), 0 as number);
   const pnlStr =
     totalPnl >= 1000 ? `+$${(totalPnl / 1000).toFixed(1)}K` : `+$${totalPnl.toFixed(0)}`;
 
