@@ -8,6 +8,29 @@ interface Props {
   params: Promise<{ username: string }>;
 }
 
+interface DBWallet {
+  address: string;
+  verified: boolean;
+  totalPnlUsd: number | null;
+  winRate: number | null;
+  totalTrades: number | null;
+}
+
+interface DBLink {
+  id: string;
+  title: string;
+  url: string;
+  icon: string | null;
+}
+
+interface DBPinnedTrade {
+  id: string;
+  tokenSymbol: string;
+  tokenName: string | null;
+  totalPnlPercent: number;
+  transactions: unknown;
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { username } = await params;
   const user = await prisma.user.findUnique({
@@ -33,11 +56,15 @@ export default async function ProfilePage({ params }: Props) {
   });
   if (!user) notFound();
 
+  const wallets: DBWallet[] = user.wallets;
+  const links: DBLink[] = user.links;
+  const trades: DBPinnedTrade[] = user.pinnedTrades;
+
   let totalPnlUsd = 0;
   let totalWinRate = 0;
   let winRateCount = 0;
   let totalTrades = 0;
-  for (const w of user.wallets) {
+  for (const w of wallets) {
     totalPnlUsd += w.totalPnlUsd ?? 0;
     totalTrades += w.totalTrades ?? 0;
     if (w.winRate != null) {
@@ -51,7 +78,7 @@ export default async function ProfilePage({ params }: Props) {
     totalTrades,
   };
 
-  const pinnedTrades = user.pinnedTrades.map((t) => ({
+  const pinnedTrades = trades.map((t: DBPinnedTrade) => ({
     id: t.id,
     tokenSymbol: t.tokenSymbol,
     tokenName: t.tokenName,
@@ -71,9 +98,9 @@ export default async function ProfilePage({ params }: Props) {
             avatarUrl: user.avatarUrl,
           }}
           stats={stats}
-          links={user.links.map((l) => ({ id: l.id, title: l.title, url: l.url, icon: l.icon }))}
+          links={links.map((l: DBLink) => ({ id: l.id, title: l.title, url: l.url, icon: l.icon }))}
           pinnedTrades={pinnedTrades}
-          wallets={user.wallets.map((w) => ({ address: w.address, verified: w.verified }))}
+          wallets={wallets.map((w: DBWallet) => ({ address: w.address, verified: w.verified }))}
         />
       </div>
     </div>

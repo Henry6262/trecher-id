@@ -6,6 +6,18 @@ export const alt = 'Trench ID Profile';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
+interface OGWallet {
+  totalPnlUsd: number | null;
+  winRate: number | null;
+  totalTrades: number | null;
+}
+
+interface OGPinnedTrade {
+  id: string;
+  tokenSymbol: string;
+  totalPnlPercent: number;
+}
+
 export default async function Image({ params }: { params: Promise<{ username: string }> }) {
   const { username } = await params;
   const user = await prisma.user.findUnique({
@@ -38,11 +50,14 @@ export default async function Image({ params }: { params: Promise<{ username: st
     );
   }
 
+  const wallets: OGWallet[] = user.wallets;
+  const pinnedTrades: OGPinnedTrade[] = user.pinnedTrades;
+
   let totalPnl = 0;
   let totalWinRate = 0;
   let winRateCount = 0;
   let totalTrades = 0;
-  for (const w of user.wallets) {
+  for (const w of wallets) {
     totalPnl += w.totalPnlUsd ?? 0;
     totalTrades += w.totalTrades ?? 0;
     if (w.winRate != null) {
@@ -67,7 +82,6 @@ export default async function Image({ params }: { params: Promise<{ username: st
           fontFamily: 'monospace',
         }}
       >
-        {/* top accent line */}
         <div
           style={{
             position: 'absolute',
@@ -79,7 +93,6 @@ export default async function Image({ params }: { params: Promise<{ username: st
           }}
         />
 
-        {/* avatar + identity */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 24, marginBottom: 40 }}>
           <div
             style={{
@@ -106,7 +119,6 @@ export default async function Image({ params }: { params: Promise<{ username: st
           </div>
         </div>
 
-        {/* stats */}
         <div style={{ display: 'flex', gap: 60, marginBottom: 40 }}>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <div style={{ fontSize: 42, fontWeight: 700, color: '#22c55e' }}>{pnlStr}</div>
@@ -124,10 +136,9 @@ export default async function Image({ params }: { params: Promise<{ username: st
           </div>
         </div>
 
-        {/* pinned trades */}
-        {user.pinnedTrades.length > 0 && (
+        {pinnedTrades.length > 0 && (
           <div style={{ display: 'flex', gap: 20 }}>
-            {user.pinnedTrades.map((t) => (
+            {pinnedTrades.map((t: OGPinnedTrade) => (
               <div
                 key={t.id}
                 style={{
@@ -175,7 +186,6 @@ export default async function Image({ params }: { params: Promise<{ username: st
           </div>
         )}
 
-        {/* wordmark */}
         <div
           style={{
             position: 'absolute',
