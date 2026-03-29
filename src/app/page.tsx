@@ -1,6 +1,10 @@
-import { BackgroundLayer } from '@/components/background-layer';
+'use client';
+
+import dynamic from 'next/dynamic';
 import { CutButton } from '@/components/cut-button';
 import { Check, Link2, BarChart3, Wallet } from 'lucide-react';
+
+const RisingLines = dynamic(() => import('@/components/rising-lines'), { ssr: false });
 
 const FEATURES = [
   {
@@ -22,9 +26,37 @@ const FEATURES = [
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen relative">
-      <BackgroundLayer />
+    <div className="min-h-screen relative" style={{ background: '#050508' }}>
+      {/* RisingLines background — same pattern as SuperMolt */}
+      <div className="fixed inset-0 z-0 opacity-70">
+        <RisingLines
+          color="#FF6B00"
+          horizonColor="#FF6B00"
+          haloColor="#FF8C33"
+          riseSpeed={0.08}
+          riseScale={10.0}
+          riseIntensity={1.3}
+          flowSpeed={0.15}
+          flowDensity={4.0}
+          flowIntensity={0.7}
+          horizonIntensity={0.9}
+          haloIntensity={7.5}
+          horizonHeight={-0.85}
+          circleScale={-0.5}
+          scale={6.5}
+          brightness={1.1}
+        />
+      </div>
 
+      {/* Vignette overlay */}
+      <div
+        className="fixed inset-0 z-[1]"
+        style={{
+          background: 'radial-gradient(ellipse at center, rgba(5,5,8,0.35) 0%, rgba(5,5,8,0.8) 65%, rgba(5,5,8,0.97) 100%)',
+        }}
+      />
+
+      {/* Content */}
       <div className="relative z-10 flex flex-col items-center min-h-screen px-4">
         {/* Nav */}
         <nav className="w-full max-w-[560px] flex items-center justify-between py-6">
@@ -38,7 +70,6 @@ export default function LandingPage() {
 
         {/* Hero */}
         <div className="flex-1 flex flex-col items-center justify-center text-center max-w-[560px] -mt-16">
-          {/* Badge */}
           <div className="cut-xs inline-flex items-center gap-1.5 px-3 py-1 mb-6 text-[10px] font-mono tracking-[2px] text-[var(--trench-orange)] bg-[rgba(255,107,0,0.08)] border border-[rgba(255,107,0,0.12)]">
             <Check size={10} strokeWidth={3} />
             ON-CHAIN VERIFIED
