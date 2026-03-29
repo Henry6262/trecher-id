@@ -27,8 +27,8 @@ const FEATURES = [
 export default function LandingPage() {
   return (
     <div className="min-h-screen relative" style={{ background: '#050508' }}>
-      {/* RisingLines background — same pattern as SuperMolt */}
-      <div className="fixed inset-0 z-0 opacity-70">
+      {/* RisingLines background — fixed, behind everything */}
+      <div className="fixed inset-0 opacity-70" style={{ zIndex: 0 }}>
         <RisingLines
           color="#FF6B00"
           horizonColor="#FF6B00"
@@ -48,16 +48,17 @@ export default function LandingPage() {
         />
       </div>
 
-      {/* Vignette overlay */}
+      {/* Vignette overlay — fixed, between bg and content */}
       <div
-        className="fixed inset-0 z-[1]"
+        className="fixed inset-0 pointer-events-none"
         style={{
+          zIndex: 1,
           background: 'radial-gradient(ellipse at center, rgba(5,5,8,0.35) 0%, rgba(5,5,8,0.8) 65%, rgba(5,5,8,0.97) 100%)',
         }}
       />
 
-      {/* Content */}
-      <div className="relative z-10 flex flex-col items-center min-h-screen px-4">
+      {/* Content — above everything */}
+      <div className="relative flex flex-col items-center min-h-screen px-4" style={{ zIndex: 2 }}>
         {/* Nav */}
         <nav className="w-full max-w-[560px] flex items-center justify-between py-6">
           <span className="font-mono font-bold text-sm tracking-[3px] text-[var(--trench-orange)]">
