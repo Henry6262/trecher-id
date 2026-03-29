@@ -1,6 +1,5 @@
 import { BackgroundLayer } from '@/components/background-layer';
 import { CutButton } from '@/components/cut-button';
-import { CutCorner } from '@/components/cut-corner';
 import { Check, Link2, BarChart3, Wallet } from 'lucide-react';
 
 const FEATURES = [
@@ -68,18 +67,22 @@ export default function LandingPage() {
         {/* Features */}
         <div className="w-full max-w-[560px] grid grid-cols-1 sm:grid-cols-3 gap-3 pb-16 mt-8">
           {FEATURES.map(({ icon: Icon, title, desc }) => (
-            <CutCorner
+            <div
               key={title}
-              cut="sm"
-              bg="rgba(255,255,255,0.02)"
-              borderColor="rgba(255,107,0,0.08)"
+              className="cut-sm backdrop-blur-md border border-[rgba(255,107,0,0.1)]"
+              style={{ background: 'rgba(255,255,255,0.03)' }}
             >
-              <div className="p-4">
-                <Icon size={16} className="text-[var(--trench-orange)] mb-2" />
-                <h3 className="text-xs font-mono font-bold text-[var(--trench-text)] mb-1">{title}</h3>
-                <p className="text-[10px] text-[var(--trench-text-muted)] leading-relaxed">{desc}</p>
+              <div className="p-5">
+                <div
+                  className="w-8 h-8 flex items-center justify-center mb-3 cut-xs"
+                  style={{ background: 'rgba(255,107,0,0.1)' }}
+                >
+                  <Icon size={14} className="text-[var(--trench-orange)]" />
+                </div>
+                <h3 className="text-xs font-mono font-bold text-[var(--trench-text)] mb-1.5">{title}</h3>
+                <p className="text-[11px] text-[var(--trench-text-muted)] leading-relaxed">{desc}</p>
               </div>
-            </CutCorner>
+            </div>
           ))}
         </div>
 
