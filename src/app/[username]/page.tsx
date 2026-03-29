@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { ProfileCard } from '@/components/profile-card';
 import { BackgroundLayer } from '@/components/background-layer';
 import type { Metadata } from 'next';
+import type { Wallet } from '@prisma/client';
 
 interface Props {
   params: Promise<{ username: string }>;
@@ -33,14 +34,14 @@ export default async function ProfilePage({ params }: Props) {
   });
   if (!user) notFound();
 
-  const walletsWithRate = user.wallets.filter((w) => w.winRate != null);
+  const walletsWithRate = user.wallets.filter((w: Wallet) => w.winRate != null);
   const stats = {
-    totalPnlUsd: user.wallets.reduce((sum, w) => sum + (w.totalPnlUsd ?? 0), 0),
+    totalPnlUsd: user.wallets.reduce((sum: number, w: Wallet) => sum + (w.totalPnlUsd ?? 0), 0),
     winRate:
       walletsWithRate.length > 0
-        ? walletsWithRate.reduce((sum, w) => sum + (w.winRate ?? 0), 0) / walletsWithRate.length
+        ? walletsWithRate.reduce((sum: number, w: Wallet) => sum + (w.winRate ?? 0), 0) / walletsWithRate.length
         : 0,
-    totalTrades: user.wallets.reduce((sum, w) => sum + (w.totalTrades ?? 0), 0),
+    totalTrades: user.wallets.reduce((sum: number, w: Wallet) => sum + (w.totalTrades ?? 0), 0),
   };
 
   const pinnedTrades = user.pinnedTrades.map((t) => ({
