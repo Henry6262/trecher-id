@@ -138,6 +138,14 @@
   border: 1px solid var(--trench-border);
 }
 
+/* ─── Background gradient fallback ───────────────────────── */
+.bg-gradient-radial {
+  background:
+    radial-gradient(ellipse at 50% 80%, rgba(255,107,0,0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 30% 70%, rgba(255,107,0,0.03) 0%, transparent 40%),
+    radial-gradient(ellipse at 70% 90%, rgba(255,107,0,0.04) 0%, transparent 35%);
+}
+
 /* ─── Scrollbar hide ──────────────────────────────────────── */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
