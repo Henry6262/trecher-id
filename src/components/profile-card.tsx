@@ -43,7 +43,7 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets }: Profi
       <div className="h-[2px]" style={{ background: 'linear-gradient(90deg, transparent, #00D4FF, transparent)' }} />
 
       {/* Main glass card */}
-      <div className="glass cut-md overflow-hidden">
+      <div className="glass rounded-lg">
         {/* Hero section with gradient */}
         <div className="relative">
           <div
