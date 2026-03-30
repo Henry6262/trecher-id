@@ -60,8 +60,11 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets }: Profi
           stats={stats}
         />
 
-        {/* Content section — indented from hero */}
-        <div className="pb-5" style={{ paddingLeft: '48px', paddingRight: '48px' }}>
+        {/* Divider — fades from transparent to cyan and back */}
+        <div className="mx-6" style={{ height: '1px', background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.12) 30%, rgba(0,212,255,0.12) 70%, transparent)' }} />
+
+        {/* Content section — more indented */}
+        <div className="pb-5 pt-4" style={{ paddingLeft: '56px', paddingRight: '56px' }}>
           {/* Links */}
           {links.length > 0 && (
             <div className="flex flex-col gap-1.5 mb-4">
