@@ -1,6 +1,7 @@
-import { ChevronRight, GraduationCap, MessageCircle, DollarSign, Globe, Gamepad2, Link2, Code2, Play } from 'lucide-react';
+import { ChevronRight, GraduationCap, MessageCircle, DollarSign, Globe, Gamepad2, Link2, Code2, Play, type LucideProps } from 'lucide-react';
+import type { FC } from 'react';
 
-const ICONS: Record<string, React.ElementType> = {
+const ICONS: Record<string, FC<LucideProps>> = {
   graduation: GraduationCap,
   x: Globe,
   telegram: MessageCircle,

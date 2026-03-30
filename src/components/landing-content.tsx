@@ -12,6 +12,7 @@ import { TraderCarousel } from '@/components/trader-carousel';
 import StaggeredText from '@/components/react-bits/staggered-text';
 
 const RisingLines = dynamic(() => import('@/components/rising-lines'), { ssr: false });
+const Lanyard = dynamic(() => import('@/components/lanyard'), { ssr: false });
 
 interface TraderData {
   username: string;
@@ -57,7 +58,7 @@ export function LandingContent({ traders, featured, traderCount, totalPnl }: Lan
         {/* Nav */}
         <nav className="mx-auto flex max-w-[900px] items-center justify-between px-6 py-5">
           <Link href="/">
-            <Image src="/logo.png" alt="Trench ID" width={160} height={40} className="h-10 w-auto transition-opacity hover:opacity-80" priority />
+            <Image src="/logo.png" alt="Trench ID" width={200} height={50} className="h-12 w-auto transition-opacity hover:opacity-80" priority />
           </Link>
           <CutButton href="/login" variant="secondary" size="sm">Sign in with X</CutButton>
         </nav>
@@ -71,15 +72,15 @@ export function LandingContent({ traders, featured, traderCount, totalPnl }: Lan
             </div>
 
             <h1 className="mb-4 text-4xl leading-[1] font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
-              Your{' '}
+              Your ultimate{' '}
               <span className="text-[var(--trench-accent)]">
-                <DecryptedText text="Web3" speed={80} maxIterations={15} revealDirection="start" animateOn="view" />
+                <DecryptedText text="Trench" speed={80} maxIterations={15} revealDirection="start" animateOn="view" />
               </span>
-              <br />Bio Link
+              <br />Identity
             </h1>
 
             <p className="mb-8 max-w-sm text-sm leading-relaxed text-[var(--trench-text-muted)]">
-              The shareable identity page for Solana traders. Custom links, verified on-chain trading performance, one URL.
+              One link for your on-chain reputation. Verified trades, custom links, shareable profile. Built for Solana degens.
             </p>
 
             <CutButton href="/login" size="lg">Create Your Trench ID</CutButton>
@@ -257,63 +258,85 @@ export function LandingContent({ traders, featured, traderCount, totalPnl }: Lan
           <TraderCarousel traders={traders} />
         </section>
 
-        {/* Bottom CTA — Cinematic Full-Bleed */}
-        <section className="relative text-center py-20 px-6">
+        {/* Bottom CTA — Split: Lanyard left, CTA right */}
+        <section className="relative py-20 px-6">
           {/* Background glow */}
           <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 50% 80%, rgba(0,212,255,0.08) 0%, transparent 50%)' }} />
 
           {/* Top accent line */}
           <div className="h-px mx-auto max-w-[400px] mb-12" style={{ background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.2), transparent)' }} />
 
-          {/* Stacked avatars */}
-          {traders.length > 0 && <div className="flex justify-center mb-5">
-            <div className="flex">
-              {traders.slice(0, 4).map((t, i) => (
-                <div
-                  key={t.username}
-                  className="rounded-full overflow-hidden flex-shrink-0"
-                  style={{
-                    width: 36, height: 36,
-                    border: '2px solid rgba(0,212,255,0.3)',
-                    boxShadow: '0 0 16px rgba(0,212,255,0.15)',
-                    marginRight: i < 3 ? '-8px' : '0',
-                    position: 'relative',
-                    zIndex: 5 - i,
-                  }}
-                >
-                  <Image
-                    src={t.avatarUrl || `https://unavatar.io/twitter/${t.username}`}
-                    alt={t.name}
-                    width={36}
-                    height={36}
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-              ))}
-              <div
-                className="rounded-full flex items-center justify-center flex-shrink-0"
-                style={{
-                  width: 36, height: 36,
-                  background: 'rgba(0,212,255,0.12)',
-                  border: '2px solid rgba(0,212,255,0.3)',
-                  position: 'relative',
-                  zIndex: 1,
-                }}
-              >
-                <span className="font-mono text-[9px] font-bold text-[var(--trench-accent)]">+{Math.max(traderCount - 4, 0)}</span>
-              </div>
+          <div className="mx-auto max-w-[900px] grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+            {/* Lanyard — left on desktop, bottom on mobile */}
+            <div className="order-2 lg:order-1 h-[450px] lg:h-[500px]">
+              <Lanyard
+                position={[0, 0, 24]}
+                gravity={[0, -40, 0]}
+                profile={featured.username !== 'trenchid' ? {
+                  username: featured.username,
+                  name: featured.name,
+                  avatarUrl: featured.avatarUrl,
+                  pnl: featured.pnl,
+                  winRate: featured.winRate,
+                } : undefined}
+              />
             </div>
-          </div>}
 
-          <p className="text-[12px] text-[var(--trench-text-muted)] mb-2">Join {traderCount} traders already on Trench ID</p>
+            {/* CTA content — right on desktop, top on mobile */}
+            <div className="order-1 lg:order-2 text-center lg:text-left">
+              {/* Stacked avatars */}
+              {traders.length > 0 && (
+                <div className="flex justify-center lg:justify-start mb-5">
+                  <div className="flex">
+                    {traders.slice(0, 4).map((t, i) => (
+                      <div
+                        key={t.username}
+                        className="rounded-full overflow-hidden flex-shrink-0"
+                        style={{
+                          width: 36, height: 36,
+                          border: '2px solid rgba(0,212,255,0.3)',
+                          boxShadow: '0 0 16px rgba(0,212,255,0.15)',
+                          marginRight: i < 3 ? '-8px' : '0',
+                          position: 'relative',
+                          zIndex: 5 - i,
+                        }}
+                      >
+                        <Image
+                          src={t.avatarUrl || `https://unavatar.io/twitter/${t.username}`}
+                          alt={t.name}
+                          width={36}
+                          height={36}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                    ))}
+                    <div
+                      className="rounded-full flex items-center justify-center flex-shrink-0"
+                      style={{
+                        width: 36, height: 36,
+                        background: 'rgba(0,212,255,0.12)',
+                        border: '2px solid rgba(0,212,255,0.3)',
+                        position: 'relative',
+                        zIndex: 1,
+                      }}
+                    >
+                      <span className="font-mono text-[9px] font-bold text-[var(--trench-accent)]">+{Math.max(traderCount - 4, 0)}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
 
-          <h2 className="text-4xl sm:text-5xl font-black text-white mb-2 leading-none">
-            Let your <span className="text-[var(--trench-accent)]">PnL</span> talk.
-          </h2>
-          <p className="text-[16px] text-[var(--trench-text-muted)] mb-9">One link. Verified on-chain. Drop it everywhere.</p>
+              <p className="text-[12px] text-[var(--trench-text-muted)] mb-2">Join {traderCount} traders already on Trench ID</p>
 
-          <CutButton href="/login" size="lg" className="text-[16px] px-14 py-5">Create Your Trench ID</CutButton>
-          <p className="mt-3.5 text-[9px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">FREE &middot; 30 SECONDS &middot; SIGN IN WITH X</p>
+              <h2 className="text-4xl sm:text-5xl font-black text-white mb-2 leading-none">
+                Let your <span className="text-[var(--trench-accent)]">PnL</span> talk.
+              </h2>
+              <p className="text-[16px] text-[var(--trench-text-muted)] mb-9">One link. Verified on-chain. Drop it everywhere.</p>
+
+              <CutButton href="/login" size="lg" className="text-[16px] px-14 py-5">Create Your Trench ID</CutButton>
+              <p className="mt-3.5 text-[9px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">FREE &middot; 30 SECONDS &middot; SIGN IN WITH X</p>
+            </div>
+          </div>
 
           {/* Bottom line */}
           <div className="h-px mx-auto max-w-[300px] mt-12" style={{ background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.1), transparent)' }} />
