@@ -5,7 +5,7 @@ import { CutButton } from '@/components/cut-button';
 import { Check, Link2, BarChart3, Wallet } from 'lucide-react';
 import DecryptedText from '@/components/decrypted-text';
 import ShinyText from '@/components/shiny-text';
-import GradientCarousel from '@/components/react-bits/gradient-carousel';
+import { TraderCarousel } from '@/components/trader-carousel';
 
 const RisingLines = dynamic(() => import('@/components/rising-lines'), { ssr: false });
 
@@ -27,23 +27,21 @@ const FEATURES = [
   },
 ] as const;
 
-// Top KOLs — avatar images for the carousel
+// Top KOLs for the carousel
 const TOP_TRADERS = [
-  { username: 'cented7', name: 'Cented', pnl: '+$11.9K' },
-  { username: 'schoen_xyz', name: 'Schoen', pnl: '+$9.0K' },
-  { username: 'theonomix', name: 'theo', pnl: '+$7.2K' },
-  { username: 'blueycryp', name: 'Bluey', pnl: '+$5.5K' },
-  { username: 'imsheepsol', name: 'Sheep', pnl: '+$4.7K' },
-  { username: 'ratwizardx', name: 'West', pnl: '+$4.6K' },
-  { username: 'saint_pablo123', name: 'Sebastian', pnl: '+$3.7K' },
-  { username: 'pandoraflips', name: 'Pandora', pnl: '+$3.3K' },
-  { username: 'orangesbs', name: 'Orange', pnl: '+$2.6K' },
-  { username: 'vibed333', name: 'dv', pnl: '+$2.6K' },
-  { username: 'notdecu', name: 'decu', pnl: '+$1.8K' },
-  { username: 'bandeez', name: 'bandit', pnl: '+$0.9K' },
+  { username: 'cented7', name: 'Cented', pnl: '+$11.9K', winRate: '60%', trades: '144' },
+  { username: 'schoen_xyz', name: 'Schoen', pnl: '+$9.0K', winRate: '47%', trades: '19' },
+  { username: 'theonomix', name: 'theo', pnl: '+$7.2K', winRate: '44%', trades: '140' },
+  { username: 'blueycryp', name: 'Bluey', pnl: '+$5.5K', winRate: '13%', trades: '30' },
+  { username: 'imsheepsol', name: 'Sheep', pnl: '+$4.7K', winRate: '82%', trades: '39' },
+  { username: 'ratwizardx', name: 'West', pnl: '+$4.6K', winRate: '41%', trades: '95' },
+  { username: 'saint_pablo123', name: 'Sebastian', pnl: '+$3.7K', winRate: '60%', trades: '5' },
+  { username: 'pandoraflips', name: 'Pandora', pnl: '+$3.3K', winRate: '80%', trades: '5' },
+  { username: 'orangesbs', name: 'Orange', pnl: '+$2.6K', winRate: '36%', trades: '25' },
+  { username: 'vibed333', name: 'dv', pnl: '+$2.6K', winRate: '49%', trades: '112' },
+  { username: 'notdecu', name: 'decu', pnl: '+$1.8K', winRate: '46%', trades: '114' },
+  { username: 'bandeez', name: 'bandit', pnl: '+$0.9K', winRate: '45%', trades: '95' },
 ];
-
-const TRADER_IMAGES = TOP_TRADERS.map(t => `https://unavatar.io/twitter/${t.username}`);
 
 export default function LandingPage() {
   return (
@@ -204,8 +202,8 @@ export default function LandingPage() {
           <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.1), transparent)' }} />
         </div>
 
-        {/* Top Traders — 3D Carousel */}
-        <section className="py-16">
+        {/* Top Traders — Infinite Carousel */}
+        <section className="py-16 overflow-hidden">
           <div className="max-w-[900px] mx-auto px-6 mb-8">
             <h2 className="text-2xl font-mono font-bold text-white mb-2">
               Top <span className="text-[var(--trench-accent)]">traders</span>
@@ -213,25 +211,7 @@ export default function LandingPage() {
             <p className="text-[12px] text-[var(--trench-text-muted)]">Already on Trench ID. Are you?</p>
           </div>
 
-          <div className="h-[400px] w-full">
-            <GradientCarousel
-              images={TRADER_IMAGES}
-              maxRotationDegrees={25}
-              maxDepthPx={120}
-              minScale={0.9}
-              cardGap={24}
-              frictionFactor={0.9}
-              wheelSensitivity={0.5}
-              dragSensitivity={1.0}
-              backgroundBlur={0}
-              gradientSize={0}
-              gradientIntensity={0}
-              enableKeyboard={true}
-              cardAspectRatio={1}
-              initialIndex={0}
-              className="w-full h-full"
-            />
-          </div>
+          <TraderCarousel traders={TOP_TRADERS} />
         </section>
 
         {/* Fading divider */}
