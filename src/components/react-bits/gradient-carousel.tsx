@@ -1,5 +1,6 @@
 "use client";
 
+import NextImage from "next/image";
 import React, {
   useRef,
   useEffect,
@@ -91,8 +92,7 @@ const GradientCarousel: React.FC<GradientCarouselProps> = ({
   cardAspectRatio = 4 / 5,
   initialIndex = 0,
 }) => {
-  const imagesKey = JSON.stringify(images);
-  const stableImages = useMemo(() => images, [imagesKey]);
+  const stableImages = useMemo(() => images, [images]);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const cardsContainerRef = useRef<HTMLDivElement>(null);
@@ -604,7 +604,17 @@ const GradientCarousel: React.FC<GradientCarouselProps> = ({
       if (bgAnimationFrameRef.current)
         cancelAnimationFrame(bgAnimationFrameRef.current);
     };
-  }, [stableImages, initialIndex, cardAspectRatio]);
+  }, [
+    animationLoop,
+    cardGap,
+    extractImageColors,
+    initialIndex,
+    onCardChange,
+    renderBackground,
+    stableImages,
+    updateActiveGradient,
+    updateAllCardTransforms,
+  ]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -644,7 +654,7 @@ const GradientCarousel: React.FC<GradientCarouselProps> = ({
 
     window.addEventListener("resize", debouncedResize);
     return () => window.removeEventListener("resize", debouncedResize);
-  }, [cardGap]);
+  }, [cardGap, updateAllCardTransforms, wrapValue]);
 
   const handleWheel = useCallback(
     (e: WheelEvent) => {
@@ -838,9 +848,12 @@ const GradientCarousel: React.FC<GradientCarouselProps> = ({
               transformOrigin: "90% center",
             }}
           >
-            <img
+            <NextImage
               src={src}
               alt={`Carousel item ${i + 1}`}
+              fill
+              sizes="(max-width: 768px) 60vw, 360px"
+              unoptimized
               className="w-full h-full object-cover rounded-4xl pointer-events-none select-none shadow-2xl border border-white/10"
               draggable={false}
               style={{ userSelect: "none" }}

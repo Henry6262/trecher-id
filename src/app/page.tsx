@@ -36,6 +36,7 @@ export default async function LandingPage() {
       winRate: `${winRate.toFixed(0)}%`,
       trades: String(totalTrades),
       recentToken: bestTrade?.tokenSymbol ?? null,
+      recentTokenImage: bestTrade?.tokenImageUrl ?? null,
       recentPnl: bestTrade ? `${bestTrade.totalPnlPercent >= 0 ? '+' : ''}${bestTrade.totalPnlPercent.toFixed(0)}%` : null,
       recentBuy: txns?.find(t => t.type === 'BUY')?.amountSol.toFixed(1) ?? null,
       recentSell: txns?.find(t => t.type === 'SELL')?.amountSol.toFixed(1) ?? null,

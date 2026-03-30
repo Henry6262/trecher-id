@@ -20,6 +20,7 @@ interface TraderData {
   winRate: string;
   trades: string;
   recentToken: string | null;
+  recentTokenImage: string | null;
   recentPnl: string | null;
   recentBuy: string | null;
   recentSell: string | null;
@@ -88,7 +89,13 @@ export function LandingContent({ traders, featured }: LandingContentProps) {
               <div className="p-5">
                 <div className="mb-3 flex items-center gap-3">
                   <div className="h-[52px] w-[52px] overflow-hidden rounded-full" style={{ border: '2px solid rgba(0,212,255,0.3)', boxShadow: '0 0 20px rgba(0,212,255,0.2)' }}>
-                    <img src={featured.avatarUrl || `https://unavatar.io/twitter/${featured.username}`} alt={featured.name} className="h-full w-full object-cover" />
+                    <Image
+                      src={featured.avatarUrl || `https://unavatar.io/twitter/${featured.username}`}
+                      alt={featured.name}
+                      width={52}
+                      height={52}
+                      className="h-full w-full object-cover"
+                    />
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-1.5">

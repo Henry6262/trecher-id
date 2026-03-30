@@ -5,6 +5,14 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: path.join(__dirname),
   },
+  webpack: (config) => {
+    config.resolve = config.resolve ?? {};
+    config.resolve.alias = {
+      ...(config.resolve.alias ?? {}),
+      '@farcaster/mini-app-solana': false,
+    };
+    return config;
+  },
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'pbs.twimg.com' },
@@ -22,6 +30,7 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'gateway.pinata.cloud' },
       { protocol: 'https', hostname: 'img.fotofolio.xyz' },
       { protocol: 'https', hostname: 'bafkreia*' },
+      { protocol: 'https', hostname: 'images.unsplash.com' },
     ],
     unoptimized: true,
   },

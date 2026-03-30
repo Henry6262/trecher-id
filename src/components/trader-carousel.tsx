@@ -1,5 +1,7 @@
 'use client';
 
+import Image from 'next/image';
+import Link from 'next/link';
 import { useRef, useEffect, useState } from 'react';
 import { Check } from 'lucide-react';
 import { BorderGlow } from './border-glow';
@@ -12,6 +14,7 @@ interface Trader {
   readonly winRate: string;
   readonly trades: string;
   readonly recentToken?: string | null;
+  readonly recentTokenImage?: string | null;
   readonly recentPnl?: string | null;
   readonly recentBuy?: string | null;
   readonly recentSell?: string | null;
@@ -65,7 +68,7 @@ export function TraderCarousel({ traders }: TraderCarouselProps) {
           edgeSensitivity={25}
           fillOpacity={0.2}
         >
-          <a
+          <Link
             href={`/${t.username}`}
             className="block relative group"
             style={{ clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)' }}
@@ -78,7 +81,13 @@ export function TraderCarousel({ traders }: TraderCarouselProps) {
                   className="w-11 h-11 rounded-full overflow-hidden flex-shrink-0"
                   style={{ border: '2px solid rgba(0,212,255,0.25)', boxShadow: '0 0 16px rgba(0,212,255,0.15)' }}
                 >
-                  <img src={t.avatarUrl || `https://unavatar.io/twitter/${t.username}`} alt={t.name} className="w-full h-full object-cover" />
+                  <Image
+                    src={t.avatarUrl || `https://unavatar.io/twitter/${t.username}`}
+                    alt={t.name}
+                    width={44}
+                    height={44}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-1">
@@ -98,8 +107,18 @@ export function TraderCarousel({ traders }: TraderCarouselProps) {
               {/* Recent trade — only if real data exists */}
               {t.recentToken && (
                 <div className="cut-xs" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(0,212,255,0.06)', padding: '8px 10px' }}>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-[11px] font-bold text-white">{t.recentToken}</span>
+                  <div className="flex items-center gap-2 mb-1.5">
+                    {/* Token image */}
+                    <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0" style={{ border: '1px solid rgba(0,212,255,0.15)', background: '#111' }}>
+                      {t.recentTokenImage ? (
+                        <Image src={t.recentTokenImage} alt={t.recentToken} width={24} height={24} className="w-full h-full object-cover" unoptimized />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-[8px] font-bold text-[var(--trench-accent)]">
+                          {t.recentToken.replace('$', '').slice(0, 2)}
+                        </div>
+                      )}
+                    </div>
+                    <span className="text-[11px] font-bold text-white flex-1">{t.recentToken}</span>
                     <span className="text-[11px] font-bold font-mono text-[var(--trench-green)]">{t.recentPnl}</span>
                   </div>
                   <div className="flex gap-2">
@@ -120,8 +139,8 @@ export function TraderCarousel({ traders }: TraderCarouselProps) {
               )}
             </div>
 
-            {/* Right side — 3 vertical stat pills, smaller */}
-            <div className="absolute right-[-1px] top-1/2 -translate-y-1/2 flex flex-col gap-1.5">
+            {/* Right side — 3 vertical stat pills, positioned higher */}
+            <div className="absolute right-[-1px] top-3 flex flex-col gap-1.5">
               <div
                 className="flex items-center justify-center px-2.5 py-1.5 min-w-[48px]"
                 style={{ background: 'rgba(8,12,18,0.92)', border: '1px solid rgba(0,212,255,0.15)', clipPath: 'polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px)' }}
@@ -150,7 +169,7 @@ export function TraderCarousel({ traders }: TraderCarouselProps) {
                 </div>
               </div>
             </div>
-          </a>
+          </Link>
         </BorderGlow>
       ))}
     </div>
