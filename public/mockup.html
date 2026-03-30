@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trench ID — Landing Page Mockups</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+  :root {
+    --accent: #00D4FF;
+    --accent-light: #33DDFF;
+    --bg: #050508;
+    --surface: #0a0a0f;
+    --border: rgba(0, 212, 255, 0.12);
+    --text: #e4e4e7;
+    --text-muted: #71717a;
+    --green: #22c55e;
+    --red: #ef4444;
+    --glass-bg: rgba(8, 12, 18, 0.78);
+    --glass-border: rgba(0, 212, 255, 0.1);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+
+  /* ── Section navigation ── */
+  .nav-bar {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(5,5,8,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 24px;
+    display: flex; gap: 16px; flex-wrap: wrap; align-items: center;
+  }
+  .nav-bar a {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px);
+    transition: all 0.2s;
+  }
+  .nav-bar a:hover { background: rgba(0,212,255,0.08); }
+  .nav-bar .title { color: var(--text-muted); font-size: 11px; letter-spacing: 2px; }
+
+  /* ── Layout ── */
+  .section-wrapper {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 60px 24px;
+    border-bottom: 1px solid rgba(0,212,255,0.06);
+  }
+  .section-label {
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+    font-weight: 700;
+  }
+  .section-title {
+    font-size: 28px;
+    font-weight: 800;
+    color: white;
+    margin-bottom: 6px;
+  }
+  .section-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 40px;
+    line-height: 1.6;
+  }
+
+  /* ── Shared card styles ── */
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+  }
+  .cut-xs { clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px); }
+  .cut-sm { clip-path: polygon(7px 0, 100% 0, 100% calc(100% - 7px), calc(100% - 7px) 100%, 0 100%, 0 7px); }
+  .cut-md { clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px); }
+  .cut-lg { clip-path: polygon(18px 0, 100% 0, 100% calc(100% - 18px), calc(100% - 18px) 100%, 0 100%, 0 18px); }
+
+  .skew { transform: skewX(-4deg); }
+  .skew > * { transform: skewX(4deg); }
+
+  .stat-pill {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(0,212,255,0.08);
+    padding: 8px 12px;
+    transform: skewX(-4deg);
+    display: flex; align-items: center; gap: 6px; flex: 1;
+  }
+  .stat-pill > * { transform: skewX(4deg); }
+
+  .check-badge {
+    width: 16px; height: 16px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .check-badge svg { width: 9px; height: 9px; }
+
+  .avatar {
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+
+  .glow-ring {
+    border: 2px solid rgba(0,212,255,0.3);
+    box-shadow: 0 0 20px rgba(0,212,255,0.2);
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .glow-ring-strong {
+    border: 2.5px solid rgba(0,212,255,0.45);
+    box-shadow: 0 0 30px rgba(0,212,255,0.3), 0 0 60px rgba(0,212,255,0.1);
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  /* ── Animated border shimmer ── */
+  @keyframes borderShimmer {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  .shimmer-border {
+    position: relative;
+  }
+  .shimmer-border::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    clip-path: inherit;
+    background: linear-gradient(90deg, transparent 0%, rgba(0,212,255,0.3) 25%, rgba(0,212,255,0.6) 50%, rgba(0,212,255,0.3) 75%, transparent 100%);
+    background-size: 200% 100%;
+    animation: borderShimmer 4s ease-in-out infinite;
+    z-index: -1;
+  }
+
+  @keyframes pulseGlow {
+    0%, 100% { box-shadow: 0 0 20px rgba(0,212,255,0.15), 0 0 40px rgba(0,212,255,0.05); }
+    50% { box-shadow: 0 0 30px rgba(0,212,255,0.25), 0 0 60px rgba(0,212,255,0.1); }
+  }
+
+  @keyframes floatCard {
+    0%, 100% { transform: perspective(800px) rotateY(-5deg) rotateX(2deg) translateY(0); }
+    50% { transform: perspective(800px) rotateY(-5deg) rotateX(2deg) translateY(-6px); }
+  }
+
+  /* ── CTA glow card ── */
+  .cta-glow {
+    position: relative;
+  }
+  .cta-glow::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    clip-path: inherit;
+    background: linear-gradient(135deg, rgba(0,212,255,0.15), transparent 40%, transparent 60%, rgba(0,212,255,0.1));
+    z-index: -1;
+  }
+
+  /* ── Button ── */
+  .cta-btn {
+    display: inline-block;
+    background: var(--accent);
+    color: black;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 14px 40px;
+    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+    text-decoration: none;
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+  }
+  .cta-btn:hover { filter: brightness(1.1); }
+  .cta-btn-lg {
+    font-size: 16px;
+    padding: 18px 56px;
+    clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+  }
+
+  /* ── Variant grid ── */
+  .variants { display: flex; flex-direction: column; gap: 60px; }
+  .variant-label {
+    display: inline-block;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--bg);
+    background: var(--accent);
+    padding: 3px 10px;
+    clip-path: polygon(3px 0, 100% 0, 100% calc(100% - 3px), calc(100% - 3px) 100%, 0 100%, 0 3px);
+    margin-bottom: 16px;
+    font-weight: 700;
+  }
+
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0,212,255,0.1), transparent);
+    margin: 8px 0;
+  }
+
+  .link-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(0,212,255,0.06);
+    transform: skewX(-4deg);
+  }
+  .link-row > * { transform: skewX(4deg); }
+
+  .trade-box {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(0,212,255,0.06);
+    padding: 10px 12px;
+  }
+
+  .url-bar {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 12px;
+    background: rgba(0,212,255,0.04);
+    border: 1px solid rgba(0,212,255,0.08);
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  .url-bar span.url { color: var(--accent); font-weight: 500; }
+</style>
+</head>
+<body>
+
+<!-- Navigation -->
+<div class="nav-bar">
+  <span class="title mono">TRENCH ID MOCKUPS</span>
+  <a href="#hero">Hero Card</a>
+  <a href="#carousel">Carousel</a>
+  <a href="#cta">Bottom CTA</a>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SECTION 1: HERO PREVIEW CARD                       -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div id="hero" class="section-wrapper">
+  <div class="section-label">Section 1</div>
+  <div class="section-title">Hero Preview Card</div>
+  <div class="section-desc">The card shown on the right side of the hero. Currently small and underwhelming.<br>Below are 3 variants — each progressively more dramatic.</div>
+
+  <div class="variants">
+
+    <!-- VARIANT A: Clean & Premium -->
+    <div>
+      <div class="variant-label">A — Clean & Premium</div>
+      <p style="font-size:11px; color:var(--text-muted); margin-bottom:20px;">Bigger avatar (80px), URL bar, more breathing room. Subtle elegance.</p>
+
+      <div style="display:flex; justify-content:center;">
+        <div class="glass cut-md shimmer-border" style="width: 380px; animation: floatCard 6s ease-in-out infinite;">
+          <div style="padding: 24px;">
+            <!-- Profile -->
+            <div style="display:flex; align-items:center; gap:14px; margin-bottom:16px;">
+              <div class="glow-ring" style="width:80px; height:80px;">
+                <img src="https://unavatar.io/twitter/blaboratory" class="avatar" width="80" height="80" alt="">
+              </div>
+              <div>
+                <div style="display:flex; align-items:center; gap:6px; margin-bottom:2px;">
+                  <span style="font-size:18px; font-weight:800; color:white;">@blaboratory</span>
+                  <div class="check-badge"><svg viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                </div>
+                <span style="font-size:10px; color:var(--text-muted);">BLabOratory</span>
+              </div>
+            </div>
+
+            <!-- Stats -->
+            <div style="display:flex; gap:8px; margin-bottom:14px;">
+              <div class="stat-pill cut-xs">
+                <span class="mono" style="font-size:13px; font-weight:700; color:var(--green);">$342K</span>
+                <span style="font-size:7px; letter-spacing:1px; color:var(--text-muted);">PnL</span>
+              </div>
+              <div class="stat-pill cut-xs">
+                <span class="mono" style="font-size:13px; font-weight:700; color:var(--accent);">68%</span>
+                <span style="font-size:7px; letter-spacing:1px; color:var(--text-muted);">Win</span>
+              </div>
+              <div class="stat-pill cut-xs">
+                <span class="mono" style="font-size:13px; font-weight:700; color:var(--text);">1.2K</span>
+                <span style="font-size:7px; letter-spacing:1px; color:var(--text-muted);">Trades</span>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Best trade -->
+            <div style="margin:12px 0;">
+              <div style="font-size:7px; letter-spacing:2px; color:var(--text-muted); margin-bottom:6px;">BEST TRADE</div>
+              <div class="trade-box cut-xs">
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <div style="width:24px; height:24px; border-radius:50%; background:#111; border:1px solid rgba(0,212,255,0.15); display:flex; align-items:center; justify-content:center;">
+                      <span style="font-size:8px; font-weight:700; color:var(--accent);">BO</span>
+                    </div>
+                    <span style="font-size:12px; font-weight:700; color:white;">$BONK</span>
+                  </div>
+                  <span class="mono" style="font-size:12px; font-weight:700; color:var(--green);">+2,340%</span>
+                </div>
+                <div style="display:flex; gap:6px;">
+                  <div class="cut-xs" style="flex:1; display:flex; justify-content:space-between; font-size:8px; padding:4px 8px; background:rgba(0,212,255,0.02);">
+                    <span style="color:var(--green); font-weight:600;">BUY</span>
+                    <span class="mono" style="color:var(--text); font-weight:600;">2.1 SOL</span>
+                  </div>
+                  <div class="cut-xs" style="flex:1; display:flex; justify-content:space-between; font-size:8px; padding:4px 8px; background:rgba(0,212,255,0.02);">
+                    <span style="color:var(--red); font-weight:600;">SELL</span>
+                    <span class="mono" style="color:var(--green); font-weight:600;">51.2 SOL</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Links -->
+            <div style="display:flex; flex-direction:column; gap:4px; margin-bottom:12px;">
+              <div class="link-row cut-xs">
+                <span style="font-size:14px; color:var(--accent);">&#x1D54F;</span>
+                <span style="flex:1; font-size:11px;">Follow @blaboratory</span>
+                <span style="font-size:16px; color:var(--text-muted);">&#x203A;</span>
+              </div>
+            </div>
+
+            <!-- URL bar -->
+            <div class="url-bar cut-xs">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--accent);"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+              <span class="url mono">trenchid.xyz/blaboratory</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VARIANT B: Dramatic with depth shadow -->
+    <div>
+      <div class="variant-label">B — Dramatic Depth</div>
+      <p style="font-size:11px; color:var(--text-muted); margin-bottom:20px;">Stronger 3D tilt, layered depth shadow, pulsing avatar glow, accent header bar.</p>
+
+      <div style="display:flex; justify-content:center;">
+        <div style="position:relative;">
+          <!-- Depth shadow layers -->
+          <div style="position:absolute; inset:8px 4px -8px 4px; background:rgba(0,212,255,0.03); clip-path:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px); filter:blur(2px);"></div>
+          <div style="position:absolute; inset:16px 8px -16px 8px; background:rgba(0,212,255,0.02); clip-path:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px); filter:blur(4px);"></div>
+
+          <div class="glass cut-md" style="width:380px; position:relative; transform:perspective(800px) rotateY(-5deg) rotateX(3deg); box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(0,212,255,0.08); overflow:visible;">
+            <!-- Accent top bar -->
+            <div style="height:3px; background:linear-gradient(90deg, var(--accent), transparent 80%);"></div>
+
+            <div style="padding:24px;">
+              <!-- Profile -->
+              <div style="display:flex; align-items:center; gap:14px; margin-bottom:16px;">
+                <div class="glow-ring-strong" style="width:80px; height:80px; animation: pulseGlow 3s ease-in-out infinite;">
+                  <img src="https://unavatar.io/twitter/blaboratory" class="avatar" width="80" height="80" alt="">
+                </div>
+                <div style="flex:1;">
+                  <div style="display:flex; align-items:center; gap:6px; margin-bottom:2px;">
+                    <span style="font-size:18px; font-weight:800; color:white;">@blaboratory</span>
+                    <div class="check-badge"><svg viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  </div>
+                  <span style="font-size:10px; color:var(--text-muted);">BLabOratory</span>
+                  <div style="display:flex; gap:4px; margin-top:6px;">
+                    <span class="cut-xs" style="font-size:7px; letter-spacing:1px; padding:2px 8px; background:rgba(0,212,255,0.08); border:1px solid rgba(0,212,255,0.12); color:var(--accent); font-weight:600;">VERIFIED</span>
+                    <span class="cut-xs" style="font-size:7px; letter-spacing:1px; padding:2px 8px; background:rgba(34,197,94,0.08); border:1px solid rgba(34,197,94,0.12); color:var(--green); font-weight:600;">TOP TRADER</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Big PnL hero number -->
+              <div style="text-align:center; margin-bottom:14px; padding:12px 0; background:linear-gradient(135deg, rgba(0,212,255,0.04), transparent);">
+                <div class="mono" style="font-size:32px; font-weight:800; color:var(--green); line-height:1;">$342,891</div>
+                <div style="font-size:8px; letter-spacing:2px; color:var(--text-muted); margin-top:4px;">TOTAL REALIZED PnL</div>
+              </div>
+
+              <!-- Stats row -->
+              <div style="display:flex; gap:8px; margin-bottom:14px;">
+                <div class="stat-pill cut-xs">
+                  <span class="mono" style="font-size:12px; font-weight:700; color:var(--accent);">68%</span>
+                  <span style="font-size:7px; letter-spacing:1px; color:var(--text-muted);">WIN RATE</span>
+                </div>
+                <div class="stat-pill cut-xs">
+                  <span class="mono" style="font-size:12px; font-weight:700; color:var(--text);">1,247</span>
+                  <span style="font-size:7px; letter-spacing:1px; color:var(--text-muted);">TRADES</span>
+                </div>
+                <div class="stat-pill cut-xs">
+                  <span class="mono" style="font-size:12px; font-weight:700; color:var(--green);">24.4x</span>
+                  <span style="font-size:7px; letter-spacing:1px; color:var(--text-muted);">BEST</span>
+                </div>
+              </div>
+
+              <div class="divider"></div>
+
+              <!-- Best trade -->
+              <div style="margin:12px 0;">
+                <div class="trade-box cut-xs">
+                  <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                      <div style="width:28px; height:28px; border-radius:50%; background:#111; border:1.5px solid rgba(0,212,255,0.2); display:flex; align-items:center; justify-content:center;">
+                        <span style="font-size:9px; font-weight:700; color:var(--accent);">BO</span>
+                      </div>
+                      <div>
+                        <span style="font-size:13px; font-weight:700; color:white;">$BONK</span>
+                        <div style="font-size:7px; color:var(--text-muted);">Pinned Trade</div>
+                      </div>
+                    </div>
+                    <span class="mono" style="font-size:14px; font-weight:800; color:var(--green);">+2,340%</span>
+                  </div>
+                  <div style="display:flex; gap:6px;">
+                    <div class="cut-xs" style="flex:1; display:flex; justify-content:space-between; font-size:8px; padding:4px 8px; background:rgba(0,212,255,0.02);">
+                      <span style="color:var(--green); font-weight:600;">BUY</span>
+                      <span class="mono" style="color:var(--text); font-weight:600;">2.1 SOL</span>
+                    </div>
+                    <div class="cut-xs" style="flex:1; display:flex; justify-content:space-between; font-size:8px; padding:4px 8px; background:rgba(0,212,255,0.02);">
+                      <span style="color:var(--red); font-weight:600;">SELL</span>
+                      <span class="mono" style="color:var(--green); font-weight:600;">51.2 SOL</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Link + URL -->
+              <div class="link-row cut-xs" style="margin-bottom:8px;">
+                <span style="font-size:14px; color:var(--accent);">&#x1D54F;</span>
+                <span style="flex:1; font-size:11px;">Follow @blaboratory</span>
+                <span style="font-size:16px; color:var(--text-muted);">&#x203A;</span>
+              </div>
+              <div class="url-bar cut-xs">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--accent);"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                <span class="url mono">trenchid.xyz/blaboratory</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VARIANT C: Maximum Impact -->
+    <div>
+      <div class="variant-label">C — Maximum Impact</div>
+      <p style="font-size:11px; color:var(--text-muted); margin-bottom:20px;">Full outer glow halo, animated shimmer border, centered hero PnL, badge row, floating animation. The "wow" card.</p>
+
+      <div style="display:flex; justify-content:center;">
+        <div style="position:relative;">
+          <!-- Outer glow halo -->
+          <div style="position:absolute; inset:-30px; background:radial-gradient(ellipse at center, rgba(0,212,255,0.08) 0%, transparent 70%); pointer-events:none; z-index:-1;"></div>
+
+          <div class="glass cut-md shimmer-border" style="width:400px; position:relative; animation: floatCard 5s ease-in-out infinite; box-shadow: 0 25px 80px rgba(0,0,0,0.6), 0 0 60px rgba(0,212,255,0.06);">
+            <!-- Accent top bar -->
+            <div style="height:3px; background:linear-gradient(90deg, transparent 10%, var(--accent) 50%, transparent 90%);"></div>
+
+            <div style="padding:28px;">
+              <!-- Avatar centered -->
+              <div style="display:flex; flex-direction:column; align-items:center; margin-bottom:16px;">
+                <div class="glow-ring-strong" style="width:88px; height:88px; animation: pulseGlow 3s ease-in-out infinite; margin-bottom:12px;">
+                  <img src="https://unavatar.io/twitter/blaboratory" class="avatar" width="88" height="88" alt="">
+                </div>
+                <div style="display:flex; align-items:center; gap:6px; margin-bottom:2px;">
+                  <span style="font-size:20px; font-weight:800; color:white;">@blaboratory</span>
+                  <div class="check-badge" style="width:18px; height:18px;"><svg viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                </div>
+                <div style="display:flex; gap:4px; margin-top:6px;">
+                  <span class="cut-xs" style="font-size:7px; letter-spacing:1px; padding:2px 8px; background:rgba(0,212,255,0.08); border:1px solid rgba(0,212,255,0.12); color:var(--accent); font-weight:600;">VERIFIED</span>
+                  <span class="cut-xs" style="font-size:7px; letter-spacing:1px; padding:2px 8px; background:rgba(34,197,94,0.08); border:1px solid rgba(34,197,94,0.12); color:var(--green); font-weight:600;">TOP TRADER</span>
+                  <span class="cut-xs" style="font-size:7px; letter-spacing:1px; padding:2px 8px; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.12); color:var(--red); font-weight:600;">DEGEN</span>
+                </div>
+              </div>
+
+              <!-- Hero PnL -->
+              <div style="text-align:center; margin-bottom:16px; padding:16px; background:linear-gradient(135deg, rgba(34,197,94,0.06), rgba(0,212,255,0.04)); clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);">
+                <div class="mono" style="font-size:36px; font-weight:900; color:var(--green); line-height:1; text-shadow: 0 0 30px rgba(34,197,94,0.3);">$342,891</div>
+                <div style="font-size:8px; letter-spacing:3px; color:var(--text-muted); margin-top:6px;">TOTAL REALIZED PnL</div>
+              </div>
+
+              <!-- Stats -->
+              <div style="display:flex; gap:8px; margin-bottom:16px;">
+                <div class="stat-pill cut-xs">
+                  <span class="mono" style="font-size:13px; font-weight:700; color:var(--accent);">68%</span>
+                  <span style="font-size:7px; letter-spacing:1px; color:var(--text-muted);">WIN</span>
+                </div>
+                <div class="stat-pill cut-xs">
+                  <span class="mono" style="font-size:13px; font-weight:700; color:var(--text);">1,247</span>
+                  <span style="font-size:7px; letter-spacing:1px; color:var(--text-muted);">TRADES</span>
+                </div>
+                <div class="stat-pill cut-xs">
+                  <span class="mono" style="font-size:13px; font-weight:700; color:var(--green);">24.4x</span>
+                  <span style="font-size:7px; letter-spacing:1px; color:var(--text-muted);">BEST</span>
+                </div>
+              </div>
+
+              <!-- Best trade -->
+              <div class="trade-box cut-xs" style="margin-bottom:12px;">
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <div style="width:28px; height:28px; border-radius:50%; background:#111; border:1.5px solid rgba(0,212,255,0.2); display:flex; align-items:center; justify-content:center;">
+                      <span style="font-size:9px; font-weight:700; color:var(--accent);">BO</span>
+                    </div>
+                    <div>
+                      <span style="font-size:13px; font-weight:700; color:white;">$BONK</span>
+                      <div style="font-size:7px; color:var(--text-muted);">Pinned Trade</div>
+                    </div>
+                  </div>
+                  <span class="mono" style="font-size:14px; font-weight:800; color:var(--green);">+2,340%</span>
+                </div>
+                <div style="display:flex; gap:6px;">
+                  <div class="cut-xs" style="flex:1; display:flex; justify-content:space-between; font-size:8px; padding:4px 8px; background:rgba(0,212,255,0.02);">
+                    <span style="color:var(--green); font-weight:600;">BUY</span>
+                    <span class="mono" style="color:var(--text); font-weight:600;">2.1 SOL</span>
+                  </div>
+                  <div class="cut-xs" style="flex:1; display:flex; justify-content:space-between; font-size:8px; padding:4px 8px; background:rgba(0,212,255,0.02);">
+                    <span style="color:var(--red); font-weight:600;">SELL</span>
+                    <span class="mono" style="color:var(--green); font-weight:600;">51.2 SOL</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Links -->
+              <div class="link-row cut-xs" style="margin-bottom:6px;">
+                <span style="font-size:14px; color:var(--accent);">&#x1D54F;</span>
+                <span style="flex:1; font-size:11px;">Follow @blaboratory</span>
+                <span style="font-size:16px; color:var(--text-muted);">&#x203A;</span>
+              </div>
+              <div class="url-bar cut-xs">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--accent);"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                <span class="url mono">trenchid.xyz/blaboratory</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SECTION 2: CAROUSEL HEADING                        -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div id="carousel" class="section-wrapper">
+  <div class="section-label">Section 2</div>
+  <div class="section-title">Carousel Section Heading</div>
+  <div class="section-desc">The carousel cards themselves are solid. Focusing on the heading treatment above them.</div>
+
+  <div class="variants">
+    <!-- VARIANT A: Animated stagger text -->
+    <div>
+      <div class="variant-label">A — Staggered Reveal + Stats</div>
+      <p style="font-size:11px; color:var(--text-muted); margin-bottom:20px;">StaggeredText animates heading in, plus a stats line showing real numbers from DB.</p>
+
+      <div style="text-align:center; padding: 40px 0;">
+        <h2 style="font-size:40px; font-weight:800; color:white; margin-bottom:8px;">
+          Top <span style="color:var(--accent);">traders</span>
+        </h2>
+        <p style="font-size:13px; color:var(--text-muted); margin-bottom:12px;">Already on Trench ID. Are you?</p>
+        <div style="display:flex; justify-content:center; gap:16px;">
+          <span class="mono" style="font-size:11px; color:var(--text-muted);">
+            <span style="color:var(--accent); font-weight:600;">45</span> traders
+          </span>
+          <span style="color:rgba(0,212,255,0.2);">|</span>
+          <span class="mono" style="font-size:11px; color:var(--text-muted);">
+            <span style="color:var(--green); font-weight:600;">$2.1M+</span> total PnL
+          </span>
+          <span style="color:rgba(0,212,255,0.2);">|</span>
+          <span class="mono" style="font-size:11px; color:var(--text-muted);">
+            <span style="color:var(--text); font-weight:600;">12K+</span> trades verified
+          </span>
+        </div>
+        <div style="margin-top:8px; font-size:8px; color:var(--text-muted); letter-spacing:2px;">&#9650; STAGGERED TEXT ANIMATES LETTERS IN FROM BOTTOM ON SCROLL</div>
+      </div>
+    </div>
+
+    <!-- VARIANT B: Large number focus -->
+    <div>
+      <div class="variant-label">B — Big Numbers Hero</div>
+      <p style="font-size:11px; color:var(--text-muted); margin-bottom:20px;">Leading with impressive aggregate stats before the carousel.</p>
+
+      <div style="text-align:center; padding:40px 0;">
+        <div style="display:flex; justify-content:center; gap:32px; margin-bottom:20px;">
+          <div>
+            <div class="mono" style="font-size:36px; font-weight:900; color:var(--accent);">45</div>
+            <div style="font-size:8px; letter-spacing:2px; color:var(--text-muted);">TRADERS</div>
+          </div>
+          <div style="width:1px; background:linear-gradient(transparent, rgba(0,212,255,0.15), transparent);"></div>
+          <div>
+            <div class="mono" style="font-size:36px; font-weight:900; color:var(--green);">$2.1M</div>
+            <div style="font-size:8px; letter-spacing:2px; color:var(--text-muted);">TOTAL PnL</div>
+          </div>
+          <div style="width:1px; background:linear-gradient(transparent, rgba(0,212,255,0.15), transparent);"></div>
+          <div>
+            <div class="mono" style="font-size:36px; font-weight:900; color:white;">12,471</div>
+            <div style="font-size:8px; letter-spacing:2px; color:var(--text-muted);">VERIFIED TRADES</div>
+          </div>
+        </div>
+        <h2 style="font-size:28px; font-weight:800; color:white; margin-bottom:6px;">
+          Top <span style="color:var(--accent);">traders</span>
+        </h2>
+        <p style="font-size:12px; color:var(--text-muted);">Already on Trench ID. Are you?</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SECTION 3: BOTTOM CTA                              -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div id="cta" class="section-wrapper" style="border-bottom:none;">
+  <div class="section-label">Section 3</div>
+  <div class="section-title">Bottom CTA</div>
+  <div class="section-desc">Currently just plain text + button. Needs to be epic — the last thing users see.</div>
+
+  <div class="variants">
+
+    <!-- VARIANT A: GlassCard with stats -->
+    <div>
+      <div class="variant-label">A — GlassCard + Social Proof</div>
+      <p style="font-size:11px; color:var(--text-muted); margin-bottom:20px;">Full-width GlassCard, stat pills, strong glow, dramatic.</p>
+
+      <div style="position:relative; max-width:800px; margin:0 auto;">
+        <!-- Outer glow -->
+        <div style="position:absolute; inset:-40px; background:radial-gradient(ellipse at center, rgba(0,212,255,0.06) 0%, transparent 60%); pointer-events:none;"></div>
+
+        <div class="glass cut-lg shimmer-border" style="position:relative; text-align:center; padding:48px 40px;">
+          <!-- Top divider glow -->
+          <div style="position:absolute; top:0; left:15%; right:15%; height:2px; background:linear-gradient(90deg, transparent, var(--accent), transparent);"></div>
+
+          <p style="font-size:11px; color:var(--text-muted); margin-bottom:8px; letter-spacing:2px;">YOUR TRADING SPEAKS FOR ITSELF</p>
+          <h2 style="font-size:42px; font-weight:900; color:white; margin-bottom:6px; line-height:1.1;">
+            Claim your <span style="color:var(--accent);">Trench ID</span>
+          </h2>
+          <p style="font-size:14px; color:var(--text-muted); margin-bottom:28px;">One link. All your trades. Verified on-chain.</p>
+
+          <!-- Stat pills -->
+          <div style="display:flex; gap:12px; justify-content:center; margin-bottom:32px; max-width:420px; margin-left:auto; margin-right:auto;">
+            <div class="stat-pill cut-xs" style="justify-content:center;">
+              <span class="mono" style="font-size:14px; font-weight:700; color:var(--accent);">45</span>
+              <span style="font-size:8px; letter-spacing:1px; color:var(--text-muted);">TRADERS</span>
+            </div>
+            <div class="stat-pill cut-xs" style="justify-content:center;">
+              <span class="mono" style="font-size:14px; font-weight:700; color:var(--green);">$2.1M+</span>
+              <span style="font-size:8px; letter-spacing:1px; color:var(--text-muted);">PnL</span>
+            </div>
+            <div class="stat-pill cut-xs" style="justify-content:center;">
+              <span class="mono" style="font-size:14px; font-weight:700; color:white;">FREE</span>
+              <span style="font-size:8px; letter-spacing:1px; color:var(--text-muted);">FOREVER</span>
+            </div>
+          </div>
+
+          <a href="#" class="cta-btn cta-btn-lg">Create Your Trench ID</a>
+          <p class="mono" style="margin-top:12px; font-size:9px; letter-spacing:2px; color:var(--text-muted);">FREE &middot; 30 SECONDS &middot; SIGN IN WITH X</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- VARIANT B: Split layout with mini card -->
+    <div>
+      <div class="variant-label">B — Split with Mini Preview</div>
+      <p style="font-size:11px; color:var(--text-muted); margin-bottom:20px;">CTA text left, mini profile preview right. Shows what you're getting.</p>
+
+      <div style="position:relative; max-width:800px; margin:0 auto;">
+        <div style="position:absolute; inset:-40px; background:radial-gradient(ellipse at center, rgba(0,212,255,0.06) 0%, transparent 60%); pointer-events:none;"></div>
+
+        <div class="glass cut-lg" style="position:relative; display:grid; grid-template-columns:1fr auto; gap:40px; padding:40px;">
+          <div style="position:absolute; top:0; left:10%; right:10%; height:2px; background:linear-gradient(90deg, transparent, var(--accent), transparent);"></div>
+
+          <div style="display:flex; flex-direction:column; justify-content:center;">
+            <p style="font-size:10px; color:var(--accent); margin-bottom:8px; letter-spacing:2px; font-weight:600;">STOP EXPLAINING. START SHOWING.</p>
+            <h2 style="font-size:36px; font-weight:900; color:white; margin-bottom:8px; line-height:1.1;">
+              Your trades.<br>Your link.
+            </h2>
+            <p style="font-size:13px; color:var(--text-muted); margin-bottom:24px; line-height:1.6;">Verified on-chain performance. Custom links. One URL you drop everywhere.</p>
+
+            <div style="display:flex; gap:12px; margin-bottom:24px;">
+              <div class="stat-pill cut-xs">
+                <span class="mono" style="font-size:12px; font-weight:700; color:var(--green);">$2.1M+</span>
+                <span style="font-size:7px; letter-spacing:1px; color:var(--text-muted);">PnL tracked</span>
+              </div>
+              <div class="stat-pill cut-xs">
+                <span class="mono" style="font-size:12px; font-weight:700; color:var(--accent);">45</span>
+                <span style="font-size:7px; letter-spacing:1px; color:var(--text-muted);">traders</span>
+              </div>
+            </div>
+
+            <div>
+              <a href="#" class="cta-btn cta-btn-lg">Create Your Trench ID</a>
+              <p class="mono" style="margin-top:10px; font-size:9px; letter-spacing:2px; color:var(--text-muted);">FREE &middot; 30 SECONDS &middot; SIGN IN WITH X</p>
+            </div>
+          </div>
+
+          <!-- Mini preview card -->
+          <div style="width:220px; flex-shrink:0;">
+            <div class="glass cut-sm" style="padding:16px; border:1px solid rgba(0,212,255,0.15);">
+              <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                <div class="glow-ring" style="width:40px; height:40px;">
+                  <img src="https://unavatar.io/twitter/yourname" class="avatar" width="40" height="40" alt="">
+                </div>
+                <div>
+                  <div style="font-size:13px; font-weight:700; color:white;">@you</div>
+                  <div style="font-size:8px; color:var(--text-muted);">Your Name</div>
+                </div>
+              </div>
+              <div class="stat-pill cut-xs" style="margin-bottom:6px;">
+                <span class="mono" style="font-size:11px; font-weight:700; color:var(--green);">$???</span>
+                <span style="font-size:7px; letter-spacing:1px; color:var(--text-muted);">PnL</span>
+              </div>
+              <div class="stat-pill cut-xs" style="margin-bottom:8px;">
+                <span class="mono" style="font-size:11px; font-weight:700; color:var(--accent);">??%</span>
+                <span style="font-size:7px; letter-spacing:1px; color:var(--text-muted);">Win</span>
+              </div>
+              <div class="link-row cut-xs" style="padding:6px 10px;">
+                <span style="font-size:12px; color:var(--accent);">&#x1D54F;</span>
+                <span style="flex:1; font-size:10px;">Follow @you</span>
+              </div>
+              <div style="text-align:center; margin-top:10px;">
+                <span style="font-size:8px; letter-spacing:1px; color:var(--accent);">THIS COULD BE YOU</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VARIANT C: Cinematic full-bleed -->
+    <div>
+      <div class="variant-label">C — Cinematic Full-Bleed</div>
+      <p style="font-size:11px; color:var(--text-muted); margin-bottom:20px;">No card — full section treatment. Massive text, stacked avatars, urgency copy.</p>
+
+      <div style="position:relative; text-align:center; padding:80px 24px;">
+        <!-- Background glow -->
+        <div style="position:absolute; inset:0; background:radial-gradient(ellipse at 50% 80%, rgba(0,212,255,0.08) 0%, transparent 50%); pointer-events:none;"></div>
+
+        <!-- Top line -->
+        <div style="height:1px; background:linear-gradient(90deg, transparent, rgba(0,212,255,0.2), transparent); margin-bottom:48px;"></div>
+
+        <!-- Stacked avatars -->
+        <div style="display:flex; justify-content:center; margin-bottom:20px;">
+          <div style="display:flex;">
+            <div class="glow-ring" style="width:36px; height:36px; margin-right:-8px; position:relative; z-index:5;">
+              <img src="https://unavatar.io/twitter/blaboratory" class="avatar" width="36" height="36" alt="">
+            </div>
+            <div class="glow-ring" style="width:36px; height:36px; margin-right:-8px; position:relative; z-index:4;">
+              <img src="https://unavatar.io/twitter/ansaboratory" class="avatar" width="36" height="36" alt="">
+            </div>
+            <div class="glow-ring" style="width:36px; height:36px; margin-right:-8px; position:relative; z-index:3;">
+              <img src="https://unavatar.io/twitter/0xCryptoBarista" class="avatar" width="36" height="36" alt="">
+            </div>
+            <div class="glow-ring" style="width:36px; height:36px; margin-right:-8px; position:relative; z-index:2;">
+              <img src="https://unavatar.io/twitter/CryptoGodJohn" class="avatar" width="36" height="36" alt="">
+            </div>
+            <div style="width:36px; height:36px; border-radius:50%; background:rgba(0,212,255,0.12); border:2px solid rgba(0,212,255,0.3); display:flex; align-items:center; justify-content:center; position:relative; z-index:1;">
+              <span class="mono" style="font-size:9px; font-weight:700; color:var(--accent);">+41</span>
+            </div>
+          </div>
+        </div>
+
+        <p style="font-size:12px; color:var(--text-muted); margin-bottom:6px;">Join 45 traders already on Trench ID</p>
+
+        <h2 style="font-size:52px; font-weight:900; color:white; margin-bottom:8px; line-height:1;">
+          Let your <span style="color:var(--accent);">PnL</span> talk.
+        </h2>
+        <p style="font-size:16px; color:var(--text-muted); margin-bottom:36px;">One link. Verified on-chain. Drop it everywhere.</p>
+
+        <a href="#" class="cta-btn cta-btn-lg" style="font-size:18px; padding:20px 64px;">Create Your Trench ID</a>
+        <p class="mono" style="margin-top:14px; font-size:9px; letter-spacing:2px; color:var(--text-muted);">FREE &middot; 30 SECONDS &middot; SIGN IN WITH X</p>
+
+        <!-- Bottom line -->
+        <div style="height:1px; background:linear-gradient(90deg, transparent, rgba(0,212,255,0.1), transparent); margin-top:48px;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<div style="text-align:center; padding:40px 24px;">
+  <p class="mono" style="font-size:9px; letter-spacing:2px; color:var(--text-muted);">TRENCH ID MOCKUP &middot; PICK YOUR FAVORITES &middot; MIX & MATCH</p>
+</div>
+
+</body>
+</html>

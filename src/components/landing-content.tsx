@@ -185,7 +185,7 @@ export function LandingContent({ traders, featured }: LandingContentProps) {
         </div>
 
         {/* Top Traders — real data from DB */}
-        <section className="overflow-hidden py-16">
+        <section className="py-16">
           <div className="mx-auto mb-10 max-w-[900px] px-6 text-center">
             <h2 className="mb-3 text-3xl sm:text-4xl font-bold text-white">Top <span className="text-[var(--trench-accent)]">traders</span></h2>
             <p className="text-[13px] text-[var(--trench-text-muted)]">Already on Trench ID. Are you?</p>

@@ -248,11 +248,19 @@
   100% { transform: translateY(-150px); }
 }
 
-/* ─── Scrollbar hide ──────────────────────────────────────── */
+/* ─── Scrollbar hide (global + targeted) ─────────────────── */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
 .no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+/* Nuclear scrollbar kill — hide on ALL nested elements too */
+.no-scrollbar *::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar * {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }

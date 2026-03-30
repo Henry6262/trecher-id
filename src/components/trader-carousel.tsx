@@ -52,10 +52,10 @@ export function TraderCarousel({ traders }: TraderCarouselProps) {
   }, [isPaused]);
 
   return (
-    <div className="relative">
-      {/* Fade overlays left + right */}
-      <div className="absolute left-0 top-0 bottom-0 w-24 z-10 pointer-events-none" style={{ background: 'linear-gradient(to right, #050508, transparent)' }} />
-      <div className="absolute right-0 top-0 bottom-0 w-24 z-10 pointer-events-none" style={{ background: 'linear-gradient(to left, #050508, transparent)' }} />
+    <div className="relative mx-auto max-w-[900px] overflow-hidden">
+      {/* Fade overlays left + right — strong, wide */}
+      <div className="absolute left-0 top-0 bottom-0 w-36 z-10 pointer-events-none" style={{ background: 'linear-gradient(to right, #050508 20%, transparent)' }} />
+      <div className="absolute right-0 top-0 bottom-0 w-36 z-10 pointer-events-none" style={{ background: 'linear-gradient(to left, #050508 20%, transparent)' }} />
 
       <div
         ref={scrollRef}
