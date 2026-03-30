@@ -2,6 +2,7 @@ import { ProfileHeader } from './profile-header';
 import { LinkItem } from './link-item';
 import { TradeCarousel } from './trade-carousel';
 import { WalletChips } from './wallet-chips';
+import { CutCorner } from './cut-corner';
 
 interface ProfileCardProps {
   user: {
@@ -41,8 +42,14 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets }: Profi
       {/* Accent line */}
       <div className="h-[2px]" style={{ background: 'linear-gradient(90deg, transparent, #00D4FF, transparent)' }} />
 
-      {/* Main card */}
-      <div className="glass cut-lg">
+      {/* Main card — CutCorner with blur */}
+      <CutCorner
+        cut="lg"
+        blur={true}
+        bg="rgba(8,12,18,0.72)"
+        borderColor="rgba(0,212,255,0.15)"
+        borderWidth={1}
+      >
         {/* Hero — full width */}
         <ProfileHeader
           avatarUrl={user.avatarUrl}
@@ -79,7 +86,7 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets }: Profi
         <div className="flex justify-center py-3.5 border-t border-[rgba(0,212,255,0.06)]">
           <img src="/logo.png" alt="Trench ID" className="h-[28px] w-auto opacity-25" />
         </div>
-      </div>
+      </CutCorner>
     </div>
   );
 }
