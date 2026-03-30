@@ -271,7 +271,7 @@ export function LandingContent({ traders, featured, traderCount, totalPnl }: Lan
           <div className="h-px mx-auto max-w-[400px] mb-12" style={{ background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.2), transparent)' }} />
 
           {/* Stacked avatars */}
-          <div className="flex justify-center mb-5">
+          {traders.length > 0 && <div className="flex justify-center mb-5">
             <div className="flex">
               {traders.slice(0, 4).map((t, i) => (
                 <div
@@ -305,10 +305,10 @@ export function LandingContent({ traders, featured, traderCount, totalPnl }: Lan
                   zIndex: 1,
                 }}
               >
-                <span className="font-mono text-[9px] font-bold text-[var(--trench-accent)]">+{traderCount - 4}</span>
+                <span className="font-mono text-[9px] font-bold text-[var(--trench-accent)]">+{Math.max(traderCount - 4, 0)}</span>
               </div>
             </div>
-          </div>
+          </div>}
 
           <p className="text-[12px] text-[var(--trench-text-muted)] mb-2">Join {traderCount} traders already on Trench ID</p>
 
