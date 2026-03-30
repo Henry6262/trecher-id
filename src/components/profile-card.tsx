@@ -1,7 +1,6 @@
 import { ProfileHeader } from './profile-header';
 import { LinkItem } from './link-item';
 import { TradeCarousel } from './trade-carousel';
-import { WalletChips } from './wallet-chips';
 import { CutCorner } from './cut-corner';
 
 interface ProfileCardProps {
@@ -58,6 +57,7 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets }: Profi
           bio={user.bio}
           verified={hasWallets}
           stats={stats}
+          wallets={wallets}
         />
 
         {/* Divider — fades from transparent to cyan and back */}
@@ -81,8 +81,6 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets }: Profi
             </div>
           )}
 
-          {/* Wallets */}
-          <WalletChips wallets={wallets} />
         </div>
 
         {/* Footer */}
