@@ -1,7 +1,7 @@
 /* eslint-disable react/no-unknown-property */
 'use client';
 import { useEffect, useRef, useState, useMemo } from 'react';
-import { Canvas, extend, useFrame, useLoader } from '@react-three/fiber';
+import { Canvas, extend, useFrame } from '@react-three/fiber';
 import { useGLTF, useTexture, Environment, Lightformer } from '@react-three/drei';
 import { BallCollider, CuboidCollider, Physics, RigidBody, useRopeJoint, useSphericalJoint } from '@react-three/rapier';
 import { MeshLineGeometry, MeshLineMaterial } from 'meshline';
@@ -14,7 +14,6 @@ interface LanyardProps {
   gravity?: [number, number, number];
   fov?: number;
   transparent?: boolean;
-  /** KOL profile data for the card texture */
   profile?: {
     username: string;
     name: string;
@@ -25,9 +24,9 @@ interface LanyardProps {
 }
 
 export default function Lanyard({
-  position = [0, 0, 24],
+  position = [0, 0, 20],
   gravity = [0, -40, 0],
-  fov = 20,
+  fov = 25,
   transparent = true,
   profile,
 }: LanyardProps) {
@@ -40,7 +39,7 @@ export default function Lanyard({
   }, []);
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100%', minHeight: '400px' }}>
+    <div style={{ position: 'relative', width: '100%', height: '100%', minHeight: '450px' }}>
       <Canvas
         camera={{ position, fov }}
         dpr={[1, isMobile ? 1.5 : 2]}
@@ -62,120 +61,166 @@ export default function Lanyard({
   );
 }
 
-/** Generate a branded Trench ID card texture on a canvas */
+/** Load the logo image and generate branded card texture */
 function useCardTexture(profile?: LanyardProps['profile']) {
+  const [logoImg, setLogoImg] = useState<HTMLImageElement | null>(null);
+
+  useEffect(() => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.src = '/logo.png';
+    img.onload = () => setLogoImg(img);
+  }, []);
+
   return useMemo(() => {
     const canvas = document.createElement('canvas');
     canvas.width = 512;
     canvas.height = 720;
     const ctx = canvas.getContext('2d')!;
 
-    // Background
-    ctx.fillStyle = '#0a0a0f';
+    // Dark background
+    ctx.fillStyle = '#080c12';
     ctx.fillRect(0, 0, 512, 720);
 
-    // Cut corner effect (top-left, bottom-right)
-    ctx.fillStyle = '#050508';
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.lineTo(30, 0);
-    ctx.lineTo(0, 30);
-    ctx.closePath();
-    ctx.fill();
-    ctx.beginPath();
-    ctx.moveTo(512, 720);
-    ctx.lineTo(482, 720);
-    ctx.lineTo(512, 690);
-    ctx.closePath();
-    ctx.fill();
+    // Subtle gradient overlay
+    const grad = ctx.createLinearGradient(0, 0, 0, 720);
+    grad.addColorStop(0, 'rgba(0, 212, 255, 0.04)');
+    grad.addColorStop(0.5, 'transparent');
+    grad.addColorStop(1, 'rgba(0, 212, 255, 0.03)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 512, 720);
 
     // Top accent line
-    ctx.fillStyle = '#00D4FF';
-    ctx.fillRect(30, 0, 452, 3);
+    const lineGrad = ctx.createLinearGradient(60, 0, 452, 0);
+    lineGrad.addColorStop(0, 'transparent');
+    lineGrad.addColorStop(0.5, '#00D4FF');
+    lineGrad.addColorStop(1, 'transparent');
+    ctx.fillStyle = lineGrad;
+    ctx.fillRect(0, 0, 512, 4);
 
     // Border
-    ctx.strokeStyle = 'rgba(0, 212, 255, 0.15)';
+    ctx.strokeStyle = 'rgba(0, 212, 255, 0.12)';
     ctx.lineWidth = 2;
-    ctx.strokeRect(1, 1, 510, 718);
+    ctx.strokeRect(2, 2, 508, 716);
 
-    // TRENCH ID logo text
-    ctx.fillStyle = '#00D4FF';
-    ctx.font = 'bold 18px monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText('TRENCH ID', 256, 50);
-
-    // Divider
-    ctx.strokeStyle = 'rgba(0, 212, 255, 0.1)';
-    ctx.beginPath();
-    ctx.moveTo(80, 70);
-    ctx.lineTo(432, 70);
-    ctx.stroke();
-
-    if (profile) {
-      // Username
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 32px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(`@${profile.username}`, 256, 260);
-
-      // Name
-      ctx.fillStyle = '#71717a';
-      ctx.font = '18px sans-serif';
-      ctx.fillText(profile.name, 256, 290);
-
-      // Verified badge
-      ctx.fillStyle = '#00D4FF';
-      ctx.font = 'bold 14px monospace';
-      ctx.fillText('✓ VERIFIED', 256, 320);
-
-      // PnL box
-      ctx.fillStyle = 'rgba(34, 197, 94, 0.1)';
-      ctx.fillRect(80, 370, 352, 80);
-      ctx.strokeStyle = 'rgba(34, 197, 94, 0.2)';
-      ctx.strokeRect(80, 370, 352, 80);
-
-      ctx.fillStyle = '#22c55e';
-      ctx.font = 'bold 36px monospace';
-      ctx.fillText(profile.pnl, 256, 415);
-
-      ctx.fillStyle = '#71717a';
-      ctx.font = '12px monospace';
-      ctx.fillText('TOTAL PnL', 256, 440);
-
-      // Win rate
-      ctx.fillStyle = '#00D4FF';
-      ctx.font = 'bold 24px monospace';
-      ctx.fillText(profile.winRate, 256, 510);
-      ctx.fillStyle = '#71717a';
-      ctx.font = '12px monospace';
-      ctx.fillText('WIN RATE', 256, 535);
+    // Logo — draw the actual PNG
+    if (logoImg) {
+      const logoW = 200;
+      const logoH = (logoImg.height / logoImg.width) * logoW;
+      ctx.drawImage(logoImg, (512 - logoW) / 2, 40, logoW, logoH);
     } else {
-      // Fallback — just branding
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 28px sans-serif';
+      // Fallback text logo
+      ctx.fillStyle = '#00D4FF';
+      ctx.font = 'bold 28px monospace';
       ctx.textAlign = 'center';
-      ctx.fillText('Your Web3', 256, 280);
-      ctx.fillText('Bio Link', 256, 320);
-
-      ctx.fillStyle = '#71717a';
-      ctx.font = '16px sans-serif';
-      ctx.fillText('trecher-id.vercel.app', 256, 380);
+      ctx.fillText('TRENCH ID', 256, 70);
     }
 
+    // Thin divider
+    ctx.strokeStyle = 'rgba(0, 212, 255, 0.08)';
+    ctx.beginPath();
+    ctx.moveTo(60, 110);
+    ctx.lineTo(452, 110);
+    ctx.stroke();
+
+    // Avatar circle placeholder
+    ctx.beginPath();
+    ctx.arc(256, 210, 60, 0, Math.PI * 2);
+    ctx.fillStyle = '#111318';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(0, 212, 255, 0.25)';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    // Avatar letter
+    const initial = profile?.name?.charAt(0).toUpperCase() ?? 'T';
+    ctx.fillStyle = '#00D4FF';
+    ctx.font = 'bold 48px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(initial, 256, 212);
+    ctx.textBaseline = 'alphabetic';
+
+    // Username
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 30px sans-serif';
+    ctx.textAlign = 'center';
+    const displayUsername = profile?.username ? `@${profile.username}` : '@you';
+    ctx.fillText(displayUsername, 256, 310);
+
+    // Name
+    ctx.fillStyle = '#71717a';
+    ctx.font = '16px sans-serif';
+    ctx.fillText(profile?.name ?? 'Your Name', 256, 340);
+
+    // Verified badge
+    ctx.fillStyle = '#00D4FF';
+    ctx.font = 'bold 13px monospace';
+    ctx.fillText('✓ VERIFIED TRADER', 256, 375);
+
+    // PnL box
+    ctx.fillStyle = 'rgba(34, 197, 94, 0.08)';
+    ctx.fillRect(60, 410, 392, 75);
+    ctx.strokeStyle = 'rgba(34, 197, 94, 0.15)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(60, 410, 392, 75);
+
+    ctx.fillStyle = '#22c55e';
+    ctx.font = 'bold 34px monospace';
+    ctx.fillText(profile?.pnl ?? '$???', 256, 450);
+
+    ctx.fillStyle = '#71717a';
+    ctx.font = '11px monospace';
+    ctx.fillText('TOTAL REALIZED PnL', 256, 475);
+
+    // Stats row
+    ctx.fillStyle = 'rgba(0, 212, 255, 0.06)';
+    ctx.fillRect(60, 510, 190, 55);
+    ctx.fillRect(262, 510, 190, 55);
+    ctx.strokeStyle = 'rgba(0, 212, 255, 0.1)';
+    ctx.strokeRect(60, 510, 190, 55);
+    ctx.strokeRect(262, 510, 190, 55);
+
+    ctx.fillStyle = '#00D4FF';
+    ctx.font = 'bold 22px monospace';
+    ctx.fillText(profile?.winRate ?? '??%', 155, 540);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(profile ? '—' : '???', 357, 540);
+
+    ctx.fillStyle = '#71717a';
+    ctx.font = '9px monospace';
+    ctx.fillText('WIN RATE', 155, 558);
+    ctx.fillText('TRADES', 357, 558);
+
+    // URL bar
+    ctx.fillStyle = 'rgba(0, 212, 255, 0.04)';
+    ctx.fillRect(60, 600, 392, 35);
+    ctx.strokeStyle = 'rgba(0, 212, 255, 0.1)';
+    ctx.strokeRect(60, 600, 392, 35);
+
+    ctx.fillStyle = '#00D4FF';
+    ctx.font = '13px monospace';
+    const url = profile?.username ? `trecher-id.vercel.app/${profile.username}` : 'trecher-id.vercel.app/you';
+    ctx.fillText(url, 256, 622);
+
     // Bottom branding
-    ctx.fillStyle = 'rgba(0, 212, 255, 0.3)';
-    ctx.font = '10px monospace';
-    ctx.fillText('TRENCH ID · SOLANA · 2026', 256, 680);
+    ctx.fillStyle = 'rgba(0, 212, 255, 0.2)';
+    ctx.font = '9px monospace';
+    ctx.fillText('TRENCH ID · SOLANA · 2026', 256, 690);
 
     // Bottom accent line
-    ctx.fillStyle = '#00D4FF';
-    ctx.fillRect(30, 700, 452, 2);
+    const botGrad = ctx.createLinearGradient(60, 0, 452, 0);
+    botGrad.addColorStop(0, 'transparent');
+    botGrad.addColorStop(0.5, '#00D4FF');
+    botGrad.addColorStop(1, 'transparent');
+    ctx.fillStyle = botGrad;
+    ctx.fillRect(0, 716, 512, 4);
 
     const texture = new THREE.CanvasTexture(canvas);
     texture.needsUpdate = true;
     texture.flipY = false;
     return texture;
-  }, [profile]);
+  }, [profile, logoImg]);
 }
 
 function Band({
@@ -272,7 +317,7 @@ function Band({
         <RigidBody position={[2, 0, 0]} ref={card} {...segmentProps} type={dragged ? 'kinematicPosition' : 'dynamic'}>
           <CuboidCollider args={[0.8, 1.125, 0.01]} />
           <group
-            scale={2.25}
+            scale={2.75}
             position={[0, -1.2, -0.05]}
             onPointerOver={() => hover(true)}
             onPointerOut={() => hover(false)}

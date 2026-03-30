@@ -12,6 +12,7 @@ const FALLBACK_FEATURED = {
   pnl: '$0',
   winRate: '0%',
   trades: '0',
+  topTrades: [] as { tokenSymbol: string; tokenImageUrl: string | null; pnlPercent: string; buy: string | null; sell: string | null }[],
   recentToken: null,
   recentTokenImage: null,
   recentPnl: null,
@@ -23,7 +24,7 @@ async function fetchLandingData() {
   const users = await prisma.user.findMany({
     include: {
       wallets: true,
-      pinnedTrades: { orderBy: { totalPnlSol: 'desc' }, take: 1 },
+      pinnedTrades: { where: { totalPnlPercent: { gt: 0 } }, orderBy: { totalPnlPercent: 'desc' }, take: 3 },
     },
     orderBy: { createdAt: 'asc' },
     take: 15,
@@ -41,8 +42,16 @@ async function fetchLandingData() {
     }
     const winRate = winRateCount > 0 ? totalWinRate / winRateCount : 0;
 
-    const bestTrade = u.pinnedTrades[0];
-    const txns = bestTrade?.transactions as { type: string; amountSol: number }[] | undefined;
+    const topTrades = u.pinnedTrades.map(t => {
+      const txns = t.transactions as { type: string; amountSol: number }[] | undefined;
+      return {
+        tokenSymbol: t.tokenSymbol,
+        tokenImageUrl: t.tokenImageUrl,
+        pnlPercent: `+${t.totalPnlPercent.toFixed(0)}%`,
+        buy: txns?.find(tx => tx.type === 'BUY')?.amountSol.toFixed(1) ?? null,
+        sell: txns?.find(tx => tx.type === 'SELL')?.amountSol.toFixed(1) ?? null,
+      };
+    });
 
     return {
       username: u.username,
@@ -51,11 +60,13 @@ async function fetchLandingData() {
       pnl: formatPnl(totalPnlUsd),
       winRate: `${winRate.toFixed(0)}%`,
       trades: String(totalTrades),
-      recentToken: bestTrade?.tokenSymbol ?? null,
-      recentTokenImage: bestTrade?.tokenImageUrl ?? null,
-      recentPnl: bestTrade ? `${bestTrade.totalPnlPercent >= 0 ? '+' : ''}${bestTrade.totalPnlPercent.toFixed(0)}%` : null,
-      recentBuy: txns?.find(t => t.type === 'BUY')?.amountSol.toFixed(1) ?? null,
-      recentSell: txns?.find(t => t.type === 'SELL')?.amountSol.toFixed(1) ?? null,
+      topTrades,
+      // Keep single best for hero card
+      recentToken: topTrades[0]?.tokenSymbol ?? null,
+      recentTokenImage: topTrades[0]?.tokenImageUrl ?? null,
+      recentPnl: topTrades[0]?.pnlPercent ?? null,
+      recentBuy: topTrades[0]?.buy ?? null,
+      recentSell: topTrades[0]?.sell ?? null,
     };
   });
 

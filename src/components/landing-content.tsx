@@ -14,6 +14,14 @@ import StaggeredText from '@/components/react-bits/staggered-text';
 const RisingLines = dynamic(() => import('@/components/rising-lines'), { ssr: false });
 const Lanyard = dynamic(() => import('@/components/lanyard'), { ssr: false });
 
+interface TradeData {
+  tokenSymbol: string;
+  tokenImageUrl: string | null;
+  pnlPercent: string;
+  buy: string | null;
+  sell: string | null;
+}
+
 interface TraderData {
   username: string;
   name: string;
@@ -21,6 +29,7 @@ interface TraderData {
   pnl: string;
   winRate: string;
   trades: string;
+  topTrades: TradeData[];
   recentToken: string | null;
   recentTokenImage: string | null;
   recentPnl: string | null;
@@ -333,8 +342,8 @@ export function LandingContent({ traders, featured, traderCount, totalPnl }: Lan
               </h2>
               <p className="text-[16px] text-[var(--trench-text-muted)] mb-9">One link. Verified on-chain. Drop it everywhere.</p>
 
-              <CutButton href="/login" size="lg" className="text-[16px] px-14 py-5">Create Your Trench ID</CutButton>
-              <p className="mt-3.5 text-[9px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">FREE &middot; 30 SECONDS &middot; SIGN IN WITH X</p>
+              <CutButton href="/login" size="sm">Create Your Trench ID</CutButton>
+              <p className="mt-3 text-[9px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">FREE &middot; 30 SECONDS &middot; SIGN IN WITH X</p>
             </div>
           </div>
 
