@@ -33,9 +33,11 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets }: Profi
 
   return (
     <div className="w-full max-w-[620px] mx-auto">
-      {/* Logo */}
+      {/* Logo — links to landing page */}
       <div className="flex justify-center pt-2 pb-5">
-        <img src="/logo.png" alt="Trench ID" className="h-[80px] w-auto" />
+        <a href="/" className="cursor-pointer">
+          <img src="/logo.png" alt="Trench ID" className="h-[80px] w-auto hover:opacity-80 transition-opacity" />
+        </a>
       </div>
 
       {/* Accent line */}
@@ -85,7 +87,9 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets }: Profi
 
         {/* Footer */}
         <div className="flex justify-center py-3.5 border-t border-[rgba(0,212,255,0.06)]">
-          <img src="/logo.png" alt="Trench ID" className="h-[28px] w-auto opacity-25" />
+          <a href="/" className="cursor-pointer">
+            <img src="/logo.png" alt="Trench ID" className="h-[28px] w-auto opacity-25 hover:opacity-40 transition-opacity" />
+          </a>
         </div>
       </CutCorner>
     </div>
