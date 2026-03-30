@@ -21,19 +21,17 @@ export function TraderCarousel({ traders }: TraderCarouselProps) {
   const animRef = useRef<number | null>(null);
   const posRef = useRef(0);
 
-  // Duplicate traders for infinite scroll illusion
   const items = [...traders, ...traders, ...traders];
 
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
 
-    const speed = 0.5; // pixels per frame
+    const speed = 0.5;
 
     function tick() {
       if (!isPaused && el) {
         posRef.current += speed;
-        // Reset when we've scrolled past the first set
         const singleSetWidth = el.scrollWidth / 3;
         if (posRef.current >= singleSetWidth) {
           posRef.current -= singleSetWidth;
@@ -52,7 +50,7 @@ export function TraderCarousel({ traders }: TraderCarouselProps) {
   return (
     <div
       ref={scrollRef}
-      className="flex gap-4 overflow-x-hidden no-scrollbar"
+      className="flex gap-4 overflow-x-hidden no-scrollbar py-2"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
@@ -60,63 +58,75 @@ export function TraderCarousel({ traders }: TraderCarouselProps) {
         <a
           key={`${t.username}-${i}`}
           href={`/${t.username}`}
-          className="flex-shrink-0 w-[220px] p-4 transition-all hover:border-[rgba(0,212,255,0.25)] cursor-pointer group"
+          className="flex-shrink-0 w-[260px] relative cursor-pointer group transition-all"
           style={{
-            background: 'rgba(8,12,18,0.8)',
-            border: '1px solid rgba(0,212,255,0.08)',
+            background: 'rgba(8,12,18,0.75)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+            border: '1px solid rgba(0,212,255,0.1)',
             clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)',
           }}
         >
-          {/* Avatar + name row */}
-          <div className="flex items-center gap-3 mb-3">
-            <div
-              className="w-11 h-11 rounded-full overflow-hidden flex-shrink-0"
-              style={{ border: '2px solid rgba(0,212,255,0.25)', boxShadow: '0 0 16px rgba(0,212,255,0.15)' }}
-            >
-              <img
-                src={`https://unavatar.io/twitter/${t.username}`}
-                alt={t.name}
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-1">
-                <span className="text-[13px] font-bold text-white truncate">@{t.username}</span>
-                <div className="w-[14px] h-[14px] rounded-full flex items-center justify-center flex-shrink-0" style={{ background: '#00D4FF' }}>
-                  <Check size={8} strokeWidth={3} className="text-black" />
-                </div>
+          {/* Main content — left side */}
+          <div className="p-4 pr-[72px]">
+            {/* Avatar + name */}
+            <div className="flex items-center gap-3 mb-2">
+              <div
+                className="w-11 h-11 rounded-full overflow-hidden flex-shrink-0"
+                style={{ border: '2px solid rgba(0,212,255,0.25)', boxShadow: '0 0 16px rgba(0,212,255,0.15)' }}
+              >
+                <img
+                  src={`https://unavatar.io/twitter/${t.username}`}
+                  alt={t.name}
+                  className="w-full h-full object-cover"
+                />
               </div>
-              <span className="text-[9px] text-[var(--trench-text-muted)]">{t.name}</span>
+              <div className="min-w-0">
+                <div className="flex items-center gap-1">
+                  <span className="text-[13px] font-bold text-white truncate">@{t.username}</span>
+                  <div className="w-[14px] h-[14px] rounded-full flex items-center justify-center flex-shrink-0" style={{ background: '#00D4FF' }}>
+                    <Check size={8} strokeWidth={3} className="text-black" />
+                  </div>
+                </div>
+                <span className="text-[9px] text-[var(--trench-text-muted)]">{t.name}</span>
+              </div>
             </div>
+
+            {/* PnL highlight */}
+            <div className="text-[18px] font-bold font-mono text-[var(--trench-green)]">{t.pnl}</div>
+            <div className="text-[8px] text-[var(--trench-text-muted)] tracking-[1px]">TOTAL PnL</div>
           </div>
 
-          {/* Stats row — skewed */}
-          <div className="flex gap-2">
+          {/* Right side — vertical stat pills, half in half out */}
+          <div className="absolute right-[-1px] top-1/2 -translate-y-1/2 flex flex-col gap-2">
             <div
-              className="skew-container flex-1 flex items-center justify-center gap-1 py-1.5 px-2"
-              style={{ background: 'rgba(255,255,255,0.035)', border: '1px solid rgba(0,212,255,0.06)' }}
+              className="flex items-center justify-center px-3 py-2 min-w-[56px]"
+              style={{
+                background: 'rgba(8,12,18,0.9)',
+                backdropFilter: 'blur(12px)',
+                border: '1px solid rgba(0,212,255,0.15)',
+                clipPath: 'polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px)',
+              }}
             >
-              <span className="text-[12px] font-bold font-mono text-[var(--trench-green)]">{t.pnl}</span>
+              <div className="text-center">
+                <div className="text-[12px] font-bold font-mono text-[var(--trench-accent)]">{t.winRate}</div>
+                <div className="text-[6px] text-[var(--trench-text-muted)] tracking-[1px]">WIN</div>
+              </div>
             </div>
             <div
-              className="skew-container flex-1 flex items-center justify-center gap-1 py-1.5 px-2"
-              style={{ background: 'rgba(255,255,255,0.035)', border: '1px solid rgba(0,212,255,0.06)' }}
+              className="flex items-center justify-center px-3 py-2 min-w-[56px]"
+              style={{
+                background: 'rgba(8,12,18,0.9)',
+                backdropFilter: 'blur(12px)',
+                border: '1px solid rgba(0,212,255,0.15)',
+                clipPath: 'polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px)',
+              }}
             >
-              <span className="text-[12px] font-bold font-mono text-[var(--trench-accent)]">{t.winRate}</span>
+              <div className="text-center">
+                <div className="text-[12px] font-bold font-mono text-[var(--trench-text)]">{t.trades}</div>
+                <div className="text-[6px] text-[var(--trench-text-muted)] tracking-[1px]">TRADES</div>
+              </div>
             </div>
-            <div
-              className="skew-container flex-1 flex items-center justify-center gap-1 py-1.5 px-2"
-              style={{ background: 'rgba(255,255,255,0.035)', border: '1px solid rgba(0,212,255,0.06)' }}
-            >
-              <span className="text-[12px] font-bold font-mono text-[var(--trench-text)]">{t.trades}</span>
-            </div>
-          </div>
-
-          {/* Labels under stats */}
-          <div className="flex gap-2 mt-0.5">
-            <span className="flex-1 text-center text-[6px] text-[var(--trench-text-muted)] tracking-[1px]">PnL</span>
-            <span className="flex-1 text-center text-[6px] text-[var(--trench-text-muted)] tracking-[1px]">WIN</span>
-            <span className="flex-1 text-center text-[6px] text-[var(--trench-text-muted)] tracking-[1px]">TRADES</span>
           </div>
         </a>
       ))}
