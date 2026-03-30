@@ -1,6 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { PrismaPg } from '@prisma/adapter-pg';
-import pg from 'pg';
+import { PrismaNeon } from '@prisma/adapter-neon';
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient | undefined };
 
@@ -9,13 +8,7 @@ export const prisma: PrismaClient = new Proxy({} as PrismaClient, {
     if (!globalForPrisma.prisma) {
       const url = process.env.DATABASE_URL;
       if (!url) throw new Error('DATABASE_URL is not set');
-      const pool = new pg.Pool({
-        connectionString: url,
-        connectionTimeoutMillis: 10000,
-        idleTimeoutMillis: 30000,
-        max: 5,
-      });
-      const adapter = new PrismaPg(pool);
+      const adapter = new PrismaNeon({ connectionString: url });
       globalForPrisma.prisma = new PrismaClient({ adapter });
     }
     return Reflect.get(globalForPrisma.prisma, prop);
