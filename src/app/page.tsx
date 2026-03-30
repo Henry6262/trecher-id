@@ -46,5 +46,21 @@ export default async function LandingPage() {
   // Top trader for the preview card
   const featured = traders[0];
 
-  return <LandingContent traders={traders} featured={featured} />;
+  // Aggregate stats for CTA section
+  const totalTraderCount = await prisma.user.count();
+  let aggregatePnl = 0;
+  for (const t of traders) {
+    const raw = t.pnl.replace(/[^0-9.-]/g, '');
+    const num = parseFloat(raw);
+    if (!isNaN(num)) {
+      if (t.pnl.includes('K')) aggregatePnl += num * 1000;
+      else if (t.pnl.includes('M')) aggregatePnl += num * 1000000;
+      else aggregatePnl += num;
+    }
+  }
+  const totalPnlStr = aggregatePnl >= 1000000
+    ? `$${(aggregatePnl / 1000000).toFixed(1)}M`
+    : `$${(aggregatePnl / 1000).toFixed(0)}K`;
+
+  return <LandingContent traders={traders} featured={featured} traderCount={totalTraderCount} totalPnl={totalPnlStr} />;
 }
