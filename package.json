@@ -7,16 +7,19 @@
     "postinstall": "prisma generate",
     "build": "prisma generate && next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "seed": "prisma db seed"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.2",
     "@prisma/adapter-neon": "^7.6.0",
+    "@prisma/adapter-pg": "^7.6.0",
     "@prisma/adapter-pg-worker": "^6.9.0",
     "@prisma/client": "^7.6.0",
     "@prisma/pg-worker": "^6.9.0",
     "@privy-io/react-auth": "^3.18.0",
     "@privy-io/server-auth": "^1.32.5",
+    "@types/pg": "^8.20.0",
     "@types/three": "^0.183.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -24,6 +27,7 @@
     "geist": "^1.7.0",
     "lucide-react": "^1.7.0",
     "next": "16.2.1",
+    "pg": "^8.20.0",
     "prisma": "^7.6.0",
     "radix-ui": "^1.4.3",
     "react": "19.2.4",
@@ -42,6 +46,10 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.1",
     "tailwindcss": "^4",
+    "tsx": "^4.21.0",
     "typescript": "^5"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   }
 }
