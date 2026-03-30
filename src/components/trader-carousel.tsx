@@ -7,13 +7,14 @@ import { BorderGlow } from './border-glow';
 interface Trader {
   readonly username: string;
   readonly name: string;
+  readonly avatarUrl?: string | null;
   readonly pnl: string;
   readonly winRate: string;
   readonly trades: string;
-  readonly recentToken: string;
-  readonly recentPnl: string;
-  readonly recentBuy: string;
-  readonly recentSell: string;
+  readonly recentToken?: string | null;
+  readonly recentPnl?: string | null;
+  readonly recentBuy?: string | null;
+  readonly recentSell?: string | null;
 }
 
 interface TraderCarouselProps {
@@ -77,7 +78,7 @@ export function TraderCarousel({ traders }: TraderCarouselProps) {
                   className="w-11 h-11 rounded-full overflow-hidden flex-shrink-0"
                   style={{ border: '2px solid rgba(0,212,255,0.25)', boxShadow: '0 0 16px rgba(0,212,255,0.15)' }}
                 >
-                  <img src={`https://unavatar.io/twitter/${t.username}`} alt={t.name} className="w-full h-full object-cover" />
+                  <img src={t.avatarUrl || `https://unavatar.io/twitter/${t.username}`} alt={t.name} className="w-full h-full object-cover" />
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-1">
@@ -94,23 +95,29 @@ export function TraderCarousel({ traders }: TraderCarouselProps) {
               <div className="text-[18px] font-bold font-mono text-[var(--trench-green)] mb-1">{t.pnl}</div>
               <div className="text-[7px] text-[var(--trench-text-muted)] tracking-[1px] mb-3">TOTAL PnL</div>
 
-              {/* Recent trade */}
-              <div className="cut-xs" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(0,212,255,0.06)', padding: '8px 10px' }}>
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[11px] font-bold text-white">{t.recentToken}</span>
-                  <span className="text-[11px] font-bold font-mono text-[var(--trench-green)]">{t.recentPnl}</span>
-                </div>
-                <div className="flex gap-2">
-                  <div className="cut-xs flex-1 flex justify-between text-[8px] px-1.5 py-0.5" style={{ background: 'rgba(0,212,255,0.02)' }}>
-                    <span className="text-[var(--trench-green)] font-semibold">BUY</span>
-                    <span className="text-[var(--trench-text)] font-semibold">{t.recentBuy} SOL</span>
+              {/* Recent trade — only if real data exists */}
+              {t.recentToken && (
+                <div className="cut-xs" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(0,212,255,0.06)', padding: '8px 10px' }}>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[11px] font-bold text-white">{t.recentToken}</span>
+                    <span className="text-[11px] font-bold font-mono text-[var(--trench-green)]">{t.recentPnl}</span>
                   </div>
-                  <div className="cut-xs flex-1 flex justify-between text-[8px] px-1.5 py-0.5" style={{ background: 'rgba(0,212,255,0.02)' }}>
-                    <span className="text-[var(--trench-red)] font-semibold">SELL</span>
-                    <span className="text-[var(--trench-green)] font-semibold">{t.recentSell} SOL</span>
+                  <div className="flex gap-2">
+                    {t.recentBuy && (
+                      <div className="cut-xs flex-1 flex justify-between text-[8px] px-1.5 py-0.5" style={{ background: 'rgba(0,212,255,0.02)' }}>
+                        <span className="text-[var(--trench-green)] font-semibold">BUY</span>
+                        <span className="text-[var(--trench-text)] font-semibold">{t.recentBuy} SOL</span>
+                      </div>
+                    )}
+                    {t.recentSell && (
+                      <div className="cut-xs flex-1 flex justify-between text-[8px] px-1.5 py-0.5" style={{ background: 'rgba(0,212,255,0.02)' }}>
+                        <span className="text-[var(--trench-red)] font-semibold">SELL</span>
+                        <span className="text-[var(--trench-green)] font-semibold">{t.recentSell} SOL</span>
+                      </div>
+                    )}
                   </div>
                 </div>
-              </div>
+              )}
             </div>
 
             {/* Right side — 3 vertical stat pills, smaller */}
