@@ -52,12 +52,17 @@ export function TraderCarousel({ traders }: TraderCarouselProps) {
   }, [isPaused]);
 
   return (
-    <div
-      ref={scrollRef}
-      className="flex gap-4 overflow-x-hidden no-scrollbar py-2"
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
-    >
+    <div className="relative">
+      {/* Fade overlays left + right */}
+      <div className="absolute left-0 top-0 bottom-0 w-24 z-10 pointer-events-none" style={{ background: 'linear-gradient(to right, #050508, transparent)' }} />
+      <div className="absolute right-0 top-0 bottom-0 w-24 z-10 pointer-events-none" style={{ background: 'linear-gradient(to left, #050508, transparent)' }} />
+
+      <div
+        ref={scrollRef}
+        className="flex gap-4 overflow-x-hidden no-scrollbar py-2"
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+      >
       {items.map((t, i) => (
         <BorderGlow
           key={`${t.username}-${i}`}
@@ -172,6 +177,7 @@ export function TraderCarousel({ traders }: TraderCarouselProps) {
           </Link>
         </BorderGlow>
       ))}
+      </div>
     </div>
   );
 }
