@@ -11,10 +11,9 @@ export const prisma: PrismaClient = new Proxy({} as PrismaClient, {
       if (!url) throw new Error('DATABASE_URL is not set');
       const pool = new pg.Pool({
         connectionString: url,
-        ssl: { rejectUnauthorized: false },
         connectionTimeoutMillis: 15000,
         idleTimeoutMillis: 30000,
-        max: 3,
+        max: 5,
       });
       const adapter = new PrismaPg(pool);
       globalForPrisma.prisma = new PrismaClient({ adapter });
