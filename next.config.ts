@@ -6,6 +6,8 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'pbs.twimg.com' },
       { protocol: 'https', hostname: 'avatars.githubusercontent.com' },
       { protocol: 'https', hostname: '*.helius-rpc.com' },
+      { protocol: 'https', hostname: 'unavatar.io' },
+      { protocol: 'https', hostname: '*.unavatar.io' },
     ],
   },
 };
