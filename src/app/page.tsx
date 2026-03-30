@@ -32,9 +32,9 @@ export default function LandingPage() {
       {/* RisingLines — exact SuperMolt config, orange instead of blue */}
       <div className="fixed inset-0 opacity-75" style={{ zIndex: 0 }}>
         <RisingLines
-          color="#FF6B00"
-          horizonColor="#FF6B00"
-          haloColor="#FF8C33"
+          color="#00D4FF"
+          horizonColor="#00D4FF"
+          haloColor="#33DDFF"
           riseSpeed={0.08}
           riseScale={10.0}
           riseIntensity={1.3}
@@ -64,7 +64,7 @@ export default function LandingPage() {
 
         {/* Hero */}
         <div className="flex-1 flex flex-col items-center justify-center text-center max-w-[560px] -mt-16">
-          <div className="cut-xs inline-flex items-center gap-1.5 px-3 py-1 mb-6 text-[10px] font-mono tracking-[2px] text-[var(--trench-orange)] bg-[rgba(255,107,0,0.08)] border border-[rgba(255,107,0,0.12)]">
+          <div className="cut-xs inline-flex items-center gap-1.5 px-3 py-1 mb-6 text-[10px] font-mono tracking-[2px] text-[var(--trench-orange)] bg-[rgba(0,212,255,0.08)] border border-[rgba(0,212,255,0.12)]">
             <Check size={10} strokeWidth={3} />
             <ShinyText text="ON-CHAIN VERIFIED" speed={3} />
           </div>
@@ -98,13 +98,13 @@ export default function LandingPage() {
           {FEATURES.map(({ icon: Icon, title, desc }) => (
             <div
               key={title}
-              className="cut-sm backdrop-blur-md border border-[rgba(255,107,0,0.1)]"
+              className="cut-sm backdrop-blur-md border border-[rgba(0,212,255,0.1)]"
               style={{ background: 'rgba(255,255,255,0.03)' }}
             >
               <div className="p-5">
                 <div
                   className="w-8 h-8 flex items-center justify-center mb-3 cut-xs"
-                  style={{ background: 'rgba(255,107,0,0.1)' }}
+                  style={{ background: 'rgba(0,212,255,0.1)' }}
                 >
                   <Icon size={14} className="text-[var(--trench-orange)]" />
                 </div>

@@ -23,7 +23,7 @@ function formatMcap(mcap: number): string {
 export function TradeCard({ tokenSymbol, tokenName, totalPnlPercent, transactions }: TradeCardProps) {
   const isWin = totalPnlPercent >= 0;
   return (
-    <div className="flex-shrink-0 w-[280px] snap-start flex items-start gap-3 p-3.5 cut-sm bg-[rgba(255,255,255,0.025)] backdrop-blur-sm border border-[rgba(255,107,0,0.08)] hover:border-[rgba(255,107,0,0.2)] transition-colors">
+    <div className="flex-shrink-0 w-[280px] snap-start flex items-start gap-3 p-3.5 cut-sm bg-[rgba(255,255,255,0.025)] backdrop-blur-sm border border-[rgba(0,212,255,0.08)] hover:border-[rgba(0,212,255,0.2)] transition-colors">
       <div
         className="w-12 h-12 rounded-full flex-shrink-0 flex items-center justify-center text-sm font-bold text-black"
         style={{

@@ -89,7 +89,7 @@ export default async function Image({ params }: { params: Promise<{ username: st
             left: 0,
             right: 0,
             height: 4,
-            background: 'linear-gradient(90deg, transparent, #FF6B00, transparent)',
+            background: 'linear-gradient(90deg, transparent, #00D4FF, transparent)',
           }}
         />
 
@@ -99,14 +99,14 @@ export default async function Image({ params }: { params: Promise<{ username: st
               width: 100,
               height: 100,
               borderRadius: '50%',
-              background: '#FF6B00',
+              background: '#00D4FF',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               fontSize: 40,
               fontWeight: 700,
               color: '#000',
-              border: '3px solid rgba(255,107,0,0.3)',
+              border: '3px solid rgba(0,212,255,0.3)',
             }}
           >
             {user.displayName.charAt(0).toUpperCase()}
@@ -125,7 +125,7 @@ export default async function Image({ params }: { params: Promise<{ username: st
             <div style={{ fontSize: 14, color: '#71717a', letterSpacing: 2 }}>TOTAL PnL</div>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <div style={{ fontSize: 42, fontWeight: 700, color: '#FF6B00' }}>
+            <div style={{ fontSize: 42, fontWeight: 700, color: '#00D4FF' }}>
               {winRate.toFixed(0)}%
             </div>
             <div style={{ fontSize: 14, color: '#71717a', letterSpacing: 2 }}>WIN RATE</div>
@@ -146,7 +146,7 @@ export default async function Image({ params }: { params: Promise<{ username: st
                   alignItems: 'center',
                   gap: 12,
                   background: 'rgba(255,255,255,0.03)',
-                  border: '1px solid rgba(255,107,0,0.12)',
+                  border: '1px solid rgba(0,212,255,0.12)',
                   padding: '12px 20px',
                 }}
               >
@@ -192,7 +192,7 @@ export default async function Image({ params }: { params: Promise<{ username: st
             bottom: 30,
             right: 60,
             fontSize: 16,
-            color: 'rgba(255,107,0,0.4)',
+            color: 'rgba(0,212,255,0.4)',
             letterSpacing: 4,
           }}
         >

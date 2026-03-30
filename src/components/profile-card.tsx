@@ -31,7 +31,7 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets }: Profi
   const hasWallets = wallets.length > 0;
   return (
     <div className="w-full max-w-[560px] mx-auto">
-      <div className="h-[2px]" style={{ background: 'linear-gradient(90deg, transparent, #FF6B00, transparent)' }} />
+      <div className="h-[2px]" style={{ background: 'linear-gradient(90deg, transparent, #00D4FF, transparent)' }} />
       <div className="glass cut-md overflow-hidden">
         <ProfileHeader avatarUrl={user.avatarUrl} displayName={user.displayName} username={user.username} bio={user.bio} verified={hasWallets} />
         {stats.totalTrades > 0 && <StatsStrip totalPnlUsd={stats.totalPnlUsd} winRate={stats.winRate} totalTrades={stats.totalTrades} />}
@@ -43,7 +43,7 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets }: Profi
         <TradeCarousel trades={pinnedTrades} />
         <WalletChips wallets={wallets} />
         <div className="text-center py-3.5 border-t border-[rgba(255,255,255,0.03)]">
-          <span className="text-[9px] text-[rgba(255,107,0,0.4)] tracking-[2px] font-mono">TRENCH ID</span>
+          <span className="text-[9px] text-[rgba(0,212,255,0.4)] tracking-[2px] font-mono">TRENCH ID</span>
         </div>
       </div>
     </div>

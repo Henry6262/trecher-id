@@ -18,7 +18,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         loginMethods: ['twitter'],
         appearance: {
           theme: 'dark',
-          accentColor: '#FF6B00',
+          accentColor: '#00D4FF',
         },
         embeddedWallets: {
           ethereum: { createOnLogin: 'off' },
