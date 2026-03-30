@@ -33,21 +33,29 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets }: Profi
   const hasWallets = wallets.length > 0;
 
   return (
-    <div className="w-full max-w-[520px] mx-auto">
+    <div className="w-full max-w-[620px] mx-auto">
       {/* Logo centered above card */}
-      <div className="flex justify-center py-4">
-        <img src="/logo.png" alt="Trench ID" className="h-[52px] w-auto opacity-80" />
+      <div className="flex justify-center py-5">
+        <img src="/logo.png" alt="Trench ID" className="h-[64px] w-auto opacity-85" />
       </div>
 
       {/* Cyan accent line */}
       <div className="h-[2px]" style={{ background: 'linear-gradient(90deg, transparent, #00D4FF, transparent)' }} />
 
-      {/* Main glass card */}
-      <div className="glass rounded-lg">
+      {/* Main glass card — darker, stronger blur */}
+      <div
+        className="rounded-xl"
+        style={{
+          background: 'rgba(8, 12, 18, 0.75)',
+          backdropFilter: 'blur(24px)',
+          WebkitBackdropFilter: 'blur(24px)',
+          border: '1px solid rgba(0, 212, 255, 0.12)',
+        }}
+      >
         {/* Hero section with gradient */}
         <div className="relative">
           <div
-            className="absolute inset-0 pointer-events-none"
+            className="absolute inset-0 pointer-events-none rounded-t-xl"
             style={{ background: 'linear-gradient(180deg, rgba(0,212,255,0.06) 0%, transparent 60%)' }}
           />
           <ProfileHeader
@@ -84,8 +92,8 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets }: Profi
         <WalletChips wallets={wallets} />
 
         {/* Footer with logo */}
-        <div className="flex justify-center py-4 border-t border-[rgba(255,255,255,0.03)]">
-          <img src="/logo.png" alt="Trench ID" className="h-[28px] w-auto opacity-30" />
+        <div className="flex justify-center py-4 border-t border-[rgba(255,255,255,0.04)]">
+          <img src="/logo.png" alt="Trench ID" className="h-[32px] w-auto opacity-30" />
         </div>
       </div>
     </div>
