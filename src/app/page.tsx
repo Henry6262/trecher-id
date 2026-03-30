@@ -6,6 +6,7 @@ import { Check, Link2, BarChart3, Wallet } from 'lucide-react';
 import DecryptedText from '@/components/decrypted-text';
 import ShinyText from '@/components/shiny-text';
 import { TraderCarousel } from '@/components/trader-carousel';
+import { GlassCard } from '@/components/glass-card';
 
 const RisingLines = dynamic(() => import('@/components/rising-lines'), { ssr: false });
 
@@ -116,16 +117,9 @@ export default function LandingPage() {
           </div>
 
           {/* Mini profile preview on the right */}
-          <div
-            className="cut-sm hidden lg:block"
-            style={{
-              background: 'rgba(8,12,18,0.78)',
-              border: '1px solid rgba(0,212,255,0.12)',
-              padding: '20px',
-              transform: 'perspective(800px) rotateY(-3deg) rotateX(2deg)',
-              boxShadow: '0 20px 60px rgba(0,0,0,0.4), 0 0 40px rgba(0,212,255,0.08)',
-            }}
-          >
+          <div className="hidden lg:block" style={{ transform: 'perspective(800px) rotateY(-3deg) rotateX(2deg)' }}>
+          <GlassCard cut={12}>
+          <div style={{ padding: '20px' }}>
             <div className="flex gap-3 items-center mb-3">
               <div className="w-[52px] h-[52px] rounded-full overflow-hidden" style={{ border: '2px solid rgba(0,212,255,0.3)', boxShadow: '0 0 20px rgba(0,212,255,0.2)' }}>
                 <img src="https://unavatar.io/twitter/Cented7" alt="Cented" className="w-full h-full object-cover" />
@@ -168,6 +162,8 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
+          </GlassCard>
+          </div>
         </section>
 
         {/* Fading divider */}
@@ -188,11 +184,13 @@ export default function LandingPage() {
               { n: '02', title: 'Link your wallets', desc: 'Add Solana wallets. We fetch your real trading history from the blockchain.' },
               { n: '03', title: 'Share your link', desc: 'Add custom links, pin your best trades. Drop your Trench ID everywhere.' },
             ].map(step => (
-              <div key={step.n} className="cut-sm" style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(0,212,255,0.06)', padding: '20px' }}>
-                <div className="text-[28px] font-bold text-[var(--trench-accent)] mb-2">{step.n}</div>
-                <div className="text-[13px] font-bold text-white mb-1">{step.title}</div>
-                <div className="text-[10px] text-[var(--trench-text-muted)] leading-relaxed">{step.desc}</div>
-              </div>
+              <GlassCard key={step.n} cut={8} bg="rgba(8,12,18,0.7)">
+                <div style={{ padding: '20px' }}>
+                  <div className="text-[28px] font-bold text-[var(--trench-accent)] mb-2">{step.n}</div>
+                  <div className="text-[13px] font-bold text-white mb-1">{step.title}</div>
+                  <div className="text-[10px] text-[var(--trench-text-muted)] leading-relaxed">{step.desc}</div>
+                </div>
+              </GlassCard>
             ))}
           </div>
         </section>

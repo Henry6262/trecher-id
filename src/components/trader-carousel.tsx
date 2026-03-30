@@ -2,6 +2,7 @@
 
 import { useRef, useEffect, useState } from 'react';
 import { Check } from 'lucide-react';
+import { BorderGlow } from './border-glow';
 
 interface Trader {
   username: string;
@@ -55,15 +56,19 @@ export function TraderCarousel({ traders }: TraderCarouselProps) {
       onMouseLeave={() => setIsPaused(false)}
     >
       {items.map((t, i) => (
-        <a
+        <BorderGlow
           key={`${t.username}-${i}`}
+          className="flex-shrink-0 w-[260px] cursor-pointer"
+          backgroundColor="rgba(8,12,18,0.78)"
+          glowRadius={20}
+          glowIntensity={0.6}
+          edgeSensitivity={25}
+          fillOpacity={0.2}
+        >
+        <a
           href={`/${t.username}`}
-          className="flex-shrink-0 w-[260px] relative cursor-pointer group transition-all"
+          className="block relative group"
           style={{
-            background: 'rgba(8,12,18,0.75)',
-            backdropFilter: 'blur(16px)',
-            WebkitBackdropFilter: 'blur(16px)',
-            border: '1px solid rgba(0,212,255,0.1)',
             clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)',
           }}
         >
@@ -129,6 +134,7 @@ export function TraderCarousel({ traders }: TraderCarouselProps) {
             </div>
           </div>
         </a>
+        </BorderGlow>
       ))}
     </div>
   );
