@@ -29,25 +29,30 @@ export async function POST(req: Request) {
   const errors: string[] = [];
 
   for (const user of users) {
-    // Skip users who already have pinned trades
-    if (user.pinnedTrades.length > 0) {
+    // Clear existing pinned trades if requested
+    const clearExisting = searchParams.get('clear') === 'true';
+    if (user.pinnedTrades.length > 0 && !clearExisting) {
       results.push(`${user.displayName} — already has ${user.pinnedTrades.length} pinned trades, skipped`);
       continue;
+    }
+    if (clearExisting && user.pinnedTrades.length > 0) {
+      await prisma.pinnedTrade.deleteMany({ where: { userId: user.id } });
     }
 
     for (const wallet of user.wallets) {
       try {
         const swaps = await getWalletSwaps(wallet.address);
-        const trades = aggregateTradesByToken(swaps);
+        const trades = aggregateTradesByToken(swaps, wallet.address);
 
         if (trades.length === 0) {
           results.push(`${user.displayName} (${wallet.address.slice(0, 6)}...) — no trades found`);
           continue;
         }
 
-        // Pick the best trades (highest PnL %)
+        // Pick best trades by absolute PnL (winners first, then biggest movers)
         const bestTrades = trades
-          .filter(t => t.totalPnlPercent > 0)
+          .filter(t => t.transactions.length >= 1 && Math.abs(t.totalPnlSol) > 0.01)
+          .sort((a, b) => b.totalPnlPercent - a.totalPnlPercent)
           .slice(0, pinCount);
 
         for (let i = 0; i < bestTrades.length; i++) {

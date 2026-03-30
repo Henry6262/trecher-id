@@ -1,19 +1,13 @@
 'use client';
 
 import { PrivyProvider } from '@privy-io/react-auth';
-import { useEffect, useState } from 'react';
 
-const PRIVY_APP_ID = process.env.NEXT_PUBLIC_PRIVY_APP_ID;
+const PRIVY_APP_ID = process.env.NEXT_PUBLIC_PRIVY_APP_ID || 'placeholder';
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // During SSR / static generation, render children without Privy
-  if (!mounted || !PRIVY_APP_ID) {
+  // If no real Privy app ID, render children without provider
+  // This only happens if the env var is completely missing at build time
+  if (PRIVY_APP_ID === 'placeholder') {
     return <>{children}</>;
   }
 
