@@ -1,3 +1,5 @@
+import Image from 'next/image';
+import Link from 'next/link';
 import { ProfileHeader } from './profile-header';
 import { LinkItem } from './link-item';
 import { TradeCarousel } from './trade-carousel';
@@ -35,9 +37,16 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets }: Profi
     <div className="w-full max-w-[620px] mx-auto">
       {/* Logo — links to landing page */}
       <div className="flex justify-center pt-2 pb-5">
-        <a href="/" className="cursor-pointer">
-          <img src="/logo.png" alt="Trench ID" className="h-[80px] w-auto hover:opacity-80 transition-opacity" />
-        </a>
+        <Link href="/" className="cursor-pointer">
+          <Image
+            src="/logo.png"
+            alt="Trench ID"
+            width={320}
+            height={80}
+            className="h-[80px] w-auto transition-opacity hover:opacity-80"
+            priority
+          />
+        </Link>
       </div>
 
       {/* Accent line */}
@@ -87,9 +96,15 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets }: Profi
 
         {/* Footer */}
         <div className="flex justify-center py-3.5 border-t border-[rgba(0,212,255,0.06)]">
-          <a href="/" className="cursor-pointer">
-            <img src="/logo.png" alt="Trench ID" className="h-[28px] w-auto opacity-25 hover:opacity-40 transition-opacity" />
-          </a>
+          <Link href="/" className="cursor-pointer">
+            <Image
+              src="/logo.png"
+              alt="Trench ID"
+              width={112}
+              height={28}
+              className="h-[28px] w-auto opacity-25 transition-opacity hover:opacity-40"
+            />
+          </Link>
         </div>
       </CutCorner>
     </div>

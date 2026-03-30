@@ -13,7 +13,7 @@ interface Trader {
 }
 
 interface TraderCarouselProps {
-  traders: Trader[];
+  traders: readonly Trader[];
 }
 
 export function TraderCarousel({ traders }: TraderCarouselProps) {

@@ -1,6 +1,7 @@
 'use client';
 
 import { usePrivy } from '@privy-io/react-auth';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { useAuthStore } from '@/stores/auth';
@@ -33,7 +34,14 @@ export default function LoginPage() {
     <div className="min-h-screen relative flex items-center justify-center">
       <BackgroundLayer />
       <div className="relative z-10 text-center space-y-6">
-        <img src="/logo.png" alt="Trench ID" className="h-14 w-auto mx-auto" />
+        <Image
+          src="/logo.png"
+          alt="Trench ID"
+          width={224}
+          height={56}
+          className="h-14 w-auto mx-auto"
+          priority
+        />
         <p className="text-sm text-[var(--trench-text-muted)]">Your Web3 bio link. Backed by on-chain proof.</p>
         <CutButton onClick={login} size="lg">Sign in with X</CutButton>
       </div>
