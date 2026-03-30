@@ -29,35 +29,26 @@ const FEATURES = [
 export default function LandingPage() {
   return (
     <div className="min-h-screen relative" style={{ background: '#050508' }}>
-      {/* RisingLines background */}
-      <div className="fixed inset-0 opacity-70" style={{ zIndex: 0 }}>
+      {/* RisingLines — exact SuperMolt config, orange instead of blue */}
+      <div className="fixed inset-0 opacity-75" style={{ zIndex: 0 }}>
         <RisingLines
           color="#FF6B00"
           horizonColor="#FF6B00"
           haloColor="#FF8C33"
-          riseSpeed={0.06}
-          riseScale={8.0}
-          riseIntensity={1.5}
-          flowSpeed={0.2}
-          flowDensity={3.0}
-          flowIntensity={0.8}
-          horizonIntensity={0.5}
-          haloIntensity={2.5}
-          horizonHeight={-0.4}
-          circleScale={0.15}
-          scale={5.0}
-          brightness={1.0}
+          riseSpeed={0.08}
+          riseScale={10.0}
+          riseIntensity={1.3}
+          flowSpeed={0.15}
+          flowDensity={4.0}
+          flowIntensity={0.7}
+          horizonIntensity={0.9}
+          haloIntensity={7.5}
+          horizonHeight={-0.85}
+          circleScale={-0.5}
+          scale={6.5}
+          brightness={1.1}
         />
       </div>
-
-      {/* Vignette */}
-      <div
-        className="fixed inset-0 pointer-events-none"
-        style={{
-          zIndex: 1,
-          background: 'radial-gradient(ellipse at center, rgba(5,5,8,0.35) 0%, rgba(5,5,8,0.8) 65%, rgba(5,5,8,0.97) 100%)',
-        }}
-      />
 
       {/* Content */}
       <div className="relative flex flex-col items-center min-h-screen px-4" style={{ zIndex: 2 }}>
