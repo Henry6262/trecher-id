@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trench ID — Carousel Card Mockups</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+  :root {
+    --accent: #00D4FF;
+    --bg: #050508;
+    --text: #e4e4e7;
+    --text-muted: #71717a;
+    --green: #22c55e;
+    --red: #ef4444;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; padding: 40px 24px; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+
+  .section-label { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; font-weight: 700; }
+  .section-title { font-size: 24px; font-weight: 800; color: white; margin-bottom: 6px; }
+  .section-desc { font-size: 12px; color: var(--text-muted); margin-bottom: 32px; }
+  .variant-label { display: inline-block; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--bg); background: var(--accent); padding: 3px 10px; clip-path: polygon(3px 0, 100% 0, 100% calc(100% - 3px), calc(100% - 3px) 100%, 0 100%, 0 3px); margin-bottom: 12px; font-weight: 700; }
+
+  .cut-xs { clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px); }
+  .cut-sm { clip-path: polygon(7px 0, 100% 0, 100% calc(100% - 7px), calc(100% - 7px) 100%, 0 100%, 0 7px); }
+  .cut-md { clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); }
+
+  .glass {
+    background: rgba(8, 12, 18, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(0, 212, 255, 0.1);
+  }
+
+  .skew { transform: skewX(-4deg); }
+  .skew > * { transform: skewX(4deg); }
+
+  .card-row { display: flex; gap: 16px; overflow-x: auto; padding: 8px 0; }
+
+  /* ── Card A: Compact with trade pills ── */
+  .card-a {
+    width: 280px;
+    flex-shrink: 0;
+  }
+  .card-a .inner { padding: 16px; }
+
+  /* ── Card B: Wider with prominent stats ── */
+  .card-b {
+    width: 320px;
+    flex-shrink: 0;
+  }
+  .card-b .inner { padding: 18px; }
+
+  /* ── Card C: Full with trade rows ── */
+  .card-c {
+    width: 300px;
+    flex-shrink: 0;
+  }
+  .card-c .inner { padding: 16px; }
+
+  .avatar-ring {
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    border: 2px solid rgba(0, 212, 255, 0.25);
+    box-shadow: 0 0 16px rgba(0, 212, 255, 0.15);
+  }
+
+  .check { width: 14px; height: 14px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .check svg { width: 8px; height: 8px; }
+
+  .stat-pill {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(0,212,255,0.08);
+    transform: skewX(-4deg);
+  }
+  .stat-pill > * { transform: skewX(4deg); }
+
+  .trade-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 10px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(0,212,255,0.06);
+  }
+
+  .token-circle {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #111;
+    border: 1px solid rgba(0,212,255,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 7px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .sep { height: 40px; }
+</style>
+</head>
+<body>
+
+<div class="section-label">Carousel Cards</div>
+<div class="section-title">Pick your favorite layout</div>
+<div class="section-desc">Each card shows avatar, name, stats, and up to 3 winning trades. All use glassmorphism + cut-corners.</div>
+
+<!-- ═══ VARIANT A: Compact Trade Pills ═══ -->
+<div class="variant-label">A — Compact with Trade Pills</div>
+<p style="font-size:11px; color:var(--text-muted); margin-bottom:16px;">Tight layout. Stats as skewed pills. Trades as small token+pnl rows.</p>
+
+<div class="card-row">
+  <!-- Card 1 -->
+  <div class="card-a">
+    <div class="glass cut-md">
+      <div style="height:2px; background:linear-gradient(90deg, var(--accent), transparent 80%)"></div>
+      <div class="inner">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+          <div class="avatar-ring" style="width:44px; height:44px;">
+            <img src="https://unavatar.io/twitter/cented7" width="44" height="44" style="width:100%; height:100%; object-fit:cover;">
+          </div>
+          <div>
+            <div style="display:flex; align-items:center; gap:4px;">
+              <span style="font-size:13px; font-weight:700; color:white;">@cented7</span>
+              <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+            </div>
+            <span style="font-size:9px; color:var(--text-muted);">Cented</span>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:6px; margin-bottom:10px;">
+          <div class="stat-pill cut-xs">
+            <span class="mono" style="font-size:12px; font-weight:700; color:var(--green);">+$11.9K</span>
+            <span style="font-size:7px; letter-spacing:1px; color:var(--text-muted);">PnL</span>
+          </div>
+          <div class="stat-pill cut-xs">
+            <span class="mono" style="font-size:12px; font-weight:700; color:var(--accent);">60%</span>
+            <span style="font-size:7px; letter-spacing:1px; color:var(--text-muted);">Win</span>
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:4px;">
+          <div class="trade-row cut-xs">
+            <div style="display:flex; align-items:center; gap:6px;">
+              <div class="token-circle">AN</div>
+              <span style="font-size:10px; font-weight:700; color:white;">ANIME</span>
+            </div>
+            <span class="mono" style="font-size:10px; font-weight:700; color:var(--green);">+6,864%</span>
+          </div>
+          <div class="trade-row cut-xs">
+            <div style="display:flex; align-items:center; gap:6px;">
+              <div class="token-circle">MA</div>
+              <span style="font-size:10px; font-weight:700; color:white;">MASUKU</span>
+            </div>
+            <span class="mono" style="font-size:10px; font-weight:700; color:var(--green);">+748%</span>
+          </div>
+          <div class="trade-row cut-xs">
+            <div style="display:flex; align-items:center; gap:6px;">
+              <div class="token-circle">DR</div>
+              <span style="font-size:10px; font-weight:700; color:white;">Drill</span>
+            </div>
+            <span class="mono" style="font-size:10px; font-weight:700; color:var(--green);">+4,105%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 2 -->
+  <div class="card-a">
+    <div class="glass cut-md">
+      <div style="height:2px; background:linear-gradient(90deg, var(--accent), transparent 80%)"></div>
+      <div class="inner">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+          <div class="avatar-ring" style="width:44px; height:44px;">
+            <img src="https://unavatar.io/twitter/schoen_xyz" width="44" height="44" style="width:100%; height:100%; object-fit:cover;">
+          </div>
+          <div>
+            <div style="display:flex; align-items:center; gap:4px;">
+              <span style="font-size:13px; font-weight:700; color:white;">@schoen_xyz</span>
+              <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+            </div>
+            <span style="font-size:9px; color:var(--text-muted);">Schoen</span>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:6px; margin-bottom:10px;">
+          <div class="stat-pill cut-xs">
+            <span class="mono" style="font-size:12px; font-weight:700; color:var(--green);">+$9.0K</span>
+            <span style="font-size:7px; letter-spacing:1px; color:var(--text-muted);">PnL</span>
+          </div>
+          <div class="stat-pill cut-xs">
+            <span class="mono" style="font-size:12px; font-weight:700; color:var(--accent);">47%</span>
+            <span style="font-size:7px; letter-spacing:1px; color:var(--text-muted);">Win</span>
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:4px;">
+          <div class="trade-row cut-xs">
+            <div style="display:flex; align-items:center; gap:6px;">
+              <div class="token-circle">BA</div>
+              <span style="font-size:10px; font-weight:700; color:white;">Bandido</span>
+            </div>
+            <span class="mono" style="font-size:10px; font-weight:700; color:var(--green);">+1,159%</span>
+          </div>
+          <div class="trade-row cut-xs">
+            <div style="display:flex; align-items:center; gap:6px;">
+              <div class="token-circle">LE</div>
+              <span style="font-size:10px; font-weight:700; color:white;">LEGO</span>
+            </div>
+            <span class="mono" style="font-size:10px; font-weight:700; color:var(--green);">+975%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 3 - no trades -->
+  <div class="card-a">
+    <div class="glass cut-md">
+      <div style="height:2px; background:linear-gradient(90deg, var(--accent), transparent 80%)"></div>
+      <div class="inner">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+          <div class="avatar-ring" style="width:44px; height:44px;">
+            <img src="https://unavatar.io/twitter/imsheepsol" width="44" height="44" style="width:100%; height:100%; object-fit:cover;">
+          </div>
+          <div>
+            <div style="display:flex; align-items:center; gap:4px;">
+              <span style="font-size:13px; font-weight:700; color:white;">@imsheepsol</span>
+              <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+            </div>
+            <span style="font-size:9px; color:var(--text-muted);">Sheep</span>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:6px; margin-bottom:10px;">
+          <div class="stat-pill cut-xs">
+            <span class="mono" style="font-size:12px; font-weight:700; color:var(--green);">+$4.6K</span>
+            <span style="font-size:7px; letter-spacing:1px; color:var(--text-muted);">PnL</span>
+          </div>
+          <div class="stat-pill cut-xs">
+            <span class="mono" style="font-size:12px; font-weight:700; color:var(--accent);">82%</span>
+            <span style="font-size:7px; letter-spacing:1px; color:var(--text-muted);">Win</span>
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:4px;">
+          <div class="trade-row cut-xs">
+            <div style="display:flex; align-items:center; gap:6px;">
+              <div class="token-circle">GI</div>
+              <span style="font-size:10px; font-weight:700; color:white;">GIKO</span>
+            </div>
+            <span class="mono" style="font-size:10px; font-weight:700; color:var(--green);">+788%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="sep"></div>
+
+<!-- ═══ VARIANT B: Hero PnL + Horizontal Trade Chips ═══ -->
+<div class="variant-label">B — Hero PnL + Horizontal Trade Chips</div>
+<p style="font-size:11px; color:var(--text-muted); margin-bottom:16px;">Big PnL number front and center. Trades as horizontal chips below.</p>
+
+<div class="card-row">
+  <div class="card-b">
+    <div class="glass cut-md">
+      <div style="height:2px; background:linear-gradient(90deg, var(--accent), transparent 80%)"></div>
+      <div class="inner">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+          <div class="avatar-ring" style="width:40px; height:40px;">
+            <img src="https://unavatar.io/twitter/cented7" width="40" height="40" style="width:100%; height:100%; object-fit:cover;">
+          </div>
+          <div style="flex:1;">
+            <div style="display:flex; align-items:center; gap:4px;">
+              <span style="font-size:13px; font-weight:700; color:white;">@cented7</span>
+              <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+            </div>
+            <span style="font-size:9px; color:var(--text-muted);">Cented · 144 trades</span>
+          </div>
+          <span class="mono" style="font-size:10px; color:var(--accent);">60%</span>
+        </div>
+
+        <!-- Hero PnL -->
+        <div style="text-align:center; padding:10px 0 8px; margin-bottom:10px; background:linear-gradient(135deg, rgba(34,197,94,0.06), transparent); clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px);">
+          <div class="mono" style="font-size:24px; font-weight:800; color:var(--green); text-shadow:0 0 20px rgba(34,197,94,0.2);">+$11,934</div>
+          <div style="font-size:7px; letter-spacing:2px; color:var(--text-muted); margin-top:2px;">TOTAL PnL</div>
+        </div>
+
+        <!-- Trade chips -->
+        <div style="display:flex; gap:4px; flex-wrap:wrap;">
+          <div class="cut-xs" style="display:flex; align-items:center; gap:4px; padding:4px 8px; background:rgba(34,197,94,0.06); border:1px solid rgba(34,197,94,0.12);">
+            <span style="font-size:9px; font-weight:600; color:white;">ANIME</span>
+            <span class="mono" style="font-size:9px; font-weight:700; color:var(--green);">+6.8K%</span>
+          </div>
+          <div class="cut-xs" style="display:flex; align-items:center; gap:4px; padding:4px 8px; background:rgba(34,197,94,0.06); border:1px solid rgba(34,197,94,0.12);">
+            <span style="font-size:9px; font-weight:600; color:white;">Drill</span>
+            <span class="mono" style="font-size:9px; font-weight:700; color:var(--green);">+4.1K%</span>
+          </div>
+          <div class="cut-xs" style="display:flex; align-items:center; gap:4px; padding:4px 8px; background:rgba(34,197,94,0.06); border:1px solid rgba(34,197,94,0.12);">
+            <span style="font-size:9px; font-weight:600; color:white;">MASUKU</span>
+            <span class="mono" style="font-size:9px; font-weight:700; color:var(--green);">+748%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-b">
+    <div class="glass cut-md">
+      <div style="height:2px; background:linear-gradient(90deg, var(--accent), transparent 80%)"></div>
+      <div class="inner">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+          <div class="avatar-ring" style="width:40px; height:40px;">
+            <img src="https://unavatar.io/twitter/theonomix" width="40" height="40" style="width:100%; height:100%; object-fit:cover;">
+          </div>
+          <div style="flex:1;">
+            <div style="display:flex; align-items:center; gap:4px;">
+              <span style="font-size:13px; font-weight:700; color:white;">@theonomix</span>
+              <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+            </div>
+            <span style="font-size:9px; color:var(--text-muted);">theo · 140 trades</span>
+          </div>
+          <span class="mono" style="font-size:10px; color:var(--accent);">44%</span>
+        </div>
+
+        <div style="text-align:center; padding:10px 0 8px; margin-bottom:10px; background:linear-gradient(135deg, rgba(34,197,94,0.06), transparent); clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px);">
+          <div class="mono" style="font-size:24px; font-weight:800; color:var(--green); text-shadow:0 0 20px rgba(34,197,94,0.2);">+$7,152</div>
+          <div style="font-size:7px; letter-spacing:2px; color:var(--text-muted); margin-top:2px;">TOTAL PnL</div>
+        </div>
+
+        <div style="display:flex; gap:4px; flex-wrap:wrap;">
+          <div class="cut-xs" style="display:flex; align-items:center; gap:4px; padding:4px 8px; background:rgba(34,197,94,0.06); border:1px solid rgba(34,197,94,0.12);">
+            <span style="font-size:9px; font-weight:600; color:white;">simulator</span>
+            <span class="mono" style="font-size:9px; font-weight:700; color:var(--green);">+1.1K%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="sep"></div>
+
+<!-- ═══ VARIANT C: Minimal with accent bar + large trades ═══ -->
+<div class="variant-label">C — Minimal + Large Trade Rows</div>
+<p style="font-size:11px; color:var(--text-muted); margin-bottom:16px;">Clean minimal header. Bigger trade rows with buy/sell data. More spacious.</p>
+
+<div class="card-row">
+  <div class="card-c">
+    <div class="glass cut-md">
+      <div style="height:3px; background:linear-gradient(90deg, var(--accent), transparent 70%)"></div>
+      <div class="inner">
+        <!-- Profile row compact -->
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div class="avatar-ring" style="width:38px; height:38px;">
+              <img src="https://unavatar.io/twitter/cented7" width="38" height="38" style="width:100%; height:100%; object-fit:cover;">
+            </div>
+            <div>
+              <div style="display:flex; align-items:center; gap:4px;">
+                <span style="font-size:12px; font-weight:700; color:white;">@cented7</span>
+                <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+              </div>
+              <span style="font-size:8px; color:var(--text-muted);">144 trades · 60% win</span>
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div class="mono" style="font-size:14px; font-weight:800; color:var(--green);">+$11.9K</div>
+            <div style="font-size:6px; letter-spacing:1px; color:var(--text-muted);">PnL</div>
+          </div>
+        </div>
+
+        <!-- Trade rows — larger, with buy/sell -->
+        <div style="display:flex; flex-direction:column; gap:6px;">
+          <div class="cut-xs" style="padding:8px 10px; background:rgba(255,255,255,0.03); border:1px solid rgba(0,212,255,0.06);">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+              <div style="display:flex; align-items:center; gap:6px;">
+                <div class="token-circle">AN</div>
+                <span style="font-size:11px; font-weight:700; color:white;">ANIME</span>
+              </div>
+              <span class="mono" style="font-size:12px; font-weight:800; color:var(--green);">+6,864%</span>
+            </div>
+            <div style="display:flex; gap:6px;">
+              <div class="cut-xs" style="flex:1; display:flex; justify-content:space-between; font-size:7px; padding:2px 6px; background:rgba(0,212,255,0.02);">
+                <span style="color:var(--green); font-weight:600;">BUY</span>
+                <span class="mono" style="color:var(--text);">0.5 SOL</span>
+              </div>
+              <div class="cut-xs" style="flex:1; display:flex; justify-content:space-between; font-size:7px; padding:2px 6px; background:rgba(0,212,255,0.02);">
+                <span style="color:var(--red); font-weight:600;">SELL</span>
+                <span class="mono" style="color:var(--green);">34.2 SOL</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="cut-xs" style="padding:8px 10px; background:rgba(255,255,255,0.03); border:1px solid rgba(0,212,255,0.06);">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+              <div style="display:flex; align-items:center; gap:6px;">
+                <div class="token-circle">DR</div>
+                <span style="font-size:11px; font-weight:700; color:white;">Drill</span>
+              </div>
+              <span class="mono" style="font-size:12px; font-weight:800; color:var(--green);">+4,105%</span>
+            </div>
+            <div style="display:flex; gap:6px;">
+              <div class="cut-xs" style="flex:1; display:flex; justify-content:space-between; font-size:7px; padding:2px 6px; background:rgba(0,212,255,0.02);">
+                <span style="color:var(--green); font-weight:600;">BUY</span>
+                <span class="mono" style="color:var(--text);">0.4 SOL</span>
+              </div>
+              <div class="cut-xs" style="flex:1; display:flex; justify-content:space-between; font-size:7px; padding:2px 6px; background:rgba(0,212,255,0.02);">
+                <span style="color:var(--red); font-weight:600;">SELL</span>
+                <span class="mono" style="color:var(--green);">16.7 SOL</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="cut-xs" style="padding:8px 10px; background:rgba(255,255,255,0.03); border:1px solid rgba(0,212,255,0.06);">
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+              <div style="display:flex; align-items:center; gap:6px;">
+                <div class="token-circle">MA</div>
+                <span style="font-size:11px; font-weight:700; color:white;">MASUKU</span>
+              </div>
+              <span class="mono" style="font-size:12px; font-weight:800; color:var(--green);">+748%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-c">
+    <div class="glass cut-md">
+      <div style="height:3px; background:linear-gradient(90deg, var(--accent), transparent 70%)"></div>
+      <div class="inner">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div class="avatar-ring" style="width:38px; height:38px;">
+              <img src="https://unavatar.io/twitter/nyhrox" width="38" height="38" style="width:100%; height:100%; object-fit:cover;">
+            </div>
+            <div>
+              <div style="display:flex; align-items:center; gap:4px;">
+                <span style="font-size:12px; font-weight:700; color:white;">@nyhrox</span>
+                <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+              </div>
+              <span style="font-size:8px; color:var(--text-muted);">17 trades · 47% win</span>
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div class="mono" style="font-size:14px; font-weight:800; color:var(--green);">+$1.3K</div>
+            <div style="font-size:6px; letter-spacing:1px; color:var(--text-muted);">PnL</div>
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:6px;">
+          <div class="cut-xs" style="padding:8px 10px; background:rgba(255,255,255,0.03); border:1px solid rgba(0,212,255,0.06);">
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+              <div style="display:flex; align-items:center; gap:6px;">
+                <div class="token-circle">BR</div>
+                <span style="font-size:11px; font-weight:700; color:white;">BRR</span>
+              </div>
+              <span class="mono" style="font-size:12px; font-weight:800; color:var(--green);">+570%</span>
+            </div>
+          </div>
+          <div class="cut-xs" style="padding:8px 10px; background:rgba(255,255,255,0.03); border:1px solid rgba(0,212,255,0.06);">
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+              <div style="display:flex; align-items:center; gap:6px;">
+                <div class="token-circle">DE</div>
+                <span style="font-size:11px; font-weight:700; color:white;">Delusional</span>
+              </div>
+              <span class="mono" style="font-size:12px; font-weight:800; color:var(--green);">+533%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="text-align:center; padding:40px; font-size:9px; letter-spacing:2px; color:var(--text-muted);" class="mono">PICK A, B, OR C · MIX ELEMENTS IF YOU WANT</div>
+
+</body>
+</html>
