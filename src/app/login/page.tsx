@@ -15,19 +15,36 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!ready || !authenticated) return;
-    (async () => {
+    let attempts = 0;
+    const tryLogin = async () => {
       const token = await getAccessToken();
       if (!token) return;
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        const { user } = await res.json();
-        setUser(user);
-        router.push('/dashboard');
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.ok) {
+          const { user } = await res.json();
+          setUser(user);
+          router.push('/dashboard');
+        } else {
+          console.error('Login API error:', res.status, await res.text());
+          // Retry up to 2 times (DB cold start)
+          if (attempts < 2) {
+            attempts++;
+            setTimeout(tryLogin, 2000);
+          }
+        }
+      } catch (err) {
+        console.error('Login fetch error:', err);
+        if (attempts < 2) {
+          attempts++;
+          setTimeout(tryLogin, 2000);
+        }
       }
-    })();
+    };
+    tryLogin();
   }, [ready, authenticated, getAccessToken, setUser, router]);
 
   return (
