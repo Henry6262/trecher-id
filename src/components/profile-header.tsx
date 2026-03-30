@@ -31,7 +31,7 @@ export function ProfileHeader({ avatarUrl, displayName, username, bio, verified 
         {bio && <p className="text-[12px] text-[var(--trench-text-muted)] mt-0.5 leading-snug">{bio}</p>}
         {verified && (
           <span
-            className="inline-flex items-center gap-1 text-[9px] text-[var(--trench-accent)] px-2 py-0.5 mt-1.5 tracking-[1px] rounded-sm"
+            className="inline-flex items-center gap-1 text-[9px] text-[var(--trench-accent)] px-2 py-0.5 mt-1.5 tracking-[1px] cut-xs"
             style={{ background: 'rgba(0,212,255,0.08)', border: '1px solid rgba(0,212,255,0.15)' }}
           >
             <Check size={10} strokeWidth={3} />

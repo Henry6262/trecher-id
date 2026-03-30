@@ -34,29 +34,21 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets }: Profi
 
   return (
     <div className="w-full max-w-[620px] mx-auto">
-      {/* Logo centered above card */}
-      <div className="flex justify-center py-5">
-        <img src="/logo.png" alt="Trench ID" className="h-[64px] w-auto opacity-85" />
+      {/* Logo — big, centered, above card */}
+      <div className="flex justify-center pt-2 pb-6">
+        <img src="/logo.png" alt="Trench ID" className="h-[80px] w-auto" />
       </div>
 
       {/* Cyan accent line */}
-      <div className="h-[2px]" style={{ background: 'linear-gradient(90deg, transparent, #00D4FF, transparent)' }} />
+      <div className="h-[2px] mb-[1px]" style={{ background: 'linear-gradient(90deg, transparent, #00D4FF, transparent)' }} />
 
-      {/* Main glass card — darker, stronger blur */}
-      <div
-        className="rounded-xl"
-        style={{
-          background: 'rgba(8, 12, 18, 0.75)',
-          backdropFilter: 'blur(24px)',
-          WebkitBackdropFilter: 'blur(24px)',
-          border: '1px solid rgba(0, 212, 255, 0.12)',
-        }}
-      >
-        {/* Hero section with gradient */}
+      {/* Main card — cut corners, dark glass */}
+      <div className="glass cut-lg">
+        {/* Hero gradient overlay */}
         <div className="relative">
           <div
-            className="absolute inset-0 pointer-events-none rounded-t-xl"
-            style={{ background: 'linear-gradient(180deg, rgba(0,212,255,0.06) 0%, transparent 60%)' }}
+            className="absolute inset-0 pointer-events-none"
+            style={{ background: 'linear-gradient(180deg, rgba(0,212,255,0.05) 0%, transparent 50%)' }}
           />
           <ProfileHeader
             avatarUrl={user.avatarUrl}
@@ -67,7 +59,7 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets }: Profi
           />
         </div>
 
-        {/* Stats in individual glass cards */}
+        {/* Stats */}
         {stats.totalTrades > 0 && (
           <StatsStrip
             totalPnlUsd={stats.totalPnlUsd}
@@ -76,7 +68,7 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets }: Profi
           />
         )}
 
-        {/* Custom links */}
+        {/* Links */}
         {links.length > 0 && (
           <div className="flex flex-col gap-1.5 px-5 py-4">
             {links.map((link) => (
@@ -85,15 +77,15 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets }: Profi
           </div>
         )}
 
-        {/* Pinned trades carousel */}
+        {/* Trades */}
         <TradeCarousel trades={pinnedTrades} />
 
-        {/* Verified wallets */}
+        {/* Wallets */}
         <WalletChips wallets={wallets} />
 
-        {/* Footer with logo */}
-        <div className="flex justify-center py-4 border-t border-[rgba(255,255,255,0.04)]">
-          <img src="/logo.png" alt="Trench ID" className="h-[32px] w-auto opacity-30" />
+        {/* Footer */}
+        <div className="flex justify-center py-4 border-t border-[rgba(0,212,255,0.06)]">
+          <img src="/logo.png" alt="Trench ID" className="h-[36px] w-auto opacity-25" />
         </div>
       </div>
     </div>

@@ -130,13 +130,14 @@
   clip-path: polygon(18px 0, 100% 0, 100% calc(100% - 18px), calc(100% - 18px) 100%, 0 100%, 0 18px);
 }
 
-/* ─── Glassmorphism utility ───────────────────────────────── */
+/* ─── Glassmorphism utility (dark glass, no border-radius) ── */
 .glass {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(0, 212, 255, 0.12);
-  border-radius: 8px;
+  background: rgba(8, 12, 18, 0.78);
+  border: 1px solid rgba(0, 212, 255, 0.1);
+}
+.glass-inner {
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(0, 212, 255, 0.08);
 }
 
 /* ─── Animated background ────────────────────────────────── */

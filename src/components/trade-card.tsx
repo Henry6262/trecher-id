@@ -20,8 +20,7 @@ export function TradeCard({ tokenSymbol, tokenName, tokenImage, totalPnlPercent,
   const isWin = totalPnlPercent >= 0;
 
   return (
-    <div className="flex-shrink-0 w-[240px] snap-start flex items-start gap-3 p-3.5 rounded-md backdrop-blur-md border border-[rgba(0,212,255,0.08)] hover:border-[rgba(0,212,255,0.2)] transition-colors"
-      style={{ background: 'rgba(255,255,255,0.04)' }}
+    <div className="flex-shrink-0 w-[240px] snap-start flex items-start gap-3 p-3.5 cut-sm glass-inner hover:border-[rgba(0,212,255,0.2)] transition-colors"
     >
       {/* Token image or fallback */}
       <div
@@ -64,7 +63,7 @@ export function TradeCard({ tokenSymbol, tokenName, tokenImage, totalPnlPercent,
         {/* Transactions */}
         <div className="flex flex-col gap-1">
           {transactions.slice(0, 4).map((tx, i) => (
-            <div key={i} className="flex justify-between items-center text-[9px] px-1.5 py-1 rounded-sm backdrop-blur-sm" style={{ background: 'rgba(0,212,255,0.03)' }}>
+            <div key={i} className="flex justify-between items-center text-[9px] px-1.5 py-1 cut-xs" style={{ background: 'rgba(0,212,255,0.03)' }}>
               <span className={`font-semibold tracking-wide ${tx.type === 'BUY' ? 'text-[var(--trench-green)]' : 'text-[var(--trench-red)]'}`}>
                 {tx.type}
               </span>
