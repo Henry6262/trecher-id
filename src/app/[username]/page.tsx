@@ -91,9 +91,9 @@ export default async function ProfilePage({ params }: Props) {
   }));
 
   return (
-    <div className="min-h-screen relative">
+    <div className="min-h-screen relative" style={{ background: 'transparent' }}>
       <BackgroundLayer />
-      <div className="relative z-10 py-10 px-4">
+      <div className="relative py-10 px-4" style={{ zIndex: 1 }}>
         <ProfileCard
           user={{
             username: user.username,

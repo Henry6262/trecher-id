@@ -8,20 +8,24 @@ interface StatsStripProps {
 
 export function StatsStrip({ totalPnlUsd, winRate, totalTrades }: StatsStripProps) {
   return (
-    <div className="flex justify-around py-3.5 px-6 border-t border-b border-[var(--trench-border-subtle)]">
-      <div className="text-center">
-        <div className={`text-[15px] font-bold font-mono ${totalPnlUsd >= 0 ? 'text-[var(--trench-green)]' : 'text-[var(--trench-red)]'}`}>
+    <div className="grid grid-cols-3 gap-2 px-5 pb-4">
+      <div className="cut-sm text-center py-3 px-2" style={{ background: 'rgba(0,212,255,0.03)', border: '1px solid rgba(0,212,255,0.06)' }}>
+        <div className={`text-lg font-bold font-mono ${totalPnlUsd >= 0 ? 'text-[var(--trench-green)]' : 'text-[var(--trench-red)]'}`}>
           {formatPnl(totalPnlUsd)}
         </div>
-        <div className="text-[8px] text-[var(--trench-text-muted)] tracking-[1px] mt-0.5">TOTAL PnL</div>
+        <div className="text-[8px] text-[var(--trench-text-muted)] tracking-[1.5px] mt-0.5">TOTAL PnL</div>
       </div>
-      <div className="text-center">
-        <div className="text-[15px] font-bold font-mono text-[var(--trench-accent)]">{winRate.toFixed(0)}%</div>
-        <div className="text-[8px] text-[var(--trench-text-muted)] tracking-[1px] mt-0.5">WIN RATE</div>
+      <div className="cut-sm text-center py-3 px-2" style={{ background: 'rgba(0,212,255,0.03)', border: '1px solid rgba(0,212,255,0.06)' }}>
+        <div className="text-lg font-bold font-mono text-[var(--trench-accent)]">
+          {winRate.toFixed(0)}%
+        </div>
+        <div className="text-[8px] text-[var(--trench-text-muted)] tracking-[1.5px] mt-0.5">WIN RATE</div>
       </div>
-      <div className="text-center">
-        <div className="text-[15px] font-bold font-mono text-[var(--trench-text)]">{totalTrades}</div>
-        <div className="text-[8px] text-[var(--trench-text-muted)] tracking-[1px] mt-0.5">TRADES</div>
+      <div className="cut-sm text-center py-3 px-2" style={{ background: 'rgba(0,212,255,0.03)', border: '1px solid rgba(0,212,255,0.06)' }}>
+        <div className="text-lg font-bold font-mono text-[var(--trench-text)]">
+          {totalTrades}
+        </div>
+        <div className="text-[8px] text-[var(--trench-text-muted)] tracking-[1.5px] mt-0.5">TRADES</div>
       </div>
     </div>
   );
