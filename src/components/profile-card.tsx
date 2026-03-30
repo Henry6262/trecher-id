@@ -1,5 +1,4 @@
 import { ProfileHeader } from './profile-header';
-import { StatsStrip } from './stats-strip';
 import { LinkItem } from './link-item';
 import { TradeCarousel } from './trade-carousel';
 import { WalletChips } from './wallet-chips';
@@ -34,58 +33,51 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets }: Profi
 
   return (
     <div className="w-full max-w-[620px] mx-auto">
-      {/* Logo — big, centered, above card */}
-      <div className="flex justify-center pt-2 pb-6">
+      {/* Logo */}
+      <div className="flex justify-center pt-2 pb-5">
         <img src="/logo.png" alt="Trench ID" className="h-[80px] w-auto" />
       </div>
 
-      {/* Cyan accent line */}
-      <div className="h-[2px] mb-[1px]" style={{ background: 'linear-gradient(90deg, transparent, #00D4FF, transparent)' }} />
+      {/* Accent line */}
+      <div className="h-[2px]" style={{ background: 'linear-gradient(90deg, transparent, #00D4FF, transparent)' }} />
 
-      {/* Main card — cut corners, dark glass */}
+      {/* Main card */}
       <div className="glass cut-lg">
-        {/* Hero gradient overlay */}
-        <div className="relative">
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{ background: 'linear-gradient(180deg, rgba(0,212,255,0.05) 0%, transparent 50%)' }}
-          />
-          <ProfileHeader
-            avatarUrl={user.avatarUrl}
-            displayName={user.displayName}
-            username={user.username}
-            bio={user.bio}
-            verified={hasWallets}
-          />
+        {/* Hero — full width */}
+        <ProfileHeader
+          avatarUrl={user.avatarUrl}
+          displayName={user.displayName}
+          username={user.username}
+          bio={user.bio}
+          verified={hasWallets}
+          stats={stats}
+        />
+
+        {/* Content section — more margin */}
+        <div className="px-8 pb-5">
+          {/* Links */}
+          {links.length > 0 && (
+            <div className="flex flex-col gap-1.5 mb-4">
+              {links.map((link) => (
+                <LinkItem key={link.id} title={link.title} url={link.url} icon={link.icon} />
+              ))}
+            </div>
+          )}
+
+          {/* Trades */}
+          {pinnedTrades.length > 0 && (
+            <div className="mb-4">
+              <TradeCarousel trades={pinnedTrades} />
+            </div>
+          )}
+
+          {/* Wallets */}
+          <WalletChips wallets={wallets} />
         </div>
 
-        {/* Stats */}
-        {stats.totalTrades > 0 && (
-          <StatsStrip
-            totalPnlUsd={stats.totalPnlUsd}
-            winRate={stats.winRate}
-            totalTrades={stats.totalTrades}
-          />
-        )}
-
-        {/* Links */}
-        {links.length > 0 && (
-          <div className="flex flex-col gap-1.5 px-5 py-4">
-            {links.map((link) => (
-              <LinkItem key={link.id} title={link.title} url={link.url} icon={link.icon} />
-            ))}
-          </div>
-        )}
-
-        {/* Trades */}
-        <TradeCarousel trades={pinnedTrades} />
-
-        {/* Wallets */}
-        <WalletChips wallets={wallets} />
-
         {/* Footer */}
-        <div className="flex justify-center py-4 border-t border-[rgba(0,212,255,0.06)]">
-          <img src="/logo.png" alt="Trench ID" className="h-[36px] w-auto opacity-25" />
+        <div className="flex justify-center py-3.5 border-t border-[rgba(0,212,255,0.06)]">
+          <img src="/logo.png" alt="Trench ID" className="h-[28px] w-auto opacity-25" />
         </div>
       </div>
     </div>
