@@ -107,28 +107,32 @@ export function ProfileHeader({ avatarUrl, displayName, username, bio, verified,
           {/* Bio */}
           {bio && <p className="text-[11px] text-[var(--trench-text-muted)] mb-3 leading-snug">{bio}</p>}
 
-          {/* Stats — compact inline row, not big cards */}
+          {/* Stats — skewed / lean / containers */}
           {stats && stats.totalTrades > 0 && (
-            <div className="flex items-center gap-4">
-              <div className="flex items-baseline gap-1">
+            <div className="flex items-center gap-2">
+              <div
+                className="skew-container glass-inner flex items-center gap-2 px-3 py-1.5"
+              >
                 <span className={`text-[13px] font-bold font-mono ${stats.totalPnlUsd >= 0 ? 'text-[var(--trench-green)]' : 'text-[var(--trench-red)]'}`}>
                   {formatPnl(stats.totalPnlUsd)}
                 </span>
-                <span className="text-[8px] text-[var(--trench-text-muted)] tracking-[1px]">PnL</span>
+                <span className="text-[7px] text-[var(--trench-text-muted)] tracking-[1px] uppercase">PnL</span>
               </div>
-              <div style={{ width: '1px', height: '14px', background: 'rgba(0,212,255,0.1)' }} />
-              <div className="flex items-baseline gap-1">
+              <div
+                className="skew-container glass-inner flex items-center gap-2 px-3 py-1.5"
+              >
                 <span className="text-[13px] font-bold font-mono text-[var(--trench-accent)]">
                   {stats.winRate.toFixed(0)}%
                 </span>
-                <span className="text-[8px] text-[var(--trench-text-muted)] tracking-[1px]">WIN</span>
+                <span className="text-[7px] text-[var(--trench-text-muted)] tracking-[1px] uppercase">Win</span>
               </div>
-              <div style={{ width: '1px', height: '14px', background: 'rgba(0,212,255,0.1)' }} />
-              <div className="flex items-baseline gap-1">
+              <div
+                className="skew-container glass-inner flex items-center gap-2 px-3 py-1.5"
+              >
                 <span className="text-[13px] font-bold font-mono text-[var(--trench-text)]">
                   {stats.totalTrades}
                 </span>
-                <span className="text-[8px] text-[var(--trench-text-muted)] tracking-[1px]">TRADES</span>
+                <span className="text-[7px] text-[var(--trench-text-muted)] tracking-[1px] uppercase">Trades</span>
               </div>
             </div>
           )}

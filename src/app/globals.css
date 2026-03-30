@@ -130,6 +130,14 @@
   clip-path: polygon(18px 0, 100% 0, 100% calc(100% - 18px), calc(100% - 18px) 100%, 0 100%, 0 18px);
 }
 
+/* ─── Skew / lean containers  / text /  ──────────────────── */
+.skew-container {
+  transform: skewX(-4deg);
+}
+.skew-container > * {
+  transform: skewX(4deg);
+}
+
 /* ─── Glassmorphism utility (dark glass, no border-radius) ── */
 .glass {
   position: relative;
