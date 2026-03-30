@@ -43,7 +43,7 @@ const STEPS = [
 export function LandingContent({ traders, featured, traderCount, totalPnl }: LandingContentProps) {
   return (
     <div className="relative min-h-screen" style={{ background: '#050508' }}>
-      <div className="fixed inset-0 opacity-75" style={{ zIndex: 0 }}>
+      <div className="fixed inset-0 opacity-75" style={{ zIndex: 0, background: 'radial-gradient(ellipse at 50% 100%, rgba(0,212,255,0.06) 0%, #050508 60%)' }}>
         <RisingLines
           color="#00D4FF" horizonColor="#00D4FF" haloColor="#33DDFF"
           riseSpeed={0.08} riseScale={10} riseIntensity={1.3}
@@ -205,7 +205,7 @@ export function LandingContent({ traders, featured, traderCount, totalPnl }: Lan
         </div>
 
         {/* How it works */}
-        <section className="mx-auto max-w-[900px] px-6 py-16">
+        <section className="mx-auto max-w-[900px] px-6 py-16 text-center">
           <h2 className="mb-2 text-2xl font-bold text-white">How it <span className="text-[var(--trench-accent)]">works</span></h2>
           <p className="mb-8 text-[12px] text-[var(--trench-text-muted)]">Three steps. Thirty seconds. Zero cost.</p>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -256,11 +256,6 @@ export function LandingContent({ traders, featured, traderCount, totalPnl }: Lan
           </div>
           <TraderCarousel traders={traders} />
         </section>
-
-        {/* Divider */}
-        <div className="mx-auto max-w-[900px] px-6">
-          <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.1), transparent)' }} />
-        </div>
 
         {/* Bottom CTA — Cinematic Full-Bleed */}
         <section className="relative text-center py-20 px-6">
