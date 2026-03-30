@@ -37,12 +37,42 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { username } = await params;
   const user = await prisma.user.findUnique({
     where: { username },
-    select: { displayName: true, bio: true },
+    include: { wallets: true },
   });
   if (!user) return { title: 'Not Found' };
+
+  let totalPnlUsd = 0;
+  let totalWinRate = 0;
+  let winRateCount = 0;
+  let totalTrades = 0;
+  for (const w of user.wallets) {
+    totalPnlUsd += w.totalPnlUsd ?? 0;
+    totalTrades += w.totalTrades ?? 0;
+    if (w.winRate != null) { totalWinRate += w.winRate; winRateCount++; }
+  }
+  const winRate = winRateCount > 0 ? totalWinRate / winRateCount : 0;
+  const pnlStr = totalPnlUsd >= 1000
+    ? `$${(totalPnlUsd / 1000).toFixed(1)}K`
+    : `$${totalPnlUsd.toFixed(0)}`;
+
+  const description = `${pnlStr} PnL · ${winRate.toFixed(0)}% Win Rate · ${totalTrades} Trades${user.bio ? ` — ${user.bio}` : ''}`;
+  const title = `@${username} — Trench ID`;
+
   return {
-    title: `@${username} — Trench ID`,
-    description: user.bio ?? `${user.displayName}'s Web3 bio link`,
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: 'profile',
+      url: `/${username}`,
+      siteName: 'Trench ID',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+    },
   };
 }
 

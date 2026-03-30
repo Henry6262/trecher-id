@@ -94,25 +94,23 @@ export default async function Image({ params }: { params: Promise<{ username: st
         />
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 24, marginBottom: 40 }}>
-          <div
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={user.avatarUrl || `https://unavatar.io/twitter/${user.username}`}
+            alt=""
+            width={100}
+            height={100}
             style={{
               width: 100,
               height: 100,
               borderRadius: '50%',
-              background: '#00D4FF',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: 40,
-              fontWeight: 700,
-              color: '#000',
-              border: '3px solid rgba(0,212,255,0.3)',
+              border: '3px solid rgba(0,212,255,0.4)',
+              objectFit: 'cover',
             }}
-          >
-            {user.displayName.charAt(0).toUpperCase()}
-          </div>
+          />
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <div style={{ fontSize: 36, fontWeight: 700, color: '#e4e4e7' }}>@{user.username}</div>
+            <div style={{ fontSize: 16, color: '#71717a', marginTop: 4 }}>{user.displayName}</div>
             {user.bio && (
               <div style={{ fontSize: 18, color: '#71717a', marginTop: 4 }}>{user.bio}</div>
             )}
