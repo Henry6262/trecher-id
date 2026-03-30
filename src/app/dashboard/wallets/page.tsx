@@ -78,7 +78,7 @@ export default function WalletsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-mono font-bold text-[var(--trench-orange)] tracking-wide">
+        <h1 className="text-xl font-mono font-bold text-[var(--trench-accent)] tracking-wide">
           WALLETS
         </h1>
         <Link href="/dashboard" className="text-xs font-mono text-[var(--trench-text-muted)] hover:text-[var(--trench-text)] transition-colors">
@@ -97,7 +97,7 @@ export default function WalletsPage() {
               value={newAddress}
               onChange={(e) => setNewAddress(e.target.value)}
               placeholder="Solana wallet address"
-              className="bg-transparent border-[var(--trench-border)] text-[var(--trench-text)] font-mono text-sm focus-visible:ring-[var(--trench-orange)] focus-visible:ring-1"
+              className="bg-transparent border-[var(--trench-border)] text-[var(--trench-text)] font-mono text-sm focus-visible:ring-[var(--trench-accent)] focus-visible:ring-1"
               onKeyDown={(e) => e.key === 'Enter' && addWallet()}
             />
             <CutButton

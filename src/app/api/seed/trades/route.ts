@@ -2,25 +2,18 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getWalletSwaps, aggregateTradesByToken } from '@/lib/helius';
 
-// Token metadata cache — avoid refetching for tokens we've already seen
-const tokenMetaCache = new Map<string, { symbol: string; name: string }>();
-
 export async function POST(req: Request) {
   const { searchParams } = new URL(req.url);
   if (searchParams.get('secret') !== 'seed-kols-2026') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  // How many top trades to auto-pin per KOL
   const pinCount = parseInt(searchParams.get('pin') ?? '3', 10);
-  // Limit how many KOLs to process (Helius rate limits)
   const limit = parseInt(searchParams.get('limit') ?? '10', 10);
+  const clearExisting = searchParams.get('clear') === 'true';
 
   const users = await prisma.user.findMany({
-    include: {
-      wallets: true,
-      pinnedTrades: true,
-    },
+    include: { wallets: true, pinnedTrades: true },
     take: limit,
     orderBy: { createdAt: 'asc' },
   });
@@ -29,54 +22,43 @@ export async function POST(req: Request) {
   const errors: string[] = [];
 
   for (const user of users) {
-    // Clear existing pinned trades if requested
-    const clearExisting = searchParams.get('clear') === 'true';
     if (user.pinnedTrades.length > 0 && !clearExisting) {
-      results.push(`${user.displayName} — already has ${user.pinnedTrades.length} pinned trades, skipped`);
+      results.push(`${user.displayName} — already has ${user.pinnedTrades.length} pinned, skipped`);
       continue;
     }
-    if (clearExisting && user.pinnedTrades.length > 0) {
+    if (clearExisting) {
       await prisma.pinnedTrade.deleteMany({ where: { userId: user.id } });
     }
 
     for (const wallet of user.wallets) {
       try {
-        const swaps = await getWalletSwaps(wallet.address);
-        const trades = aggregateTradesByToken(swaps, wallet.address);
+        const txns = await getWalletSwaps(wallet.address);
+        // aggregateTradesByToken is now async (fetches DAS metadata)
+        const trades = await aggregateTradesByToken(txns, wallet.address, 7);
 
         if (trades.length === 0) {
-          results.push(`${user.displayName} (${wallet.address.slice(0, 6)}...) — no trades found`);
+          results.push(`${user.displayName} — no swaps in last 7 days`);
           continue;
         }
 
-        // Pick best trades by absolute PnL (winners first, then biggest movers)
-        const bestTrades = trades
-          .filter(t => t.transactions.length >= 1 && Math.abs(t.totalPnlSol) > 0.01)
-          .sort((a, b) => b.totalPnlPercent - a.totalPnlPercent)
+        // Only pin winners (positive PnL SOL), sorted by biggest gain
+        const winners = trades
+          .filter(t => t.totalPnlSol > 0.01 && t.transactions.length >= 1)
           .slice(0, pinCount);
 
-        for (let i = 0; i < bestTrades.length; i++) {
-          const trade = bestTrades[i];
+        // If no winners, take top trades by activity
+        const toPinn = winners.length > 0 ? winners : trades.slice(0, pinCount);
 
-          // Check cache for token metadata
-          let tokenName = tokenMetaCache.get(trade.tokenMint)?.name ?? null;
-          let tokenSymbol = trade.tokenSymbol;
-          const cached = tokenMetaCache.get(trade.tokenMint);
-          if (cached) {
-            tokenSymbol = cached.symbol;
-            tokenName = cached.name;
-          } else {
-            // Cache what we have
-            tokenMetaCache.set(trade.tokenMint, { symbol: tokenSymbol, name: tokenName ?? tokenSymbol });
-          }
-
+        for (let i = 0; i < toPinn.length; i++) {
+          const trade = toPinn[i];
           await prisma.pinnedTrade.create({
             data: {
               userId: user.id,
               walletAddress: wallet.address,
               tokenMint: trade.tokenMint,
-              tokenSymbol,
-              tokenName,
+              tokenSymbol: trade.tokenSymbol,
+              tokenName: trade.tokenName || null,
+              tokenImageUrl: trade.tokenImage || null,
               totalPnlPercent: trade.totalPnlPercent,
               totalPnlSol: trade.totalPnlSol,
               order: i,
@@ -89,10 +71,8 @@ export async function POST(req: Request) {
           });
         }
 
-        results.push(`${user.displayName} — pinned ${bestTrades.length} best trades from ${trades.length} total`);
-
-        // Small delay to avoid Helius rate limits
-        await new Promise(r => setTimeout(r, 500));
+        results.push(`${user.displayName} — pinned ${toPinn.length} trades (${winners.length} winners) from ${trades.length} tokens`);
+        await new Promise(r => setTimeout(r, 300));
 
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
@@ -101,10 +81,5 @@ export async function POST(req: Request) {
     }
   }
 
-  return NextResponse.json({
-    processed: users.length,
-    results,
-    errors,
-    tokensCached: tokenMetaCache.size,
-  });
+  return NextResponse.json({ processed: users.length, results, errors });
 }

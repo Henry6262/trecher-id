@@ -110,7 +110,7 @@ export default function DashboardPage() {
     <div className="space-y-8">
       {/* Header nav */}
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-mono font-bold text-[var(--trench-orange)] tracking-wide">
+        <h1 className="text-xl font-mono font-bold text-[var(--trench-accent)] tracking-wide">
           DASHBOARD
         </h1>
         <div className="flex items-center gap-3 text-xs font-mono">
@@ -123,7 +123,7 @@ export default function DashboardPage() {
           {profile?.username && (
             <Link
               href={`/${profile.username}`}
-              className="text-[var(--trench-orange)] hover:opacity-80 transition-opacity"
+              className="text-[var(--trench-accent)] hover:opacity-80 transition-opacity"
             >
               VIEW PROFILE ↗
             </Link>
@@ -146,7 +146,7 @@ export default function DashboardPage() {
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
                 placeholder="Your name"
-                className="bg-transparent border-[var(--trench-border)] text-[var(--trench-text)] font-mono text-sm focus-visible:ring-[var(--trench-orange)] focus-visible:ring-1"
+                className="bg-transparent border-[var(--trench-border)] text-[var(--trench-text)] font-mono text-sm focus-visible:ring-[var(--trench-accent)] focus-visible:ring-1"
               />
             </div>
             <div>
@@ -158,7 +158,7 @@ export default function DashboardPage() {
                 onChange={(e) => setBio(e.target.value)}
                 placeholder="Short bio..."
                 rows={3}
-                className="bg-transparent border-[var(--trench-border)] text-[var(--trench-text)] font-mono text-sm resize-none focus-visible:ring-[var(--trench-orange)] focus-visible:ring-1"
+                className="bg-transparent border-[var(--trench-border)] text-[var(--trench-text)] font-mono text-sm resize-none focus-visible:ring-[var(--trench-accent)] focus-visible:ring-1"
               />
             </div>
           </div>
@@ -217,7 +217,7 @@ export default function DashboardPage() {
               <select
                 value={newIcon}
                 onChange={(e) => setNewIcon(e.target.value)}
-                className="bg-[var(--trench-surface-elevated)] border border-[var(--trench-border)] text-[var(--trench-text)] font-mono text-sm rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[var(--trench-orange)]"
+                className="bg-[var(--trench-surface-elevated)] border border-[var(--trench-border)] text-[var(--trench-text)] font-mono text-sm rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[var(--trench-accent)]"
               >
                 {ICON_OPTIONS.map((icon) => (
                   <option key={icon} value={icon}>{icon}</option>
@@ -227,14 +227,14 @@ export default function DashboardPage() {
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
                 placeholder="Label"
-                className="bg-transparent border-[var(--trench-border)] text-[var(--trench-text)] font-mono text-sm focus-visible:ring-[var(--trench-orange)] focus-visible:ring-1"
+                className="bg-transparent border-[var(--trench-border)] text-[var(--trench-text)] font-mono text-sm focus-visible:ring-[var(--trench-accent)] focus-visible:ring-1"
               />
             </div>
             <Input
               value={newUrl}
               onChange={(e) => setNewUrl(e.target.value)}
               placeholder="https://..."
-              className="bg-transparent border-[var(--trench-border)] text-[var(--trench-text)] font-mono text-sm focus-visible:ring-[var(--trench-orange)] focus-visible:ring-1"
+              className="bg-transparent border-[var(--trench-border)] text-[var(--trench-text)] font-mono text-sm focus-visible:ring-[var(--trench-accent)] focus-visible:ring-1"
             />
             <CutButton
               onClick={addLink}

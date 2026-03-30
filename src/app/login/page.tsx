@@ -33,7 +33,7 @@ export default function LoginPage() {
     <div className="min-h-screen relative flex items-center justify-center">
       <BackgroundLayer />
       <div className="relative z-10 text-center space-y-6">
-        <h1 className="text-3xl font-mono font-bold text-[var(--trench-orange)]">TRENCH ID</h1>
+        <img src="/logo.png" alt="Trench ID" className="h-14 w-auto mx-auto" />
         <p className="text-sm text-[var(--trench-text-muted)]">Your Web3 bio link. Backed by on-chain proof.</p>
         <CutButton onClick={login} size="lg">Sign in with X</CutButton>
       </div>

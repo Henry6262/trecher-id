@@ -42,8 +42,8 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets }: Profi
         )}
         <TradeCarousel trades={pinnedTrades} />
         <WalletChips wallets={wallets} />
-        <div className="text-center py-3.5 border-t border-[rgba(255,255,255,0.03)]">
-          <span className="text-[9px] text-[rgba(0,212,255,0.4)] tracking-[2px] font-mono">TRENCH ID</span>
+        <div className="flex justify-center py-3.5 border-t border-[rgba(255,255,255,0.03)]">
+          <img src="/logo.png" alt="Trench ID" className="h-5 w-auto opacity-40" />
         </div>
       </div>
     </div>

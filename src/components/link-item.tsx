@@ -27,9 +27,9 @@ export function LinkItem({ title, url, icon }: LinkItemProps) {
       rel="noopener noreferrer"
       className="flex items-center gap-3 px-[18px] py-3.5 cut-sm transition-all bg-[rgba(255,255,255,0.025)] backdrop-blur-sm border border-[rgba(0,212,255,0.06)] hover:bg-[rgba(0,212,255,0.06)] hover:border-[rgba(0,212,255,0.2)] group"
     >
-      <IconComponent size={18} className="text-[var(--trench-orange)] flex-shrink-0" />
+      <IconComponent size={18} className="text-[var(--trench-accent)] flex-shrink-0" />
       <span className="text-[13px] text-[var(--trench-text)] font-medium flex-1">{title}</span>
-      <ChevronRight size={20} className="text-[var(--trench-text-muted)] flex-shrink-0 transition-colors group-hover:text-[var(--trench-orange)]" />
+      <ChevronRight size={20} className="text-[var(--trench-text-muted)] flex-shrink-0 transition-colors group-hover:text-[var(--trench-accent)]" />
     </a>
   );
 }

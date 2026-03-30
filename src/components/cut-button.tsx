@@ -14,7 +14,7 @@ const SIZE: Record<CutButtonSize, { cut: string; px: string; py: string; text: s
 };
 
 const VARIANT: Record<CutButtonVariant, { border: string; bg: string; text: string }> = {
-  primary: { border: 'var(--trench-orange)', bg: 'var(--trench-orange)', text: 'text-black font-bold' },
+  primary: { border: 'var(--trench-accent)', bg: 'var(--trench-accent)', text: 'text-black font-bold' },
   secondary: { border: 'var(--trench-border)', bg: 'var(--trench-surface-elevated)', text: 'text-[var(--trench-text)]' },
   ghost: { border: 'transparent', bg: 'transparent', text: 'text-[var(--trench-text-muted)]' },
 };

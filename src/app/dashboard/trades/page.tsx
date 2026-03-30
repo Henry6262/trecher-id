@@ -129,7 +129,7 @@ export default function TradesPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-mono font-bold text-[var(--trench-orange)] tracking-wide">
+        <h1 className="text-xl font-mono font-bold text-[var(--trench-accent)] tracking-wide">
           TRADES
         </h1>
         <Link href="/dashboard" className="text-xs font-mono text-[var(--trench-text-muted)] hover:text-[var(--trench-text)] transition-colors">
@@ -168,7 +168,7 @@ export default function TradesPage() {
             <CutCorner
               key={p.id}
               cut="sm"
-              borderColor="var(--trench-orange)"
+              borderColor="var(--trench-accent)"
               className="w-full"
             >
               <div className="p-4 flex items-center justify-between gap-3">

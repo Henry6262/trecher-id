@@ -16,7 +16,7 @@ export function StatsStrip({ totalPnlUsd, winRate, totalTrades }: StatsStripProp
         <div className="text-[8px] text-[var(--trench-text-muted)] tracking-[1px] mt-0.5">TOTAL PnL</div>
       </div>
       <div className="text-center">
-        <div className="text-[15px] font-bold font-mono text-[var(--trench-orange)]">{winRate.toFixed(0)}%</div>
+        <div className="text-[15px] font-bold font-mono text-[var(--trench-accent)]">{winRate.toFixed(0)}%</div>
         <div className="text-[8px] text-[var(--trench-text-muted)] tracking-[1px] mt-0.5">WIN RATE</div>
       </div>
       <div className="text-center">

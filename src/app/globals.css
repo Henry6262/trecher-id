@@ -6,8 +6,8 @@
 
 /* ─── Trench ID design tokens ─────────────────────────────── */
 :root {
-  --trench-orange: #00D4FF;
-  --trench-orange-light: #33DDFF;
+  --trench-accent: #00D4FF;
+  --trench-accent-light: #33DDFF;
   --trench-bg: #050508;
   --trench-surface: #0a0a0f;
   --trench-surface-elevated: #111318;

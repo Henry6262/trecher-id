@@ -29,7 +29,7 @@ const FEATURES = [
 export default function LandingPage() {
   return (
     <div className="min-h-screen relative" style={{ background: '#050508' }}>
-      {/* RisingLines — exact SuperMolt config, orange instead of blue */}
+      {/* RisingLines — exact SuperMolt config, cyan blue branding */}
       <div className="fixed inset-0 opacity-75" style={{ zIndex: 0 }}>
         <RisingLines
           color="#00D4FF"
@@ -54,9 +54,7 @@ export default function LandingPage() {
       <div className="relative flex flex-col items-center min-h-screen px-4" style={{ zIndex: 2 }}>
         {/* Nav */}
         <nav className="w-full max-w-[560px] flex items-center justify-between py-6">
-          <span className="font-mono font-bold text-sm tracking-[3px] text-[var(--trench-orange)]">
-            TRENCH ID
-          </span>
+          <img src="/logo.png" alt="Trench ID" className="h-8 w-auto" />
           <CutButton href="/login" variant="secondary" size="sm">
             Sign in
           </CutButton>
@@ -64,12 +62,12 @@ export default function LandingPage() {
 
         {/* Hero */}
         <div className="flex-1 flex flex-col items-center justify-center text-center max-w-[560px] -mt-16">
-          <div className="cut-xs inline-flex items-center gap-1.5 px-3 py-1 mb-6 text-[10px] font-mono tracking-[2px] text-[var(--trench-orange)] bg-[rgba(0,212,255,0.08)] border border-[rgba(0,212,255,0.12)]">
+          <div className="cut-xs inline-flex items-center gap-1.5 px-3 py-1 mb-6 text-[10px] font-mono tracking-[2px] text-[var(--trench-accent)] bg-[rgba(0,212,255,0.08)] border border-[rgba(0,212,255,0.12)]">
             <Check size={10} strokeWidth={3} />
             <ShinyText text="ON-CHAIN VERIFIED" speed={3} />
           </div>
 
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-mono font-bold text-[var(--trench-orange)] mb-4 tracking-tight leading-[0.95]">
+          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-mono font-bold text-[var(--trench-accent)] mb-4 tracking-tight leading-[0.95]">
             <DecryptedText
               text="TRENCH ID"
               speed={80}
@@ -106,7 +104,7 @@ export default function LandingPage() {
                   className="w-8 h-8 flex items-center justify-center mb-3 cut-xs"
                   style={{ background: 'rgba(0,212,255,0.1)' }}
                 >
-                  <Icon size={14} className="text-[var(--trench-orange)]" />
+                  <Icon size={14} className="text-[var(--trench-accent)]" />
                 </div>
                 <h3 className="text-xs font-mono font-bold text-[var(--trench-text)] mb-1.5">{title}</h3>
                 <p className="text-[11px] text-[var(--trench-text-muted)] leading-relaxed">{desc}</p>

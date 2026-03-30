@@ -27,7 +27,9 @@ interface DBPinnedTrade {
   id: string;
   tokenSymbol: string;
   tokenName: string | null;
+  tokenImageUrl: string | null;
   totalPnlPercent: number;
+  totalPnlSol: number;
   transactions: unknown;
 }
 
@@ -82,7 +84,9 @@ export default async function ProfilePage({ params }: Props) {
     id: t.id,
     tokenSymbol: t.tokenSymbol,
     tokenName: t.tokenName,
+    tokenImage: t.tokenImageUrl,
     totalPnlPercent: t.totalPnlPercent,
+    totalPnlSol: t.totalPnlSol,
     transactions: t.transactions as { type: 'BUY' | 'SELL'; mcap: number; amountSol: number }[],
   }));
 
