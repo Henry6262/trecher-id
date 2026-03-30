@@ -53,8 +53,8 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets }: Profi
           stats={stats}
         />
 
-        {/* Content section — more margin */}
-        <div className="px-8 pb-5">
+        {/* Content section — indented from hero */}
+        <div className="pb-5" style={{ paddingLeft: '48px', paddingRight: '48px' }}>
           {/* Links */}
           {links.length > 0 && (
             <div className="flex flex-col gap-1.5 mb-4">
