@@ -269,15 +269,17 @@ export function LandingContent({ traders, featured, traderCount, totalPnl }: Lan
 
         {/* Bottom CTA — Split: Lanyard left, CTA right */}
         <section className="relative py-20 px-6">
-          {/* Background glow */}
-          <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 50% 80%, rgba(0,212,255,0.08) 0%, transparent 50%)' }} />
+          {/* Dark overlay behind the whole section */}
+          <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.4) 30%, rgba(0,0,0,0.6) 60%, rgba(0,0,0,0.4) 100%)' }} />
+          {/* Accent glow */}
+          <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 30% 60%, rgba(0,212,255,0.06) 0%, transparent 50%)' }} />
 
           {/* Top accent line */}
-          <div className="h-px mx-auto max-w-[400px] mb-12" style={{ background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.2), transparent)' }} />
+          <div className="relative h-px mx-auto max-w-[400px] mb-12" style={{ background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.2), transparent)' }} />
 
-          <div className="mx-auto max-w-[900px] grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+          <div className="relative mx-auto max-w-[900px] grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
             {/* Lanyard — left on desktop, bottom on mobile */}
-            <div className="order-2 lg:order-1 h-[450px] lg:h-[500px]">
+            <div className="order-2 lg:order-1 h-[500px] lg:h-[600px]">
               <Lanyard
                 position={[0, 0, 24]}
                 gravity={[0, -40, 0]}
