@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Check, Link2, BarChart3, Wallet } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { CutButton } from '@/components/cut-button';
 import DecryptedText from '@/components/decrypted-text';
 import { GlassCard } from '@/components/glass-card';
@@ -14,37 +14,19 @@ const RisingLines = dynamic(() => import('@/components/rising-lines'), {
   ssr: false,
 });
 
-const FEATURES = [
-  {
-    icon: Link2,
-    title: 'Custom Links',
-    desc: 'Add any link - courses, socials, projects, tip jar. Fully customizable.',
-  },
-  {
-    icon: BarChart3,
-    title: 'Verified Trades',
-    desc: 'On-chain PnL, win rate, and pinned trades auto-fetched from your wallets.',
-  },
-  {
-    icon: Wallet,
-    title: 'Wallet Proof',
-    desc: 'Link Solana wallets via Privy. Verified on-chain, no faking it.',
-  },
-] as const;
-
 const TOP_TRADERS = [
-  { username: 'cented7', name: 'Cented', pnl: '+$11.9K', winRate: '60%', trades: '144' },
-  { username: 'schoen_xyz', name: 'Schoen', pnl: '+$9.0K', winRate: '47%', trades: '19' },
-  { username: 'theonomix', name: 'theo', pnl: '+$7.2K', winRate: '44%', trades: '140' },
-  { username: 'blueycryp', name: 'Bluey', pnl: '+$5.5K', winRate: '13%', trades: '30' },
-  { username: 'imsheepsol', name: 'Sheep', pnl: '+$4.7K', winRate: '82%', trades: '39' },
-  { username: 'ratwizardx', name: 'West', pnl: '+$4.6K', winRate: '41%', trades: '95' },
-  { username: 'saint_pablo123', name: 'Sebastian', pnl: '+$3.7K', winRate: '60%', trades: '5' },
-  { username: 'pandoraflips', name: 'Pandora', pnl: '+$3.3K', winRate: '80%', trades: '5' },
-  { username: 'orangesbs', name: 'Orange', pnl: '+$2.6K', winRate: '36%', trades: '25' },
-  { username: 'vibed333', name: 'dv', pnl: '+$2.6K', winRate: '49%', trades: '112' },
-  { username: 'notdecu', name: 'decu', pnl: '+$1.8K', winRate: '46%', trades: '114' },
-  { username: 'bandeez', name: 'bandit', pnl: '+$0.9K', winRate: '45%', trades: '95' },
+  { username: 'cented7', name: 'Cented', pnl: '+$11.9K', winRate: '60%', trades: '144', recentToken: '$PEPE', recentPnl: '+340%', recentBuy: '1.2', recentSell: '5.4' },
+  { username: 'schoen_xyz', name: 'Schoen', pnl: '+$9.0K', winRate: '47%', trades: '19', recentToken: '$WIF', recentPnl: '+180%', recentBuy: '2.0', recentSell: '5.6' },
+  { username: 'theonomix', name: 'theo', pnl: '+$7.2K', winRate: '44%', trades: '140', recentToken: '$BONK', recentPnl: '+95%', recentBuy: '3.5', recentSell: '6.8' },
+  { username: 'blueycryp', name: 'Bluey', pnl: '+$5.5K', winRate: '13%', trades: '30', recentToken: '$JUP', recentPnl: '+62%', recentBuy: '4.0', recentSell: '6.5' },
+  { username: 'imsheepsol', name: 'Sheep', pnl: '+$4.7K', winRate: '82%', trades: '39', recentToken: '$RAY', recentPnl: '+210%', recentBuy: '1.5', recentSell: '4.7' },
+  { username: 'ratwizardx', name: 'West', pnl: '+$4.6K', winRate: '41%', trades: '95', recentToken: '$ORCA', recentPnl: '+78%', recentBuy: '2.8', recentSell: '5.0' },
+  { username: 'saint_pablo123', name: 'Sebastian', pnl: '+$3.7K', winRate: '60%', trades: '5', recentToken: '$PYTH', recentPnl: '+420%', recentBuy: '0.8', recentSell: '4.2' },
+  { username: 'pandoraflips', name: 'Pandora', pnl: '+$3.3K', winRate: '80%', trades: '5', recentToken: '$DRIFT', recentPnl: '+150%', recentBuy: '1.0', recentSell: '2.5' },
+  { username: 'orangesbs', name: 'Orange', pnl: '+$2.6K', winRate: '36%', trades: '25', recentToken: '$W', recentPnl: '+88%', recentBuy: '2.2', recentSell: '4.1' },
+  { username: 'vibed333', name: 'dv', pnl: '+$2.6K', winRate: '49%', trades: '112', recentToken: '$POPCAT', recentPnl: '+55%', recentBuy: '3.0', recentSell: '4.7' },
+  { username: 'notdecu', name: 'decu', pnl: '+$1.8K', winRate: '46%', trades: '114', recentToken: '$SAMO', recentPnl: '+120%', recentBuy: '1.2', recentSell: '2.6' },
+  { username: 'bandeez', name: 'bandit', pnl: '+$0.9K', winRate: '45%', trades: '95', recentToken: '$MEME', recentPnl: '+45%', recentBuy: '2.5', recentSell: '3.6' },
 ] as const;
 
 const PREVIEW_STATS = [
@@ -221,27 +203,6 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-[900px] px-6 pb-16">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            {FEATURES.map((feature) => {
-              const Icon = feature.icon;
-
-              return (
-                <GlassCard key={feature.title} cut={8} bg="rgba(8,12,18,0.7)">
-                  <div className="p-5">
-                    <Icon className="mb-3 h-5 w-5 text-[var(--trench-accent)]" />
-                    <div className="mb-1 text-[13px] font-bold text-white">
-                      {feature.title}
-                    </div>
-                    <div className="text-[10px] leading-relaxed text-[var(--trench-text-muted)]">
-                      {feature.desc}
-                    </div>
-                  </div>
-                </GlassCard>
-              );
-            })}
-          </div>
-        </section>
 
         <div className="mx-auto max-w-[900px] px-6">
           <div
