@@ -29,20 +29,41 @@ export async function POST(req: NextRequest) {
 
     const username = twitter.username ?? twitter.subject;
 
-    const user = await prisma.user.upsert({
-      where: { privyUserId: privyUser.id },
-      update: {
-        displayName: twitter.name ?? username,
-        avatarUrl: twitter.profilePictureUrl ?? null,
-      },
-      create: {
-        privyUserId: privyUser.id,
-        twitterId: twitter.subject,
-        username,
-        displayName: twitter.name ?? username,
-        avatarUrl: twitter.profilePictureUrl ?? null,
-      },
+    // Check if this is a seeded KOL being claimed by the real person
+    const existingByUsername = await prisma.user.findUnique({
+      where: { username },
     });
+
+    let user;
+
+    if (existingByUsername && existingByUsername.privyUserId.startsWith('precreated_')) {
+      // Claim the seeded profile — update with real Privy + Twitter IDs
+      user = await prisma.user.update({
+        where: { id: existingByUsername.id },
+        data: {
+          privyUserId: privyUser.id,
+          twitterId: twitter.subject,
+          displayName: twitter.name ?? username,
+          avatarUrl: twitter.profilePictureUrl ?? existingByUsername.avatarUrl,
+        },
+      });
+    } else {
+      // Normal upsert — create or update
+      user = await prisma.user.upsert({
+        where: { privyUserId: privyUser.id },
+        update: {
+          displayName: twitter.name ?? username,
+          avatarUrl: twitter.profilePictureUrl ?? null,
+        },
+        create: {
+          privyUserId: privyUser.id,
+          twitterId: twitter.subject,
+          username,
+          displayName: twitter.name ?? username,
+          avatarUrl: twitter.profilePictureUrl ?? null,
+        },
+      });
+    }
 
     const jwt = await new SignJWT({ sub: user.id, username: user.username })
       .setProtectedHeader({ alg: 'HS256' })
