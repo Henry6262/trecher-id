@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trench ID — Production Mockup</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+  :root { --accent:#00D4FF; --bg:#050508; --text:#e4e4e7; --muted:#71717a; --green:#22c55e; --red:#ef4444; --surface:rgba(8,12,18,0.85); }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body { background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
+  .mono { font-family:'JetBrains Mono',monospace; }
+  .cut-xs { clip-path:polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px); }
+  .cut-sm { clip-path:polygon(7px 0,100% 0,100% calc(100% - 7px),calc(100% - 7px) 100%,0 100%,0 7px); }
+  .cut-md { clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px); }
+  .glass { background:var(--surface); backdrop-filter:blur(16px); border:1px solid rgba(0,212,255,0.1); }
+  .skew { transform:skewX(-4deg); } .skew > * { transform:skewX(4deg); }
+  .badge { display:inline-flex; font-size:7px; letter-spacing:1px; padding:2px 7px; font-weight:600; clip-path:polygon(3px 0,100% 0,100% calc(100% - 3px),calc(100% - 3px) 100%,0 100%,0 3px); }
+  .no-scrollbar::-webkit-scrollbar { display:none; } .no-scrollbar { scrollbar-width:none; }
+
+  .section-label { font-size:8px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
+  .divider { height:1px; background:linear-gradient(90deg, transparent, rgba(0,212,255,0.1), transparent); }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- THIS IS A PROFILE PAGE MOCKUP          -->
+<!-- Mirrors /[username] page in production -->
+<!-- ═══════════════════════════════════════ -->
+
+<div style="max-width:620px; margin:0 auto; padding:20px 16px 60px;">
+
+  <!-- Logo -->
+  <div style="text-align:center; padding:8px 0 20px;">
+    <span style="font-size:18px; font-weight:800; color:var(--accent); letter-spacing:2px;">TRENCH ID</span>
+  </div>
+
+  <!-- Accent line -->
+  <div style="height:2px; background:linear-gradient(90deg, transparent, #00D4FF, transparent); margin-bottom:0;"></div>
+
+  <!-- Main card -->
+  <div class="glass cut-md" style="border-top:none;">
+    <div style="padding:20px;">
+
+      <!-- ══ PROFILE HEADER ══ -->
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:4px;">
+        <div style="width:56px; height:56px; border-radius:50%; overflow:hidden; border:2.5px solid rgba(0,212,255,0.35); box-shadow:0 0 24px rgba(0,212,255,0.15); flex-shrink:0;">
+          <img src="https://unavatar.io/twitter/cented7" style="width:100%; height:100%; object-fit:cover;">
+        </div>
+        <div style="flex:1;">
+          <div style="display:flex; align-items:center; gap:5px; flex-wrap:wrap;">
+            <span style="font-size:16px; font-weight:800; color:white;">@cented7</span>
+            <div style="width:14px; height:14px; background:var(--accent); border-radius:50%; display:flex; align-items:center; justify-content:center;">
+              <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <span class="badge" style="color:#f59e0b; background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.12);">🎯 SNIPER</span>
+          </div>
+          <span style="font-size:10px; color:var(--muted);">Cented</span>
+        </div>
+      </div>
+
+      <!-- Stats strip -->
+      <div style="display:flex; gap:6px; margin:12px 0;">
+        <div class="skew cut-xs" style="flex:1; display:flex; align-items:center; gap:5px; padding:6px 10px; background:rgba(255,255,255,0.03); border:1px solid rgba(0,212,255,0.08);">
+          <span class="mono" style="font-size:13px; font-weight:700; color:var(--green);">+$11.9K</span>
+          <span style="font-size:7px; letter-spacing:1px; color:var(--muted);">PnL</span>
+        </div>
+        <div class="skew cut-xs" style="flex:1; display:flex; align-items:center; gap:5px; padding:6px 10px; background:rgba(255,255,255,0.03); border:1px solid rgba(0,212,255,0.08);">
+          <span class="mono" style="font-size:13px; font-weight:700; color:var(--accent);">60%</span>
+          <span style="font-size:7px; letter-spacing:1px; color:var(--muted);">Win</span>
+        </div>
+        <div class="skew cut-xs" style="flex:1; display:flex; align-items:center; gap:5px; padding:6px 10px; background:rgba(255,255,255,0.03); border:1px solid rgba(0,212,255,0.08);">
+          <span class="mono" style="font-size:13px; font-weight:700; color:var(--text);">144</span>
+          <span style="font-size:7px; letter-spacing:1px; color:var(--muted);">Trades</span>
+        </div>
+      </div>
+
+      <!-- Analytics tags -->
+      <div style="display:flex; gap:4px; flex-wrap:wrap; margin-bottom:14px;">
+        <span class="badge" style="color:var(--accent); background:rgba(0,212,255,0.06); border:1px solid rgba(0,212,255,0.1);">ROI +342%</span>
+        <span class="badge" style="color:var(--accent); background:rgba(0,212,255,0.06); border:1px solid rgba(0,212,255,0.1);">AVG 2.4 SOL</span>
+        <span class="badge" style="color:var(--green); background:rgba(34,197,94,0.06); border:1px solid rgba(34,197,94,0.1);">🔥 7 STREAK</span>
+        <span class="badge" style="color:var(--accent); background:rgba(0,212,255,0.06); border:1px solid rgba(0,212,255,0.1);">HOLD 2.3h</span>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- ══ PINNED TRADES — Horizontal Carousel ══ -->
+      <div style="padding:14px 0;">
+        <div class="section-label">PINNED TRADES</div>
+        <div style="display:flex; gap:10px; overflow-x:auto; padding-bottom:4px;" class="no-scrollbar">
+
+          <!-- Trade card 1 — vertical -->
+          <div class="cut-sm" style="flex-shrink:0; width:160px; background:rgba(255,255,255,0.03); border:1px solid rgba(0,212,255,0.06); overflow:hidden;">
+            <!-- Big token image -->
+            <div style="width:160px; height:120px; background:linear-gradient(135deg, #0a0a1a, #111827); display:flex; align-items:center; justify-content:center; border-bottom:1px solid rgba(0,212,255,0.06);">
+              <div style="width:64px; height:64px; border-radius:50%; background:#111; border:2px solid rgba(0,212,255,0.2); display:flex; align-items:center; justify-content:center;">
+                <span style="font-size:22px; font-weight:800; color:var(--accent);">AN</span>
+              </div>
+            </div>
+            <div style="padding:10px;">
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+                <span style="font-size:13px; font-weight:800; color:white;">$ANIME</span>
+                <span class="mono" style="font-size:11px; font-weight:800; color:var(--green);">+6.8K%</span>
+              </div>
+              <!-- 3 metrics -->
+              <div style="display:flex; gap:4px; margin-bottom:6px;">
+                <div class="cut-xs" style="flex:1; padding:3px 5px; background:rgba(0,212,255,0.02); text-align:center;">
+                  <div class="mono" style="font-size:9px; font-weight:700; color:var(--green);">34.2</div>
+                  <div style="font-size:5px; color:var(--muted); letter-spacing:1px;">SELL SOL</div>
+                </div>
+                <div class="cut-xs" style="flex:1; padding:3px 5px; background:rgba(0,212,255,0.02); text-align:center;">
+                  <div class="mono" style="font-size:9px; font-weight:700; color:var(--accent);">0.5</div>
+                  <div style="font-size:5px; color:var(--muted); letter-spacing:1px;">BUY SOL</div>
+                </div>
+                <div class="cut-xs" style="flex:1; padding:3px 5px; background:rgba(0,212,255,0.02); text-align:center;">
+                  <div class="mono" style="font-size:9px; font-weight:700; color:var(--text);">68x</div>
+                  <div style="font-size:5px; color:var(--muted); letter-spacing:1px;">MULTI</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Trade card 2 -->
+          <div class="cut-sm" style="flex-shrink:0; width:160px; background:rgba(255,255,255,0.03); border:1px solid rgba(0,212,255,0.06); overflow:hidden;">
+            <div style="width:160px; height:120px; background:linear-gradient(135deg, #0a0a1a, #111827); display:flex; align-items:center; justify-content:center; border-bottom:1px solid rgba(0,212,255,0.06);">
+              <div style="width:64px; height:64px; border-radius:50%; background:#111; border:2px solid rgba(0,212,255,0.2); display:flex; align-items:center; justify-content:center;">
+                <span style="font-size:22px; font-weight:800; color:var(--accent);">DR</span>
+              </div>
+            </div>
+            <div style="padding:10px;">
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+                <span style="font-size:13px; font-weight:800; color:white;">$Drill</span>
+                <span class="mono" style="font-size:11px; font-weight:800; color:var(--green);">+4.1K%</span>
+              </div>
+              <div style="display:flex; gap:4px; margin-bottom:6px;">
+                <div class="cut-xs" style="flex:1; padding:3px 5px; background:rgba(0,212,255,0.02); text-align:center;">
+                  <div class="mono" style="font-size:9px; font-weight:700; color:var(--green);">16.7</div>
+                  <div style="font-size:5px; color:var(--muted); letter-spacing:1px;">SELL SOL</div>
+                </div>
+                <div class="cut-xs" style="flex:1; padding:3px 5px; background:rgba(0,212,255,0.02); text-align:center;">
+                  <div class="mono" style="font-size:9px; font-weight:700; color:var(--accent);">0.4</div>
+                  <div style="font-size:5px; color:var(--muted); letter-spacing:1px;">BUY SOL</div>
+                </div>
+                <div class="cut-xs" style="flex:1; padding:3px 5px; background:rgba(0,212,255,0.02); text-align:center;">
+                  <div class="mono" style="font-size:9px; font-weight:700; color:var(--text);">41x</div>
+                  <div style="font-size:5px; color:var(--muted); letter-spacing:1px;">MULTI</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Trade card 3 -->
+          <div class="cut-sm" style="flex-shrink:0; width:160px; background:rgba(255,255,255,0.03); border:1px solid rgba(0,212,255,0.06); overflow:hidden;">
+            <div style="width:160px; height:120px; background:linear-gradient(135deg, #0a0a1a, #111827); display:flex; align-items:center; justify-content:center; border-bottom:1px solid rgba(0,212,255,0.06);">
+              <div style="width:64px; height:64px; border-radius:50%; background:#111; border:2px solid rgba(0,212,255,0.2); display:flex; align-items:center; justify-content:center;">
+                <span style="font-size:22px; font-weight:800; color:var(--accent);">MA</span>
+              </div>
+            </div>
+            <div style="padding:10px;">
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+                <span style="font-size:13px; font-weight:800; color:white;">$MASUKU</span>
+                <span class="mono" style="font-size:11px; font-weight:800; color:var(--green);">+748%</span>
+              </div>
+              <div style="display:flex; gap:4px;">
+                <div class="cut-xs" style="flex:1; padding:3px 5px; background:rgba(0,212,255,0.02); text-align:center;">
+                  <div class="mono" style="font-size:9px; font-weight:700; color:var(--green);">45.4</div>
+                  <div style="font-size:5px; color:var(--muted); letter-spacing:1px;">SELL SOL</div>
+                </div>
+                <div class="cut-xs" style="flex:1; padding:3px 5px; background:rgba(0,212,255,0.02); text-align:center;">
+                  <div class="mono" style="font-size:9px; font-weight:700; color:var(--accent);">5.3</div>
+                  <div style="font-size:5px; color:var(--muted); letter-spacing:1px;">BUY SOL</div>
+                </div>
+                <div class="cut-xs" style="flex:1; padding:3px 5px; background:rgba(0,212,255,0.02); text-align:center;">
+                  <div class="mono" style="font-size:9px; font-weight:700; color:var(--text);">8.5x</div>
+                  <div style="font-size:5px; color:var(--muted); letter-spacing:1px;">MULTI</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- More indicator -->
+          <div style="flex-shrink:0; width:60px; display:flex; align-items:center; justify-content:center;">
+            <span style="font-size:10px; color:var(--muted);">→</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- ══ TOKEN DEPLOYMENTS — Horizontal Carousel ══ -->
+      <div style="padding:14px 0;">
+        <div class="section-label">TOKEN DEPLOYMENTS</div>
+        <div style="display:flex; gap:10px; overflow-x:auto; padding-bottom:4px;" class="no-scrollbar">
+
+          <!-- Deploy card 1 — migrated, profitable -->
+          <div class="cut-sm" style="flex-shrink:0; width:170px; background:rgba(255,255,255,0.03); border:1px solid rgba(0,212,255,0.06); overflow:hidden;">
+            <!-- Big token image area -->
+            <div style="width:170px; height:130px; background:linear-gradient(135deg, #060810, #0d1520); display:flex; align-items:center; justify-content:center; border-bottom:1px solid rgba(0,212,255,0.06); position:relative;">
+              <div style="width:72px; height:72px; border-radius:50%; background:linear-gradient(135deg, #111, #1a1a2e); border:2px solid rgba(0,212,255,0.25); display:flex; align-items:center; justify-content:center; box-shadow:0 0 20px rgba(0,212,255,0.1);">
+                <span style="font-size:28px;">🚀</span>
+              </div>
+              <!-- Status badge -->
+              <div style="position:absolute; top:8px; right:8px;">
+                <span class="badge" style="color:var(--green); background:rgba(34,197,94,0.12); border:1px solid rgba(34,197,94,0.2);">MIGRATED</span>
+              </div>
+            </div>
+            <div style="padding:10px;">
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+                <span style="font-size:14px; font-weight:800; color:white;">$TRENCHY</span>
+              </div>
+              <div style="font-size:8px; color:var(--muted); margin-bottom:8px;">Pump.fun · 2d ago</div>
+              <!-- Dev PnL -->
+              <div class="cut-xs" style="padding:6px 8px; background:rgba(34,197,94,0.04); border:1px solid rgba(34,197,94,0.08); margin-bottom:6px; text-align:center;">
+                <span class="mono" style="font-size:14px; font-weight:800; color:var(--green);">+50.2 SOL</span>
+                <div style="font-size:6px; color:var(--muted); letter-spacing:1px; margin-top:1px;">DEV PnL</div>
+              </div>
+              <!-- 3 metrics -->
+              <div style="display:flex; gap:4px;">
+                <div class="cut-xs" style="flex:1; padding:3px 5px; background:rgba(0,212,255,0.02); text-align:center;">
+                  <div class="mono" style="font-size:9px; font-weight:700; color:var(--accent);">$128K</div>
+                  <div style="font-size:5px; color:var(--muted); letter-spacing:1px;">ATH</div>
+                </div>
+                <div class="cut-xs" style="flex:1; padding:3px 5px; background:rgba(0,212,255,0.02); text-align:center;">
+                  <div class="mono" style="font-size:9px; font-weight:700; color:var(--text);">1.2K</div>
+                  <div style="font-size:5px; color:var(--muted); letter-spacing:1px;">HOLDERS</div>
+                </div>
+                <div class="cut-xs" style="flex:1; padding:3px 5px; background:rgba(0,212,255,0.02); text-align:center;">
+                  <div class="mono" style="font-size:9px; font-weight:700; color:var(--text);">$89K</div>
+                  <div style="font-size:5px; color:var(--muted); letter-spacing:1px;">VOL</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Deploy card 2 — bonding -->
+          <div class="cut-sm" style="flex-shrink:0; width:170px; background:rgba(255,255,255,0.03); border:1px solid rgba(0,212,255,0.06); overflow:hidden;">
+            <div style="width:170px; height:130px; background:linear-gradient(135deg, #060810, #0d1520); display:flex; align-items:center; justify-content:center; border-bottom:1px solid rgba(0,212,255,0.06); position:relative;">
+              <div style="width:72px; height:72px; border-radius:50%; background:linear-gradient(135deg, #111, #1a1a2e); border:2px solid rgba(0,212,255,0.25); display:flex; align-items:center; justify-content:center; box-shadow:0 0 20px rgba(0,212,255,0.1);">
+                <span style="font-size:28px;">🪙</span>
+              </div>
+              <div style="position:absolute; top:8px; right:8px;">
+                <span class="badge" style="color:var(--accent); background:rgba(0,212,255,0.08); border:1px solid rgba(0,212,255,0.15);">BONDING</span>
+              </div>
+            </div>
+            <div style="padding:10px;">
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+                <span style="font-size:14px; font-weight:800; color:white;">$COPE</span>
+              </div>
+              <div style="font-size:8px; color:var(--muted); margin-bottom:8px;">Pump.fun · 5d ago</div>
+              <div class="cut-xs" style="padding:6px 8px; background:rgba(239,68,68,0.04); border:1px solid rgba(239,68,68,0.08); margin-bottom:6px; text-align:center;">
+                <span class="mono" style="font-size:14px; font-weight:800; color:var(--red);">-9.6 SOL</span>
+                <div style="font-size:6px; color:var(--muted); letter-spacing:1px; margin-top:1px;">DEV PnL</div>
+              </div>
+              <div style="display:flex; gap:4px;">
+                <div class="cut-xs" style="flex:1; padding:3px 5px; background:rgba(0,212,255,0.02); text-align:center;">
+                  <div class="mono" style="font-size:9px; font-weight:700; color:var(--accent);">$34K</div>
+                  <div style="font-size:5px; color:var(--muted); letter-spacing:1px;">ATH</div>
+                </div>
+                <div class="cut-xs" style="flex:1; padding:3px 5px; background:rgba(0,212,255,0.02); text-align:center;">
+                  <div class="mono" style="font-size:9px; font-weight:700; color:var(--text);">342</div>
+                  <div style="font-size:5px; color:var(--muted); letter-spacing:1px;">HOLDERS</div>
+                </div>
+                <div class="cut-xs" style="flex:1; padding:3px 5px; background:rgba(0,212,255,0.02); text-align:center;">
+                  <div class="mono" style="font-size:9px; font-weight:700; color:var(--text);">$12K</div>
+                  <div style="font-size:5px; color:var(--muted); letter-spacing:1px;">VOL</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Deploy card 3 — dead -->
+          <div class="cut-sm" style="flex-shrink:0; width:170px; background:rgba(255,255,255,0.03); border:1px solid rgba(0,212,255,0.06); overflow:hidden; opacity:0.5;">
+            <div style="width:170px; height:130px; background:linear-gradient(135deg, #060810, #0a0a12); display:flex; align-items:center; justify-content:center; border-bottom:1px solid rgba(0,212,255,0.04); position:relative;">
+              <div style="width:72px; height:72px; border-radius:50%; background:#111; border:2px solid rgba(255,255,255,0.06); display:flex; align-items:center; justify-content:center;">
+                <span style="font-size:28px;">💀</span>
+              </div>
+              <div style="position:absolute; top:8px; right:8px;">
+                <span class="badge" style="color:var(--red); background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.15);">DEAD</span>
+              </div>
+            </div>
+            <div style="padding:10px;">
+              <span style="font-size:14px; font-weight:800; color:var(--muted);">$RUGGED</span>
+              <div style="font-size:8px; color:var(--muted); margin:4px 0 8px;">14d ago</div>
+              <div class="cut-xs" style="padding:6px 8px; background:rgba(239,68,68,0.03); border:1px solid rgba(239,68,68,0.06); text-align:center;">
+                <span class="mono" style="font-size:14px; font-weight:800; color:var(--red);">-100%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- ══ LINKS ══ -->
+      <div style="padding:14px 0 0;">
+        <div class="section-label">LINKS</div>
+        <div style="display:flex; flex-direction:column; gap:4px;">
+          <a href="#" class="cut-xs" style="display:flex; align-items:center; gap:8px; padding:10px 14px; background:rgba(255,255,255,0.025); border:1px solid rgba(0,212,255,0.06); text-decoration:none; transition:all 0.15s;" onmouseover="this.style.background='rgba(0,212,255,0.04)'" onmouseout="this.style.background='rgba(255,255,255,0.025)'">
+            <span style="font-size:14px; color:var(--accent);">𝕏</span>
+            <span style="flex:1; font-size:12px; color:var(--text);">Follow @cented7</span>
+            <span style="color:var(--muted);">›</span>
+          </a>
+          <a href="#" class="cut-xs" style="display:flex; align-items:center; gap:8px; padding:10px 14px; background:rgba(255,255,255,0.025); border:1px solid rgba(0,212,255,0.06); text-decoration:none;" onmouseover="this.style.background='rgba(0,212,255,0.04)'" onmouseout="this.style.background='rgba(255,255,255,0.025)'">
+            <span style="font-size:14px;">💬</span>
+            <span style="flex:1; font-size:12px; color:var(--text);">Telegram Group</span>
+            <span style="color:var(--muted);">›</span>
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div style="text-align:center; padding:20px 0;">
+    <span style="font-size:9px; letter-spacing:2px; color:var(--muted);" class="mono">TRENCH ID · SOLANA · 2026</span>
+  </div>
+</div>
+
+</body>
+</html>
