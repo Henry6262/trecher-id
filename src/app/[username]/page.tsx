@@ -2,6 +2,9 @@ import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { ProfileCard } from '@/components/profile-card';
 import { BackgroundLayer } from '@/components/background-layer';
+import { getWalletTransactions, aggregateTradesByToken } from '@/lib/helius';
+import { computeTraderStats } from '@/lib/trade-stats';
+import { cached } from '@/lib/redis';
 import type { Metadata } from 'next';
 
 interface Props {
@@ -11,6 +14,7 @@ interface Props {
 interface DBWallet {
   address: string;
   verified: boolean;
+  isMain: boolean;
   totalPnlUsd: number | null;
   winRate: number | null;
   totalTrades: number | null;
@@ -110,6 +114,26 @@ export default async function ProfilePage({ params }: Props) {
     totalTrades,
   };
 
+  // Fetch on-chain trades for all wallets and compute advanced stats
+  const allTrades = await cached(
+    `trader-stats:${user.id}`,
+    300, // 5 min TTL
+    async () => {
+      const results = await Promise.all(
+        wallets.map(async (w: DBWallet) => {
+          try {
+            const txns = await getWalletTransactions(w.address);
+            return aggregateTradesByToken(txns, w.address, 7);
+          } catch {
+            return [];
+          }
+        }),
+      );
+      return results.flat();
+    },
+  );
+  const traderStats = computeTraderStats(allTrades);
+
   const pinnedTrades = trades.map((t: DBPinnedTrade) => ({
     id: t.id,
     tokenSymbol: t.tokenSymbol,
@@ -134,7 +158,8 @@ export default async function ProfilePage({ params }: Props) {
           stats={stats}
           links={links.map((l: DBLink) => ({ id: l.id, title: l.title, url: l.url, icon: l.icon }))}
           pinnedTrades={pinnedTrades}
-          wallets={wallets.map((w: DBWallet) => ({ address: w.address, verified: w.verified }))}
+          traderStats={traderStats}
+          wallets={wallets.map((w: DBWallet) => ({ address: w.address, verified: w.verified, isMain: w.isMain }))}
         />
       </div>
     </div>

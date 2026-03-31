@@ -5,12 +5,14 @@ import { usePrivy } from '@privy-io/react-auth';
 import { GlassCard } from '@/components/glass-card';
 import { CutButton } from '@/components/cut-button';
 import { Input } from '@/components/ui/input';
+import { Star } from 'lucide-react';
 
 interface Wallet {
   id: string;
   address: string;
   chain: string;
   verified: boolean;
+  isMain: boolean;
   linkedAt: string;
 }
 
@@ -27,6 +29,7 @@ export default function WalletsPage() {
   const [addError, setAddError] = useState('');
   const [removing, setRemoving] = useState<string | null>(null);
   const [showManual, setShowManual] = useState(false);
+  const [settingMain, setSettingMain] = useState<string | null>(null);
 
   useEffect(() => {
     fetch('/api/wallets')
@@ -69,6 +72,24 @@ export default function WalletsPage() {
       // For now, show the manual input as fallback
     } catch {
       // User cancelled or error — show manual option
+    }
+  }
+
+  async function setMainWallet(address: string) {
+    setSettingMain(address);
+    try {
+      const res = await fetch('/api/wallets/main', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ address }),
+      });
+      if (res.ok) {
+        setWallets((prev) =>
+          prev.map((w) => ({ ...w, isMain: w.address === address })),
+        );
+      }
+    } finally {
+      setSettingMain(null);
     }
   }
 
@@ -150,7 +171,10 @@ export default function WalletsPage() {
           <GlassCard key={wallet.id} cut={8} glow={false}>
             <div className="p-4 flex items-center justify-between gap-3">
               <div className="min-w-0">
-                <p className="text-sm font-mono text-[var(--trench-text)] break-all">{shortAddr(wallet.address)}</p>
+                <div className="flex items-center gap-1.5">
+                  {wallet.isMain && <Star size={12} className="text-[var(--trench-accent)] fill-[var(--trench-accent)] shrink-0" />}
+                  <p className="text-sm font-mono text-[var(--trench-text)] break-all">{shortAddr(wallet.address)}</p>
+                </div>
                 <div className="flex items-center gap-2 mt-1">
                   <span className="cut-xs text-[7px] tracking-[1px] px-2 py-0.5 font-semibold text-[var(--trench-accent)] uppercase" style={{ background: 'rgba(0,212,255,0.08)', border: '1px solid rgba(0,212,255,0.12)' }}>
                     {wallet.chain}
@@ -160,20 +184,37 @@ export default function WalletsPage() {
                       VERIFIED
                     </span>
                   )}
+                  {wallet.isMain && (
+                    <span className="cut-xs text-[7px] tracking-[1px] px-2 py-0.5 font-semibold text-[var(--trench-accent)]" style={{ background: 'rgba(0,212,255,0.08)', border: '1px solid rgba(0,212,255,0.12)' }}>
+                      MAIN
+                    </span>
+                  )}
                   <span className="text-[9px] font-mono text-[var(--trench-text-muted)]">
                     {new Date(wallet.linkedAt).toLocaleDateString()}
                   </span>
                 </div>
               </div>
-              <CutButton
-                variant="ghost"
-                size="sm"
-                onClick={() => removeWallet(wallet.address)}
-                disabled={removing === wallet.address}
-                className="shrink-0 text-red-400 hover:text-red-300"
-              >
-                {removing === wallet.address ? '...' : 'Remove'}
-              </CutButton>
+              <div className="flex items-center gap-2 shrink-0">
+                {!wallet.isMain && (
+                  <CutButton
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setMainWallet(wallet.address)}
+                    disabled={settingMain === wallet.address}
+                  >
+                    {settingMain === wallet.address ? '...' : 'Set Main'}
+                  </CutButton>
+                )}
+                <CutButton
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removeWallet(wallet.address)}
+                  disabled={removing === wallet.address}
+                  className="text-red-400 hover:text-red-300"
+                >
+                  {removing === wallet.address ? '...' : 'Remove'}
+                </CutButton>
+              </div>
             </div>
           </GlassCard>
         ))}

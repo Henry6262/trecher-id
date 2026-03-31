@@ -21,6 +21,7 @@ model User {
   links        Link[]
   wallets      Wallet[]
   pinnedTrades PinnedTrade[]
+  rankings     UserRanking[]
 }
 
 model Link {
@@ -43,6 +44,7 @@ model Wallet {
   address        String
   chain          String    @default("solana")
   verified       Boolean   @default(false)
+  isMain         Boolean   @default(false)
   linkedAt       DateTime  @default(now())
   totalPnlUsd    Float?
   winRate        Float?
@@ -69,4 +71,19 @@ model PinnedTrade {
   pinnedAt        DateTime @default(now())
 
   @@index([userId, order])
+}
+
+model UserRanking {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  period    String   // "1d", "3d", "7d", "all"
+  pnlUsd    Float
+  pnlSol    Float
+  winRate   Float
+  trades    Int
+  updatedAt DateTime @default(now())
+
+  @@unique([userId, period])
+  @@index([period, pnlUsd])
 }

@@ -4,6 +4,8 @@ import { ProfileHeader } from './profile-header';
 import { LinkItem } from './link-item';
 import { TradeCarousel } from './trade-carousel';
 import { CutCorner } from './cut-corner';
+import { EnhancedStats } from './enhanced-stats';
+import type { TraderStats } from '@/lib/trade-stats';
 
 interface ProfileCardProps {
   user: {
@@ -27,10 +29,11 @@ interface ProfileCardProps {
     totalPnlSol?: number;
     transactions: { type: 'BUY' | 'SELL'; mcap: number; amountSol: number }[];
   }[];
-  wallets: { address: string; verified: boolean }[];
+  wallets: { address: string; verified: boolean; isMain?: boolean }[];
+  traderStats?: TraderStats;
 }
 
-export function ProfileCard({ user, stats, links, pinnedTrades, wallets }: ProfileCardProps) {
+export function ProfileCard({ user, stats, links, pinnedTrades, wallets, traderStats }: ProfileCardProps) {
   const hasWallets = wallets.length > 0;
 
   return (
@@ -73,6 +76,13 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets }: Profi
 
         {/* Divider — fades from transparent to cyan and back */}
         <div className="mx-6" style={{ height: '1px', background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.12) 30%, rgba(0,212,255,0.12) 70%, transparent)' }} />
+
+        {/* Enhanced trader stats */}
+        {traderStats && traderStats.totalBuySol > 0 && (
+          <div className="px-6 py-4">
+            <EnhancedStats stats={traderStats} />
+          </div>
+        )}
 
         {/* Content section — more indented */}
         <div className="pb-5 pt-4" style={{ paddingLeft: '56px', paddingRight: '56px' }}>

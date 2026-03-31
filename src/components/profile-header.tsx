@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { formatPnl, truncateAddress } from '@/lib/utils';
-import { Check, ChevronDown } from 'lucide-react';
+import { Check, ChevronDown, Star } from 'lucide-react';
 import { useState } from 'react';
 
 interface ProfileHeaderProps {
@@ -16,7 +16,7 @@ interface ProfileHeaderProps {
     winRate: number;
     totalTrades: number;
   };
-  wallets?: { address: string; verified: boolean }[];
+  wallets?: { address: string; verified: boolean; isMain?: boolean }[];
 }
 
 export function ProfileHeader({ avatarUrl, displayName, username, bio, verified, stats, wallets }: ProfileHeaderProps) {
@@ -74,6 +74,7 @@ export function ProfileHeader({ avatarUrl, displayName, username, bio, verified,
                   className="cut-xs flex items-center gap-2 text-[10px] font-mono text-[var(--trench-text-muted)] px-3 py-1.5 transition-all hover:text-[var(--trench-accent)] hover:border-[rgba(0,212,255,0.2)]"
                   style={{ background: 'rgba(0,212,255,0.04)', border: '1px solid rgba(0,212,255,0.1)' }}
                 >
+                  {wallets[activeWallet]?.isMain && <Star size={9} className="text-[var(--trench-accent)] fill-[var(--trench-accent)]" />}
                   <span className="w-[6px] h-[6px] rounded-full flex-shrink-0" style={{ background: wallets[activeWallet]?.verified ? '#22c55e' : '#71717a' }} />
                   {truncateAddress(wallets[activeWallet]?.address || '')}
                   <ChevronDown size={11} className={`transition-transform ${walletOpen ? 'rotate-180' : ''}`} />
@@ -93,6 +94,7 @@ export function ProfileHeader({ avatarUrl, displayName, username, bio, verified,
                         }`}
                         style={{ background: i === activeWallet ? 'rgba(0,212,255,0.06)' : 'transparent' }}
                       >
+                        {w.isMain && <Star size={9} className="text-[var(--trench-accent)] fill-[var(--trench-accent)]" />}
                         <span className="w-[6px] h-[6px] rounded-full flex-shrink-0" style={{ background: w.verified ? '#22c55e' : '#71717a' }} />
                         {truncateAddress(w.address)}
                         {i === activeWallet && <Check size={11} className="ml-auto text-[var(--trench-accent)]" />}
