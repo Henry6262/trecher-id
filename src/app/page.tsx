@@ -1,30 +1,13 @@
 import { prisma } from '@/lib/prisma';
-import { cached } from '@/lib/redis';
 import { LandingContent } from '@/components/landing-content';
 import { formatPnl } from '@/lib/utils';
 
-export const dynamic = 'force-dynamic';
-
-const FALLBACK_FEATURED = {
-  username: 'trenchid',
-  name: 'Trench ID',
-  avatarUrl: null,
-  pnl: '$0',
-  winRate: '0%',
-  trades: '0',
-  topTrades: [] as { tokenSymbol: string; tokenImageUrl: string | null; pnlPercent: string; buy: string | null; sell: string | null }[],
-  recentToken: null,
-  recentTokenImage: null,
-  recentPnl: null,
-  recentBuy: null,
-  recentSell: null,
-};
-
-async function fetchLandingData() {
+export default async function LandingPage() {
+  // Fetch top traders with their best pinned trade from DB
   const users = await prisma.user.findMany({
     include: {
       wallets: true,
-      pinnedTrades: { where: { totalPnlPercent: { gt: 0 } }, orderBy: { totalPnlPercent: 'desc' }, take: 3 },
+      pinnedTrades: { orderBy: { totalPnlSol: 'desc' }, take: 1 },
     },
     orderBy: { createdAt: 'asc' },
     take: 15,
@@ -42,16 +25,8 @@ async function fetchLandingData() {
     }
     const winRate = winRateCount > 0 ? totalWinRate / winRateCount : 0;
 
-    const topTrades = u.pinnedTrades.map(t => {
-      const txns = t.transactions as { type: string; amountSol: number }[] | undefined;
-      return {
-        tokenSymbol: t.tokenSymbol,
-        tokenImageUrl: t.tokenImageUrl,
-        pnlPercent: `+${t.totalPnlPercent.toFixed(0)}%`,
-        buy: txns?.find(tx => tx.type === 'BUY')?.amountSol.toFixed(1) ?? null,
-        sell: txns?.find(tx => tx.type === 'SELL')?.amountSol.toFixed(1) ?? null,
-      };
-    });
+    const bestTrade = u.pinnedTrades[0];
+    const txns = bestTrade?.transactions as { type: string; amountSol: number }[] | undefined;
 
     return {
       username: u.username,
@@ -60,47 +35,16 @@ async function fetchLandingData() {
       pnl: formatPnl(totalPnlUsd),
       winRate: `${winRate.toFixed(0)}%`,
       trades: String(totalTrades),
-      topTrades,
-      // Keep single best for hero card
-      recentToken: topTrades[0]?.tokenSymbol ?? null,
-      recentTokenImage: topTrades[0]?.tokenImageUrl ?? null,
-      recentPnl: topTrades[0]?.pnlPercent ?? null,
-      recentBuy: topTrades[0]?.buy ?? null,
-      recentSell: topTrades[0]?.sell ?? null,
+      recentToken: bestTrade?.tokenSymbol ?? null,
+      recentTokenImage: bestTrade?.tokenImageUrl ?? null,
+      recentPnl: bestTrade ? `${bestTrade.totalPnlPercent >= 0 ? '+' : ''}${bestTrade.totalPnlPercent.toFixed(0)}%` : null,
+      recentBuy: txns?.find(t => t.type === 'BUY')?.amountSol.toFixed(1) ?? null,
+      recentSell: txns?.find(t => t.type === 'SELL')?.amountSol.toFixed(1) ?? null,
     };
   });
 
-  const totalTraderCount = await prisma.user.count();
-  let aggregatePnl = 0;
-  for (const t of traders) {
-    const raw = t.pnl.replace(/[^0-9.-]/g, '');
-    const num = parseFloat(raw);
-    if (!isNaN(num)) {
-      if (t.pnl.includes('K')) aggregatePnl += num * 1000;
-      else if (t.pnl.includes('M')) aggregatePnl += num * 1000000;
-      else aggregatePnl += num;
-    }
-  }
-  const totalPnlStr = aggregatePnl >= 1000000
-    ? `$${(aggregatePnl / 1000000).toFixed(1)}M`
-    : `$${(aggregatePnl / 1000).toFixed(0)}K`;
+  // Top trader for the preview card
+  const featured = traders[0];
 
-  return { traders, totalTraderCount, totalPnlStr };
-}
-
-export default async function LandingPage() {
-  try {
-    // Cache landing data for 5 minutes in Redis
-    const { traders, totalTraderCount, totalPnlStr } = await cached(
-      'landing:traders',
-      300,
-      fetchLandingData,
-    );
-
-    const featured = traders[0] ?? FALLBACK_FEATURED;
-    return <LandingContent traders={traders} featured={featured} traderCount={totalTraderCount} totalPnl={totalPnlStr} />;
-  } catch (error) {
-    console.error('Landing page error:', error);
-    return <LandingContent traders={[]} featured={FALLBACK_FEATURED} traderCount={0} totalPnl="$0" />;
-  }
+  return <LandingContent traders={traders} featured={featured} />;
 }

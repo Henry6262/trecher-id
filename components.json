@@ -21,12 +21,5 @@
   },
   "menuColor": "default",
   "menuAccent": "subtle",
-  "registries": {
-    "@reactbits-starter": {
-      "url": "https://pro.reactbits.dev/api/r/starter/{name}.json",
-      "headers": {
-        "Authorization": "Bearer ${REACTBITS_LICENSE_KEY}"
-      }
-    }
-  }
+  "registries": {}
 }

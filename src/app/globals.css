@@ -60,8 +60,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif, ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "Geist Mono", "Geist Mono Fallback", ui-monospace, monospace, ui-monospace, monospace;
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
   --font-heading: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -113,7 +113,6 @@
   }
   html {
     @apply font-sans;
-    scroll-behavior: smooth;
   }
 }
 
@@ -131,72 +130,12 @@
   clip-path: polygon(18px 0, 100% 0, 100% calc(100% - 18px), calc(100% - 18px) 100%, 0 100%, 0 18px);
 }
 
-/* ─── Skew / lean containers  / text /  ──────────────────── */
-.skew-container {
-  transform: skewX(-4deg);
-}
-.skew-container > * {
-  transform: skewX(4deg);
-}
-
-/* ─── Glassmorphism utility (dark glass, no border-radius) ── */
+/* ─── Glassmorphism utility ───────────────────────────────── */
 .glass {
-  position: relative;
-  background: rgba(8, 12, 18, 0.72);
-  border: 1px solid transparent;
-  overflow: hidden;
-}
-/* Blur layer — sits behind content, not clipped */
-.glass::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  z-index: 0;
-}
-/* Ensure content is above blur layer */
-.glass > * {
-  position: relative;
-  z-index: 1;
-}
-/* Animated gradient border */
-.glass::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  border: 1px solid transparent;
-  background:
-    linear-gradient(180deg,
-      rgba(0, 212, 255, 0.25) 0%,
-      rgba(0, 212, 255, 0.08) 30%,
-      rgba(0, 212, 255, 0.03) 60%,
-      rgba(0, 212, 255, 0.08) 80%,
-      rgba(0, 212, 255, 0.2) 100%
-    ) border-box;
-  -webkit-mask:
-    linear-gradient(#fff 0 0) padding-box,
-    linear-gradient(#fff 0 0);
-  mask:
-    linear-gradient(#fff 0 0) padding-box,
-    linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  animation: borderPulse 4s ease-in-out infinite;
-}
-@keyframes borderPulse {
-  0%, 100% { opacity: 0.7; }
-  50% { opacity: 1; }
-}
-@keyframes pulseGlow {
-  0%, 100% { box-shadow: 0 0 20px rgba(0,212,255,0.15), 0 0 40px rgba(0,212,255,0.05); }
-  50% { box-shadow: 0 0 30px rgba(0,212,255,0.25), 0 0 60px rgba(0,212,255,0.1); }
-}
-
-.glass-inner {
-  background: rgba(255, 255, 255, 0.035);
-  border: 1px solid rgba(0, 212, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--trench-border);
 }
 
 /* ─── Animated background ────────────────────────────────── */
@@ -253,19 +192,11 @@
   100% { transform: translateY(-150px); }
 }
 
-/* ─── Scrollbar hide (global + targeted) ─────────────────── */
+/* ─── Scrollbar hide ──────────────────────────────────────── */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
 .no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-/* Nuclear scrollbar kill — hide on ALL nested elements too */
-.no-scrollbar *::-webkit-scrollbar {
-  display: none;
-}
-.no-scrollbar * {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }

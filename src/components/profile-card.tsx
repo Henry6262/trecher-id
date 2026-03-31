@@ -58,7 +58,6 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets, traderS
       {/* Main card — CutCorner with blur */}
       <CutCorner
         cut="lg"
-        blur={true}
         bg="rgba(8,12,18,0.72)"
         borderColor="rgba(0,212,255,0.15)"
         borderWidth={1}

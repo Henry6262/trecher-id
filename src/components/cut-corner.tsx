@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils';
 import type { ReactNode, CSSProperties } from 'react';
 
-export type CutSize = 'xs' | 'sm' | 'md' | 'lg';
+type CutSize = 'xs' | 'sm' | 'md' | 'lg';
 
 const CUT_PX: Record<CutSize, string> = {
   xs: '4px',
@@ -21,7 +21,6 @@ interface CutCornerProps {
   borderWidth?: number;
   borderColor?: string;
   bg?: string;
-  blur?: boolean;
   style?: CSSProperties;
   onClick?: () => void;
 }
@@ -31,9 +30,8 @@ export function CutCorner({
   className,
   cut = 'md',
   borderWidth = 1,
-  borderColor = 'rgba(0,212,255,0.12)',
-  bg = 'rgba(8,12,18,0.75)',
-  blur = false,
+  borderColor = 'var(--trench-border)',
+  bg = 'rgba(255,255,255,0.03)',
   style,
   onClick,
 }: CutCornerProps) {
@@ -41,50 +39,10 @@ export function CutCorner({
   const clip = clipPath(cutVal);
 
   return (
-    <div className={cn('relative', className)} style={style} onClick={onClick}>
-      {/* Border shape layer — clipped */}
-      <div
-        aria-hidden
-        className="absolute inset-0 pointer-events-none"
-        style={{ clipPath: clip, background: borderColor }}
-      />
-      {/* Blur layer — NOT clipped, sits behind content */}
-      {blur && (
-        <div
-          aria-hidden
-          className="absolute pointer-events-none"
-          style={{
-            inset: borderWidth,
-            backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)',
-            background: bg,
-          }}
-        />
-      )}
-      {/* Fill layer — clipped for shape, no blur */}
-      {!blur && (
-        <div
-          aria-hidden
-          className="absolute pointer-events-none"
-          style={{
-            inset: borderWidth,
-            clipPath: clip,
-            background: bg,
-          }}
-        />
-      )}
-      {/* Content — above everything */}
-      <div
-        className="relative"
-        style={{
-          padding: borderWidth,
-          clipPath: clip,
-          zIndex: 1,
-        }}
-      >
-        <div style={{ margin: borderWidth }}>
-          {children}
-        </div>
+    <div className={cn('relative', className)} style={{ clipPath: clip, ...style }} onClick={onClick}>
+      <div aria-hidden className="absolute inset-0 pointer-events-none" style={{ background: borderColor }} />
+      <div className="relative" style={{ margin: borderWidth, clipPath: clip, background: bg }}>
+        {children}
       </div>
     </div>
   );

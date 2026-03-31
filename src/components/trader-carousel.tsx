@@ -4,15 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRef, useEffect, useState } from 'react';
 import { Check } from 'lucide-react';
-import { GlassCard } from './glass-card';
-
-interface TradeData {
-  readonly tokenSymbol: string;
-  readonly tokenImageUrl?: string | null;
-  readonly pnlPercent: string;
-  readonly buy?: string | null;
-  readonly sell?: string | null;
-}
+import { BorderGlow } from './border-glow';
 
 interface Trader {
   readonly username: string;
@@ -21,7 +13,11 @@ interface Trader {
   readonly pnl: string;
   readonly winRate: string;
   readonly trades: string;
-  readonly topTrades?: readonly TradeData[];
+  readonly recentToken?: string | null;
+  readonly recentTokenImage?: string | null;
+  readonly recentPnl?: string | null;
+  readonly recentBuy?: string | null;
+  readonly recentSell?: string | null;
 }
 
 interface TraderCarouselProps {
@@ -57,6 +53,7 @@ export function TraderCarousel({ traders }: TraderCarouselProps) {
 
   return (
     <div className="relative mx-auto max-w-[900px] overflow-hidden">
+      {/* Fade overlays left + right — strong, wide */}
       <div className="absolute left-0 top-0 bottom-0 w-36 z-10 pointer-events-none" style={{ background: 'linear-gradient(to right, #050508 20%, transparent)' }} />
       <div className="absolute right-0 top-0 bottom-0 w-36 z-10 pointer-events-none" style={{ background: 'linear-gradient(to left, #050508 20%, transparent)' }} />
 
@@ -67,90 +64,118 @@ export function TraderCarousel({ traders }: TraderCarouselProps) {
         onMouseLeave={() => setIsPaused(false)}
       >
       {items.map((t, i) => (
-        <Link
+        <BorderGlow
           key={`${t.username}-${i}`}
-          href={`/${t.username}`}
-          className="flex-shrink-0 w-[300px] cursor-pointer block"
+          className="flex-shrink-0 w-[300px] cursor-pointer"
+          backgroundColor="rgba(8,12,18,0.78)"
+          glowRadius={20}
+          glowIntensity={0.6}
+          edgeSensitivity={25}
+          fillOpacity={0.2}
         >
-          <GlassCard cut={10} bg="rgba(8,12,18,0.85)">
-            {/* Accent top bar */}
-            <div style={{ height: '3px', background: 'linear-gradient(90deg, var(--trench-accent), transparent 70%)' }} />
-
-            <div className="p-4">
-              {/* Profile row — compact with PnL on right */}
-              <div className="flex items-center justify-between mb-3.5">
-                <div className="flex items-center gap-2.5">
-                  <div
-                    className="w-[38px] h-[38px] rounded-full overflow-hidden flex-shrink-0"
-                    style={{ border: '2px solid rgba(0,212,255,0.25)', boxShadow: '0 0 16px rgba(0,212,255,0.15)' }}
-                  >
-                    <Image
-                      src={t.avatarUrl || `https://unavatar.io/twitter/${t.username}`}
-                      alt={t.name}
-                      width={38}
-                      height={38}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-1">
-                      <span className="text-[12px] font-bold text-white truncate">@{t.username}</span>
-                      <div className="w-[14px] h-[14px] rounded-full flex items-center justify-center flex-shrink-0" style={{ background: '#00D4FF' }}>
-                        <Check size={8} strokeWidth={3} className="text-black" />
-                      </div>
-                    </div>
-                    <span className="text-[8px] text-[var(--trench-text-muted)]">{t.trades} trades · {t.winRate} win</span>
-                  </div>
+          <Link
+            href={`/${t.username}`}
+            className="block relative group"
+            style={{ clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)' }}
+          >
+            {/* Main content */}
+            <div className="p-4 pr-[68px]">
+              {/* Avatar + name */}
+              <div className="flex items-center gap-3 mb-3">
+                <div
+                  className="w-11 h-11 rounded-full overflow-hidden flex-shrink-0"
+                  style={{ border: '2px solid rgba(0,212,255,0.25)', boxShadow: '0 0 16px rgba(0,212,255,0.15)' }}
+                >
+                  <Image
+                    src={t.avatarUrl || `https://unavatar.io/twitter/${t.username}`}
+                    alt={t.name}
+                    width={44}
+                    height={44}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
-                <div className="text-right flex-shrink-0">
-                  <div className="font-mono text-[14px] font-extrabold text-[var(--trench-green)]">{t.pnl}</div>
-                  <div className="text-[6px] tracking-[1px] text-[var(--trench-text-muted)]">PnL</div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1">
+                    <span className="text-[13px] font-bold text-white truncate">@{t.username}</span>
+                    <div className="w-[14px] h-[14px] rounded-full flex items-center justify-center flex-shrink-0" style={{ background: '#00D4FF' }}>
+                      <Check size={8} strokeWidth={3} className="text-black" />
+                    </div>
+                  </div>
+                  <span className="text-[9px] text-[var(--trench-text-muted)]">{t.name}</span>
                 </div>
               </div>
 
-              {/* Trade rows — Variant C style */}
-              {t.topTrades && t.topTrades.length > 0 && (
-                <div className="flex flex-col gap-1.5">
-                  {t.topTrades.map((trade, ti) => (
-                    <div key={ti} className="cut-xs" style={{ padding: '8px 10px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(0,212,255,0.06)' }}>
-                      <div className="flex items-center justify-between mb-1">
-                        <div className="flex items-center gap-1.5">
-                          <div className="w-5 h-5 rounded-full overflow-hidden flex-shrink-0" style={{ background: '#111', border: '1px solid rgba(0,212,255,0.15)' }}>
-                            {trade.tokenImageUrl ? (
-                              <Image src={trade.tokenImageUrl} alt={trade.tokenSymbol} width={20} height={20} className="w-full h-full object-cover" unoptimized />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center text-[6px] font-bold text-[var(--trench-accent)]">
-                                {trade.tokenSymbol.replace('$', '').slice(0, 2)}
-                              </div>
-                            )}
-                          </div>
-                          <span className="text-[11px] font-bold text-white">{trade.tokenSymbol}</span>
-                        </div>
-                        <span className="font-mono text-[12px] font-extrabold text-[var(--trench-green)]">{trade.pnlPercent}</span>
-                      </div>
-                      {(trade.buy || trade.sell) && (
-                        <div className="flex gap-1.5">
-                          {trade.buy && (
-                            <div className="cut-xs flex-1 flex justify-between text-[7px] px-1.5 py-0.5" style={{ background: 'rgba(0,212,255,0.02)' }}>
-                              <span className="text-[var(--trench-green)] font-semibold">BUY</span>
-                              <span className="font-mono text-[var(--trench-text)] font-semibold">{trade.buy} SOL</span>
-                            </div>
-                          )}
-                          {trade.sell && (
-                            <div className="cut-xs flex-1 flex justify-between text-[7px] px-1.5 py-0.5" style={{ background: 'rgba(0,212,255,0.02)' }}>
-                              <span className="text-[var(--trench-red)] font-semibold">SELL</span>
-                              <span className="font-mono text-[var(--trench-green)] font-semibold">{trade.sell} SOL</span>
-                            </div>
-                          )}
+              {/* PnL */}
+              <div className="text-[18px] font-bold font-mono text-[var(--trench-green)] mb-1">{t.pnl}</div>
+              <div className="text-[7px] text-[var(--trench-text-muted)] tracking-[1px] mb-3">TOTAL PnL</div>
+
+              {/* Recent trade — only if real data exists */}
+              {t.recentToken && (
+                <div className="cut-xs" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(0,212,255,0.06)', padding: '8px 10px' }}>
+                  <div className="flex items-center gap-2 mb-1.5">
+                    {/* Token image */}
+                    <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0" style={{ border: '1px solid rgba(0,212,255,0.15)', background: '#111' }}>
+                      {t.recentTokenImage ? (
+                        <Image src={t.recentTokenImage} alt={t.recentToken} width={24} height={24} className="w-full h-full object-cover" unoptimized />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-[8px] font-bold text-[var(--trench-accent)]">
+                          {t.recentToken.replace('$', '').slice(0, 2)}
                         </div>
                       )}
                     </div>
-                  ))}
+                    <span className="text-[11px] font-bold text-white flex-1">{t.recentToken}</span>
+                    <span className="text-[11px] font-bold font-mono text-[var(--trench-green)]">{t.recentPnl}</span>
+                  </div>
+                  <div className="flex gap-2">
+                    {t.recentBuy && (
+                      <div className="cut-xs flex-1 flex justify-between text-[8px] px-1.5 py-0.5" style={{ background: 'rgba(0,212,255,0.02)' }}>
+                        <span className="text-[var(--trench-green)] font-semibold">BUY</span>
+                        <span className="text-[var(--trench-text)] font-semibold">{t.recentBuy} SOL</span>
+                      </div>
+                    )}
+                    {t.recentSell && (
+                      <div className="cut-xs flex-1 flex justify-between text-[8px] px-1.5 py-0.5" style={{ background: 'rgba(0,212,255,0.02)' }}>
+                        <span className="text-[var(--trench-red)] font-semibold">SELL</span>
+                        <span className="text-[var(--trench-green)] font-semibold">{t.recentSell} SOL</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
-          </GlassCard>
-        </Link>
+
+            {/* Right side — 3 vertical stat pills, positioned higher */}
+            <div className="absolute right-[-1px] top-3 flex flex-col gap-1.5">
+              <div
+                className="flex items-center justify-center px-2.5 py-1.5 min-w-[48px]"
+                style={{ background: 'rgba(8,12,18,0.92)', border: '1px solid rgba(0,212,255,0.15)', clipPath: 'polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px)' }}
+              >
+                <div className="text-center">
+                  <div className="text-[10px] font-bold font-mono text-[var(--trench-green)]">{t.pnl}</div>
+                  <div className="text-[5px] text-[var(--trench-text-muted)] tracking-[1px]">PnL</div>
+                </div>
+              </div>
+              <div
+                className="flex items-center justify-center px-2.5 py-1.5 min-w-[48px]"
+                style={{ background: 'rgba(8,12,18,0.92)', border: '1px solid rgba(0,212,255,0.15)', clipPath: 'polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px)' }}
+              >
+                <div className="text-center">
+                  <div className="text-[10px] font-bold font-mono text-[var(--trench-accent)]">{t.winRate}</div>
+                  <div className="text-[5px] text-[var(--trench-text-muted)] tracking-[1px]">WIN</div>
+                </div>
+              </div>
+              <div
+                className="flex items-center justify-center px-2.5 py-1.5 min-w-[48px]"
+                style={{ background: 'rgba(8,12,18,0.92)', border: '1px solid rgba(0,212,255,0.15)', clipPath: 'polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px)' }}
+              >
+                <div className="text-center">
+                  <div className="text-[10px] font-bold font-mono text-[var(--trench-text)]">{t.trades}</div>
+                  <div className="text-[5px] text-[var(--trench-text-muted)] tracking-[1px]">TRADES</div>
+                </div>
+              </div>
+            </div>
+          </Link>
+        </BorderGlow>
       ))}
       </div>
     </div>

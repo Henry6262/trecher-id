@@ -1,18 +1,16 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { usePrivy } from '@privy-io/react-auth';
-import { GlassCard } from '@/components/glass-card';
+import Link from 'next/link';
+import { CutCorner } from '@/components/cut-corner';
 import { CutButton } from '@/components/cut-button';
 import { Input } from '@/components/ui/input';
-import { Star } from 'lucide-react';
 
 interface Wallet {
   id: string;
   address: string;
   chain: string;
   verified: boolean;
-  isMain: boolean;
   linkedAt: string;
 }
 
@@ -21,20 +19,19 @@ function shortAddr(addr: string) {
 }
 
 export default function WalletsPage() {
-  const { linkWallet } = usePrivy();
   const [wallets, setWallets] = useState<Wallet[]>([]);
   const [loading, setLoading] = useState(true);
   const [newAddress, setNewAddress] = useState('');
   const [adding, setAdding] = useState(false);
   const [addError, setAddError] = useState('');
   const [removing, setRemoving] = useState<string | null>(null);
-  const [showManual, setShowManual] = useState(false);
-  const [settingMain, setSettingMain] = useState<string | null>(null);
 
   useEffect(() => {
     fetch('/api/wallets')
       .then((r) => r.json())
-      .then((data) => setWallets(Array.isArray(data) ? data : []))
+      .then((data) => {
+        setWallets(Array.isArray(data) ? data : []);
+      })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
@@ -54,42 +51,12 @@ export default function WalletsPage() {
         const created: Wallet = await res.json();
         setWallets((prev) => [...prev, created]);
         setNewAddress('');
-        setShowManual(false);
       } else {
         const data = await res.json();
         setAddError(data.error ?? 'Failed to add wallet');
       }
     } finally {
       setAdding(false);
-    }
-  }
-
-  async function handleConnectWallet() {
-    try {
-      await linkWallet();
-      // After Privy links the wallet, we need to sync it to our DB
-      // The linked wallet address will be available via usePrivy().user.linkedAccounts
-      // For now, show the manual input as fallback
-    } catch {
-      // User cancelled or error — show manual option
-    }
-  }
-
-  async function setMainWallet(address: string) {
-    setSettingMain(address);
-    try {
-      const res = await fetch('/api/wallets/main', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ address }),
-      });
-      if (res.ok) {
-        setWallets((prev) =>
-          prev.map((w) => ({ ...w, isMain: w.address === address })),
-        );
-      }
-    } finally {
-      setSettingMain(null);
     }
   }
 
@@ -108,122 +75,107 @@ export default function WalletsPage() {
   }
 
   return (
-    <div className="space-y-6 pb-16">
-      {/* Connect wallet */}
-      <GlassCard cut={10}>
-        <div className="p-5 space-y-4">
-          <p className="text-[10px] font-mono text-[var(--trench-text-muted)] tracking-[2px] uppercase">
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-mono font-bold text-[var(--trench-accent)] tracking-wide">
+          WALLETS
+        </h1>
+        <Link href="/dashboard" className="text-xs font-mono text-[var(--trench-text-muted)] hover:text-[var(--trench-text)] transition-colors">
+          ← BACK
+        </Link>
+      </div>
+
+      {/* Add wallet */}
+      <CutCorner cut="md" className="w-full">
+        <div className="p-5 space-y-3">
+          <p className="text-xs font-mono text-[var(--trench-text-muted)] tracking-widest uppercase">
             Link a Wallet
           </p>
-
-          <div className="flex gap-3">
-            <CutButton onClick={handleConnectWallet} size="sm">
-              Connect Wallet
-            </CutButton>
-            <CutButton onClick={() => setShowManual(!showManual)} variant="secondary" size="sm">
-              {showManual ? 'Hide' : 'Paste Address'}
+          <div className="flex gap-2">
+            <Input
+              value={newAddress}
+              onChange={(e) => setNewAddress(e.target.value)}
+              placeholder="Solana wallet address"
+              className="bg-transparent border-[var(--trench-border)] text-[var(--trench-text)] font-mono text-sm focus-visible:ring-[var(--trench-accent)] focus-visible:ring-1"
+              onKeyDown={(e) => e.key === 'Enter' && addWallet()}
+            />
+            <CutButton
+              onClick={addWallet}
+              disabled={adding || !newAddress.trim()}
+              size="sm"
+            >
+              {adding ? 'Adding...' : 'Add'}
             </CutButton>
           </div>
-
-          {showManual && (
-            <div className="space-y-2 pt-2">
-              <div className="flex gap-2">
-                <Input
-                  value={newAddress}
-                  onChange={(e) => setNewAddress(e.target.value)}
-                  placeholder="Solana wallet address"
-                  className="bg-transparent border-[var(--trench-border)] text-[var(--trench-text)] font-mono text-sm focus-visible:ring-[var(--trench-accent)] focus-visible:ring-1"
-                  onKeyDown={(e) => e.key === 'Enter' && addWallet()}
-                />
-                <CutButton onClick={addWallet} disabled={adding || !newAddress.trim()} size="sm">
-                  {adding ? '...' : 'Add'}
-                </CutButton>
-              </div>
-              {addError && <p className="text-[10px] font-mono text-red-400">{addError}</p>}
-            </div>
+          {addError && (
+            <p className="text-xs font-mono text-red-400">{addError}</p>
           )}
-
-          <p className="text-[10px] font-mono text-[var(--trench-text-muted)]">
-            Connect your Solana wallet or paste an address. We fetch your on-chain trading history automatically.
+          <p className="text-xs font-mono text-[var(--trench-text-muted)]">
+            Wallets are used to fetch your on-chain trading history.
           </p>
         </div>
-      </GlassCard>
+      </CutCorner>
 
       {/* Wallet list */}
       <div className="space-y-3">
-        <p className="text-[10px] font-mono text-[var(--trench-text-muted)] tracking-[2px] uppercase">
+        <p className="text-xs font-mono text-[var(--trench-text-muted)] tracking-widest uppercase">
           Linked Wallets ({wallets.length})
         </p>
 
         {loading && (
-          <p className="text-[10px] font-mono text-[var(--trench-text-muted)] animate-pulse">Loading...</p>
+          <p className="text-xs font-mono text-[var(--trench-text-muted)] animate-pulse">Loading...</p>
         )}
 
         {!loading && wallets.length === 0 && (
-          <GlassCard cut={8} glow={false}>
+          <CutCorner cut="sm" className="w-full">
             <div className="p-5 text-center">
-              <p className="text-[11px] font-mono text-[var(--trench-text-muted)]">No wallets linked yet.</p>
+              <p className="text-sm font-mono text-[var(--trench-text-muted)]">
+                No wallets linked yet.
+              </p>
             </div>
-          </GlassCard>
+          </CutCorner>
         )}
 
         {wallets.map((wallet) => (
-          <GlassCard key={wallet.id} cut={8} glow={false}>
+          <CutCorner key={wallet.id} cut="sm" className="w-full">
             <div className="p-4 flex items-center justify-between gap-3">
               <div className="min-w-0">
-                <div className="flex items-center gap-1.5">
-                  {wallet.isMain && <Star size={12} className="text-[var(--trench-accent)] fill-[var(--trench-accent)] shrink-0" />}
-                  <p className="text-sm font-mono text-[var(--trench-text)] break-all">{shortAddr(wallet.address)}</p>
-                </div>
+                <p className="text-sm font-mono text-[var(--trench-text)] break-all">
+                  {shortAddr(wallet.address)}
+                </p>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="cut-xs text-[7px] tracking-[1px] px-2 py-0.5 font-semibold text-[var(--trench-accent)] uppercase" style={{ background: 'rgba(0,212,255,0.08)', border: '1px solid rgba(0,212,255,0.12)' }}>
+                  <span className="text-xs font-mono text-[var(--trench-text-muted)] uppercase">
                     {wallet.chain}
                   </span>
                   {wallet.verified && (
-                    <span className="cut-xs text-[7px] tracking-[1px] px-2 py-0.5 font-semibold text-[var(--trench-green)]" style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.12)' }}>
-                      VERIFIED
-                    </span>
+                    <span className="text-xs font-mono text-green-400">✓ verified</span>
                   )}
-                  {wallet.isMain && (
-                    <span className="cut-xs text-[7px] tracking-[1px] px-2 py-0.5 font-semibold text-[var(--trench-accent)]" style={{ background: 'rgba(0,212,255,0.08)', border: '1px solid rgba(0,212,255,0.12)' }}>
-                      MAIN
-                    </span>
-                  )}
-                  <span className="text-[9px] font-mono text-[var(--trench-text-muted)]">
+                  <span className="text-xs font-mono text-[var(--trench-text-muted)]">
                     {new Date(wallet.linkedAt).toLocaleDateString()}
                   </span>
                 </div>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
-                {!wallet.isMain && (
-                  <CutButton
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => setMainWallet(wallet.address)}
-                    disabled={settingMain === wallet.address}
-                  >
-                    {settingMain === wallet.address ? '...' : 'Set Main'}
-                  </CutButton>
-                )}
-                <CutButton
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => removeWallet(wallet.address)}
-                  disabled={removing === wallet.address}
-                  className="text-red-400 hover:text-red-300"
-                >
-                  {removing === wallet.address ? '...' : 'Remove'}
-                </CutButton>
-              </div>
+              <CutButton
+                variant="ghost"
+                size="sm"
+                onClick={() => removeWallet(wallet.address)}
+                disabled={removing === wallet.address}
+                className="shrink-0 text-red-400 hover:text-red-300"
+              >
+                {removing === wallet.address ? '...' : 'Remove'}
+              </CutButton>
             </div>
-          </GlassCard>
+          </CutCorner>
         ))}
       </div>
 
       {wallets.length > 0 && (
-        <CutButton href="/dashboard/trades" variant="secondary" size="sm">
-          View Trades →
-        </CutButton>
+        <div className="pt-2">
+          <CutButton href="/dashboard/trades" variant="secondary" size="sm">
+            View Trades →
+          </CutButton>
+        </div>
       )}
     </div>
   );

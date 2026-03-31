@@ -7,8 +7,11 @@ import type { ReactNode } from 'react';
 interface GlassCardProps {
   children: ReactNode;
   className?: string;
+  /** Cut corner size in px */
   cut?: number;
+  /** Whether to show BorderGlow on hover */
   glow?: boolean;
+  /** Override background */
   bg?: string;
 }
 
@@ -21,22 +24,21 @@ export function GlassCard({
 }: GlassCardProps) {
   const clipPath = `polygon(${cut}px 0, 100% 0, 100% calc(100% - ${cut}px), calc(100% - ${cut}px) 100%, 0 100%, 0 ${cut}px)`;
 
-  const blurContent = (
-    <div
-      style={{
-        clipPath,
-        background: bg,
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
-        border: '1px solid rgba(0,212,255,0.1)',
-      }}
-    >
-      {children}
-    </div>
-  );
-
   if (!glow) {
-    return <div className={cn('relative', className)}>{blurContent}</div>;
+    return (
+      <div
+        className={cn('relative', className)}
+        style={{
+          clipPath,
+          background: bg,
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          border: '1px solid rgba(0,212,255,0.1)',
+        }}
+      >
+        {children}
+      </div>
+    );
   }
 
   return (
@@ -51,7 +53,9 @@ export function GlassCard({
       edgeSensitivity={25}
       fillOpacity={0.25}
     >
-      {blurContent}
+      <div style={{ clipPath }}>
+        {children}
+      </div>
     </BorderGlow>
   );
 }

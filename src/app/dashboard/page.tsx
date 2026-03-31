@@ -1,9 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
-import { GlassCard } from '@/components/glass-card';
+import { CutCorner } from '@/components/cut-corner';
 import { CutButton } from '@/components/cut-button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -28,6 +27,7 @@ const ICON_OPTIONS = ['🔗', '🐦', '📸', '💬', '🎮', '📺', '🎵', '�
 
 export default function DashboardPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [displayName, setDisplayName] = useState('');
   const [bio, setBio] = useState('');
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState('');
@@ -43,6 +43,7 @@ export default function DashboardPage() {
       .then((r) => r.json())
       .then((data: Profile) => {
         setProfile(data);
+        setDisplayName(data.displayName ?? '');
         setBio(data.bio ?? '');
       })
       .catch(() => {});
@@ -60,7 +61,7 @@ export default function DashboardPage() {
       const res = await fetch('/api/profile', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ bio }),
+        body: JSON.stringify({ displayName, bio }),
       });
       if (res.ok) {
         const updated: Profile = await res.json();
@@ -106,54 +107,61 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="space-y-6 pb-16">
-      {/* View profile link */}
-      {profile?.username && (
-        <div className="flex justify-end">
-          <Link
-            href={`/${profile.username}`}
-            className="cut-xs px-3 py-1 text-[10px] font-mono tracking-[1px] text-[var(--trench-accent)] border border-[rgba(0,212,255,0.15)] hover:bg-[rgba(0,212,255,0.06)] transition-colors"
-          >
-            VIEW PROFILE
+    <div className="space-y-8">
+      {/* Header nav */}
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-mono font-bold text-[var(--trench-accent)] tracking-wide">
+          DASHBOARD
+        </h1>
+        <div className="flex items-center gap-3 text-xs font-mono">
+          <Link href="/dashboard/trades" className="text-[var(--trench-text-muted)] hover:text-[var(--trench-text)] transition-colors">
+            TRADES
           </Link>
+          <Link href="/dashboard/wallets" className="text-[var(--trench-text-muted)] hover:text-[var(--trench-text)] transition-colors">
+            WALLETS
+          </Link>
+          {profile?.username && (
+            <Link
+              href={`/${profile.username}`}
+              className="text-[var(--trench-accent)] hover:opacity-80 transition-opacity"
+            >
+              VIEW PROFILE ↗
+            </Link>
+          )}
         </div>
-      )}
+      </div>
 
       {/* Profile editor */}
-      <GlassCard cut={10}>
+      <CutCorner cut="md" className="w-full">
         <div className="p-5 space-y-4">
-          <div className="flex items-center gap-3">
-            {profile?.avatarUrl && (
-              <div className="h-14 w-14 rounded-full overflow-hidden flex-shrink-0" style={{ border: '2px solid rgba(0,212,255,0.25)', boxShadow: '0 0 20px rgba(0,212,255,0.15)' }}>
-                <Image
-                  src={profile.avatarUrl}
-                  alt={profile.displayName ?? ''}
-                  width={56}
-                  height={56}
-                  className="h-full w-full object-cover"
-                />
-              </div>
-            )}
+          <p className="text-xs font-mono text-[var(--trench-text-muted)] tracking-widest uppercase">
+            Profile
+          </p>
+          <div className="space-y-3">
             <div>
-              <p className="text-[10px] font-mono text-[var(--trench-text-muted)] tracking-[2px] uppercase mb-1">Profile</p>
-              <p className="text-sm font-bold text-white">{profile?.displayName}</p>
-              <p className="text-[10px] font-mono text-[var(--trench-text-muted)]">@{profile?.username}</p>
+              <label className="block text-xs font-mono text-[var(--trench-text-muted)] mb-1">
+                Display Name
+              </label>
+              <Input
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                placeholder="Your name"
+                className="bg-transparent border-[var(--trench-border)] text-[var(--trench-text)] font-mono text-sm focus-visible:ring-[var(--trench-accent)] focus-visible:ring-1"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-mono text-[var(--trench-text-muted)] mb-1">
+                Bio
+              </label>
+              <Textarea
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+                placeholder="Short bio..."
+                rows={3}
+                className="bg-transparent border-[var(--trench-border)] text-[var(--trench-text)] font-mono text-sm resize-none focus-visible:ring-[var(--trench-accent)] focus-visible:ring-1"
+              />
             </div>
           </div>
-
-          <div>
-            <label className="block text-[10px] font-mono text-[var(--trench-text-muted)] tracking-[1px] mb-1">
-              BIO
-            </label>
-            <Textarea
-              value={bio}
-              onChange={(e) => setBio(e.target.value)}
-              placeholder="Short bio..."
-              rows={3}
-              className="bg-transparent border-[var(--trench-border)] text-[var(--trench-text)] font-mono text-sm resize-none focus-visible:ring-[var(--trench-accent)] focus-visible:ring-1"
-            />
-          </div>
-
           <div className="flex items-center gap-3">
             <CutButton onClick={saveProfile} disabled={saving} size="sm">
               {saving ? 'Saving...' : 'Save Profile'}
@@ -163,27 +171,28 @@ export default function DashboardPage() {
             )}
           </div>
         </div>
-      </GlassCard>
+      </CutCorner>
 
       {/* Links manager */}
-      <GlassCard cut={10}>
+      <CutCorner cut="md" className="w-full">
         <div className="p-5 space-y-4">
-          <p className="text-[10px] font-mono text-[var(--trench-text-muted)] tracking-[2px] uppercase">
+          <p className="text-xs font-mono text-[var(--trench-text-muted)] tracking-widest uppercase">
             Links
           </p>
 
+          {/* Existing links */}
           {links.length > 0 ? (
             <div className="space-y-2">
               {links.map((link) => (
                 <div
                   key={link.id}
-                  className="flex items-center justify-between gap-3 py-2 border-b border-[rgba(0,212,255,0.06)] last:border-0"
+                  className="flex items-center justify-between gap-3 py-2 border-b border-[var(--trench-border)] last:border-0"
                 >
                   <div className="flex items-center gap-2 min-w-0">
                     <span className="text-base leading-none">{link.icon ?? '🔗'}</span>
                     <div className="min-w-0">
                       <p className="text-sm font-mono text-[var(--trench-text)] truncate">{link.title}</p>
-                      <p className="text-[10px] font-mono text-[var(--trench-text-muted)] truncate">{link.url}</p>
+                      <p className="text-xs font-mono text-[var(--trench-text-muted)] truncate">{link.url}</p>
                     </div>
                   </div>
                   <CutButton
@@ -198,16 +207,17 @@ export default function DashboardPage() {
               ))}
             </div>
           ) : (
-            <p className="text-[10px] font-mono text-[var(--trench-text-muted)]">No links yet.</p>
+            <p className="text-xs font-mono text-[var(--trench-text-muted)]">No links yet.</p>
           )}
 
-          <div className="space-y-3 pt-2 border-t border-[rgba(0,212,255,0.06)]">
-            <p className="text-[10px] font-mono text-[var(--trench-text-muted)]">Add a link</p>
+          {/* Add link form */}
+          <div className="space-y-3 pt-2 border-t border-[var(--trench-border)]">
+            <p className="text-xs font-mono text-[var(--trench-text-muted)]">Add a link</p>
             <div className="flex gap-2">
               <select
                 value={newIcon}
                 onChange={(e) => setNewIcon(e.target.value)}
-                className="bg-[var(--trench-surface-elevated)] border border-[var(--trench-border)] text-[var(--trench-text)] font-mono text-sm px-2 py-1 cut-xs focus:outline-none focus:ring-1 focus:ring-[var(--trench-accent)]"
+                className="bg-[var(--trench-surface-elevated)] border border-[var(--trench-border)] text-[var(--trench-text)] font-mono text-sm rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[var(--trench-accent)]"
               >
                 {ICON_OPTIONS.map((icon) => (
                   <option key={icon} value={icon}>{icon}</option>
@@ -235,7 +245,7 @@ export default function DashboardPage() {
             </CutButton>
           </div>
         </div>
-      </GlassCard>
+      </CutCorner>
     </div>
   );
 }

@@ -44,12 +44,12 @@ model Wallet {
   address        String
   chain          String    @default("solana")
   verified       Boolean   @default(false)
-  isMain         Boolean   @default(false)
   linkedAt       DateTime  @default(now())
   totalPnlUsd    Float?
   winRate        Float?
   totalTrades    Int?
   statsUpdatedAt DateTime?
+  isMain         Boolean   @default(false)
 
   @@unique([userId, address])
   @@index([userId])
@@ -77,7 +77,7 @@ model UserRanking {
   id        String   @id @default(cuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  period    String   // "1d", "3d", "7d", "all"
+  period    String
   pnlUsd    Float
   pnlSol    Float
   winRate   Float
