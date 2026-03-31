@@ -3,79 +3,58 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trench ID — Feature Mockups</title>
+<title>Trench ID — Feature Mockups v2</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
-  :root { --accent:#00D4FF; --bg:#050508; --text:#e4e4e7; --muted:#71717a; --green:#22c55e; --red:#ef4444; }
+  :root { --accent:#00D4FF; --bg:#050508; --text:#e4e4e7; --muted:#71717a; --green:#22c55e; --red:#ef4444; --surface:rgba(8,12,18,0.85); }
   * { margin:0; padding:0; box-sizing:border-box; }
   body { background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
   .mono { font-family:'JetBrains Mono',monospace; }
   .cut-xs { clip-path:polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px); }
   .cut-sm { clip-path:polygon(7px 0,100% 0,100% calc(100% - 7px),calc(100% - 7px) 100%,0 100%,0 7px); }
   .cut-md { clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px); }
-  .glass { background:rgba(8,12,18,0.85); backdrop-filter:blur(16px); border:1px solid rgba(0,212,255,0.1); }
-  .nav { position:sticky; top:0; z-index:100; background:rgba(5,5,8,0.95); backdrop-filter:blur(12px); border-bottom:1px solid rgba(0,212,255,0.08); padding:12px 24px; display:flex; gap:16px; flex-wrap:wrap; align-items:center; }
-  .nav a { color:var(--accent); text-decoration:none; font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase; padding:6px 14px; border:1px solid rgba(0,212,255,0.15); clip-path:polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px); transition:all 0.2s; }
-  .nav a:hover { background:rgba(0,212,255,0.08); }
-  .nav .title { color:var(--muted); font-size:10px; letter-spacing:2px; }
-  .section { max-width:900px; margin:0 auto; padding:48px 24px; border-bottom:1px solid rgba(0,212,255,0.06); }
-  .label { font-size:9px; letter-spacing:3px; text-transform:uppercase; color:var(--accent); font-weight:700; margin-bottom:6px; }
-  .title { font-size:24px; font-weight:800; color:white; margin-bottom:4px; }
-  .desc { font-size:12px; color:var(--muted); margin-bottom:32px; }
-  .variant-tag { display:inline-block; font-size:8px; letter-spacing:2px; text-transform:uppercase; color:var(--bg); background:var(--accent); padding:2px 8px; clip-path:polygon(3px 0,100% 0,100% calc(100% - 3px),calc(100% - 3px) 100%,0 100%,0 3px); margin-bottom:12px; font-weight:700; }
+  .glass { background:var(--surface); backdrop-filter:blur(16px); border:1px solid rgba(0,212,255,0.1); }
 
-  /* Period tabs */
-  .tabs { display:flex; gap:4px; margin-bottom:20px; }
-  .tab { padding:6px 16px; font-size:10px; font-weight:600; letter-spacing:1.5px; color:var(--muted); border:1px solid transparent; cursor:pointer; transition:all 0.2s; clip-path:polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px); }
+  .nav { position:sticky; top:0; z-index:100; background:rgba(5,5,8,0.95); backdrop-filter:blur(12px); padding:12px 24px; display:flex; gap:16px; align-items:center; }
+  .nav::after { content:''; position:absolute; bottom:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,rgba(0,212,255,0.2),transparent); }
+  .nav a { color:var(--accent); text-decoration:none; font-size:10px; font-weight:600; letter-spacing:1px; padding:5px 12px; border:1px solid rgba(0,212,255,0.12); clip-path:polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px); }
+  .nav .title { color:var(--muted); font-size:9px; letter-spacing:2px; }
+
+  .section { max-width:900px; margin:0 auto; padding:48px 24px; }
+  .label { font-size:9px; letter-spacing:3px; color:var(--accent); font-weight:700; margin-bottom:6px; }
+  .stitle { font-size:24px; font-weight:800; color:white; margin-bottom:4px; }
+  .desc { font-size:11px; color:var(--muted); margin-bottom:32px; }
+
+  .tabs { display:flex; gap:4px; margin-bottom:24px; }
+  .tab { padding:6px 16px; font-size:10px; font-weight:600; letter-spacing:1.5px; color:var(--muted); border:1px solid transparent; cursor:pointer; clip-path:polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px); }
   .tab.active { color:var(--accent); background:rgba(0,212,255,0.12); border-color:rgba(0,212,255,0.2); }
-  .tab:hover:not(.active) { color:var(--text); border-color:rgba(255,255,255,0.06); }
 
-  /* Leaderboard row */
-  .lb-row { display:flex; align-items:center; gap:12px; padding:12px 16px; margin-bottom:6px; transition:background 0.15s; }
-  .lb-row:hover { background:rgba(0,212,255,0.03); }
-  .lb-rank { width:32px; text-align:center; font-size:14px; font-weight:800; flex-shrink:0; }
-  .lb-rank.gold { color:#FFD700; }
-  .lb-rank.silver { color:#C0C0C0; }
-  .lb-rank.bronze { color:#CD7F32; }
-  .lb-avatar { width:36px; height:36px; border-radius:50%; border:2px solid rgba(0,212,255,0.2); overflow:hidden; flex-shrink:0; }
-  .lb-avatar img { width:100%; height:100%; object-fit:cover; }
-  .lb-info { flex:1; min-width:0; }
-  .lb-name { font-size:13px; font-weight:700; color:white; }
-  .lb-sub { font-size:9px; color:var(--muted); }
-  .lb-stat { text-align:right; min-width:70px; }
-  .lb-pnl { font-size:14px; font-weight:800; }
-  .lb-pnl.pos { color:var(--green); }
-  .lb-pnl.neg { color:var(--red); }
-  .lb-meta { font-size:8px; color:var(--muted); letter-spacing:1px; }
+  @keyframes pulseGold { 0%,100% { box-shadow:0 0 20px rgba(255,215,0,0.1), 0 0 40px rgba(255,215,0,0.05); } 50% { box-shadow:0 0 30px rgba(255,215,0,0.2), 0 0 60px rgba(255,215,0,0.1); } }
 
-  /* Stat element boxes */
-  .stat-grid { display:grid; grid-template-columns:repeat(2, 1fr); gap:8px; }
-  @media(min-width:640px) { .stat-grid { grid-template-columns:repeat(3, 1fr); } }
-  .stat-box { padding:14px 12px; background:rgba(255,255,255,0.03); border:1px solid rgba(0,212,255,0.08); }
-  .stat-val { font-size:18px; font-weight:800; line-height:1; margin-bottom:4px; }
-  .stat-label { font-size:7px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); }
+  .avatar-ring { border-radius:50%; overflow:hidden; flex-shrink:0; border:2px solid rgba(0,212,255,0.25); box-shadow:0 0 16px rgba(0,212,255,0.15); }
+  .check { width:14px; height:14px; background:var(--accent); border-radius:50%; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .check svg { width:8px; height:8px; }
+
+  /* Stat grid */
+  .stat-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:6px; }
+  @media(min-width:640px) { .stat-grid { grid-template-columns:repeat(3,1fr); } }
 </style>
 </head>
 <body>
 
 <div class="nav">
-  <span class="title mono">FEATURE MOCKUPS</span>
+  <span class="title mono">TRENCH ID — FEATURES V2</span>
   <a href="#leaderboard">Leaderboard</a>
-  <a href="#profile-stats">Profile Stats</a>
-  <a href="#wallet-main">Main Wallet</a>
+  <a href="#profile">Profile Stats</a>
 </div>
 
 <!-- ═══════════════════════════════════════ -->
 <!-- LEADERBOARD                            -->
 <!-- ═══════════════════════════════════════ -->
 <div id="leaderboard" class="section">
-  <div class="label">Feature 1</div>
-  <div class="title">Leaderboard</div>
-  <div class="desc">Ranked traders by realized PnL. Period tabs switch between 1D, 3D, 7D, All Time.</div>
-
-  <!-- VARIANT A: Clean table rows -->
-  <div class="variant-tag">A — Clean Table Rows</div>
-  <p style="font-size:11px; color:var(--muted); margin-bottom:16px;">Simple rows, rank badges, avatar + name left, PnL + win rate right.</p>
+  <div class="label">Leaderboard</div>
+  <div class="stitle">Top <span style="color:var(--accent);">Traders</span></div>
+  <div class="desc">Ranked by realized PnL. Updated every 4 hours from on-chain data.</div>
 
   <div class="tabs">
     <div class="tab mono">1D</div>
@@ -84,285 +63,278 @@
     <div class="tab mono">ALL</div>
   </div>
 
+  <!-- ══ EPIC PODIUM ══ -->
+  <div style="position:relative; margin-bottom:32px;">
+    <!-- Background glow behind podium -->
+    <div style="position:absolute; inset:-20px; background:radial-gradient(ellipse at 50% 60%, rgba(255,215,0,0.04) 0%, transparent 50%); pointer-events:none;"></div>
+
+    <div style="display:grid; grid-template-columns:1fr 1.2fr 1fr; gap:10px; align-items:end; position:relative;">
+
+      <!-- 2nd place -->
+      <div class="glass cut-md" style="text-align:center; position:relative; overflow:visible;">
+        <div style="height:2px; background:linear-gradient(90deg, transparent, rgba(192,192,192,0.4), transparent);"></div>
+        <div style="padding:20px 14px 16px;">
+          <div class="mono" style="font-size:11px; font-weight:800; color:#C0C0C0; letter-spacing:2px; margin-bottom:10px;">2ND</div>
+          <div style="width:52px; height:52px; border-radius:50%; overflow:hidden; margin:0 auto 10px; border:2.5px solid rgba(192,192,192,0.4); box-shadow:0 0 20px rgba(192,192,192,0.1);">
+            <img src="https://unavatar.io/twitter/schoen_xyz" style="width:100%; height:100%; object-fit:cover;">
+          </div>
+          <div style="display:flex; align-items:center; justify-content:center; gap:4px; margin-bottom:2px;">
+            <span style="font-size:12px; font-weight:700; color:white;">@schoen_xyz</span>
+            <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+          </div>
+          <div class="mono" style="font-size:18px; font-weight:800; color:var(--green); margin-top:8px;">+$9.0K</div>
+          <div style="display:flex; justify-content:center; gap:8px; margin-top:6px;">
+            <span class="mono" style="font-size:9px; color:var(--accent);">47% <span style="color:var(--muted);">win</span></span>
+            <span class="mono" style="font-size:9px; color:var(--muted);">19 trades</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 1st place — EPIC -->
+      <div style="position:relative;">
+        <!-- Outer glow halo -->
+        <div style="position:absolute; inset:-16px; background:radial-gradient(ellipse at center, rgba(255,215,0,0.06) 0%, transparent 70%); pointer-events:none;"></div>
+        <div class="glass cut-md" style="text-align:center; position:relative; border-color:rgba(255,215,0,0.2); animation:pulseGold 4s ease-in-out infinite;">
+          <div style="height:3px; background:linear-gradient(90deg, transparent 10%, #FFD700 50%, transparent 90%);"></div>
+          <div style="padding:24px 14px 20px;">
+            <div class="mono" style="font-size:13px; font-weight:900; color:#FFD700; letter-spacing:3px; margin-bottom:12px; text-shadow:0 0 20px rgba(255,215,0,0.3);">1ST</div>
+            <div style="width:68px; height:68px; border-radius:50%; overflow:hidden; margin:0 auto 12px; border:3px solid rgba(255,215,0,0.5); box-shadow:0 0 30px rgba(255,215,0,0.15), 0 0 60px rgba(255,215,0,0.05);">
+              <img src="https://unavatar.io/twitter/cented7" style="width:100%; height:100%; object-fit:cover;">
+            </div>
+            <div style="display:flex; align-items:center; justify-content:center; gap:4px; margin-bottom:2px;">
+              <span style="font-size:14px; font-weight:800; color:white;">@cented7</span>
+              <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+            </div>
+            <span style="font-size:9px; color:var(--muted);">Cented</span>
+            <div class="mono" style="font-size:24px; font-weight:900; color:var(--green); margin-top:10px; text-shadow:0 0 30px rgba(34,197,94,0.3);">+$11.9K</div>
+            <div style="display:flex; justify-content:center; gap:10px; margin-top:8px;">
+              <span class="mono" style="font-size:10px; color:var(--accent);">60% <span style="color:var(--muted);">win</span></span>
+              <span class="mono" style="font-size:10px; color:var(--muted);">144 trades</span>
+            </div>
+            <!-- Best trade chip -->
+            <div class="cut-xs" style="display:inline-flex; align-items:center; gap:4px; padding:4px 10px; margin-top:10px; background:rgba(34,197,94,0.06); border:1px solid rgba(34,197,94,0.12);">
+              <span style="font-size:8px; font-weight:600; color:white;">ANIME</span>
+              <span class="mono" style="font-size:8px; font-weight:700; color:var(--green);">+6,864%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3rd place -->
+      <div class="glass cut-md" style="text-align:center; position:relative;">
+        <div style="height:2px; background:linear-gradient(90deg, transparent, rgba(205,127,50,0.4), transparent);"></div>
+        <div style="padding:20px 14px 16px;">
+          <div class="mono" style="font-size:11px; font-weight:800; color:#CD7F32; letter-spacing:2px; margin-bottom:10px;">3RD</div>
+          <div style="width:52px; height:52px; border-radius:50%; overflow:hidden; margin:0 auto 10px; border:2.5px solid rgba(205,127,50,0.4); box-shadow:0 0 20px rgba(205,127,50,0.1);">
+            <img src="https://unavatar.io/twitter/theonomix" style="width:100%; height:100%; object-fit:cover;">
+          </div>
+          <div style="display:flex; align-items:center; justify-content:center; gap:4px; margin-bottom:2px;">
+            <span style="font-size:12px; font-weight:700; color:white;">@theonomix</span>
+            <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+          </div>
+          <div class="mono" style="font-size:18px; font-weight:800; color:var(--green); margin-top:8px;">+$7.1K</div>
+          <div style="display:flex; justify-content:center; gap:8px; margin-top:6px;">
+            <span class="mono" style="font-size:9px; color:var(--accent);">44% <span style="color:var(--muted);">win</span></span>
+            <span class="mono" style="font-size:9px; color:var(--muted);">140 trades</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ REST OF TABLE ══ -->
   <div class="glass cut-md" style="overflow:hidden;">
-    <!-- Header -->
-    <div style="display:flex; align-items:center; gap:12px; padding:10px 16px; border-bottom:1px solid rgba(0,212,255,0.06); font-size:8px; letter-spacing:2px; color:var(--muted);">
-      <span style="width:32px; text-align:center;">#</span>
+    <div style="display:flex; align-items:center; gap:12px; padding:8px 16px; border-bottom:1px solid rgba(0,212,255,0.06); font-size:7px; letter-spacing:2px; color:var(--muted);">
+      <span style="width:28px; text-align:center;">#</span>
       <span style="flex:1;">TRADER</span>
       <span style="min-width:70px; text-align:right;">PnL</span>
       <span style="min-width:50px; text-align:right;">WIN</span>
       <span style="min-width:50px; text-align:right;">TRADES</span>
     </div>
 
-    <div class="lb-row">
-      <div class="lb-rank gold mono">1</div>
-      <div class="lb-avatar"><img src="https://unavatar.io/twitter/cented7"></div>
-      <div class="lb-info">
-        <div class="lb-name">@cented7</div>
-        <div class="lb-sub">Cented</div>
-      </div>
-      <div class="lb-stat"><div class="lb-pnl pos mono">+$11.9K</div></div>
-      <div class="lb-stat"><div class="mono" style="font-size:12px; color:var(--accent);">60%</div></div>
-      <div class="lb-stat"><div class="mono" style="font-size:12px;">144</div></div>
+    <div style="display:flex; align-items:center; gap:12px; padding:10px 16px; transition:background 0.15s;" onmouseover="this.style.background='rgba(0,212,255,0.03)'" onmouseout="this.style.background='transparent'">
+      <span class="mono" style="width:28px; text-align:center; font-size:12px; font-weight:700; color:var(--muted);">4</span>
+      <div class="avatar-ring" style="width:32px; height:32px;"><img src="https://unavatar.io/twitter/blueycryp" style="width:100%; height:100%; object-fit:cover;"></div>
+      <div style="flex:1;"><span style="font-size:12px; font-weight:700; color:white;">@blueycryp</span></div>
+      <span class="mono" style="min-width:70px; text-align:right; font-size:13px; font-weight:800; color:var(--green);">+$5.5K</span>
+      <span class="mono" style="min-width:50px; text-align:right; font-size:11px; color:var(--accent);">13%</span>
+      <span class="mono" style="min-width:50px; text-align:right; font-size:11px;">30</span>
     </div>
 
-    <div class="lb-row">
-      <div class="lb-rank silver mono">2</div>
-      <div class="lb-avatar"><img src="https://unavatar.io/twitter/schoen_xyz"></div>
-      <div class="lb-info">
-        <div class="lb-name">@schoen_xyz</div>
-        <div class="lb-sub">Schoen</div>
-      </div>
-      <div class="lb-stat"><div class="lb-pnl pos mono">+$9.0K</div></div>
-      <div class="lb-stat"><div class="mono" style="font-size:12px; color:var(--accent);">47%</div></div>
-      <div class="lb-stat"><div class="mono" style="font-size:12px;">19</div></div>
+    <div style="display:flex; align-items:center; gap:12px; padding:10px 16px;" onmouseover="this.style.background='rgba(0,212,255,0.03)'" onmouseout="this.style.background='transparent'">
+      <span class="mono" style="width:28px; text-align:center; font-size:12px; font-weight:700; color:var(--muted);">5</span>
+      <div class="avatar-ring" style="width:32px; height:32px;"><img src="https://unavatar.io/twitter/imsheepsol" style="width:100%; height:100%; object-fit:cover;"></div>
+      <div style="flex:1;"><span style="font-size:12px; font-weight:700; color:white;">@imsheepsol</span></div>
+      <span class="mono" style="min-width:70px; text-align:right; font-size:13px; font-weight:800; color:var(--green);">+$4.6K</span>
+      <span class="mono" style="min-width:50px; text-align:right; font-size:11px; color:var(--accent);">82%</span>
+      <span class="mono" style="min-width:50px; text-align:right; font-size:11px;">39</span>
     </div>
 
-    <div class="lb-row">
-      <div class="lb-rank bronze mono">3</div>
-      <div class="lb-avatar"><img src="https://unavatar.io/twitter/theonomix"></div>
-      <div class="lb-info">
-        <div class="lb-name">@theonomix</div>
-        <div class="lb-sub">theo</div>
-      </div>
-      <div class="lb-stat"><div class="lb-pnl pos mono">+$7.1K</div></div>
-      <div class="lb-stat"><div class="mono" style="font-size:12px; color:var(--accent);">44%</div></div>
-      <div class="lb-stat"><div class="mono" style="font-size:12px;">140</div></div>
+    <div style="display:flex; align-items:center; gap:12px; padding:10px 16px;" onmouseover="this.style.background='rgba(0,212,255,0.03)'" onmouseout="this.style.background='transparent'">
+      <span class="mono" style="width:28px; text-align:center; font-size:12px; font-weight:700; color:var(--muted);">6</span>
+      <div class="avatar-ring" style="width:32px; height:32px;"><img src="https://unavatar.io/twitter/ratwizardx" style="width:100%; height:100%; object-fit:cover;"></div>
+      <div style="flex:1;"><span style="font-size:12px; font-weight:700; color:white;">@ratwizardx</span></div>
+      <span class="mono" style="min-width:70px; text-align:right; font-size:13px; font-weight:800; color:var(--green);">+$4.5K</span>
+      <span class="mono" style="min-width:50px; text-align:right; font-size:11px; color:var(--accent);">41%</span>
+      <span class="mono" style="min-width:50px; text-align:right; font-size:11px;">95</span>
     </div>
 
-    <div class="lb-row">
-      <div class="lb-rank mono" style="color:var(--muted);">4</div>
-      <div class="lb-avatar"><img src="https://unavatar.io/twitter/blueycryp"></div>
-      <div class="lb-info">
-        <div class="lb-name">@blueycryp</div>
-        <div class="lb-sub">Bluey</div>
-      </div>
-      <div class="lb-stat"><div class="lb-pnl pos mono">+$5.5K</div></div>
-      <div class="lb-stat"><div class="mono" style="font-size:12px; color:var(--accent);">13%</div></div>
-      <div class="lb-stat"><div class="mono" style="font-size:12px;">30</div></div>
-    </div>
-
-    <div class="lb-row">
-      <div class="lb-rank mono" style="color:var(--muted);">5</div>
-      <div class="lb-avatar"><img src="https://unavatar.io/twitter/imsheepsol"></div>
-      <div class="lb-info">
-        <div class="lb-name">@imsheepsol</div>
-        <div class="lb-sub">Sheep</div>
-      </div>
-      <div class="lb-stat"><div class="lb-pnl pos mono">+$4.6K</div></div>
-      <div class="lb-stat"><div class="mono" style="font-size:12px; color:var(--accent);">82%</div></div>
-      <div class="lb-stat"><div class="mono" style="font-size:12px;">39</div></div>
-    </div>
-
-    <div class="lb-row">
-      <div class="lb-rank mono" style="color:var(--muted);">6</div>
-      <div class="lb-avatar"><img src="https://unavatar.io/twitter/ratwizardx"></div>
-      <div class="lb-info">
-        <div class="lb-name">@ratwizardx</div>
-        <div class="lb-sub">West</div>
-      </div>
-      <div class="lb-stat"><div class="lb-pnl pos mono">+$4.5K</div></div>
-      <div class="lb-stat"><div class="mono" style="font-size:12px; color:var(--accent);">41%</div></div>
-      <div class="lb-stat"><div class="mono" style="font-size:12px;">95</div></div>
-    </div>
-  </div>
-
-  <div style="height:40px;"></div>
-
-  <!-- VARIANT B: Card-based with glow top 3 -->
-  <div class="variant-tag">B — Podium Top 3 + Table</div>
-  <p style="font-size:11px; color:var(--muted); margin-bottom:16px;">Top 3 as highlighted cards above, rest as clean table rows below.</p>
-
-  <div class="tabs">
-    <div class="tab mono">1D</div>
-    <div class="tab mono">3D</div>
-    <div class="tab active mono">7D</div>
-    <div class="tab mono">ALL</div>
-  </div>
-
-  <!-- Podium -->
-  <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:20px;">
-    <!-- 2nd place -->
-    <div class="glass cut-sm" style="padding:16px; text-align:center; border-color:rgba(192,192,192,0.15);">
-      <div class="mono" style="font-size:20px; font-weight:800; color:#C0C0C0; margin-bottom:8px;">2</div>
-      <div style="width:48px; height:48px; border-radius:50%; overflow:hidden; margin:0 auto 8px; border:2px solid rgba(192,192,192,0.3);">
-        <img src="https://unavatar.io/twitter/schoen_xyz" style="width:100%; height:100%; object-fit:cover;">
-      </div>
-      <div style="font-size:12px; font-weight:700; color:white;">@schoen_xyz</div>
-      <div class="mono" style="font-size:16px; font-weight:800; color:var(--green); margin-top:6px;">+$9.0K</div>
-      <div style="font-size:7px; color:var(--muted); letter-spacing:1px; margin-top:2px;">47% WIN · 19 TRADES</div>
-    </div>
-
-    <!-- 1st place -->
-    <div class="glass cut-sm" style="padding:16px; text-align:center; border-color:rgba(255,215,0,0.2); box-shadow:0 0 30px rgba(255,215,0,0.05);">
-      <div class="mono" style="font-size:24px; font-weight:900; color:#FFD700; margin-bottom:8px;">1</div>
-      <div style="width:56px; height:56px; border-radius:50%; overflow:hidden; margin:0 auto 8px; border:2.5px solid rgba(255,215,0,0.4); box-shadow:0 0 20px rgba(255,215,0,0.15);">
-        <img src="https://unavatar.io/twitter/cented7" style="width:100%; height:100%; object-fit:cover;">
-      </div>
-      <div style="font-size:13px; font-weight:700; color:white;">@cented7</div>
-      <div class="mono" style="font-size:20px; font-weight:800; color:var(--green); margin-top:6px; text-shadow:0 0 20px rgba(34,197,94,0.2);">+$11.9K</div>
-      <div style="font-size:7px; color:var(--muted); letter-spacing:1px; margin-top:2px;">60% WIN · 144 TRADES</div>
-    </div>
-
-    <!-- 3rd place -->
-    <div class="glass cut-sm" style="padding:16px; text-align:center; border-color:rgba(205,127,50,0.15);">
-      <div class="mono" style="font-size:20px; font-weight:800; color:#CD7F32; margin-bottom:8px;">3</div>
-      <div style="width:48px; height:48px; border-radius:50%; overflow:hidden; margin:0 auto 8px; border:2px solid rgba(205,127,50,0.3);">
-        <img src="https://unavatar.io/twitter/theonomix" style="width:100%; height:100%; object-fit:cover;">
-      </div>
-      <div style="font-size:12px; font-weight:700; color:white;">@theonomix</div>
-      <div class="mono" style="font-size:16px; font-weight:800; color:var(--green); margin-top:6px;">+$7.1K</div>
-      <div style="font-size:7px; color:var(--muted); letter-spacing:1px; margin-top:2px;">44% WIN · 140 TRADES</div>
-    </div>
-  </div>
-
-  <!-- Rest as rows -->
-  <div class="glass cut-md" style="overflow:hidden;">
-    <div class="lb-row">
-      <div class="lb-rank mono" style="color:var(--muted);">4</div>
-      <div class="lb-avatar"><img src="https://unavatar.io/twitter/blueycryp"></div>
-      <div class="lb-info"><div class="lb-name">@blueycryp</div></div>
-      <div class="lb-stat"><div class="lb-pnl pos mono">+$5.5K</div></div>
-      <div class="lb-stat"><div class="mono" style="font-size:12px; color:var(--accent);">13%</div></div>
-    </div>
-    <div class="lb-row">
-      <div class="lb-rank mono" style="color:var(--muted);">5</div>
-      <div class="lb-avatar"><img src="https://unavatar.io/twitter/imsheepsol"></div>
-      <div class="lb-info"><div class="lb-name">@imsheepsol</div></div>
-      <div class="lb-stat"><div class="lb-pnl pos mono">+$4.6K</div></div>
-      <div class="lb-stat"><div class="mono" style="font-size:12px; color:var(--accent);">82%</div></div>
-    </div>
-    <div class="lb-row">
-      <div class="lb-rank mono" style="color:var(--muted);">6</div>
-      <div class="lb-avatar"><img src="https://unavatar.io/twitter/ratwizardx"></div>
-      <div class="lb-info"><div class="lb-name">@ratwizardx</div></div>
-      <div class="lb-stat"><div class="lb-pnl pos mono">+$4.5K</div></div>
-      <div class="lb-stat"><div class="mono" style="font-size:12px; color:var(--accent);">41%</div></div>
+    <div style="display:flex; align-items:center; gap:12px; padding:10px 16px;" onmouseover="this.style.background='rgba(0,212,255,0.03)'" onmouseout="this.style.background='transparent'">
+      <span class="mono" style="width:28px; text-align:center; font-size:12px; font-weight:700; color:var(--muted);">7</span>
+      <div class="avatar-ring" style="width:32px; height:32px;"><img src="https://unavatar.io/twitter/saint_pablo123" style="width:100%; height:100%; object-fit:cover;"></div>
+      <div style="flex:1;"><span style="font-size:12px; font-weight:700; color:white;">@saint_pablo123</span></div>
+      <span class="mono" style="min-width:70px; text-align:right; font-size:13px; font-weight:800; color:var(--green);">+$3.7K</span>
+      <span class="mono" style="min-width:50px; text-align:right; font-size:11px; color:var(--accent);">60%</span>
+      <span class="mono" style="min-width:50px; text-align:right; font-size:11px;">5</span>
     </div>
   </div>
 </div>
 
 <!-- ═══════════════════════════════════════ -->
-<!-- ENHANCED PROFILE STATS                 -->
+<!-- PROFILE STATS + TRADES                 -->
 <!-- ═══════════════════════════════════════ -->
-<div id="profile-stats" class="section">
-  <div class="label">Feature 2</div>
-  <div class="title">Enhanced Profile Stats</div>
-  <div class="desc">Element box grid showing advanced trader metrics. Shown on every profile page below the basic stats.</div>
+<div id="profile" class="section" style="border-top:1px solid rgba(0,212,255,0.06);">
+  <div class="label">Profile Page</div>
+  <div class="stitle">Enhanced <span style="color:var(--accent);">Stats</span> + Trades</div>
+  <div class="desc">Stats grid + trade cards on every profile. Cyan-only branding, no color salad.</div>
 
-  <!-- VARIANT A: 3-col glass boxes -->
-  <div class="variant-tag">A — Glass Element Boxes</div>
-  <p style="font-size:11px; color:var(--muted); margin-bottom:16px;">Clean 3-column grid. Each stat in its own glassmorphic cut-corner box.</p>
+  <!-- Simulated profile context -->
+  <div class="glass cut-md" style="max-width:620px; margin:0 auto;">
+    <div style="height:3px; background:linear-gradient(90deg, var(--accent), transparent 80%);"></div>
+    <div style="padding:20px;">
 
-  <div class="stat-grid">
-    <div class="stat-box cut-xs">
-      <div class="stat-val mono" style="color:var(--green);">+342%</div>
-      <div class="stat-label">ROI</div>
-    </div>
-    <div class="stat-box cut-xs">
-      <div class="stat-val mono" style="color:var(--accent);">2.4 SOL</div>
-      <div class="stat-label">AVG TRADE</div>
-    </div>
-    <div class="stat-box cut-xs">
-      <div class="stat-val mono" style="color:var(--green);">ANIME +6.8K%</div>
-      <div class="stat-label">BEST TRADE</div>
-    </div>
-    <div class="stat-box cut-xs">
-      <div class="stat-val mono" style="color:var(--accent);">7 wins</div>
-      <div class="stat-label">WIN STREAK</div>
-    </div>
-    <div class="stat-box cut-xs">
-      <div class="stat-val mono" style="color:white;">2.3h</div>
-      <div class="stat-label">AVG HOLD</div>
-    </div>
-    <div class="stat-box cut-xs">
-      <div class="stat-val mono" style="color:var(--accent);">78/100</div>
-      <div class="stat-label">CONSISTENCY</div>
-    </div>
-  </div>
-
-  <div style="height:32px;"></div>
-
-  <!-- VARIANT B: Compact 2-row with accent borders -->
-  <div class="variant-tag">B — Compact with Accent Borders</div>
-  <p style="font-size:11px; color:var(--muted); margin-bottom:16px;">Tighter boxes, left accent bar per stat. More data-dense.</p>
-
-  <div class="stat-grid">
-    <div class="cut-xs" style="padding:10px 12px; background:rgba(255,255,255,0.03); border-left:2px solid var(--green);">
-      <div class="mono" style="font-size:16px; font-weight:800; color:var(--green);">+342%</div>
-      <div style="font-size:7px; letter-spacing:2px; color:var(--muted); margin-top:2px;">ROI</div>
-    </div>
-    <div class="cut-xs" style="padding:10px 12px; background:rgba(255,255,255,0.03); border-left:2px solid var(--accent);">
-      <div class="mono" style="font-size:16px; font-weight:800; color:var(--accent);">2.4 SOL</div>
-      <div style="font-size:7px; letter-spacing:2px; color:var(--muted); margin-top:2px;">AVG TRADE SIZE</div>
-    </div>
-    <div class="cut-xs" style="padding:10px 12px; background:rgba(255,255,255,0.03); border-left:2px solid var(--green);">
-      <div class="mono" style="font-size:14px; font-weight:800; color:var(--green);">ANIME +6.8K%</div>
-      <div style="font-size:7px; letter-spacing:2px; color:var(--muted); margin-top:2px;">BEST TRADE</div>
-    </div>
-    <div class="cut-xs" style="padding:10px 12px; background:rgba(255,255,255,0.03); border-left:2px solid var(--accent);">
-      <div class="mono" style="font-size:16px; font-weight:800; color:var(--accent);">7 wins</div>
-      <div style="font-size:7px; letter-spacing:2px; color:var(--muted); margin-top:2px;">WIN STREAK</div>
-    </div>
-    <div class="cut-xs" style="padding:10px 12px; background:rgba(255,255,255,0.03); border-left:2px solid white;">
-      <div class="mono" style="font-size:16px; font-weight:800; color:white;">2.3h</div>
-      <div style="font-size:7px; letter-spacing:2px; color:var(--muted); margin-top:2px;">AVG HOLD TIME</div>
-    </div>
-    <div class="cut-xs" style="padding:10px 12px; background:rgba(255,255,255,0.03); border-left:2px solid var(--accent);">
-      <div class="mono" style="font-size:16px; font-weight:800; color:var(--accent);">78/100</div>
-      <div style="font-size:7px; letter-spacing:2px; color:var(--muted); margin-top:2px;">CONSISTENCY</div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════ -->
-<!-- MAIN WALLET                            -->
-<!-- ═══════════════════════════════════════ -->
-<div id="wallet-main" class="section" style="border-bottom:none;">
-  <div class="label">Feature 3</div>
-  <div class="title">Main Wallet Designation</div>
-  <div class="desc">Users pick one wallet as "main" — highlighted with a star on profile and dashboard.</div>
-
-  <div class="variant-tag">Dashboard Wallet Card</div>
-
-  <div style="max-width:500px;">
-    <!-- Main wallet -->
-    <div class="glass cut-sm" style="padding:14px 16px; margin-bottom:8px; border-color:rgba(0,212,255,0.2);">
-      <div style="display:flex; align-items:center; justify-content:space-between;">
-        <div>
-          <div style="display:flex; align-items:center; gap:6px;">
-            <span style="color:var(--accent); font-size:14px;">★</span>
-            <span class="mono" style="font-size:13px; color:white;">CyaE1V…a54o</span>
-          </div>
-          <div style="display:flex; gap:4px; margin-top:4px;">
-            <span class="cut-xs" style="font-size:7px; letter-spacing:1px; padding:2px 8px; background:rgba(0,212,255,0.08); border:1px solid rgba(0,212,255,0.12); color:var(--accent); font-weight:600;">SOLANA</span>
-            <span class="cut-xs" style="font-size:7px; letter-spacing:1px; padding:2px 8px; background:rgba(0,212,255,0.12); border:1px solid rgba(0,212,255,0.2); color:var(--accent); font-weight:600;">★ MAIN</span>
-          </div>
+      <!-- Profile header mini -->
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+        <div style="width:52px; height:52px; border-radius:50%; overflow:hidden; border:2.5px solid rgba(0,212,255,0.35); box-shadow:0 0 20px rgba(0,212,255,0.15);">
+          <img src="https://unavatar.io/twitter/cented7" style="width:100%; height:100%; object-fit:cover;">
         </div>
-        <button style="font-size:9px; color:var(--red); background:none; border:1px solid rgba(239,68,68,0.2); padding:4px 10px; cursor:pointer; clip-path:polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px);">Remove</button>
-      </div>
-    </div>
-
-    <!-- Secondary wallet -->
-    <div class="glass cut-sm" style="padding:14px 16px; margin-bottom:8px;">
-      <div style="display:flex; align-items:center; justify-content:space-between;">
         <div>
-          <span class="mono" style="font-size:13px; color:white;">5hAgYC…84zM</span>
-          <div style="display:flex; gap:4px; margin-top:4px;">
-            <span class="cut-xs" style="font-size:7px; letter-spacing:1px; padding:2px 8px; background:rgba(0,212,255,0.08); border:1px solid rgba(0,212,255,0.12); color:var(--accent); font-weight:600;">SOLANA</span>
+          <div style="display:flex; align-items:center; gap:4px;">
+            <span style="font-size:16px; font-weight:800; color:white;">@cented7</span>
+            <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
           </div>
+          <span style="font-size:10px; color:var(--muted);">Cented · 144 trades · 60% win</span>
         </div>
-        <div style="display:flex; gap:6px;">
-          <button style="font-size:9px; color:var(--accent); background:rgba(0,212,255,0.06); border:1px solid rgba(0,212,255,0.15); padding:4px 10px; cursor:pointer; clip-path:polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px);">Set Main</button>
-          <button style="font-size:9px; color:var(--red); background:none; border:1px solid rgba(239,68,68,0.2); padding:4px 10px; cursor:pointer; clip-path:polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px);">Remove</button>
+        <div style="margin-left:auto; text-align:right;">
+          <div class="mono" style="font-size:18px; font-weight:800; color:var(--green);">+$11.9K</div>
+          <div style="font-size:7px; letter-spacing:1px; color:var(--muted);">TOTAL PnL</div>
         </div>
       </div>
+
+      <!-- Divider -->
+      <div style="height:1px; background:linear-gradient(90deg, transparent, rgba(0,212,255,0.1), transparent); margin-bottom:16px;"></div>
+
+      <!-- ══ STATS GRID — Cyan only ══ -->
+      <div style="font-size:8px; letter-spacing:2px; color:var(--muted); margin-bottom:8px;">TRADER ANALYTICS</div>
+      <div class="stat-grid" style="margin-bottom:16px;">
+        <div class="cut-xs" style="padding:12px 10px; background:rgba(0,212,255,0.03); border:1px solid rgba(0,212,255,0.08);">
+          <div class="mono" style="font-size:16px; font-weight:800; color:var(--green);">+342%</div>
+          <div style="font-size:7px; letter-spacing:2px; color:var(--muted); margin-top:3px;">ROI</div>
+        </div>
+        <div class="cut-xs" style="padding:12px 10px; background:rgba(0,212,255,0.03); border:1px solid rgba(0,212,255,0.08);">
+          <div class="mono" style="font-size:16px; font-weight:800; color:var(--accent);">2.4 SOL</div>
+          <div style="font-size:7px; letter-spacing:2px; color:var(--muted); margin-top:3px;">AVG TRADE</div>
+        </div>
+        <div class="cut-xs" style="padding:12px 10px; background:rgba(0,212,255,0.03); border:1px solid rgba(0,212,255,0.08);">
+          <div class="mono" style="font-size:16px; font-weight:800; color:var(--accent);">7 wins</div>
+          <div style="font-size:7px; letter-spacing:2px; color:var(--muted); margin-top:3px;">WIN STREAK</div>
+        </div>
+        <div class="cut-xs" style="padding:12px 10px; background:rgba(0,212,255,0.03); border:1px solid rgba(0,212,255,0.08);">
+          <div class="mono" style="font-size:16px; font-weight:800; color:var(--text);">2.3h</div>
+          <div style="font-size:7px; letter-spacing:2px; color:var(--muted); margin-top:3px;">AVG HOLD</div>
+        </div>
+        <div class="cut-xs" style="padding:12px 10px; background:rgba(0,212,255,0.03); border:1px solid rgba(0,212,255,0.08);">
+          <div class="mono" style="font-size:16px; font-weight:800; color:var(--accent);">78/100</div>
+          <div style="font-size:7px; letter-spacing:2px; color:var(--muted); margin-top:3px;">CONSISTENCY</div>
+        </div>
+        <div class="cut-xs" style="padding:12px 10px; background:rgba(0,212,255,0.03); border:1px solid rgba(0,212,255,0.08);">
+          <div class="mono" style="font-size:14px; font-weight:800; color:var(--green);">ANIME</div>
+          <div style="font-size:7px; letter-spacing:2px; color:var(--muted); margin-top:3px;">BEST TRADE +6.8K%</div>
+        </div>
+      </div>
+
+      <!-- Divider -->
+      <div style="height:1px; background:linear-gradient(90deg, transparent, rgba(0,212,255,0.1), transparent); margin-bottom:16px;"></div>
+
+      <!-- ══ TRADE CARDS ══ -->
+      <div style="font-size:8px; letter-spacing:2px; color:var(--muted); margin-bottom:8px;">PINNED TRADES</div>
+      <div style="display:flex; flex-direction:column; gap:6px;">
+
+        <!-- Trade 1 -->
+        <div class="cut-xs" style="padding:10px 12px; background:rgba(255,255,255,0.03); border:1px solid rgba(0,212,255,0.06);">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <div style="width:24px; height:24px; border-radius:50%; background:#111; border:1.5px solid rgba(0,212,255,0.15); display:flex; align-items:center; justify-content:center;">
+                <span style="font-size:8px; font-weight:700; color:var(--accent);">AN</span>
+              </div>
+              <div>
+                <span style="font-size:12px; font-weight:700; color:white;">ANIME</span>
+                <div style="font-size:7px; color:var(--muted);">Pinned Trade</div>
+              </div>
+            </div>
+            <span class="mono" style="font-size:14px; font-weight:800; color:var(--green);">+6,864%</span>
+          </div>
+          <div style="display:flex; gap:6px;">
+            <div class="cut-xs" style="flex:1; display:flex; justify-content:space-between; font-size:8px; padding:4px 8px; background:rgba(0,212,255,0.02);">
+              <span style="color:var(--green); font-weight:600;">BUY</span>
+              <span class="mono" style="color:var(--text); font-weight:600;">0.5 SOL</span>
+            </div>
+            <div class="cut-xs" style="flex:1; display:flex; justify-content:space-between; font-size:8px; padding:4px 8px; background:rgba(0,212,255,0.02);">
+              <span style="color:var(--red); font-weight:600;">SELL</span>
+              <span class="mono" style="color:var(--green); font-weight:600;">34.2 SOL</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Trade 2 -->
+        <div class="cut-xs" style="padding:10px 12px; background:rgba(255,255,255,0.03); border:1px solid rgba(0,212,255,0.06);">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <div style="width:24px; height:24px; border-radius:50%; background:#111; border:1.5px solid rgba(0,212,255,0.15); display:flex; align-items:center; justify-content:center;">
+                <span style="font-size:8px; font-weight:700; color:var(--accent);">DR</span>
+              </div>
+              <div>
+                <span style="font-size:12px; font-weight:700; color:white;">Drill</span>
+                <div style="font-size:7px; color:var(--muted);">Pinned Trade</div>
+              </div>
+            </div>
+            <span class="mono" style="font-size:14px; font-weight:800; color:var(--green);">+4,105%</span>
+          </div>
+          <div style="display:flex; gap:6px;">
+            <div class="cut-xs" style="flex:1; display:flex; justify-content:space-between; font-size:8px; padding:4px 8px; background:rgba(0,212,255,0.02);">
+              <span style="color:var(--green); font-weight:600;">BUY</span>
+              <span class="mono" style="color:var(--text); font-weight:600;">0.4 SOL</span>
+            </div>
+            <div class="cut-xs" style="flex:1; display:flex; justify-content:space-between; font-size:8px; padding:4px 8px; background:rgba(0,212,255,0.02);">
+              <span style="color:var(--red); font-weight:600;">SELL</span>
+              <span class="mono" style="color:var(--green); font-weight:600;">16.7 SOL</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Trade 3 -->
+        <div class="cut-xs" style="padding:10px 12px; background:rgba(255,255,255,0.03); border:1px solid rgba(0,212,255,0.06);">
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <div style="width:24px; height:24px; border-radius:50%; background:#111; border:1.5px solid rgba(0,212,255,0.15); display:flex; align-items:center; justify-content:center;">
+                <span style="font-size:8px; font-weight:700; color:var(--accent);">MA</span>
+              </div>
+              <div>
+                <span style="font-size:12px; font-weight:700; color:white;">MASUKU</span>
+                <div style="font-size:7px; color:var(--muted);">Pinned Trade</div>
+              </div>
+            </div>
+            <span class="mono" style="font-size:14px; font-weight:800; color:var(--green);">+748%</span>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
 
 <div style="text-align:center; padding:40px;" class="mono">
-  <span style="font-size:9px; letter-spacing:2px; color:var(--muted);">PICK VARIANTS · LEADERBOARD: A OR B · STATS: A OR B</span>
+  <span style="font-size:9px; letter-spacing:2px; color:var(--muted);">APPROVE OR REQUEST CHANGES</span>
 </div>
 
 </body>
