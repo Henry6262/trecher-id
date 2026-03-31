@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -51,6 +52,25 @@ const STEPS = [
 ] as const;
 
 export function LandingContent({ traders, featured, traderCount, totalPnl }: LandingContentProps) {
+  const [navVisible, setNavVisible] = useState(true);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentY = window.scrollY;
+      if (currentY < 80) {
+        setNavVisible(true);
+      } else if (currentY > lastScrollY.current + 5) {
+        setNavVisible(false);
+      } else if (currentY < lastScrollY.current - 5) {
+        setNavVisible(true);
+      }
+      lastScrollY.current = currentY;
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
     <div className="relative min-h-screen" style={{ background: '#050508' }}>
       <div className="fixed inset-0 opacity-75" style={{ zIndex: 0, background: 'radial-gradient(ellipse at 50% 100%, rgba(0,212,255,0.06) 0%, #050508 60%)' }}>
@@ -64,13 +84,32 @@ export function LandingContent({ traders, featured, traderCount, totalPnl }: Lan
       </div>
 
       <div className="relative" style={{ zIndex: 2 }}>
-        {/* Nav */}
-        <nav className="mx-auto flex max-w-[900px] items-center justify-between px-6 py-5">
-          <Link href="/">
-            <Image src="/logo.png" alt="Trench ID" width={200} height={50} className="h-12 w-auto transition-opacity hover:opacity-80" priority />
-          </Link>
-          <CutButton href="/login" variant="secondary" size="sm">Sign in with X</CutButton>
+        {/* Sticky Nav — hide on scroll down, show on scroll up */}
+        <nav
+          className="fixed top-0 left-0 right-0 transition-transform duration-300 ease-in-out"
+          style={{
+            zIndex: 50,
+            transform: navVisible ? 'translateY(0)' : 'translateY(-100%)',
+            background: 'rgba(5, 5, 8, 0.85)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+          }}
+        >
+          <div className="mx-auto flex max-w-[900px] items-center justify-between px-6 py-4">
+            <Link href="/">
+              <Image src="/logo.png" alt="Trench ID" width={200} height={50} className="h-11 w-auto transition-opacity hover:opacity-80" priority />
+            </Link>
+            <div className="flex items-center gap-4">
+              <span className="hidden sm:inline-block text-[9px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">SOLANA</span>
+              <CutButton href="/login" variant="secondary" size="sm">Sign in with X</CutButton>
+            </div>
+          </div>
+          {/* Bottom fade border */}
+          <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.2), transparent)' }} />
         </nav>
+
+        {/* Spacer for fixed nav */}
+        <div className="h-[68px]" />
 
         {/* Hero */}
         <section className="mx-auto grid max-w-[900px] grid-cols-1 items-center gap-12 px-6 pt-16 pb-12 lg:grid-cols-2">
