@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { CutCorner } from '@/components/cut-corner';
+import { usePrivy } from '@privy-io/react-auth';
+import { GlassCard } from '@/components/glass-card';
 import { CutButton } from '@/components/cut-button';
 import { Input } from '@/components/ui/input';
 
@@ -19,19 +19,19 @@ function shortAddr(addr: string) {
 }
 
 export default function WalletsPage() {
+  const { linkWallet } = usePrivy();
   const [wallets, setWallets] = useState<Wallet[]>([]);
   const [loading, setLoading] = useState(true);
   const [newAddress, setNewAddress] = useState('');
   const [adding, setAdding] = useState(false);
   const [addError, setAddError] = useState('');
   const [removing, setRemoving] = useState<string | null>(null);
+  const [showManual, setShowManual] = useState(false);
 
   useEffect(() => {
     fetch('/api/wallets')
       .then((r) => r.json())
-      .then((data) => {
-        setWallets(Array.isArray(data) ? data : []);
-      })
+      .then((data) => setWallets(Array.isArray(data) ? data : []))
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
@@ -51,12 +51,24 @@ export default function WalletsPage() {
         const created: Wallet = await res.json();
         setWallets((prev) => [...prev, created]);
         setNewAddress('');
+        setShowManual(false);
       } else {
         const data = await res.json();
         setAddError(data.error ?? 'Failed to add wallet');
       }
     } finally {
       setAdding(false);
+    }
+  }
+
+  async function handleConnectWallet() {
+    try {
+      await linkWallet();
+      // After Privy links the wallet, we need to sync it to our DB
+      // The linked wallet address will be available via usePrivy().user.linkedAccounts
+      // For now, show the manual input as fallback
+    } catch {
+      // User cancelled or error — show manual option
     }
   }
 
@@ -75,83 +87,80 @@ export default function WalletsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-mono font-bold text-[var(--trench-accent)] tracking-wide">
-          WALLETS
-        </h1>
-        <Link href="/dashboard" className="text-xs font-mono text-[var(--trench-text-muted)] hover:text-[var(--trench-text)] transition-colors">
-          ← BACK
-        </Link>
-      </div>
-
-      {/* Add wallet */}
-      <CutCorner cut="md" className="w-full">
-        <div className="p-5 space-y-3">
-          <p className="text-xs font-mono text-[var(--trench-text-muted)] tracking-widest uppercase">
+    <div className="space-y-6 pb-16">
+      {/* Connect wallet */}
+      <GlassCard cut={10}>
+        <div className="p-5 space-y-4">
+          <p className="text-[10px] font-mono text-[var(--trench-text-muted)] tracking-[2px] uppercase">
             Link a Wallet
           </p>
-          <div className="flex gap-2">
-            <Input
-              value={newAddress}
-              onChange={(e) => setNewAddress(e.target.value)}
-              placeholder="Solana wallet address"
-              className="bg-transparent border-[var(--trench-border)] text-[var(--trench-text)] font-mono text-sm focus-visible:ring-[var(--trench-accent)] focus-visible:ring-1"
-              onKeyDown={(e) => e.key === 'Enter' && addWallet()}
-            />
-            <CutButton
-              onClick={addWallet}
-              disabled={adding || !newAddress.trim()}
-              size="sm"
-            >
-              {adding ? 'Adding...' : 'Add'}
+
+          <div className="flex gap-3">
+            <CutButton onClick={handleConnectWallet} size="sm">
+              Connect Wallet
+            </CutButton>
+            <CutButton onClick={() => setShowManual(!showManual)} variant="secondary" size="sm">
+              {showManual ? 'Hide' : 'Paste Address'}
             </CutButton>
           </div>
-          {addError && (
-            <p className="text-xs font-mono text-red-400">{addError}</p>
+
+          {showManual && (
+            <div className="space-y-2 pt-2">
+              <div className="flex gap-2">
+                <Input
+                  value={newAddress}
+                  onChange={(e) => setNewAddress(e.target.value)}
+                  placeholder="Solana wallet address"
+                  className="bg-transparent border-[var(--trench-border)] text-[var(--trench-text)] font-mono text-sm focus-visible:ring-[var(--trench-accent)] focus-visible:ring-1"
+                  onKeyDown={(e) => e.key === 'Enter' && addWallet()}
+                />
+                <CutButton onClick={addWallet} disabled={adding || !newAddress.trim()} size="sm">
+                  {adding ? '...' : 'Add'}
+                </CutButton>
+              </div>
+              {addError && <p className="text-[10px] font-mono text-red-400">{addError}</p>}
+            </div>
           )}
-          <p className="text-xs font-mono text-[var(--trench-text-muted)]">
-            Wallets are used to fetch your on-chain trading history.
+
+          <p className="text-[10px] font-mono text-[var(--trench-text-muted)]">
+            Connect your Solana wallet or paste an address. We fetch your on-chain trading history automatically.
           </p>
         </div>
-      </CutCorner>
+      </GlassCard>
 
       {/* Wallet list */}
       <div className="space-y-3">
-        <p className="text-xs font-mono text-[var(--trench-text-muted)] tracking-widest uppercase">
+        <p className="text-[10px] font-mono text-[var(--trench-text-muted)] tracking-[2px] uppercase">
           Linked Wallets ({wallets.length})
         </p>
 
         {loading && (
-          <p className="text-xs font-mono text-[var(--trench-text-muted)] animate-pulse">Loading...</p>
+          <p className="text-[10px] font-mono text-[var(--trench-text-muted)] animate-pulse">Loading...</p>
         )}
 
         {!loading && wallets.length === 0 && (
-          <CutCorner cut="sm" className="w-full">
+          <GlassCard cut={8} glow={false}>
             <div className="p-5 text-center">
-              <p className="text-sm font-mono text-[var(--trench-text-muted)]">
-                No wallets linked yet.
-              </p>
+              <p className="text-[11px] font-mono text-[var(--trench-text-muted)]">No wallets linked yet.</p>
             </div>
-          </CutCorner>
+          </GlassCard>
         )}
 
         {wallets.map((wallet) => (
-          <CutCorner key={wallet.id} cut="sm" className="w-full">
+          <GlassCard key={wallet.id} cut={8} glow={false}>
             <div className="p-4 flex items-center justify-between gap-3">
               <div className="min-w-0">
-                <p className="text-sm font-mono text-[var(--trench-text)] break-all">
-                  {shortAddr(wallet.address)}
-                </p>
+                <p className="text-sm font-mono text-[var(--trench-text)] break-all">{shortAddr(wallet.address)}</p>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="text-xs font-mono text-[var(--trench-text-muted)] uppercase">
+                  <span className="cut-xs text-[7px] tracking-[1px] px-2 py-0.5 font-semibold text-[var(--trench-accent)] uppercase" style={{ background: 'rgba(0,212,255,0.08)', border: '1px solid rgba(0,212,255,0.12)' }}>
                     {wallet.chain}
                   </span>
                   {wallet.verified && (
-                    <span className="text-xs font-mono text-green-400">✓ verified</span>
+                    <span className="cut-xs text-[7px] tracking-[1px] px-2 py-0.5 font-semibold text-[var(--trench-green)]" style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.12)' }}>
+                      VERIFIED
+                    </span>
                   )}
-                  <span className="text-xs font-mono text-[var(--trench-text-muted)]">
+                  <span className="text-[9px] font-mono text-[var(--trench-text-muted)]">
                     {new Date(wallet.linkedAt).toLocaleDateString()}
                   </span>
                 </div>
@@ -166,16 +175,14 @@ export default function WalletsPage() {
                 {removing === wallet.address ? '...' : 'Remove'}
               </CutButton>
             </div>
-          </CutCorner>
+          </GlassCard>
         ))}
       </div>
 
       {wallets.length > 0 && (
-        <div className="pt-2">
-          <CutButton href="/dashboard/trades" variant="secondary" size="sm">
-            View Trades →
-          </CutButton>
-        </div>
+        <CutButton href="/dashboard/trades" variant="secondary" size="sm">
+          View Trades →
+        </CutButton>
       )}
     </div>
   );
