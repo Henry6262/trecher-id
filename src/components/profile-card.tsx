@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { ProfileHeader } from './profile-header';
 import { LinkItem } from './link-item';
 import { TradeCarousel } from './trade-carousel';
+import { DeploymentCarousel } from './deployment-carousel';
+import type { DeploymentData } from './deployment-carousel';
 import { CutCorner } from './cut-corner';
 import { EnhancedStats } from './enhanced-stats';
 import type { TraderStats } from '@/lib/trade-stats';
@@ -31,9 +33,10 @@ interface ProfileCardProps {
   }[];
   wallets: { address: string; verified: boolean; isMain?: boolean }[];
   traderStats?: TraderStats;
+  deployments?: DeploymentData[];
 }
 
-export function ProfileCard({ user, stats, links, pinnedTrades, wallets, traderStats }: ProfileCardProps) {
+export function ProfileCard({ user, stats, links, pinnedTrades, wallets, traderStats, deployments }: ProfileCardProps) {
   const hasWallets = wallets.length > 0;
 
   return (
@@ -98,6 +101,13 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets, traderS
           {pinnedTrades.length > 0 && (
             <div className="mb-4">
               <TradeCarousel trades={pinnedTrades} />
+            </div>
+          )}
+
+          {/* Token Deployments */}
+          {deployments && deployments.length > 0 && (
+            <div className="mb-4">
+              <DeploymentCarousel deployments={deployments} />
             </div>
           )}
 

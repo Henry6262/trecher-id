@@ -5,6 +5,7 @@ import { BackgroundLayer } from '@/components/background-layer';
 import { getWalletTransactions, aggregateTradesByToken } from '@/lib/helius';
 import { computeTraderStats } from '@/lib/trade-stats';
 import { cached } from '@/lib/redis';
+import type { DeploymentData } from '@/components/deployment-carousel';
 import type { Metadata } from 'next';
 
 interface Props {
@@ -88,6 +89,7 @@ export default async function ProfilePage({ params }: Props) {
       links: { orderBy: { order: 'asc' } },
       wallets: { orderBy: { linkedAt: 'asc' } },
       pinnedTrades: { orderBy: { order: 'asc' } },
+      tokenDeployments: { orderBy: { deployedAt: 'desc' } },
     },
   });
   if (!user) notFound();
@@ -134,6 +136,21 @@ export default async function ProfilePage({ params }: Props) {
   );
   const traderStats = computeTraderStats(allTrades);
 
+  const deployments: DeploymentData[] = user.tokenDeployments.map((d) => ({
+    id: d.id,
+    tokenSymbol: d.tokenSymbol,
+    tokenName: d.tokenName,
+    tokenImageUrl: d.tokenImageUrl,
+    platform: d.platform,
+    status: d.status,
+    mcapAthUsd: d.mcapAthUsd,
+    holders: d.holders,
+    volumeUsd: d.volumeUsd,
+    devPnlSol: d.devPnlSol,
+    devPnlUsd: d.devPnlUsd,
+    deployedAt: d.deployedAt.toISOString(),
+  }));
+
   const pinnedTrades = trades.map((t: DBPinnedTrade) => ({
     id: t.id,
     tokenSymbol: t.tokenSymbol,
@@ -160,6 +177,7 @@ export default async function ProfilePage({ params }: Props) {
           pinnedTrades={pinnedTrades}
           traderStats={traderStats}
           wallets={wallets.map((w: DBWallet) => ({ address: w.address, verified: w.verified, isMain: w.isMain }))}
+          deployments={deployments}
         />
       </div>
     </div>

@@ -18,10 +18,11 @@ model User {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  links        Link[]
-  wallets      Wallet[]
-  pinnedTrades PinnedTrade[]
-  rankings     UserRanking[]
+  links            Link[]
+  wallets          Wallet[]
+  pinnedTrades     PinnedTrade[]
+  rankings         UserRanking[]
+  tokenDeployments TokenDeployment[]
 }
 
 model Link {
@@ -86,4 +87,27 @@ model UserRanking {
 
   @@unique([userId, period])
   @@index([period, pnlUsd])
+}
+
+model TokenDeployment {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  walletAddress String
+  tokenMint     String   @unique
+  tokenSymbol   String
+  tokenName     String?
+  tokenImageUrl String?
+  platform      String   @default("pump.fun")
+  status        String   @default("bonding")
+  mcapAthUsd    Float?
+  holders       Int?
+  volumeUsd     Float?
+  devPnlSol     Float?
+  devPnlUsd     Float?
+  deployedAt    DateTime
+  updatedAt     DateTime @default(now())
+
+  @@index([userId])
+  @@index([walletAddress])
 }

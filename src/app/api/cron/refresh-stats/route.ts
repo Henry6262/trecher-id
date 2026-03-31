@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getWalletTransactions, aggregateTradesByToken } from '@/lib/helius';
 import { getSolPrice } from '@/lib/sol-price';
+import { refreshTokenDeployments } from '@/lib/token-deployments';
 
 export const maxDuration = 300; // 5 min for cron
 
@@ -131,6 +132,16 @@ export async function GET(req: Request) {
               updatedAt: new Date(),
             },
           });
+
+          // Refresh token deployments for this user
+          try {
+            await refreshTokenDeployments(
+              user.id,
+              user.wallets.map((w) => ({ address: w.address })),
+            );
+          } catch (deployErr) {
+            console.error(`[refresh-stats] Error refreshing deployments for user ${user.id}:`, deployErr);
+          }
 
           processed++;
         } catch (err) {
