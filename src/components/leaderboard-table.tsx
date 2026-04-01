@@ -87,43 +87,100 @@ function PodiumCard({ trader, place }: { trader: RankedTrader; place: 1 | 2 | 3 
   );
 }
 
+interface RankedDeployer {
+  rank: number;
+  username: string;
+  displayName: string;
+  avatarUrl: string | null;
+  totalDevPnlSol: number;
+  totalDevPnlUsd: number;
+  deployCount: number;
+  migratedCount: number;
+  bestToken: string | null;
+  bestTokenPnl: number;
+}
+
+type LeaderboardMode = 'traders' | 'deployers';
+
 export function LeaderboardTable({ initialPeriod = '7d' }: { initialPeriod?: string }) {
+  const [mode, setMode] = useState<LeaderboardMode>('traders');
   const [period, setPeriod] = useState(initialPeriod);
   const [traders, setTraders] = useState<RankedTrader[]>([]);
+  const [deployers, setDeployers] = useState<RankedDeployer[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    fetch(`/api/leaderboard?period=${period}&limit=50`)
-      .then((res) => res.json())
-      .then((data) => { if (!cancelled) { setTraders(Array.isArray(data) ? data : []); setLoading(false); } })
-      .catch(() => { if (!cancelled) setLoading(false); });
+    if (mode === 'traders') {
+      fetch(`/api/leaderboard?period=${period}&limit=50`)
+        .then((res) => res.json())
+        .then((data) => { if (!cancelled) { setTraders(Array.isArray(data) ? data : []); setLoading(false); } })
+        .catch(() => { if (!cancelled) setLoading(false); });
+    } else {
+      fetch(`/api/leaderboard/deployers?limit=50`)
+        .then((res) => res.json())
+        .then((data) => { if (!cancelled) { setDeployers(Array.isArray(data) ? data : []); setLoading(false); } })
+        .catch(() => { if (!cancelled) setLoading(false); });
+    }
     return () => { cancelled = true; };
-  }, [period]);
+  }, [mode, period]);
 
-  const top3 = traders.slice(0, 3);
-  const rest = traders.slice(3);
+  // Normalize deployers to RankedTrader shape for shared podium/table
+  const deployerAsTraders: RankedTrader[] = deployers.map(d => ({
+    rank: d.rank,
+    username: d.username,
+    displayName: d.displayName,
+    avatarUrl: d.avatarUrl,
+    pnlUsd: d.totalDevPnlUsd,
+    pnlSol: d.totalDevPnlSol,
+    winRate: d.deployCount > 0 ? (d.migratedCount / d.deployCount) * 100 : 0,
+    trades: d.deployCount,
+  }));
+
+  const activeList = mode === 'traders' ? traders : deployerAsTraders;
+  const top3 = activeList.slice(0, 3);
+  const rest = activeList.slice(3);
 
   return (
     <div>
-      {/* Period tabs */}
-      <div className="flex gap-2 mb-6">
-        {PERIODS.map((p) => (
+      {/* Mode toggle — Traders / Deployers */}
+      <div className="flex gap-2 mb-4">
+        {(['traders', 'deployers'] as const).map((m) => (
           <button
-            key={p.key}
-            onClick={() => setPeriod(p.key)}
-            className="font-mono text-[10px] tracking-[1.5px] font-semibold px-4 py-1.5 transition-all cut-xs"
+            key={m}
+            onClick={() => setMode(m)}
+            className="font-mono text-[11px] tracking-[1px] font-bold px-5 py-2 transition-all cut-sm"
             style={{
-              background: period === p.key ? 'rgba(0,212,255,0.12)' : 'transparent',
-              border: period === p.key ? '1px solid rgba(0,212,255,0.2)' : '1px solid transparent',
-              color: period === p.key ? '#00D4FF' : '#71717a',
+              background: mode === m ? 'rgba(0,212,255,0.12)' : 'transparent',
+              border: mode === m ? '1px solid rgba(0,212,255,0.25)' : '1px solid rgba(255,255,255,0.04)',
+              color: mode === m ? '#00D4FF' : '#71717a',
             }}
           >
-            {p.label}
+            {m === 'traders' ? '📊 TRADERS' : '🚀 DEPLOYERS'}
           </button>
         ))}
       </div>
+
+      {/* Period tabs — only for traders */}
+      {mode === 'traders' && (
+        <div className="flex gap-2 mb-6">
+          {PERIODS.map((p) => (
+            <button
+              key={p.key}
+              onClick={() => setPeriod(p.key)}
+              className="font-mono text-[10px] tracking-[1.5px] font-semibold px-4 py-1.5 transition-all cut-xs"
+              style={{
+                background: period === p.key ? 'rgba(0,212,255,0.12)' : 'transparent',
+                border: period === p.key ? '1px solid rgba(0,212,255,0.2)' : '1px solid transparent',
+                color: period === p.key ? '#00D4FF' : '#71717a',
+              }}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Loading */}
       {loading && (
@@ -133,7 +190,7 @@ export function LeaderboardTable({ initialPeriod = '7d' }: { initialPeriod?: str
       )}
 
       {/* Empty */}
-      {!loading && traders.length === 0 && (
+      {!loading && activeList.length === 0 && (
         <GlassCard cut={10} glow={false}>
           <div className="flex flex-col items-center justify-center py-16 gap-2">
             <span className="text-[13px] text-[var(--trench-text-muted)]">No rankings yet</span>
@@ -164,9 +221,9 @@ export function LeaderboardTable({ initialPeriod = '7d' }: { initialPeriod?: str
               style={{ gridTemplateColumns: '32px 1fr 100px 60px', borderBottom: '1px solid rgba(0,212,255,0.06)' }}
             >
               <span>#</span>
-              <span>TRADER</span>
-              <span className="text-right">PnL</span>
-              <span className="text-right">WIN</span>
+              <span>{mode === 'traders' ? 'TRADER' : 'DEPLOYER'}</span>
+              <span className="text-right">{mode === 'traders' ? 'PnL' : 'DEV PnL'}</span>
+              <span className="text-right">{mode === 'traders' ? 'WIN' : 'MIGRATED'}</span>
             </div>
 
             {rest.map((t) => {
