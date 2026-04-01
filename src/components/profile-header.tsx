@@ -107,14 +107,15 @@ export function ProfileHeader({ avatarUrl, displayName, username, bio, verified,
 
         {/* Info — right side */}
         <div className="flex-1 min-w-0 pt-1">
-          {/* Name + badge */}
-          <div className="flex items-center gap-1.5 mb-0.5">
+          {/* Name + badge + category */}
+          <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
             <h1 className="text-[20px] font-black text-white tracking-tight truncate">@{username}</h1>
             {verified && (
               <div className="w-[16px] h-[16px] flex items-center justify-center rounded-full flex-shrink-0" style={{ background: '#00D4FF' }}>
                 <Check size={10} strokeWidth={3} className="text-black" />
               </div>
             )}
+            <span className="cut-xs text-[7px] tracking-[1px] px-2 py-0.5 font-semibold text-[var(--trench-accent)]" style={{ background: 'rgba(0,212,255,0.08)', border: '1px solid rgba(0,212,255,0.12)' }}>SOLANA TRADER</span>
           </div>
           <span className="text-[11px] text-[var(--trench-text-muted)]">{displayName}</span>
 
@@ -138,20 +139,20 @@ export function ProfileHeader({ avatarUrl, displayName, username, bio, verified,
         </div>
       </div>
 
-      {/* Stats strip + bio below the hero row */}
+      {/* Stats strip — branded cut-corner containers */}
       {stats && stats.totalTrades > 0 && (
         <div className="flex gap-2 mt-4">
-          <div className="skew-container glass-inner flex flex-1 items-center justify-center gap-1.5 px-3 py-2">
-            <span className="text-[13px] font-bold font-mono text-[var(--trench-accent)]">{stats.winRate.toFixed(0)}%</span>
+          <div className="cut-xs flex flex-1 items-center justify-center gap-1.5 px-3 py-2.5" style={{ background: 'rgba(0,212,255,0.03)', border: '1px solid rgba(0,212,255,0.08)' }}>
+            <span className="text-[14px] font-bold font-mono text-[var(--trench-accent)]">{stats.winRate.toFixed(0)}%</span>
             <span className="text-[7px] text-[var(--trench-text-muted)] tracking-[1px]">WIN</span>
           </div>
-          <div className="skew-container glass-inner flex flex-1 items-center justify-center gap-1.5 px-3 py-2">
-            <span className="text-[13px] font-bold font-mono text-[var(--trench-text)]">{stats.totalTrades}</span>
+          <div className="cut-xs flex flex-1 items-center justify-center gap-1.5 px-3 py-2.5" style={{ background: 'rgba(0,212,255,0.03)', border: '1px solid rgba(0,212,255,0.08)' }}>
+            <span className="text-[14px] font-bold font-mono text-[var(--trench-text)]">{stats.totalTrades}</span>
             <span className="text-[7px] text-[var(--trench-text-muted)] tracking-[1px]">TRADES</span>
           </div>
           {roi !== undefined && (
-            <div className="skew-container glass-inner flex flex-1 items-center justify-center gap-1.5 px-3 py-2">
-              <span className={`text-[13px] font-bold font-mono ${roi >= 0 ? 'text-[var(--trench-accent)]' : 'text-[var(--trench-red)]'}`}>
+            <div className="cut-xs flex flex-1 items-center justify-center gap-1.5 px-3 py-2.5" style={{ background: 'rgba(0,212,255,0.03)', border: '1px solid rgba(0,212,255,0.08)' }}>
+              <span className={`text-[14px] font-bold font-mono ${roi >= 0 ? 'text-[var(--trench-green)]' : 'text-[var(--trench-red)]'}`}>
                 {roi >= 0 ? '+' : ''}{Math.round(roi)}%
               </span>
               <span className="text-[7px] text-[var(--trench-text-muted)] tracking-[1px]">ROI</span>
