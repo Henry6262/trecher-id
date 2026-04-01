@@ -80,8 +80,8 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets, traderS
         {/* Divider */}
         <div className="mx-6" style={{ height: '1px', background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.12) 30%, rgba(0,212,255,0.12) 70%, transparent)' }} />
 
-        {/* Content section — proper padding */}
-        <div className="pb-5 pt-4 px-6">
+        {/* Content section — generous padding */}
+        <div className="pb-6 pt-5 px-7 sm:px-10">
           {/* Trades first, then deployments, then links */}
           {pinnedTrades.length > 0 && (
             <div className="mb-5">
