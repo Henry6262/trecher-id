@@ -11,10 +11,19 @@ export function truncateAddress(address: string): string {
 
 export function formatPnl(value: number): string {
   const prefix = value >= 0 ? '+' : '';
-  if (Math.abs(value) >= 1000) {
-    return `${prefix}$${(value / 1000).toFixed(1)}K`;
+  const abs = Math.abs(value);
+  if (abs >= 1_000_000) {
+    return `${prefix}$${Math.round(value / 1_000_000)}M`;
   }
-  return `${prefix}$${value.toFixed(0)}`;
+  if (abs >= 1000) {
+    return `${prefix}$${Math.round(value / 1000)}K`;
+  }
+  return `${prefix}$${Math.round(value)}`;
+}
+
+export function formatPnlFull(value: number): string {
+  const prefix = value >= 0 ? '+' : '';
+  return `${prefix}$${Math.round(Math.abs(value)).toLocaleString()}`;
 }
 
 export function formatPercent(value: number): string {

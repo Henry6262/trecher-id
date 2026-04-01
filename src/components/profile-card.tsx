@@ -74,40 +74,38 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets, traderS
           verified={hasWallets}
           stats={stats}
           wallets={wallets}
+          roi={traderStats?.roi}
         />
 
-        {/* Divider — fades from transparent to cyan and back */}
+        {/* Divider */}
         <div className="mx-6" style={{ height: '1px', background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.12) 30%, rgba(0,212,255,0.12) 70%, transparent)' }} />
 
-        {/* Enhanced trader stats */}
-        {traderStats && traderStats.totalBuySol > 0 && (
-          <div className="px-6 py-4">
-            <EnhancedStats stats={traderStats} />
-          </div>
-        )}
+        {/* Content section — proper padding */}
+        <div className="pb-5 pt-4 px-6">
+          {/* Trades first, then deployments, then links */}
+          {pinnedTrades.length > 0 && (
+            <div className="mb-5">
+              <TradeCarousel trades={pinnedTrades} />
+            </div>
+          )}
 
-        {/* Content section — more indented */}
-        <div className="pb-5 pt-4" style={{ paddingLeft: '56px', paddingRight: '56px' }}>
-          {/* Links */}
+          {deployments && deployments.length > 0 && (
+            <div className="mb-5">
+              <DeploymentCarousel deployments={deployments} />
+            </div>
+          )}
+
+          {/* Divider before links */}
+          {(pinnedTrades.length > 0 || (deployments && deployments.length > 0)) && links.length > 0 && (
+            <div className="mb-5" style={{ height: '1px', background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.08), transparent)' }} />
+          )}
+
+          {/* Links — at the bottom */}
           {links.length > 0 && (
             <div className="flex flex-col gap-1.5 mb-4">
               {links.map((link) => (
                 <LinkItem key={link.id} title={link.title} url={link.url} icon={link.icon} />
               ))}
-            </div>
-          )}
-
-          {/* Trades */}
-          {pinnedTrades.length > 0 && (
-            <div className="mb-4">
-              <TradeCarousel trades={pinnedTrades} />
-            </div>
-          )}
-
-          {/* Token Deployments */}
-          {deployments && deployments.length > 0 && (
-            <div className="mb-4">
-              <DeploymentCarousel deployments={deployments} />
             </div>
           )}
 
