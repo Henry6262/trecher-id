@@ -34,22 +34,74 @@ export function ProfileHeader({ avatarUrl, displayName, username, bio, verified,
         background: 'linear-gradient(180deg, rgba(0,212,255,0.05) 0%, transparent 100%)',
       }}
     >
+      {/* Wallet selector — absolute top-right */}
+      {wallets && wallets.length > 0 && (
+        <div className="absolute top-4 right-4 z-10">
+          <button
+            onClick={() => setWalletOpen(!walletOpen)}
+            className="cut-xs flex items-center gap-1.5 text-[8px] font-mono text-[var(--trench-text-muted)] px-2 py-1 transition-all hover:text-[var(--trench-accent)]"
+            style={{ background: 'rgba(0,212,255,0.04)', border: '1px solid rgba(0,212,255,0.08)' }}
+          >
+            {wallets[activeWallet]?.isMain && <Star size={7} className="text-[var(--trench-accent)] fill-[var(--trench-accent)]" />}
+            <span className="w-[4px] h-[4px] rounded-full flex-shrink-0" style={{ background: wallets[activeWallet]?.verified ? '#22c55e' : '#71717a' }} />
+            {truncateAddress(wallets[activeWallet]?.address || '')}
+            <ChevronDown size={9} className={`transition-transform ${walletOpen ? 'rotate-180' : ''}`} />
+          </button>
+
+          {walletOpen && wallets.length > 1 && (
+            <div
+              className="absolute top-full right-0 mt-1 cut-sm z-50"
+              style={{ background: 'rgba(8,12,18,0.95)', border: '1px solid rgba(0,212,255,0.12)', minWidth: '180px' }}
+            >
+              {wallets.map((w, i) => (
+                <button
+                  key={w.address}
+                  onClick={() => { setActiveWallet(i); setWalletOpen(false); }}
+                  className={`w-full flex items-center gap-2 px-3 py-2 text-[9px] font-mono transition-all ${
+                    i === activeWallet ? 'text-[var(--trench-accent)]' : 'text-[var(--trench-text-muted)] hover:text-[var(--trench-text)]'
+                  }`}
+                  style={{ background: i === activeWallet ? 'rgba(0,212,255,0.06)' : 'transparent' }}
+                >
+                  {w.isMain && <Star size={8} className="text-[var(--trench-accent)] fill-[var(--trench-accent)]" />}
+                  <span className="w-[5px] h-[5px] rounded-full flex-shrink-0" style={{ background: w.verified ? '#22c55e' : '#71717a' }} />
+                  {truncateAddress(w.address)}
+                  {i === activeWallet && <Check size={10} className="ml-auto text-[var(--trench-accent)]" />}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Hero layout — avatar left, info right */}
       <div className="flex items-start gap-4">
-        {/* Avatar — left side */}
+        {/* Avatar — left side, cut-corner branded */}
         <div className="relative flex-shrink-0">
-          <div className="absolute inset-[-12px] pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(0,212,255,0.06) 0%, transparent 70%)' }} />
+          <div className="absolute inset-[-16px] pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(0,212,255,0.08) 0%, transparent 70%)' }} />
+          {/* Outer glow border */}
           <div
-            className="w-[88px] h-[88px] rounded-full overflow-hidden relative animate-[pulseGlow_3s_ease-in-out_infinite]"
-            style={{ border: '3px solid rgba(0,212,255,0.4)' }}
+            className="relative w-[100px] h-[100px] animate-[pulseGlow_3s_ease-in-out_infinite]"
+            style={{
+              clipPath: 'polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px)',
+              background: 'linear-gradient(135deg, rgba(0,212,255,0.5), rgba(0,212,255,0.15), rgba(0,212,255,0.4))',
+              padding: '2px',
+            }}
           >
-            {avatarUrl ? (
-              <Image src={avatarUrl} alt={displayName} width={88} height={88} className="w-full h-full object-cover" unoptimized />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-[32px] font-bold text-black" style={{ background: 'var(--trench-accent)' }}>
-                {displayName.charAt(0).toUpperCase()}
-              </div>
-            )}
+            <div
+              className="w-full h-full overflow-hidden"
+              style={{
+                clipPath: 'polygon(11px 0, 100% 0, 100% calc(100% - 11px), calc(100% - 11px) 100%, 0 100%, 0 11px)',
+                background: '#0a0a0f',
+              }}
+            >
+              {avatarUrl ? (
+                <Image src={avatarUrl} alt={displayName} width={100} height={100} className="w-full h-full object-cover" unoptimized />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-[36px] font-bold text-black" style={{ background: 'var(--trench-accent)' }}>
+                  {displayName.charAt(0).toUpperCase()}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -82,44 +134,7 @@ export function ProfileHeader({ avatarUrl, displayName, username, bio, verified,
             </div>
           )}
 
-          {/* Wallet selector */}
-          {wallets && wallets.length > 0 && (
-            <div className="mt-2 relative">
-              <button
-                onClick={() => setWalletOpen(!walletOpen)}
-                className="cut-xs flex items-center gap-2 text-[9px] font-mono text-[var(--trench-text-muted)] px-2.5 py-1 transition-all hover:text-[var(--trench-accent)]"
-                style={{ background: 'rgba(0,212,255,0.04)', border: '1px solid rgba(0,212,255,0.1)' }}
-              >
-                {wallets[activeWallet]?.isMain && <Star size={8} className="text-[var(--trench-accent)] fill-[var(--trench-accent)]" />}
-                <span className="w-[5px] h-[5px] rounded-full flex-shrink-0" style={{ background: wallets[activeWallet]?.verified ? '#22c55e' : '#71717a' }} />
-                {truncateAddress(wallets[activeWallet]?.address || '')}
-                <ChevronDown size={10} className={`transition-transform ${walletOpen ? 'rotate-180' : ''}`} />
-              </button>
-
-              {walletOpen && wallets.length > 1 && (
-                <div
-                  className="absolute top-full left-0 mt-1 cut-sm z-50"
-                  style={{ background: 'rgba(8,12,18,0.95)', border: '1px solid rgba(0,212,255,0.12)', minWidth: '200px' }}
-                >
-                  {wallets.map((w, i) => (
-                    <button
-                      key={w.address}
-                      onClick={() => { setActiveWallet(i); setWalletOpen(false); }}
-                      className={`w-full flex items-center gap-2 px-3 py-2 text-[9px] font-mono transition-all ${
-                        i === activeWallet ? 'text-[var(--trench-accent)]' : 'text-[var(--trench-text-muted)] hover:text-[var(--trench-text)]'
-                      }`}
-                      style={{ background: i === activeWallet ? 'rgba(0,212,255,0.06)' : 'transparent' }}
-                    >
-                      {w.isMain && <Star size={8} className="text-[var(--trench-accent)] fill-[var(--trench-accent)]" />}
-                      <span className="w-[5px] h-[5px] rounded-full flex-shrink-0" style={{ background: w.verified ? '#22c55e' : '#71717a' }} />
-                      {truncateAddress(w.address)}
-                      {i === activeWallet && <Check size={10} className="ml-auto text-[var(--trench-accent)]" />}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+          {/* Wallet selector removed from here — placed absolutely at top-right */}
         </div>
       </div>
 
