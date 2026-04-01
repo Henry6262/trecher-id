@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { formatPnlFull, truncateAddress } from '@/lib/utils';
+import { formatPnl, truncateAddress } from '@/lib/utils';
 import { Check, ChevronDown, Star } from 'lucide-react';
 import { useState } from 'react';
 
@@ -106,67 +106,68 @@ export function ProfileHeader({ avatarUrl, displayName, username, bio, verified,
 
         {/* Info — right side */}
         <div className="flex-1 min-w-0 pt-1">
-          {/* Name + badge + category — clickable to twitter */}
-          <div className="flex items-center gap-2 mb-1 flex-wrap">
-            <a
-              href={`https://x.com/${username}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[24px] font-black text-white tracking-tight truncate hover:text-[var(--trench-accent)] transition-colors"
-            >
-              @{username}
-            </a>
-            {verified && (
-              <div className="w-[18px] h-[18px] flex items-center justify-center rounded-full flex-shrink-0" style={{ background: '#00D4FF' }}>
-                <Check size={11} strokeWidth={3} className="text-black" />
+          {/* Row: name+badge left, PnL right */}
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              {/* Name + badge + category */}
+              <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                <a
+                  href={`https://x.com/${username}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[24px] font-black text-white tracking-tight truncate hover:text-[var(--trench-accent)] transition-colors"
+                >
+                  @{username}
+                </a>
+                {verified && (
+                  <div className="w-[18px] h-[18px] flex items-center justify-center rounded-full flex-shrink-0" style={{ background: '#00D4FF' }}>
+                    <Check size={11} strokeWidth={3} className="text-black" />
+                  </div>
+                )}
+                <span className="cut-xs text-[7px] tracking-[1px] px-2 py-0.5 font-semibold text-[var(--trench-accent)]" style={{ background: 'rgba(0,212,255,0.08)', border: '1px solid rgba(0,212,255,0.12)' }}>SOLANA TRADER</span>
+              </div>
+
+              {/* Bio */}
+              {bio && (
+                <p className="text-[11px] text-[var(--trench-text-muted)] mt-1 leading-snug max-w-[240px]">{bio}</p>
+              )}
+            </div>
+
+            {/* PnL — far right */}
+            {stats && (
+              <div className="text-right flex-shrink-0">
+                <div
+                  className="font-mono text-[28px] font-black leading-none"
+                  style={{
+                    color: stats.totalPnlUsd >= 0 ? 'var(--trench-green)' : 'var(--trench-red)',
+                    textShadow: stats.totalPnlUsd >= 0 ? '0 0 24px rgba(34,197,94,0.2)' : '0 0 24px rgba(239,68,68,0.2)',
+                  }}
+                >
+                  {formatPnl(stats.totalPnlUsd)}
+                </div>
+                <div className="text-[7px] tracking-[2px] text-[var(--trench-text-muted)] mt-1">PnL</div>
               </div>
             )}
-            <span className="cut-xs text-[7px] tracking-[1px] px-2 py-0.5 font-semibold text-[var(--trench-accent)]" style={{ background: 'rgba(0,212,255,0.08)', border: '1px solid rgba(0,212,255,0.12)' }}>SOLANA TRADER</span>
           </div>
-          <span className="text-[12px] text-[var(--trench-text-muted)]">{displayName}</span>
-
-          {/* Hero PnL — right side under name */}
-          {stats && (
-            <div className="mt-2">
-              <div
-                className="font-mono text-[30px] font-black leading-none"
-                style={{
-                  color: stats.totalPnlUsd >= 0 ? 'var(--trench-green)' : 'var(--trench-red)',
-                  textShadow: stats.totalPnlUsd >= 0 ? '0 0 24px rgba(34,197,94,0.2)' : '0 0 24px rgba(239,68,68,0.2)',
-                }}
-              >
-                {formatPnlFull(stats.totalPnlUsd)}
-              </div>
-              <div className="text-[8px] tracking-[2px] text-[var(--trench-text-muted)] mt-1">TOTAL REALIZED PnL</div>
-            </div>
-          )}
-
-          {/* Bio */}
-          {bio && (
-            <p className="text-[11px] text-[var(--trench-text-muted)] mt-2 leading-snug">{bio}</p>
-          )}
         </div>
       </div>
 
-      {/* Stats strip — red/green/white, bigger labels, stacked layout */}
+      {/* Stats strip — branded containers with gradient top border */}
       {stats && stats.totalTrades > 0 && (
         <div className="flex gap-2 mt-5">
-          <div className="cut-xs flex flex-1 flex-col items-center justify-center px-3 py-3" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(0,212,255,0.08)' }}>
-            <span className={`text-[16px] font-bold font-mono ${stats.winRate >= 50 ? 'text-[var(--trench-green)]' : 'text-[var(--trench-red)]'}`}>{stats.winRate.toFixed(0)}%</span>
-            <span className="text-[9px] text-[var(--trench-text-muted)] tracking-[1.5px] mt-1">WIN RATE</span>
-          </div>
-          <div className="cut-xs flex flex-1 flex-col items-center justify-center px-3 py-3" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(0,212,255,0.08)' }}>
-            <span className="text-[16px] font-bold font-mono text-white">{stats.totalTrades}</span>
-            <span className="text-[9px] text-[var(--trench-text-muted)] tracking-[1.5px] mt-1">TRADES</span>
-          </div>
-          {roi !== undefined && (
-            <div className="cut-xs flex flex-1 flex-col items-center justify-center px-3 py-3" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(0,212,255,0.08)' }}>
-              <span className={`text-[16px] font-bold font-mono ${roi >= 0 ? 'text-[var(--trench-green)]' : 'text-[var(--trench-red)]'}`}>
-                {roi >= 0 ? '+' : ''}{Math.round(roi)}%
-              </span>
-              <span className="text-[9px] text-[var(--trench-text-muted)] tracking-[1.5px] mt-1">ROI</span>
+          {[
+            { value: `${stats.winRate.toFixed(0)}%`, label: 'WIN RATE', color: stats.winRate >= 50 ? 'var(--trench-green)' : 'var(--trench-red)' },
+            { value: String(stats.totalTrades), label: 'TRADES', color: 'white' },
+            ...(roi !== undefined ? [{ value: `${roi >= 0 ? '+' : ''}${Math.round(roi)}%`, label: 'ROI', color: roi >= 0 ? 'var(--trench-green)' : 'var(--trench-red)' }] : []),
+          ].map((s) => (
+            <div key={s.label} className="flex-1 relative cut-sm overflow-hidden" style={{ background: 'rgba(8,12,18,0.6)' }}>
+              <div style={{ height: '2px', background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.3), transparent)' }} />
+              <div className="flex flex-col items-center justify-center px-3 py-3" style={{ border: '1px solid rgba(0,212,255,0.1)', borderTop: 'none' }}>
+                <span className="text-[17px] font-bold font-mono" style={{ color: s.color }}>{s.value}</span>
+                <span className="text-[8px] text-[var(--trench-text-muted)] tracking-[1.5px] mt-1">{s.label}</span>
+              </div>
             </div>
-          )}
+          ))}
         </div>
       )}
     </div>
