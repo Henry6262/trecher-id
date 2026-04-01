@@ -40,9 +40,16 @@ export function CutCorner({
 
   return (
     <div className={cn('relative', className)} style={{ clipPath: clip, ...style }} onClick={onClick}>
+      {/* Border layer */}
       <div aria-hidden className="absolute inset-0 pointer-events-none" style={{ background: borderColor }} />
-      <div className="relative" style={{ margin: borderWidth, clipPath: clip, background: bg, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
-        {children}
+      {/* Content layer with background */}
+      <div className="relative" style={{ margin: borderWidth, clipPath: clip, background: bg }}>
+        {/* Blur layer — separate from clip-path parent */}
+        <div className="absolute inset-0 pointer-events-none" style={{ backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }} />
+        {/* Actual content */}
+        <div className="relative">
+          {children}
+        </div>
       </div>
     </div>
   );

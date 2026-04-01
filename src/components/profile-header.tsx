@@ -30,7 +30,7 @@ export function ProfileHeader({ avatarUrl, displayName, username, bio, verified,
     <div
       className="relative"
       style={{
-        padding: '32px 28px 24px',
+        padding: '28px 28px 24px',
         background: 'linear-gradient(180deg, rgba(0,212,255,0.05) 0%, transparent 100%)',
       }}
     >
@@ -74,15 +74,14 @@ export function ProfileHeader({ avatarUrl, displayName, username, bio, verified,
       )}
 
       {/* Hero layout — avatar left, info right */}
-      <div className="flex items-start gap-4">
+      <div className="flex items-start gap-5">
         {/* Avatar — left side, cut-corner branded */}
         <div className="relative flex-shrink-0">
           <div className="absolute inset-[-16px] pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(0,212,255,0.08) 0%, transparent 70%)' }} />
-          {/* Outer glow border */}
           <div
-            className="relative w-[100px] h-[100px] animate-[pulseGlow_3s_ease-in-out_infinite]"
+            className="relative w-[110px] h-[110px] animate-[pulseGlow_3s_ease-in-out_infinite]"
             style={{
-              clipPath: 'polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px)',
+              clipPath: 'polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px)',
               background: 'linear-gradient(135deg, rgba(0,212,255,0.5), rgba(0,212,255,0.15), rgba(0,212,255,0.4))',
               padding: '2px',
             }}
@@ -90,14 +89,14 @@ export function ProfileHeader({ avatarUrl, displayName, username, bio, verified,
             <div
               className="w-full h-full overflow-hidden"
               style={{
-                clipPath: 'polygon(11px 0, 100% 0, 100% calc(100% - 11px), calc(100% - 11px) 100%, 0 100%, 0 11px)',
+                clipPath: 'polygon(13px 0, 100% 0, 100% calc(100% - 13px), calc(100% - 13px) 100%, 0 100%, 0 13px)',
                 background: '#0a0a0f',
               }}
             >
               {avatarUrl ? (
-                <Image src={avatarUrl} alt={displayName} width={100} height={100} className="w-full h-full object-cover" unoptimized />
+                <Image src={avatarUrl} alt={displayName} width={110} height={110} className="w-full h-full object-cover" unoptimized />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-[36px] font-bold text-black" style={{ background: 'var(--trench-accent)' }}>
+                <div className="w-full h-full flex items-center justify-center text-[40px] font-bold text-black" style={{ background: 'var(--trench-accent)' }}>
                   {displayName.charAt(0).toUpperCase()}
                 </div>
               )}
@@ -107,23 +106,30 @@ export function ProfileHeader({ avatarUrl, displayName, username, bio, verified,
 
         {/* Info — right side */}
         <div className="flex-1 min-w-0 pt-1">
-          {/* Name + badge + category */}
-          <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
-            <h1 className="text-[20px] font-black text-white tracking-tight truncate">@{username}</h1>
+          {/* Name + badge + category — clickable to twitter */}
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
+            <a
+              href={`https://x.com/${username}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[24px] font-black text-white tracking-tight truncate hover:text-[var(--trench-accent)] transition-colors"
+            >
+              @{username}
+            </a>
             {verified && (
-              <div className="w-[16px] h-[16px] flex items-center justify-center rounded-full flex-shrink-0" style={{ background: '#00D4FF' }}>
-                <Check size={10} strokeWidth={3} className="text-black" />
+              <div className="w-[18px] h-[18px] flex items-center justify-center rounded-full flex-shrink-0" style={{ background: '#00D4FF' }}>
+                <Check size={11} strokeWidth={3} className="text-black" />
               </div>
             )}
             <span className="cut-xs text-[7px] tracking-[1px] px-2 py-0.5 font-semibold text-[var(--trench-accent)]" style={{ background: 'rgba(0,212,255,0.08)', border: '1px solid rgba(0,212,255,0.12)' }}>SOLANA TRADER</span>
           </div>
-          <span className="text-[11px] text-[var(--trench-text-muted)]">{displayName}</span>
+          <span className="text-[12px] text-[var(--trench-text-muted)]">{displayName}</span>
 
-          {/* Hero PnL */}
+          {/* Hero PnL — right side under name */}
           {stats && (
             <div className="mt-2">
               <div
-                className="font-mono text-[28px] font-black leading-none"
+                className="font-mono text-[30px] font-black leading-none"
                 style={{
                   color: stats.totalPnlUsd >= 0 ? 'var(--trench-green)' : 'var(--trench-red)',
                   textShadow: stats.totalPnlUsd >= 0 ? '0 0 24px rgba(34,197,94,0.2)' : '0 0 24px rgba(239,68,68,0.2)',
@@ -131,38 +137,37 @@ export function ProfileHeader({ avatarUrl, displayName, username, bio, verified,
               >
                 {formatPnlFull(stats.totalPnlUsd)}
               </div>
-              <div className="text-[7px] tracking-[2px] text-[var(--trench-text-muted)] mt-1">TOTAL REALIZED PnL</div>
+              <div className="text-[8px] tracking-[2px] text-[var(--trench-text-muted)] mt-1">TOTAL REALIZED PnL</div>
             </div>
           )}
 
-          {/* Wallet selector removed from here — placed absolutely at top-right */}
+          {/* Bio */}
+          {bio && (
+            <p className="text-[11px] text-[var(--trench-text-muted)] mt-2 leading-snug">{bio}</p>
+          )}
         </div>
       </div>
 
-      {/* Stats strip — branded cut-corner containers */}
+      {/* Stats strip — red/green/white, bigger labels, stacked layout */}
       {stats && stats.totalTrades > 0 && (
-        <div className="flex gap-2 mt-4">
-          <div className="cut-xs flex flex-1 items-center justify-center gap-1.5 px-3 py-2.5" style={{ background: 'rgba(0,212,255,0.03)', border: '1px solid rgba(0,212,255,0.08)' }}>
-            <span className="text-[14px] font-bold font-mono text-[var(--trench-accent)]">{stats.winRate.toFixed(0)}%</span>
-            <span className="text-[7px] text-[var(--trench-text-muted)] tracking-[1px]">WIN</span>
+        <div className="flex gap-2 mt-5">
+          <div className="cut-xs flex flex-1 flex-col items-center justify-center px-3 py-3" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(0,212,255,0.08)' }}>
+            <span className={`text-[16px] font-bold font-mono ${stats.winRate >= 50 ? 'text-[var(--trench-green)]' : 'text-[var(--trench-red)]'}`}>{stats.winRate.toFixed(0)}%</span>
+            <span className="text-[9px] text-[var(--trench-text-muted)] tracking-[1.5px] mt-1">WIN RATE</span>
           </div>
-          <div className="cut-xs flex flex-1 items-center justify-center gap-1.5 px-3 py-2.5" style={{ background: 'rgba(0,212,255,0.03)', border: '1px solid rgba(0,212,255,0.08)' }}>
-            <span className="text-[14px] font-bold font-mono text-[var(--trench-text)]">{stats.totalTrades}</span>
-            <span className="text-[7px] text-[var(--trench-text-muted)] tracking-[1px]">TRADES</span>
+          <div className="cut-xs flex flex-1 flex-col items-center justify-center px-3 py-3" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(0,212,255,0.08)' }}>
+            <span className="text-[16px] font-bold font-mono text-white">{stats.totalTrades}</span>
+            <span className="text-[9px] text-[var(--trench-text-muted)] tracking-[1.5px] mt-1">TRADES</span>
           </div>
           {roi !== undefined && (
-            <div className="cut-xs flex flex-1 items-center justify-center gap-1.5 px-3 py-2.5" style={{ background: 'rgba(0,212,255,0.03)', border: '1px solid rgba(0,212,255,0.08)' }}>
-              <span className={`text-[14px] font-bold font-mono ${roi >= 0 ? 'text-[var(--trench-green)]' : 'text-[var(--trench-red)]'}`}>
+            <div className="cut-xs flex flex-1 flex-col items-center justify-center px-3 py-3" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(0,212,255,0.08)' }}>
+              <span className={`text-[16px] font-bold font-mono ${roi >= 0 ? 'text-[var(--trench-green)]' : 'text-[var(--trench-red)]'}`}>
                 {roi >= 0 ? '+' : ''}{Math.round(roi)}%
               </span>
-              <span className="text-[7px] text-[var(--trench-text-muted)] tracking-[1px]">ROI</span>
+              <span className="text-[9px] text-[var(--trench-text-muted)] tracking-[1.5px] mt-1">ROI</span>
             </div>
           )}
         </div>
-      )}
-
-      {bio && (
-        <p className="text-[11px] text-[var(--trench-text-muted)] mt-3 leading-snug">{bio}</p>
       )}
     </div>
   );

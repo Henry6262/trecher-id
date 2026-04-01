@@ -42,7 +42,7 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets, traderS
   return (
     <div className="w-full max-w-[620px] mx-auto">
       {/* Logo — links to landing page */}
-      <div className="flex justify-center pt-2 pb-5">
+      <div className="flex justify-center pt-0 pb-3">
         <Link href="/" className="cursor-pointer">
           <Image
             src="/logo.png"
@@ -82,30 +82,31 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets, traderS
 
         {/* Content section — generous padding */}
         <div className="pb-6 pt-5 px-7 sm:px-10">
-          {/* Trades first, then deployments, then links */}
+          {/* Links first */}
+          {links.length > 0 && (
+            <div className="flex flex-col gap-1.5 mb-5">
+              {links.map((link) => (
+                <LinkItem key={link.id} title={link.title} url={link.url} icon={link.icon} />
+              ))}
+            </div>
+          )}
+
+          {/* Divider between links and trades */}
+          {links.length > 0 && (pinnedTrades.length > 0 || (deployments && deployments.length > 0)) && (
+            <div className="mb-5" style={{ height: '1px', background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.08), transparent)' }} />
+          )}
+
+          {/* Pinned trades */}
           {pinnedTrades.length > 0 && (
             <div className="mb-5">
               <TradeCarousel trades={pinnedTrades} />
             </div>
           )}
 
+          {/* Token deployments */}
           {deployments && deployments.length > 0 && (
             <div className="mb-5">
               <DeploymentCarousel deployments={deployments} />
-            </div>
-          )}
-
-          {/* Divider before links */}
-          {(pinnedTrades.length > 0 || (deployments && deployments.length > 0)) && links.length > 0 && (
-            <div className="mb-5" style={{ height: '1px', background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.08), transparent)' }} />
-          )}
-
-          {/* Links — at the bottom */}
-          {links.length > 0 && (
-            <div className="flex flex-col gap-1.5 mb-4">
-              {links.map((link) => (
-                <LinkItem key={link.id} title={link.title} url={link.url} icon={link.icon} />
-              ))}
             </div>
           )}
 
