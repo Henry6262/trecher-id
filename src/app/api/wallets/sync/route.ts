@@ -50,14 +50,21 @@ function parseSwaps(
   return tokenMap;
 }
 
-export async function POST() {
+export async function POST(req: Request) {
   try {
     const session = await getSessionUser();
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const wallets = await prisma.wallet.findMany({ where: { userId: session.id } });
+    const body = await req.json().catch(() => ({}));
+    const targetAddress: string | undefined = body?.address;
+
+    const wallets = await prisma.wallet.findMany({
+      where: targetAddress
+        ? { userId: session.id, address: targetAddress }
+        : { userId: session.id },
+    });
 
     if (wallets.length === 0) {
       return NextResponse.json({ ok: true, walletsUpdated: 0, newTrades: 0 });

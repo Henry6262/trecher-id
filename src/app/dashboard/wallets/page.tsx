@@ -87,7 +87,11 @@ export default function WalletsPage() {
   async function syncWallet(address: string) {
     setSyncing(address);
     try {
-      const res = await fetch('/api/wallets/sync', { method: 'POST' });
+      const res = await fetch('/api/wallets/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ address }),
+      });
       if (res.ok) {
         // Refresh the wallet list to show updated stats
         const updated = await fetch('/api/wallets').then(r => r.json());
