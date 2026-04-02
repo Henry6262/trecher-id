@@ -6,6 +6,8 @@ import { CutCorner } from '@/components/cut-corner';
 import { CutButton } from '@/components/cut-button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { GlassCard } from '@/components/glass-card';
+import { ExternalLink, CheckCircle2, Circle } from 'lucide-react';
 
 interface Profile {
   id: string;
@@ -38,6 +40,9 @@ export default function DashboardPage() {
   const [newIcon, setNewIcon] = useState('🔗');
   const [addingLink, setAddingLink] = useState(false);
 
+  const [walletCount, setWalletCount] = useState(0);
+  const [linkCount, setLinkCount] = useState(0);
+
   useEffect(() => {
     fetch('/api/profile')
       .then((r) => r.json())
@@ -50,8 +55,14 @@ export default function DashboardPage() {
 
     fetch('/api/links')
       .then((r) => r.json())
-      .then((data: LinkItem[]) => setLinks(Array.isArray(data) ? data : []))
+      .then((data: LinkItem[]) => {
+        const arr = Array.isArray(data) ? data : [];
+        setLinks(arr);
+        setLinkCount(arr.length);
+      })
       .catch(() => {});
+
+    fetch('/api/wallets').then(r => r.json()).then(d => setWalletCount(Array.isArray(d) ? d.length : 0)).catch(() => {});
   }, []);
 
   async function saveProfile() {
@@ -82,7 +93,11 @@ export default function DashboardPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id }),
     });
-    setLinks((prev) => prev.filter((l) => l.id !== id));
+    setLinks((prev) => {
+      const next = prev.filter((l) => l.id !== id);
+      setLinkCount(next.length);
+      return next;
+    });
   }
 
   async function addLink() {
@@ -96,7 +111,11 @@ export default function DashboardPage() {
       });
       if (res.ok) {
         const created: LinkItem = await res.json();
-        setLinks((prev) => [...prev, created]);
+        setLinks((prev) => {
+          const next = [...prev, created];
+          setLinkCount(next.length);
+          return next;
+        });
         setNewTitle('');
         setNewUrl('');
         setNewIcon('🔗');
@@ -130,6 +149,59 @@ export default function DashboardPage() {
           )}
         </div>
       </div>
+
+      {/* Profile Preview */}
+      {profile && (
+        <GlassCard className="p-5" cut={12}>
+          <div className="flex items-center gap-3">
+            {profile.avatarUrl ? (
+              <img src={profile.avatarUrl} alt="" className="w-10 h-10 rounded-full object-cover" />
+            ) : (
+              <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold text-black" style={{ background: '#00D4FF' }}>
+                {(profile.displayName ?? profile.username).charAt(0).toUpperCase()}
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-mono font-bold text-[var(--trench-text)] truncate">{profile.displayName ?? profile.username}</p>
+              <p className="text-xs font-mono text-[var(--trench-text-muted)]">@{profile.username}</p>
+            </div>
+            <a
+              href={`/${profile.username}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 text-[10px] font-mono text-[#00D4FF] hover:text-[#33DDFF] tracking-widest transition-colors shrink-0"
+            >
+              VIEW <ExternalLink size={10} />
+            </a>
+          </div>
+        </GlassCard>
+      )}
+
+      {/* Setup Checklist */}
+      <GlassCard className="p-5" cut={12}>
+        <p className="text-[9px] font-mono tracking-[2px] text-[var(--trench-text-muted)] mb-3">SETUP</p>
+        <div className="space-y-2.5">
+          {[
+            { label: 'Sign in with X', done: true, href: null },
+            { label: 'Link a wallet', done: walletCount > 0, href: '/dashboard/wallets' },
+            { label: 'Add a link', done: linkCount > 0, href: '/dashboard' },
+            { label: 'Pin a trade', done: false, href: '/dashboard/trades' },
+          ].map(step => (
+            <div key={step.label} className="flex items-center gap-2.5">
+              {step.done
+                ? <CheckCircle2 size={14} className="text-green-400 shrink-0" />
+                : <Circle size={14} className="text-[var(--trench-text-muted)] shrink-0" />
+              }
+              <span className={`text-xs font-mono flex-1 ${step.done ? 'text-[var(--trench-text-muted)] line-through' : 'text-[var(--trench-text)]'}`}>
+                {step.label}
+              </span>
+              {!step.done && step.href && (
+                <a href={step.href} className="text-[9px] font-mono text-[#00D4FF] tracking-widest hover:text-[#33DDFF]">→</a>
+              )}
+            </div>
+          ))}
+        </div>
+      </GlassCard>
 
       {/* Profile editor */}
       <CutCorner cut="md" className="w-full">
