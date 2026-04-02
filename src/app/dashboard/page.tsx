@@ -42,6 +42,7 @@ export default function DashboardPage() {
 
   const [walletCount, setWalletCount] = useState(0);
   const [linkCount, setLinkCount] = useState(0);
+  const [pinnedCount, setPinnedCount] = useState(0);
 
   useEffect(() => {
     fetch('/api/profile')
@@ -63,6 +64,8 @@ export default function DashboardPage() {
       .catch(() => {});
 
     fetch('/api/wallets').then(r => r.json()).then(d => setWalletCount(Array.isArray(d) ? d.length : 0)).catch(() => {});
+
+    fetch('/api/trades/pin').then(r => r.json()).then(d => setPinnedCount(Array.isArray(d) ? d.length : 0)).catch(() => {});
   }, []);
 
   async function saveProfile() {
@@ -185,7 +188,7 @@ export default function DashboardPage() {
             { label: 'Sign in with X', done: true, href: null },
             { label: 'Link a wallet', done: walletCount > 0, href: '/dashboard/wallets' },
             { label: 'Add a link', done: linkCount > 0, href: '/dashboard' },
-            { label: 'Pin a trade', done: false, href: '/dashboard/trades' },
+            { label: 'Pin a trade', done: pinnedCount > 0, href: '/dashboard/trades' },
           ].map(step => (
             <div key={step.label} className="flex items-center gap-2.5">
               {step.done
