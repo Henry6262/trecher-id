@@ -28,7 +28,7 @@ interface TokenStats {
 export async function detectTokenDeployments(
   walletAddress: string,
 ): Promise<DetectedDeployment[]> {
-  const txns = await getWalletTransactions(walletAddress);
+  const { txns } = await getWalletTransactions(walletAddress);
 
   const deployMints: { mint: string; timestamp: number; platform: string }[] = [];
 
