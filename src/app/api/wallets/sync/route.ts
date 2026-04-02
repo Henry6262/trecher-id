@@ -63,7 +63,14 @@ export async function POST() {
       return NextResponse.json({ ok: true, walletsUpdated: 0, newTrades: 0 });
     }
 
-    const solPrice = await getSolPrice();
+    // Fix 3: Add fallback for SOL price fetch
+    let solPrice = 150; // fallback
+    try {
+      solPrice = await getSolPrice();
+    } catch {
+      // use fallback
+    }
+
     let walletsUpdated = 0;
     let newTrades = 0;
 
@@ -110,21 +117,36 @@ export async function POST() {
         });
       }
 
-      // Recompute summary stats from all accumulated WalletTrade records
-      const allTrades = await prisma.walletTrade.findMany({ where: { walletId: wallet.id } });
+      walletsUpdated++;
+    }
 
-      const totalPnlSol = allTrades.reduce((s, t) => s + t.pnlSol, 0);
+    // Fix 1: Batch trade query after loop to eliminate N+1
+    const allTrades = await prisma.walletTrade.findMany({
+      where: { walletId: { in: wallets.map(w => w.id) } },
+    });
+
+    // Group by walletId manually
+    const tradesByWallet = new Map<string, typeof allTrades>();
+    for (const t of allTrades) {
+      const arr = tradesByWallet.get(t.walletId) ?? [];
+      arr.push(t);
+      tradesByWallet.set(t.walletId, arr);
+    }
+
+    // Update stats for each wallet using grouped data
+    for (const wallet of wallets) {
+      const wTrades = tradesByWallet.get(wallet.id) ?? [];
+      const totalTrades = wTrades.reduce((s, t) => s + t.tradeCount, 0);
+      // Fix 2: winRate by trade count not token count
+      const wins = wTrades.reduce((s, t) => s + (t.pnlSol > 0 ? t.tradeCount : 0), 0);
+      const winRate = totalTrades > 0 ? (wins / totalTrades) * 100 : 0;
+      const totalPnlSol = wTrades.reduce((s, t) => s + t.pnlSol, 0);
       const totalPnlUsd = totalPnlSol * solPrice;
-      const totalTrades = allTrades.reduce((s, t) => s + t.tradeCount, 0);
-      const wins = allTrades.filter(t => t.pnlSol > 0).length;
-      const winRate = allTrades.length > 0 ? (wins / allTrades.length) * 100 : 0;
 
       await prisma.wallet.update({
         where: { id: wallet.id },
         data: { totalPnlUsd, winRate, totalTrades },
       });
-
-      walletsUpdated++;
     }
 
     return NextResponse.json({ ok: true, walletsUpdated, newTrades });
