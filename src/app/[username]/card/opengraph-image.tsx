@@ -27,10 +27,15 @@ export default async function Image({
 }) {
   const { username } = await params;
 
-  // Load Inter font from Google Fonts
-  const fontData = await fetch(
-    'https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hiJ-Ek-_EeA.woff2',
-  ).then((r) => r.arrayBuffer());
+  // Load Inter font from Google Fonts with fallback
+  let fontData: ArrayBuffer | undefined;
+  try {
+    fontData = await fetch(
+      'https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hiJ-Ek-_EeA.woff2',
+    ).then((r) => r.arrayBuffer());
+  } catch {
+    // font fetch failed — ImageResponse will use system font
+  }
 
   const user = await prisma.user.findUnique({
     where: { username },
@@ -59,7 +64,7 @@ export default async function Image({
           Not Found
         </div>
       ),
-      { ...size, fonts: [{ name: 'Inter', data: fontData, weight: 400 }] },
+      { ...size, fonts: fontData ? [{ name: 'Inter', data: fontData, weight: 400 }] : [] },
     );
   }
 
@@ -351,7 +356,7 @@ export default async function Image({
     ),
     {
       ...size,
-      fonts: [{ name: 'Inter', data: fontData, weight: 400 }],
+      fonts: fontData ? [{ name: 'Inter', data: fontData, weight: 400 }] : [],
     },
   );
 }
