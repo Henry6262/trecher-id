@@ -8,6 +8,40 @@ import type { DegenScoreResult } from '@/lib/degen-score';
 import { useState } from 'react';
 import { ProfileStatsTabs } from './profile-stats-tabs';
 
+function ShareButtons({ username }: { username: string }) {
+  const [copied, setCopied] = useState(false);
+
+  function copyLink() {
+    navigator.clipboard.writeText(window.location.href).catch(() => {});
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+
+  const cardUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/${username}/card`;
+  const tweetText = encodeURIComponent(`Check out @${username}'s trading profile on Web3Me 👀\n${cardUrl}`);
+
+  return (
+    <>
+      <button
+        onClick={copyLink}
+        className="cut-xs flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-mono tracking-widest transition-all hover:text-[#00D4FF]"
+        style={{ background: 'rgba(0,212,255,0.04)', border: '1px solid rgba(0,212,255,0.1)', color: copied ? '#22c55e' : '#71717a' }}
+      >
+        {copied ? '✓ COPIED' : '🔗 COPY'}
+      </button>
+      <a
+        href={`https://twitter.com/intent/tweet?text=${tweetText}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="cut-xs flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-mono tracking-widest transition-all"
+        style={{ background: 'rgba(0,212,255,0.08)', border: '1px solid rgba(0,212,255,0.2)', color: '#00D4FF' }}
+      >
+        📤 SHARE
+      </a>
+    </>
+  );
+}
+
 interface ProfileHeaderProps {
   avatarUrl?: string | null;
   displayName: string;
@@ -189,6 +223,11 @@ export function ProfileHeader({ avatarUrl, displayName, username, bio, verified,
             )}
           </div>
         </div>
+      </div>
+
+      {/* Share actions */}
+      <div className="flex gap-2 mt-3">
+        <ShareButtons username={username} />
       </div>
 
       <ProfileStatsTabs username={username} allTimeStats={stats} />
