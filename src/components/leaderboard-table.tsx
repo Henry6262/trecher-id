@@ -65,9 +65,11 @@ function PodiumCard({ trader, place }: { trader: RankedTrader; place: 1 | 2 | 3 
           </div>
           <div className="flex items-center justify-center gap-1 mb-0.5">
             <span className="font-bold text-white" style={{ fontSize: place === 1 ? '13px' : '11px' }}>@{trader.username}</span>
-            <div className="w-[12px] h-[12px] rounded-full flex items-center justify-center" style={{ background: '#00D4FF' }}>
-              <Check size={7} strokeWidth={3} className="text-black" />
-            </div>
+            {trader.isClaimed && (
+              <div className="w-[12px] h-[12px] rounded-full flex items-center justify-center" style={{ background: '#00D4FF' }}>
+                <Check size={7} strokeWidth={3} className="text-black" />
+              </div>
+            )}
           </div>
           {badge && (
             <div className="flex justify-center mt-1 mb-2">
