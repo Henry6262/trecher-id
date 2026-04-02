@@ -87,8 +87,12 @@ export default function WalletsPage() {
   async function syncWallet(address: string) {
     setSyncing(address);
     try {
-      // TODO: POST /api/wallets/sync when endpoint exists
-      await new Promise(resolve => setTimeout(resolve, 1000)); // placeholder
+      const res = await fetch('/api/wallets/sync', { method: 'POST' });
+      if (res.ok) {
+        // Refresh the wallet list to show updated stats
+        const updated = await fetch('/api/wallets').then(r => r.json());
+        setWallets(Array.isArray(updated) ? updated : []);
+      }
     } finally {
       setSyncing(null);
     }
