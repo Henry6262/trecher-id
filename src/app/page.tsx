@@ -1,6 +1,8 @@
 import { prisma } from '@/lib/prisma';
 import { LandingContent } from '@/components/landing-content';
 import { formatPnl } from '@/lib/utils';
+import { cached } from '@/lib/redis';
+import type { TickerItem } from '@/app/api/ticker/route';
 
 export const dynamic = 'force-dynamic';
 
@@ -45,8 +47,25 @@ export default async function LandingPage() {
     };
   });
 
+  // Fetch ticker items directly (no internal HTTP — same Prisma call as /api/ticker)
+  const ticker = await cached<TickerItem[]>('ticker:recent', 60, async () => {
+    const rows = await prisma.pinnedTrade.findMany({
+      orderBy: { pinnedAt: 'desc' },
+      take: 20,
+      include: { user: { select: { username: true, avatarUrl: true } } },
+    });
+    return rows.map((r) => ({
+      username: r.user.username,
+      avatarUrl: r.user.avatarUrl,
+      tokenSymbol: r.tokenSymbol,
+      pnlPercent: r.totalPnlPercent,
+      totalPnlSol: r.totalPnlSol,
+      pinnedAt: r.pinnedAt.toISOString(),
+    }));
+  });
+
   // Top trader for the preview card
   const featured = traders[0];
 
-  return <LandingContent traders={traders} featured={featured} />;
+  return <LandingContent traders={traders} featured={featured} ticker={ticker} />;
 }

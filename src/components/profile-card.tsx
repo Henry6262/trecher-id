@@ -7,7 +7,14 @@ import { DeploymentCarousel } from './deployment-carousel';
 import type { DeploymentData } from './deployment-carousel';
 import { CutCorner } from './cut-corner';
 import { EnhancedStats } from './enhanced-stats';
+import { TrophyCase } from './trophy-case';
+import { TradeCalendar } from './trade-calendar';
 import type { TraderStats } from '@/lib/trade-stats';
+import type { TokenTrade } from '@/lib/helius';
+import { computeDegenScore } from '@/lib/degen-score';
+import type { DegenScoreResult } from '@/lib/degen-score';
+import { computeAchievements } from '@/lib/achievements';
+import { buildTradeCalendar } from '@/lib/trade-calendar';
 
 interface ProfileCardProps {
   user: {
@@ -34,10 +41,22 @@ interface ProfileCardProps {
   wallets: { address: string; verified: boolean; isMain?: boolean }[];
   traderStats?: TraderStats;
   deployments?: DeploymentData[];
+  allTrades?: TokenTrade[];
+  degenScore?: DegenScoreResult;
 }
 
-export function ProfileCard({ user, stats, links, pinnedTrades, wallets, traderStats, deployments }: ProfileCardProps) {
+export function ProfileCard({ user, stats, links, pinnedTrades, wallets, traderStats, deployments, allTrades, degenScore }: ProfileCardProps) {
   const hasWallets = wallets.length > 0;
+
+  // Compute achievements when we have enough data
+  const achievements = traderStats && degenScore
+    ? computeAchievements(stats, traderStats, degenScore)
+    : [];
+
+  // Build calendar from on-chain trade data if available
+  const calendarWeeks = allTrades && allTrades.length > 0
+    ? buildTradeCalendar(allTrades)
+    : [];
 
   return (
     <div className="w-full max-w-[620px] mx-auto">
@@ -46,7 +65,7 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets, traderS
         <Link href="/" className="cursor-pointer">
           <Image
             src="/logo.png"
-            alt="Trench ID"
+            alt="Web3Me"
             width={320}
             height={80}
             className="h-[80px] w-auto transition-opacity hover:opacity-80"
@@ -75,6 +94,7 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets, traderS
           stats={stats}
           wallets={wallets}
           roi={traderStats?.roi}
+          degenScore={degenScore}
         />
 
         {/* Divider */}
@@ -82,7 +102,10 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets, traderS
 
         {/* Content section — generous padding */}
         <div className="pb-6 pt-5 px-7 sm:px-10">
-          {/* Links first */}
+          {/* Achievements */}
+          {achievements.length > 0 && <TrophyCase achievements={achievements} />}
+
+          {/* Links */}
           {links.length > 0 && (
             <div className="flex flex-col gap-1.5 mb-5">
               {links.map((link) => (
@@ -95,6 +118,9 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets, traderS
           {links.length > 0 && (pinnedTrades.length > 0 || (deployments && deployments.length > 0)) && (
             <div className="mb-5" style={{ height: '1px', background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.08), transparent)' }} />
           )}
+
+          {/* Trade calendar */}
+          {calendarWeeks.length > 0 && <TradeCalendar weeks={calendarWeeks} />}
 
           {/* Pinned trades */}
           {pinnedTrades.length > 0 && (
@@ -117,7 +143,7 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets, traderS
           <Link href="/" className="cursor-pointer">
             <Image
               src="/logo.png"
-              alt="Trench ID"
+              alt="Web3Me"
               width={112}
               height={28}
               className="h-[28px] w-auto opacity-25 transition-opacity hover:opacity-40"

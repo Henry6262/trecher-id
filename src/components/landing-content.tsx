@@ -3,6 +3,7 @@
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useState } from 'react';
 import { Check } from 'lucide-react';
 import { CutButton } from '@/components/cut-button';
 import DecryptedText from '@/components/decrypted-text';
@@ -10,8 +11,14 @@ import { GlassCard } from '@/components/glass-card';
 import ShinyText from '@/components/shiny-text';
 import { TraderCarousel } from '@/components/trader-carousel';
 import { LeaderboardTable } from '@/components/leaderboard-table';
+import { ActivityTicker } from '@/components/activity-ticker';
+import type { TickerItem } from '@/app/api/ticker/route';
 
 const RisingLines = dynamic(() => import('@/components/rising-lines'), { ssr: false });
+const DomeGallery = dynamic(() => import('@/components/DomeGallery'), { ssr: false });
+const Circles = dynamic(() => import('@/components/circles'), { ssr: false });
+
+type ViewMode = 'scroll' | 'dome' | 'orbits';
 
 interface TraderData {
   username: string;
@@ -30,15 +37,28 @@ interface TraderData {
 interface LandingContentProps {
   traders: TraderData[];
   featured: TraderData;
+  ticker: TickerItem[];
 }
 
 const STEPS = [
-  { n: '01', title: 'Sign in with X', desc: 'Connect your Twitter account. Your handle becomes your Trench ID URL.' },
+  { n: '01', title: 'Sign in with X', desc: 'Connect your Twitter account. Your handle becomes your Web3Me URL.' },
   { n: '02', title: 'Link your wallets', desc: 'Add Solana wallets. We fetch your real trading history from the blockchain.' },
-  { n: '03', title: 'Share your link', desc: 'Add custom links, pin your best trades. Drop your Trench ID everywhere.' },
+  { n: '03', title: 'Share your link', desc: 'Add custom links, pin your best trades. Drop your Web3Me everywhere.' },
 ] as const;
 
-export function LandingContent({ traders, featured }: LandingContentProps) {
+export function LandingContent({ traders, featured, ticker }: LandingContentProps) {
+  const [traderView, setTraderView] = useState<ViewMode>('scroll');
+
+  // Build avatar arrays for non-scroll views
+  const avatarUrls = traders.map(t => t.avatarUrl || `https://unavatar.io/twitter/${t.username}`);
+  const domeImages = avatarUrls.map(src => ({ src, alt: '' }));
+  // Distribute into 3 orbital rings: inner=2, mid=3, outer=rest
+  const orbitRows: string[][] = [
+    avatarUrls.slice(0, 2),
+    avatarUrls.slice(2, 5),
+    avatarUrls.slice(5, 10),
+  ].filter(r => r.length > 0);
+
   return (
     <div className="relative min-h-screen" style={{ background: '#050508' }}>
       <div className="fixed inset-0 opacity-75" style={{ zIndex: 0 }}>
@@ -64,11 +84,14 @@ export function LandingContent({ traders, featured }: LandingContentProps) {
         >
         <div className="mx-auto flex max-w-[900px] items-center justify-between px-6 py-5">
           <Link href="/">
-            <Image src="/logo.png" alt="Trench ID" width={160} height={40} className="h-10 w-auto transition-opacity hover:opacity-80" priority />
+            <Image src="/logo.png" alt="Web3Me" width={160} height={40} className="h-10 w-auto transition-opacity hover:opacity-80" priority />
           </Link>
           <CutButton href="/login" variant="secondary" size="sm">Sign in with X</CutButton>
         </div>
         </nav>
+
+        {/* Activity Ticker */}
+        <ActivityTicker items={ticker} />
 
         {/* Hero */}
         <section className="mx-auto grid max-w-[900px] grid-cols-1 items-center gap-12 px-6 pt-16 pb-12 lg:grid-cols-2">
@@ -90,91 +113,123 @@ export function LandingContent({ traders, featured }: LandingContentProps) {
               The shareable identity page for Solana traders. Custom links, verified on-chain trading performance, one URL.
             </p>
 
-            <CutButton href="/login" size="lg">Create Your Trench ID</CutButton>
+            <CutButton href="/login" size="lg">Create Your Web3Me</CutButton>
             <p className="mt-4 text-[9px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">FREE &middot; 30 SECONDS &middot; SIGN IN WITH X</p>
           </div>
 
-          {/* Preview card — real data */}
-          <div className="hidden lg:block" style={{ transform: 'perspective(800px) rotateY(-3deg) rotateX(2deg)' }}>
-            <GlassCard cut={12}>
-              <div className="p-5">
-                <div className="mb-3 flex items-center gap-3">
-                  <div className="h-[52px] w-[52px] overflow-hidden rounded-full" style={{ border: '2px solid rgba(0,212,255,0.3)', boxShadow: '0 0 20px rgba(0,212,255,0.2)' }}>
-                    <Image
-                      src={featured.avatarUrl || `https://unavatar.io/twitter/${featured.username}`}
-                      alt={featured.name}
-                      width={52}
-                      height={52}
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[16px] font-bold text-white">@{featured.username}</span>
-                      <div className="flex h-[14px] w-[14px] items-center justify-center rounded-full" style={{ background: '#00D4FF' }}>
-                        <Check size={9} strokeWidth={3} className="text-black" />
-                      </div>
+          {/* Preview card — mirrors real profile layout */}
+          <div className="hidden lg:block w-[340px]" style={{ transform: 'perspective(1000px) rotateY(-4deg) rotateX(2deg)' }}>
+            {/* Accent line */}
+            <div className="h-[2px] mb-0" style={{ background: 'linear-gradient(90deg, transparent, #00D4FF, transparent)' }} />
+
+            {/* Main card */}
+            <GlassCard cut={12} bg="rgba(8,12,18,0.82)">
+              {/* Profile header */}
+              <div className="px-5 pt-5 pb-4">
+                <div className="flex items-start gap-4 mb-4">
+                  {/* Avatar */}
+                  <div className="relative flex-shrink-0">
+                    <div className="h-[72px] w-[72px] overflow-hidden rounded-full" style={{ border: '2px solid rgba(0,212,255,0.35)', boxShadow: '0 0 24px rgba(0,212,255,0.2)' }}>
+                      <Image
+                        src={featured.avatarUrl || `https://unavatar.io/twitter/${featured.username}`}
+                        alt={featured.name}
+                        width={72}
+                        height={72}
+                        className="h-full w-full object-cover"
+                      />
                     </div>
-                    <span className="text-[9px] text-[var(--trench-text-muted)]">{featured.name}</span>
+                    {/* Verified badge */}
+                    <div className="absolute -bottom-0.5 -right-0.5 flex h-[18px] w-[18px] items-center justify-center rounded-full" style={{ background: '#00D4FF', border: '2px solid rgba(8,12,18,0.9)' }}>
+                      <Check size={9} strokeWidth={3} className="text-black" />
+                    </div>
+                  </div>
+
+                  {/* Name + handle + bio */}
+                  <div className="flex-1 min-w-0 pt-1">
+                    <div className="text-[15px] font-bold text-white leading-tight truncate">{featured.name}</div>
+                    <div className="text-[11px] text-[var(--trench-accent)] mb-1.5">@{featured.username}</div>
+                    <div className="text-[10px] leading-relaxed text-[var(--trench-text-muted)]">Solana trader · On-chain verified</div>
                   </div>
                 </div>
 
-                <div className="mb-3 flex gap-2">
+                {/* Stats row */}
+                <div className="flex gap-2 mb-1">
                   {[
-                    { val: featured.pnl, label: 'PnL', color: 'text-[var(--trench-green)]' },
-                    { val: featured.winRate, label: 'Win', color: 'text-[var(--trench-accent)]' },
-                    { val: featured.trades, label: 'Trades', color: 'text-[var(--trench-text)]' },
+                    { val: featured.pnl, label: 'TOTAL PnL', color: 'var(--trench-green)' },
+                    { val: featured.winRate, label: 'WIN RATE', color: 'var(--trench-accent)' },
+                    { val: featured.trades, label: 'TRADES', color: 'var(--trench-text)' },
                   ].map(s => (
-                    <div key={s.label} className="skew-container glass-inner flex flex-1 items-center gap-1.5 px-2.5 py-1.5">
-                      <span className={`font-mono text-[12px] font-bold ${s.color}`}>{s.val}</span>
-                      <span className="text-[7px] tracking-[1px] text-[var(--trench-text-muted)]">{s.label}</span>
+                    <div key={s.label} className="flex-1 flex flex-col items-center py-2 px-1" style={{ background: 'rgba(0,212,255,0.04)', border: '1px solid rgba(0,212,255,0.08)', clipPath: 'polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px)' }}>
+                      <span className="font-mono text-[13px] font-bold" style={{ color: s.color }}>{s.val}</span>
+                      <span className="text-[6px] tracking-[1px] text-[var(--trench-text-muted)] mt-0.5">{s.label}</span>
                     </div>
                   ))}
                 </div>
+              </div>
 
-                {/* Real recent trade if available */}
-                {featured.recentToken && (
-                  <div className="cut-xs mb-2" style={{ background: 'rgba(8,12,22,0.55)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid rgba(0,212,255,0.06)', padding: '8px 10px' }}>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-[11px] font-bold text-white">{featured.recentToken}</span>
-                      <span className="text-[11px] font-bold font-mono text-[var(--trench-green)]">{featured.recentPnl}</span>
+              {/* Divider */}
+              <div className="mx-5" style={{ height: '1px', background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.12) 30%, rgba(0,212,255,0.12) 70%, transparent)' }} />
+
+              {/* Links */}
+              <div className="px-5 pt-4 pb-3 flex flex-col gap-1.5">
+                {[
+                  { icon: '𝕏', label: `Follow @${featured.username}` },
+                  { icon: '📊', label: 'Trading Dashboard' },
+                  { icon: '⚡', label: 'Latest Calls' },
+                ].map(l => (
+                  <div key={l.label} className="flex items-center gap-2.5 px-3 py-2" style={{ background: 'rgba(0,212,255,0.04)', border: '1px solid rgba(0,212,255,0.08)', clipPath: 'polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px)' }}>
+                    <span className="text-[13px]">{l.icon}</span>
+                    <span className="flex-1 text-[11px] text-white">{l.label}</span>
+                    <span className="text-[13px] text-[var(--trench-text-muted)]">›</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Divider */}
+              <div className="mx-5" style={{ height: '1px', background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.08), transparent)' }} />
+
+              {/* Pinned trade */}
+              {featured.recentToken && (
+                <div className="px-5 py-4">
+                  <div className="text-[7px] font-mono tracking-[2px] text-[var(--trench-text-muted)] mb-2">PINNED TRADE</div>
+                  <div className="cut-xs" style={{ background: 'rgba(8,12,22,0.6)', border: '1px solid rgba(0,212,255,0.08)', padding: '10px 12px' }}>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[12px] font-bold text-white">{featured.recentToken}</span>
+                      <span className="text-[12px] font-bold font-mono text-[var(--trench-green)]">{featured.recentPnl}</span>
                     </div>
                     <div className="flex gap-2">
                       {featured.recentBuy && (
-                        <div className="cut-xs flex-1 flex justify-between text-[8px] px-1.5 py-0.5" style={{ background: 'rgba(0,212,255,0.02)' }}>
+                        <div className="cut-xs flex-1 flex justify-between text-[8px] px-2 py-1" style={{ background: 'rgba(0,212,255,0.03)' }}>
                           <span className="text-[var(--trench-green)] font-semibold">BUY</span>
                           <span className="text-[var(--trench-text)] font-semibold">{featured.recentBuy} SOL</span>
                         </div>
                       )}
                       {featured.recentSell && (
-                        <div className="cut-xs flex-1 flex justify-between text-[8px] px-1.5 py-0.5" style={{ background: 'rgba(0,212,255,0.02)' }}>
+                        <div className="cut-xs flex-1 flex justify-between text-[8px] px-2 py-1" style={{ background: 'rgba(0,212,255,0.03)' }}>
                           <span className="text-[var(--trench-red)] font-semibold">SELL</span>
                           <span className="text-[var(--trench-green)] font-semibold">{featured.recentSell} SOL</span>
                         </div>
                       )}
                     </div>
                   </div>
-                )}
-
-                <div className="flex flex-col gap-1">
-                  <div className="skew-container glass-inner flex items-center gap-2 px-3 py-2">
-                    <span className="text-[14px] text-[var(--trench-accent)]">𝕏</span>
-                    <span className="flex-1 text-[11px]">Follow @{featured.username}</span>
-                    <span className="text-[16px] text-[var(--trench-text-muted)]">›</span>
-                  </div>
                 </div>
+              )}
+
+              {/* Footer */}
+              <div className="flex justify-center py-3 border-t border-[rgba(0,212,255,0.06)]">
+                <Image src="/logo.png" alt="Web3Me" width={80} height={20} className="h-5 w-auto opacity-30" />
               </div>
             </GlassCard>
           </div>
         </section>
 
         {/* Divider */}
-        <div className="mx-auto max-w-[900px] px-6">
+        <div className="mx-auto max-w-[900px] px-10">
           <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.1), transparent)' }} />
         </div>
 
         {/* Leaderboard — traders + deployers */}
-        <section className="mx-auto max-w-[900px] px-6 py-16">
+        <section className="mx-auto max-w-[900px] px-10 py-16">
           <div className="mb-8 text-right">
             <div
               className="mb-3 inline-flex items-center gap-1.5 px-3 py-1 text-[9px] font-mono tracking-[2px] text-[var(--trench-accent)]"
@@ -200,12 +255,12 @@ export function LandingContent({ traders, featured }: LandingContentProps) {
         </section>
 
         {/* Divider */}
-        <div className="mx-auto max-w-[900px] px-6">
+        <div className="mx-auto max-w-[900px] px-10">
           <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.1), transparent)' }} />
         </div>
 
         {/* How it works */}
-        <section className="mx-auto max-w-[900px] px-6 py-16">
+        <section className="mx-auto max-w-[900px] px-10 py-16">
           <h2 className="mb-2 text-2xl font-bold text-white">How it <span className="text-[var(--trench-accent)]">works</span></h2>
           <p className="mb-8 text-[12px] text-[var(--trench-text-muted)]">Three steps. Thirty seconds. Zero cost.</p>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -222,38 +277,90 @@ export function LandingContent({ traders, featured }: LandingContentProps) {
         </section>
 
         {/* Divider */}
-        <div className="mx-auto max-w-[900px] px-6">
+        <div className="mx-auto max-w-[900px] px-10">
           <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.1), transparent)' }} />
         </div>
 
         {/* Top Traders — real data from DB */}
         <section className="py-16">
-          <div className="mx-auto mb-10 max-w-[900px] px-6 text-center">
-            <h2 className="mb-3 text-3xl sm:text-4xl font-bold text-white">Top <span className="text-[var(--trench-accent)]">traders</span></h2>
-            <p className="text-[13px] text-[var(--trench-text-muted)]">Already on Trench ID. Are you?</p>
+          <div className="mx-auto mb-8 max-w-[900px] px-10">
+            <div className="flex items-end justify-between">
+              <div>
+                <h2 className="mb-1 text-3xl sm:text-4xl font-bold text-white">Top <span className="text-[var(--trench-accent)]">traders</span></h2>
+                <p className="text-[13px] text-[var(--trench-text-muted)]">Already on Web3Me. Are you?</p>
+              </div>
+              {/* View toggle */}
+              <div className="flex gap-1">
+                {(['scroll', 'dome', 'orbits'] as ViewMode[]).map(mode => (
+                  <button
+                    key={mode}
+                    onClick={() => setTraderView(mode)}
+                    className="px-3 py-1 text-[9px] font-mono tracking-[2px] transition-colors"
+                    style={{
+                      background: traderView === mode ? 'rgba(0,212,255,0.12)' : 'rgba(0,212,255,0.04)',
+                      border: `1px solid ${traderView === mode ? 'rgba(0,212,255,0.35)' : 'rgba(0,212,255,0.1)'}`,
+                      color: traderView === mode ? 'var(--trench-accent)' : 'var(--trench-text-muted)',
+                      clipPath: 'polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px)',
+                    }}
+                  >
+                    {mode.toUpperCase()}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
-          <TraderCarousel traders={traders} />
+
+          {traderView === 'scroll' && <TraderCarousel traders={traders} />}
+
+          {traderView === 'dome' && (
+            <div className="h-[520px] w-full">
+              <DomeGallery
+                images={domeImages}
+                fit={0.8}
+                minRadius={500}
+                maxVerticalRotationDeg={0}
+                segments={34}
+                dragDampening={2}
+                grayscale={false}
+              />
+            </div>
+          )}
+
+          {traderView === 'orbits' && (
+            <div className="flex justify-center overflow-hidden py-4">
+              <Circles
+                rows={orbitRows}
+                circleSize={72}
+                baseRadius={130}
+                orbitGap={110}
+                rotationDuration={18}
+                alternateDirection
+                showPaths
+                animate
+              />
+            </div>
+          )}
         </section>
 
         {/* Divider */}
-        <div className="mx-auto max-w-[900px] px-6">
+        <div className="mx-auto max-w-[900px] px-10">
           <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.1), transparent)' }} />
         </div>
 
         {/* Bottom CTA */}
-        <section className="mx-auto max-w-[900px] px-6 py-16 text-center">
-          <h2 className="mb-3 text-3xl font-bold text-white">Claim your <span className="text-[var(--trench-accent)]">Trench ID</span></h2>
+        <section className="mx-auto max-w-[900px] px-10 py-16 text-center">
+          <h2 className="mb-3 text-3xl font-bold text-white">Claim your <span className="text-[var(--trench-accent)]">Web3Me</span></h2>
           <p className="mb-6 text-[13px] text-[var(--trench-text-muted)]">Your trading speaks for itself. Let it.</p>
-          <CutButton href="/login" size="lg">Create Your Trench ID</CutButton>
+          <CutButton href="/login" size="lg">Create Your Web3Me</CutButton>
         </section>
 
         {/* Footer */}
-        <div className="mx-auto max-w-[900px] border-t border-[rgba(0,212,255,0.06)] px-6 py-6 text-center">
+        <div className="mx-auto max-w-[900px] border-t border-[rgba(0,212,255,0.06)] px-10 py-6 text-center">
           <Link href="/" className="mb-2 inline-block">
-            <Image src="/logo.png" alt="Trench ID" width={96} height={24} className="mx-auto h-6 w-auto opacity-30 transition-opacity hover:opacity-50" />
+            <Image src="/logo.png" alt="Web3Me" width={96} height={24} className="mx-auto h-6 w-auto opacity-30 transition-opacity hover:opacity-50" />
           </Link>
           <br />
-          <span className="text-[9px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">TRENCH ID &middot; SOLANA &middot; 2026</span>
+          <span className="text-[9px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">WEB3ME &middot; SOLANA &middot; 2026</span>
         </div>
       </div>
     </div>

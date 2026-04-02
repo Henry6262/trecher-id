@@ -4,6 +4,7 @@ import { ProfileCard } from '@/components/profile-card';
 import { BackgroundLayer } from '@/components/background-layer';
 import { getWalletTransactions, aggregateTradesByToken } from '@/lib/helius';
 import { computeTraderStats } from '@/lib/trade-stats';
+import { computeDegenScore } from '@/lib/degen-score';
 import { cached } from '@/lib/redis';
 import type { DeploymentData } from '@/components/deployment-carousel';
 import type { Metadata } from 'next';
@@ -61,7 +62,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     : `$${totalPnlUsd.toFixed(0)}`;
 
   const description = `${pnlStr} PnL · ${winRate.toFixed(0)}% Win Rate · ${totalTrades} Trades${user.bio ? ` — ${user.bio}` : ''}`;
-  const title = `@${username} — Trench ID`;
+  const title = `@${username} — Web3Me`;
 
   return {
     title,
@@ -71,7 +72,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description,
       type: 'profile',
       url: `/${username}`,
-      siteName: 'Trench ID',
+      siteName: 'Web3Me',
     },
     twitter: {
       card: 'summary_large_image',
@@ -135,6 +136,7 @@ export default async function ProfilePage({ params }: Props) {
     },
   );
   const traderStats = computeTraderStats(allTrades);
+  const degenScore = computeDegenScore(traderStats, stats);
 
   const deployments: DeploymentData[] = user.tokenDeployments.map((d) => ({
     id: d.id,
@@ -178,6 +180,8 @@ export default async function ProfilePage({ params }: Props) {
           traderStats={traderStats}
           wallets={wallets.map((w: DBWallet) => ({ address: w.address, verified: w.verified, isMain: w.isMain }))}
           deployments={deployments}
+          allTrades={allTrades}
+          degenScore={degenScore}
         />
       </div>
     </div>

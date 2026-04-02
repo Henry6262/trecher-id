@@ -22,7 +22,7 @@ export async function getTokenMetadata(mints: string[]): Promise<Map<string, Tok
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           jsonrpc: '2.0',
-          id: 'trench-id',
+          id: 'web3me',
           method: 'getAssetBatch',
           params: { ids: uncached },
         }),

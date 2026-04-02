@@ -5,7 +5,7 @@ import { Providers } from '@/components/providers';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Trench ID — Your Web3 Bio Link',
+  title: 'Web3Me — Your Web3 Bio Link',
   description: 'Linktree for crypto traders. Verified on-chain trading performance.',
 };
 

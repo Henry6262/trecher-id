@@ -1,8 +1,9 @@
 import { ImageResponse } from 'next/og';
 import { prisma } from '@/lib/prisma';
+import { computeDegenScore } from '@/lib/degen-score';
 
 export const runtime = 'nodejs';
-export const alt = 'Trench ID Profile';
+export const alt = 'Web3Me Profile';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -66,6 +67,12 @@ export default async function Image({ params }: { params: Promise<{ username: st
     }
   }
   const winRate = winRateCount > 0 ? totalWinRate / winRateCount : 0;
+
+  const degenResult = computeDegenScore(
+    { roi: 0, avgTradeSize: 0, bestTrade: null, worstTrade: null, winStreak: 0, avgHoldTime: '0m', consistency: 0, totalBuySol: 0, totalSellSol: 0 },
+    { winRate, totalTrades, totalPnlUsd: totalPnl },
+  );
+
   const pnlStr =
     totalPnl >= 1000 ? `+$${(totalPnl / 1000).toFixed(1)}K` : `+$${totalPnl.toFixed(0)}`;
 
@@ -136,6 +143,32 @@ export default async function Image({ params }: { params: Promise<{ username: st
           </div>
         </div>
 
+        {/* Degen Score badge */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 16,
+            background: 'rgba(255,255,255,0.04)',
+            border: `1px solid ${degenResult.archetype.glowColor}40`,
+            padding: '14px 24px',
+            marginBottom: 32,
+          }}
+        >
+          <div style={{ fontSize: 28, fontWeight: 900, color: degenResult.archetype.glowColor, letterSpacing: 3 }}>
+            {degenResult.archetype.key}
+          </div>
+          <div style={{ fontSize: 16, color: '#71717a' }}>
+            {degenResult.archetype.description}
+          </div>
+          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ width: 80, height: 3, background: 'rgba(255,255,255,0.08)', position: 'relative', display: 'flex' }}>
+              <div style={{ width: `${degenResult.score}%`, height: '100%', background: degenResult.archetype.glowColor }} />
+            </div>
+            <div style={{ fontSize: 14, color: degenResult.archetype.glowColor }}>{degenResult.score}/100</div>
+          </div>
+        </div>
+
         {pinnedTrades.length > 0 && (
           <div style={{ display: 'flex', gap: 20 }}>
             {pinnedTrades.map((t: OGPinnedTrade) => (
@@ -196,7 +229,7 @@ export default async function Image({ params }: { params: Promise<{ username: st
             letterSpacing: 4,
           }}
         >
-          TRENCH ID
+          WEB3ME
         </div>
       </div>
     ),

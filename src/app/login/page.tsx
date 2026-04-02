@@ -36,7 +36,7 @@ export default function LoginPage() {
       <div className="relative z-10 text-center space-y-6">
         <Image
           src="/logo.png"
-          alt="Trench ID"
+          alt="Web3Me"
           width={224}
           height={56}
           className="h-14 w-auto mx-auto"

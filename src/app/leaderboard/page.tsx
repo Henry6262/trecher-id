@@ -25,7 +25,7 @@ export default function LeaderboardPage() {
             <Link href="/">
               <Image
                 src="/logo.png"
-                alt="Trench ID"
+                alt="Web3Me"
                 width={200}
                 height={50}
                 className="h-11 w-auto transition-opacity hover:opacity-80"
@@ -56,7 +56,7 @@ export default function LeaderboardPage() {
         {/* Content */}
         <div className="mx-auto max-w-[900px] px-6 pt-10 pb-20">
           {/* Header */}
-          <div className="mb-8">
+          <div className="mb-8 text-right">
             <div
               className="mb-3 inline-flex items-center gap-1.5 px-3 py-1 text-[9px] font-mono tracking-[2px] text-[var(--trench-accent)]"
               style={{
@@ -84,7 +84,7 @@ export default function LeaderboardPage() {
           <Link href="/" className="mb-2 inline-block">
             <Image
               src="/logo.png"
-              alt="Trench ID"
+              alt="Web3Me"
               width={96}
               height={24}
               className="mx-auto h-6 w-auto opacity-30 transition-opacity hover:opacity-50"
@@ -92,7 +92,7 @@ export default function LeaderboardPage() {
           </Link>
           <br />
           <span className="text-[9px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">
-            TRENCH ID &middot; SOLANA &middot; 2026
+            WEB3ME &middot; SOLANA &middot; 2026
           </span>
         </div>
       </div>
