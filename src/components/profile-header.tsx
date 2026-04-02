@@ -11,6 +11,7 @@ interface ProfileHeaderProps {
   username: string;
   bio?: string | null;
   verified?: boolean;
+  isClaimed?: boolean;
   stats?: {
     totalPnlUsd: number;
     winRate: number;
@@ -20,7 +21,7 @@ interface ProfileHeaderProps {
   roi?: number;
 }
 
-export function ProfileHeader({ avatarUrl, displayName, username, bio, verified, stats, wallets, roi }: ProfileHeaderProps) {
+export function ProfileHeader({ avatarUrl, displayName, username, bio, verified, isClaimed, stats, wallets, roi }: ProfileHeaderProps) {
   const [activeWallet, setActiveWallet] = useState(
     () => wallets?.findIndex(w => w.isMain) ?? 0
   );
@@ -123,6 +124,11 @@ export function ProfileHeader({ avatarUrl, displayName, username, bio, verified,
                   <div className="w-[18px] h-[18px] flex items-center justify-center rounded-full flex-shrink-0" style={{ background: '#00D4FF' }}>
                     <Check size={11} strokeWidth={3} className="text-black" />
                   </div>
+                )}
+                {isClaimed && (
+                  <span style={{ clipPath: 'polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px)' }} className="inline-flex items-center px-1.5 py-0.5 font-mono text-[10px] tracking-widest text-[#00D4FF] border border-[#00D4FF]/30 bg-[#00D4FF]/[0.08] ml-2">
+                    ✓ VERIFIED
+                  </span>
                 )}
                 <span className="cut-xs text-[7px] tracking-[1px] px-2 py-0.5 font-semibold text-[var(--trench-accent)]" style={{ background: 'rgba(0,212,255,0.08)', border: '1px solid rgba(0,212,255,0.12)' }}>SOLANA TRADER</span>
               </div>

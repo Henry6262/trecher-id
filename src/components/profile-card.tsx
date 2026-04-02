@@ -15,6 +15,7 @@ interface ProfileCardProps {
     displayName: string;
     bio?: string | null;
     avatarUrl?: string | null;
+    isClaimed?: boolean;
   };
   stats: {
     totalPnlUsd: number;
@@ -72,6 +73,7 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets, traderS
           username={user.username}
           bio={user.bio}
           verified={hasWallets}
+          isClaimed={user.isClaimed}
           stats={stats}
           wallets={wallets}
           roi={traderStats?.roi}

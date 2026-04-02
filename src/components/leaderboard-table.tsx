@@ -19,6 +19,7 @@ interface RankedTrader {
   username: string;
   displayName: string;
   avatarUrl: string | null;
+  isClaimed?: boolean;
   pnlUsd: number;
   pnlSol: number;
   winRate: number;
@@ -92,6 +93,7 @@ interface RankedDeployer {
   username: string;
   displayName: string;
   avatarUrl: string | null;
+  isClaimed?: boolean;
   totalDevPnlSol: number;
   totalDevPnlUsd: number;
   deployCount: number;
@@ -137,6 +139,7 @@ export function LeaderboardTable({ initialPeriod = '7d' }: { initialPeriod?: str
     username: d.username,
     displayName: d.displayName,
     avatarUrl: d.avatarUrl,
+    isClaimed: d.isClaimed,
     pnlUsd: d.totalDevPnlUsd,
     pnlSol: d.totalDevPnlSol,
     winRate: d.deployCount > 0 ? (d.migratedCount / d.deployCount) * 100 : 0,
@@ -253,6 +256,9 @@ export function LeaderboardTable({ initialPeriod = '7d' }: { initialPeriod?: str
                     </div>
                     <div className="min-w-0 flex items-center gap-1.5">
                       <span className="text-[11px] font-semibold text-white truncate">@{t.username}</span>
+                      {t.isClaimed && (
+                        <span className="ml-1 text-[10px] font-mono text-[#00D4FF]">✓</span>
+                      )}
                       {badge && (
                         <span className="cut-xs text-[6px] tracking-[0.5px] px-1.5 py-0.5 font-semibold flex-shrink-0" style={{ color: badge.color, background: `${badge.color}14`, border: `1px solid ${badge.color}20` }}>
                           {badge.emoji} {badge.label}
