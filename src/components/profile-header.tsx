@@ -6,6 +6,7 @@ import { Check, ChevronDown, Star } from 'lucide-react';
 import { DegenBadge } from './degen-badge';
 import type { DegenScoreResult } from '@/lib/degen-score';
 import { useState } from 'react';
+import { ProfileStatsTabs } from './profile-stats-tabs';
 
 interface ProfileHeaderProps {
   avatarUrl?: string | null;
@@ -190,24 +191,7 @@ export function ProfileHeader({ avatarUrl, displayName, username, bio, verified,
         </div>
       </div>
 
-      {/* Stats strip — branded containers with gradient top border */}
-      {stats && stats.totalTrades > 0 && (
-        <div className="flex gap-2 mt-5">
-          {[
-            { value: `${stats.winRate.toFixed(0)}%`, label: 'WIN RATE', color: stats.winRate >= 50 ? 'var(--trench-green)' : 'var(--trench-red)' },
-            { value: String(stats.totalTrades), label: 'TRADES', color: 'white' },
-            ...(roi !== undefined ? [{ value: `${roi >= 0 ? '+' : ''}${Math.round(roi)}%`, label: 'ROI', color: roi >= 0 ? 'var(--trench-green)' : 'var(--trench-red)' }] : []),
-          ].map((s) => (
-            <div key={s.label} className="flex-1 relative cut-sm overflow-hidden" style={{ background: 'rgba(8,12,18,0.6)' }}>
-              <div style={{ height: '2px', background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.3), transparent)' }} />
-              <div className="flex flex-col items-center justify-center px-3 py-3" style={{ border: '1px solid rgba(0,212,255,0.1)', borderTop: 'none' }}>
-                <span className="text-[17px] font-bold font-mono" style={{ color: s.color }}>{s.value}</span>
-                <span className="text-[8px] text-[var(--trench-text-muted)] tracking-[1.5px] mt-1">{s.label}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+      <ProfileStatsTabs username={username} allTimeStats={stats} />
 
       {/* Edit button — own profiles only */}
       {isOwner && (
