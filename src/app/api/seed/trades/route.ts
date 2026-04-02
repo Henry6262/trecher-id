@@ -32,22 +32,25 @@ export async function POST(req: Request) {
 
     for (const wallet of user.wallets) {
       try {
-        const { txns } = await getWalletSwaps(wallet.address);
+        const { txns } = await getWalletSwaps(wallet.address, { maxPages: 20 });
         // aggregateTradesByToken is now async (fetches DAS metadata)
-        const trades = await aggregateTradesByToken(txns, wallet.address, 7);
+        const trades = await aggregateTradesByToken(txns, wallet.address, 90);
 
         if (trades.length === 0) {
-          results.push(`${user.displayName} — no swaps in last 7 days`);
+          results.push(`${user.displayName} — no swaps in last 90 days`);
           continue;
         }
 
         // Only pin winners (positive PnL SOL), sorted by biggest gain
         const winners = trades
           .filter(t => t.totalPnlSol > 0.01 && t.transactions.length >= 1)
+          .sort((a, b) => b.totalPnlPercent - a.totalPnlPercent)
           .slice(0, pinCount);
 
-        // If no winners, take top trades by activity
-        const toPinn = winners.length > 0 ? winners : trades.slice(0, pinCount);
+        // If no winners, take top trades by % gain
+        const toPinn = winners.length > 0
+          ? winners
+          : trades.sort((a, b) => b.totalPnlPercent - a.totalPnlPercent).slice(0, pinCount);
 
         for (let i = 0; i < toPinn.length; i++) {
           const trade = toPinn[i];
