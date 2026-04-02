@@ -173,6 +173,7 @@ export default async function ProfilePage({ params }: Props) {
             displayName: user.displayName,
             bio: user.bio,
             avatarUrl: user.avatarUrl,
+            isClaimed: user.isClaimed,
           }}
           stats={stats}
           links={links.map((l: DBLink) => ({ id: l.id, title: l.title, url: l.url, icon: l.icon }))}

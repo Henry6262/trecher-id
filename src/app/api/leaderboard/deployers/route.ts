@@ -9,7 +9,11 @@ export async function GET(req: Request) {
   // Aggregate token deployments by user — rank by total dev PnL
   const users = await prisma.user.findMany({
     where: { tokenDeployments: { some: {} } },
-    include: {
+    select: {
+      username: true,
+      displayName: true,
+      avatarUrl: true,
+      isClaimed: true,
       tokenDeployments: true,
       _count: { select: { tokenDeployments: true } },
     },
@@ -28,6 +32,7 @@ export async function GET(req: Request) {
       username: u.username,
       displayName: u.displayName,
       avatarUrl: u.avatarUrl,
+      isClaimed: u.isClaimed,
       totalDevPnlSol,
       totalDevPnlUsd,
       deployCount: u._count.tokenDeployments,

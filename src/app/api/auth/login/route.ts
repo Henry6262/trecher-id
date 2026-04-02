@@ -2,10 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { privyClient } from '@/lib/privy';
 import { prisma } from '@/lib/prisma';
 import { SignJWT } from 'jose';
-
-const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET!);
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client';
 
 export async function POST(req: NextRequest) {
+  // Fix 3: JWT_SECRET guard — fail fast at request time, not silently at signing
+  if (!process.env.JWT_SECRET) throw new Error('JWT_SECRET env var is not set');
+  const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
   const authHeader = req.headers.get('authorization');
   if (!authHeader?.startsWith('Bearer ')) {
     return NextResponse.json({ error: 'Missing token' }, { status: 401 });
@@ -28,33 +30,80 @@ export async function POST(req: NextRequest) {
   }
 
   const username = twitter.username ?? twitter.subject;
+  const displayName = twitter.name ?? username;
+  const avatarUrl = twitter.profilePictureUrl ?? null;
 
-  const user = await prisma.user.upsert({
+  // Stage 1: already claimed — find by privyUserId
+  let user = await prisma.user.findUnique({
     where: { privyUserId: privyUser.id },
-    update: {
-      displayName: twitter.name ?? username,
-      avatarUrl: twitter.profilePictureUrl ?? null,
-    },
-    create: {
-      privyUserId: privyUser.id,
-      twitterId: twitter.subject,
-      username,
-      displayName: twitter.name ?? username,
-      avatarUrl: twitter.profilePictureUrl ?? null,
-    },
   });
 
-  const jwt = await new SignJWT({ sub: user.id, username: user.username })
+  if (user) {
+    // Fix 4: Sync twitterId on re-login alongside display fields
+    user = await prisma.user.update({
+      where: { id: user.id },
+      data: { twitterId: twitter.subject, displayName, avatarUrl },
+    });
+  } else {
+    // Fix 1 & 2: Stage 2 — atomic claim via updateMany + P2002 handling
+    try {
+      const { count } = await prisma.user.updateMany({
+        where: { username, privyUserId: null },
+        data: {
+          privyUserId: privyUser.id,
+          twitterId: twitter.subject,
+          displayName,
+          avatarUrl,
+          isClaimed: true,
+        },
+      });
+
+      if (count > 0) {
+        // Fetch the record we just claimed
+        user = await prisma.user.findUnique({
+          where: { privyUserId: privyUser.id },
+        });
+      }
+
+      if (!user) {
+        // count === 0 means row was concurrently claimed — fall through to Stage 3
+        // Fix 5: self-registered users own their profile from day 1
+        user = await prisma.user.create({
+          data: {
+            privyUserId: privyUser.id,
+            twitterId: twitter.subject,
+            username,
+            displayName,
+            avatarUrl,
+            isClaimed: true,
+          },
+        });
+      }
+    } catch (err) {
+      if (
+        err instanceof PrismaClientKnownRequestError &&
+        err.code === 'P2002'
+      ) {
+        return NextResponse.json(
+          { error: 'Username already taken' },
+          { status: 409 },
+        );
+      }
+      throw err;
+    }
+  }
+
+  const jwt = await new SignJWT({ sub: user!.id, username: user!.username })
     .setProtectedHeader({ alg: 'HS256' })
     .setExpirationTime('7d')
     .sign(JWT_SECRET);
 
   const response = NextResponse.json({
     user: {
-      id: user.id,
-      username: user.username,
-      displayName: user.displayName,
-      avatarUrl: user.avatarUrl,
+      id: user!.id,
+      username: user!.username,
+      displayName: user!.displayName,
+      avatarUrl: user!.avatarUrl,
     },
   });
 

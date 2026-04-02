@@ -13,8 +13,9 @@ model User {
   displayName String
   bio         String?
   avatarUrl   String?
-  twitterId   String   @unique
-  privyUserId String   @unique
+  twitterId   String?  @unique
+  privyUserId String?  @unique
+  isClaimed   Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

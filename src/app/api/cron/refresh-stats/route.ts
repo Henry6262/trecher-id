@@ -4,6 +4,9 @@ import { getWalletTransactions } from '@/lib/helius';
 import { getSolPrice } from '@/lib/sol-price';
 import { refreshTokenDeployments } from '@/lib/token-deployments';
 
+// CRON_SECRET env var must be set in Vercel dashboard for manual invocation.
+// Vercel's scheduler uses the x-vercel-cron header automatically (no secret needed).
+
 export const maxDuration = 300;
 
 const BATCH_SIZE = 1;      // one user at a time — avoids 429s
@@ -59,8 +62,12 @@ function parseSwaps(txns: Awaited<ReturnType<typeof getWalletTransactions>>['txn
 
 export async function GET(req: Request) {
   const authHeader = req.headers.get('authorization');
+  const vercelCron = req.headers.get('x-vercel-cron');
   const cronSecret = process.env.CRON_SECRET;
-  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
+  const isVercelCron = vercelCron === '1' && process.env.NODE_ENV === 'production';
+  const isManualAuth = cronSecret && authHeader === `Bearer ${cronSecret}`;
+
+  if (!isVercelCron && !isManualAuth) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

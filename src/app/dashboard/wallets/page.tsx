@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { CutCorner } from '@/components/cut-corner';
+import { GlassCard } from '@/components/glass-card';
 import { CutButton } from '@/components/cut-button';
 import { Input } from '@/components/ui/input';
 
@@ -12,6 +12,9 @@ interface Wallet {
   chain: string;
   verified: boolean;
   linkedAt: string;
+  totalPnlUsd?: number | null;
+  winRate?: number | null;
+  totalTrades?: number | null;
 }
 
 function shortAddr(addr: string) {
@@ -25,6 +28,7 @@ export default function WalletsPage() {
   const [adding, setAdding] = useState(false);
   const [addError, setAddError] = useState('');
   const [removing, setRemoving] = useState<string | null>(null);
+  const [syncing, setSyncing] = useState<string | null>(null);
 
   useEffect(() => {
     fetch('/api/wallets')
@@ -39,6 +43,12 @@ export default function WalletsPage() {
   async function addWallet() {
     const addr = newAddress.trim();
     if (!addr) return;
+    // Solana addresses are base58, 32-44 chars
+    const isValidSolana = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(addr);
+    if (!isValidSolana) {
+      setAddError('Invalid Solana address (must be 32-44 base58 characters)');
+      return;
+    }
     setAdding(true);
     setAddError('');
     try {
@@ -74,6 +84,16 @@ export default function WalletsPage() {
     }
   }
 
+  async function syncWallet(address: string) {
+    setSyncing(address);
+    try {
+      // TODO: POST /api/wallets/sync when endpoint exists
+      await new Promise(resolve => setTimeout(resolve, 1000)); // placeholder
+    } finally {
+      setSyncing(null);
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -87,8 +107,8 @@ export default function WalletsPage() {
       </div>
 
       {/* Add wallet */}
-      <CutCorner cut="md" className="w-full">
-        <div className="p-5 space-y-3">
+      <GlassCard className="w-full p-5" cut={12}>
+        <div className="space-y-3">
           <p className="text-xs font-mono text-[var(--trench-text-muted)] tracking-widest uppercase">
             Link a Wallet
           </p>
@@ -115,7 +135,7 @@ export default function WalletsPage() {
             Wallets are used to fetch your on-chain trading history.
           </p>
         </div>
-      </CutCorner>
+      </GlassCard>
 
       {/* Wallet list */}
       <div className="space-y-3">
@@ -128,18 +148,18 @@ export default function WalletsPage() {
         )}
 
         {!loading && wallets.length === 0 && (
-          <CutCorner cut="sm" className="w-full">
-            <div className="p-5 text-center">
-              <p className="text-sm font-mono text-[var(--trench-text-muted)]">
-                No wallets linked yet.
-              </p>
-            </div>
-          </CutCorner>
+          <GlassCard className="w-full p-8 text-center" cut={12}>
+            <p className="text-2xl mb-2">◎</p>
+            <p className="text-sm font-mono font-bold text-[var(--trench-text)] mb-1">No wallets linked yet</p>
+            <p className="text-xs font-mono text-[var(--trench-text-muted)] max-w-xs mx-auto">
+              Add your Solana wallet address below to import your on-chain trading history.
+            </p>
+          </GlassCard>
         )}
 
         {wallets.map((wallet) => (
-          <CutCorner key={wallet.id} cut="sm" className="w-full">
-            <div className="p-4 flex items-center justify-between gap-3">
+          <GlassCard key={wallet.id} className="w-full p-4" cut={8}>
+            <div className="flex items-center justify-between gap-3">
               <div className="min-w-0">
                 <p className="text-sm font-mono text-[var(--trench-text)] break-all">
                   {shortAddr(wallet.address)}
@@ -155,18 +175,40 @@ export default function WalletsPage() {
                     {new Date(wallet.linkedAt).toLocaleDateString()}
                   </span>
                 </div>
+                {(wallet.totalPnlUsd != null || wallet.totalTrades != null) && (
+                  <p className="text-xs font-mono text-[var(--trench-text-muted)] mt-1">
+                    {wallet.totalPnlUsd != null && (
+                      <span className={wallet.totalPnlUsd >= 0 ? 'text-green-400' : 'text-red-400'}>
+                        {wallet.totalPnlUsd >= 0 ? '+' : ''}{wallet.totalPnlUsd >= 1000 ? `$${(wallet.totalPnlUsd/1000).toFixed(1)}K` : `$${wallet.totalPnlUsd.toFixed(0)}`}
+                      </span>
+                    )}
+                    {wallet.winRate != null && <span> · {wallet.winRate.toFixed(0)}% WR</span>}
+                    {wallet.totalTrades != null && <span> · {wallet.totalTrades} trades</span>}
+                  </p>
+                )}
               </div>
-              <CutButton
-                variant="ghost"
-                size="sm"
-                onClick={() => removeWallet(wallet.address)}
-                disabled={removing === wallet.address}
-                className="shrink-0 text-red-400 hover:text-red-300"
-              >
-                {removing === wallet.address ? '...' : 'Remove'}
-              </CutButton>
+              <div className="flex items-center gap-1 shrink-0">
+                <CutButton
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => syncWallet(wallet.address)}
+                  disabled={syncing === wallet.address}
+                  className="shrink-0 text-[#00D4FF] hover:text-[#33DDFF]"
+                >
+                  {syncing === wallet.address ? '...' : 'Sync'}
+                </CutButton>
+                <CutButton
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removeWallet(wallet.address)}
+                  disabled={removing === wallet.address}
+                  className="shrink-0 text-red-400 hover:text-red-300"
+                >
+                  {removing === wallet.address ? '...' : 'Remove'}
+                </CutButton>
+              </div>
             </div>
-          </CutCorner>
+          </GlassCard>
         ))}
       </div>
 
