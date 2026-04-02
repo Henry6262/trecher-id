@@ -44,9 +44,10 @@ interface ProfileCardProps {
   deployments?: DeploymentData[];
   allTrades?: TokenTrade[];
   degenScore?: DegenScoreResult;
+  isOwner?: boolean;
 }
 
-export function ProfileCard({ user, stats, links, pinnedTrades, wallets, traderStats, deployments, allTrades, degenScore }: ProfileCardProps) {
+export function ProfileCard({ user, stats, links, pinnedTrades, wallets, traderStats, deployments, allTrades, degenScore, isOwner }: ProfileCardProps) {
   const hasWallets = wallets.length > 0;
 
   // Compute achievements when we have enough data
@@ -97,6 +98,7 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets, traderS
           wallets={wallets}
           roi={traderStats?.roi}
           degenScore={degenScore}
+          isOwner={isOwner}
         />
 
         {/* Divider */}

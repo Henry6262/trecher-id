@@ -22,9 +22,10 @@ interface ProfileHeaderProps {
   wallets?: { address: string; verified: boolean; isMain?: boolean }[];
   roi?: number;
   degenScore?: DegenScoreResult;
+  isOwner?: boolean;
 }
 
-export function ProfileHeader({ avatarUrl, displayName, username, bio, verified, isClaimed, stats, wallets, roi, degenScore }: ProfileHeaderProps) {
+export function ProfileHeader({ avatarUrl, displayName, username, bio, verified, isClaimed, stats, wallets, roi, degenScore, isOwner }: ProfileHeaderProps) {
   const [activeWallet, setActiveWallet] = useState(
     () => wallets?.findIndex(w => w.isMain) ?? 0
   );
@@ -38,6 +39,27 @@ export function ProfileHeader({ avatarUrl, displayName, username, bio, verified,
         background: 'linear-gradient(180deg, rgba(0,212,255,0.05) 0%, transparent 100%)',
       }}
     >
+      {/* Claim banner — unclaimed profiles only */}
+      {!isClaimed && (
+        <div
+          className="flex items-center justify-between px-7 py-3 text-xs font-mono"
+          style={{
+            background: 'rgba(0,212,255,0.04)',
+            borderBottom: '1px solid rgba(0,212,255,0.08)',
+          }}
+        >
+          <span className="text-[var(--trench-text-muted)]">
+            👋 <span className="text-[var(--trench-text)]">@{username}</span>? This profile was created for you.
+          </span>
+          <a
+            href="/login"
+            className="text-[#00D4FF] hover:text-[#33DDFF] transition-colors tracking-widest text-[10px]"
+          >
+            CLAIM IT →
+          </a>
+        </div>
+      )}
+
       {/* Wallet selector — absolute top-right */}
       {wallets && wallets.length > 0 && (
         <div className="absolute top-4 right-4 z-10">
@@ -184,6 +206,23 @@ export function ProfileHeader({ avatarUrl, displayName, username, bio, verified,
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Edit button — own profiles only */}
+      {isOwner && (
+        <div className="absolute bottom-4 right-4 z-10">
+          <a
+            href="/dashboard"
+            className="cut-xs flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-mono tracking-widest transition-all hover:text-[#00D4FF]"
+            style={{
+              background: 'rgba(0,212,255,0.06)',
+              border: '1px solid rgba(0,212,255,0.15)',
+              color: '#00D4FF',
+            }}
+          >
+            ✏ EDIT
+          </a>
         </div>
       )}
     </div>

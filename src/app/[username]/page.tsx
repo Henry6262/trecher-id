@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
+import { getSessionUser } from '@/lib/auth';
 import { ProfileCard } from '@/components/profile-card';
 import { BackgroundLayer } from '@/components/background-layer';
 import { getWalletTransactions, aggregateTradesByToken } from '@/lib/helius';
@@ -95,6 +96,9 @@ export default async function ProfilePage({ params }: Props) {
   });
   if (!user) notFound();
 
+  const session = await getSessionUser();
+  const isOwner = !!(session && session.username === user.username);
+
   const wallets: DBWallet[] = user.wallets;
   const links: DBLink[] = user.links;
   const trades: DBPinnedTrade[] = user.pinnedTrades;
@@ -183,6 +187,7 @@ export default async function ProfilePage({ params }: Props) {
           deployments={deployments}
           allTrades={allTrades}
           degenScore={degenScore}
+          isOwner={isOwner}
         />
       </div>
     </div>
