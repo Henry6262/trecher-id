@@ -9,6 +9,7 @@ import DecryptedText from '@/components/decrypted-text';
 import { GlassCard } from '@/components/glass-card';
 import ShinyText from '@/components/shiny-text';
 import { TraderCarousel } from '@/components/trader-carousel';
+import { LeaderboardTable } from '@/components/leaderboard-table';
 
 const RisingLines = dynamic(() => import('@/components/rising-lines'), { ssr: false });
 
@@ -51,12 +52,22 @@ export function LandingContent({ traders, featured }: LandingContentProps) {
       </div>
 
       <div className="relative" style={{ zIndex: 2 }}>
-        {/* Nav */}
-        <nav className="mx-auto flex max-w-[900px] items-center justify-between px-6 py-5">
+        {/* Nav — glassmorphic sticky bar */}
+        <nav
+          className="sticky top-0 z-10"
+          style={{
+            background: 'rgba(5,5,8,0.85)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+            borderBottom: '1px solid rgba(0,212,255,0.06)',
+          }}
+        >
+        <div className="mx-auto flex max-w-[900px] items-center justify-between px-6 py-5">
           <Link href="/">
             <Image src="/logo.png" alt="Trench ID" width={160} height={40} className="h-10 w-auto transition-opacity hover:opacity-80" priority />
           </Link>
           <CutButton href="/login" variant="secondary" size="sm">Sign in with X</CutButton>
+        </div>
         </nav>
 
         {/* Hero */}
@@ -155,6 +166,37 @@ export function LandingContent({ traders, featured }: LandingContentProps) {
               </div>
             </GlassCard>
           </div>
+        </section>
+
+        {/* Divider */}
+        <div className="mx-auto max-w-[900px] px-6">
+          <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.1), transparent)' }} />
+        </div>
+
+        {/* Leaderboard — traders + deployers */}
+        <section className="mx-auto max-w-[900px] px-6 py-16">
+          <div className="mb-8">
+            <div
+              className="mb-3 inline-flex items-center gap-1.5 px-3 py-1 text-[9px] font-mono tracking-[2px] text-[var(--trench-accent)]"
+              style={{
+                background: 'rgba(0,212,255,0.08)',
+                border: '1px solid rgba(0,212,255,0.12)',
+                clipPath: 'polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px)',
+              }}
+            >
+              LEADERBOARD
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-bold text-white mb-1">
+              Top <span className="text-[var(--trench-accent)]">Traders</span> &amp; Deployers
+            </h2>
+            <p className="text-[12px] text-[var(--trench-text-muted)]">
+              Ranked by realized PnL. Updated every 4 hours from on-chain data.{' '}
+              <Link href="/leaderboard" className="text-[var(--trench-accent)] hover:underline">
+                Full leaderboard →
+              </Link>
+            </p>
+          </div>
+          <LeaderboardTable initialPeriod="7d" />
         </section>
 
         {/* Divider */}

@@ -18,7 +18,7 @@ export async function GET(req: Request) {
 
   const allTrades = [];
   for (const wallet of wallets) {
-    const swaps = await getWalletSwaps(wallet.address);
+    const { txns: swaps } = await getWalletSwaps(wallet.address);
     const trades = await aggregateTradesByToken(swaps, wallet.address);
     allTrades.push(...trades.map((t) => ({ ...t, walletAddress: wallet.address })));
   }

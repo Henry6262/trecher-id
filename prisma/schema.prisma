@@ -51,9 +51,36 @@ model Wallet {
   totalTrades    Int?
   statsUpdatedAt DateTime?
   isMain         Boolean   @default(false)
+  lastSignature  String?   // Helius pagination cursor — only fetch txns newer than this
+  lastFetchedAt  DateTime? // When we last fetched transactions
+
+  trades WalletTrade[]
 
   @@unique([userId, address])
   @@index([userId])
+}
+
+// Stores accumulated per-token trade PnL — grows each cron run
+// This is the source of truth for rankings
+model WalletTrade {
+  id            String   @id @default(cuid())
+  walletId      String
+  wallet        Wallet   @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  tokenMint     String
+  tokenSymbol   String
+  tokenName     String?
+  tokenImageUrl String?
+  buySol        Float    @default(0)
+  sellSol       Float    @default(0)
+  pnlSol        Float    @default(0)
+  tradeCount    Int      @default(0)
+  firstTradeAt  DateTime
+  lastTradeAt   DateTime
+  updatedAt     DateTime @default(now())
+
+  @@unique([walletId, tokenMint])
+  @@index([walletId])
+  @@index([pnlSol])
 }
 
 model PinnedTrade {

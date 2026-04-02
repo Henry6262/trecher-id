@@ -124,7 +124,7 @@ export default async function ProfilePage({ params }: Props) {
       const results = await Promise.all(
         wallets.map(async (w: DBWallet) => {
           try {
-            const txns = await getWalletTransactions(w.address);
+            const { txns } = await getWalletTransactions(w.address);
             return aggregateTradesByToken(txns, w.address, 7);
           } catch {
             return [];

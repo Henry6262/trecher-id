@@ -12,6 +12,7 @@
     "seed": "prisma db seed"
   },
   "dependencies": {
+    "@gsap/react": "^2.1.2",
     "@neondatabase/serverless": "^1.0.2",
     "@prisma/adapter-neon": "^7.6.0",
     "@prisma/adapter-pg": "^7.6.0",
@@ -20,6 +21,7 @@
     "@prisma/pg-worker": "^6.9.0",
     "@privy-io/react-auth": "^3.18.0",
     "@privy-io/server-auth": "^1.32.5",
+    "@react-three/fiber": "^9.5.0",
     "@types/pg": "^8.20.0",
     "@types/three": "^0.183.1",
     "class-variance-authority": "^0.7.1",
@@ -28,9 +30,11 @@
     "geist": "^1.7.0",
     "gsap": "^3.14.2",
     "ioredis": "^5.10.1",
+    "lenis": "^1.3.21",
     "lucide-react": "^1.7.0",
     "motion": "^12.38.0",
     "next": "16.2.1",
+    "next-themes": "^0.4.6",
     "pg": "^8.20.0",
     "prisma": "^7.6.0",
     "radix-ui": "^1.4.3",

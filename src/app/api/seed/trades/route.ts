@@ -32,7 +32,7 @@ export async function POST(req: Request) {
 
     for (const wallet of user.wallets) {
       try {
-        const txns = await getWalletSwaps(wallet.address);
+        const { txns } = await getWalletSwaps(wallet.address);
         // aggregateTradesByToken is now async (fetches DAS metadata)
         const trades = await aggregateTradesByToken(txns, wallet.address, 7);
 
