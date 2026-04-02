@@ -28,21 +28,51 @@ export async function POST(req: NextRequest) {
   }
 
   const username = twitter.username ?? twitter.subject;
+  const displayName = twitter.name ?? username;
+  const avatarUrl = twitter.profilePictureUrl ?? null;
 
-  const user = await prisma.user.upsert({
+  // Stage 1: already claimed — find by privyUserId
+  let user = await prisma.user.findUnique({
     where: { privyUserId: privyUser.id },
-    update: {
-      displayName: twitter.name ?? username,
-      avatarUrl: twitter.profilePictureUrl ?? null,
-    },
-    create: {
-      privyUserId: privyUser.id,
-      twitterId: twitter.subject,
-      username,
-      displayName: twitter.name ?? username,
-      avatarUrl: twitter.profilePictureUrl ?? null,
-    },
   });
+
+  if (user) {
+    // Update mutable display fields on every login
+    user = await prisma.user.update({
+      where: { id: user.id },
+      data: { displayName, avatarUrl },
+    });
+  } else {
+    // Stage 2: seeded profile waiting to be claimed — match by username with no privyUserId
+    const seeded = await prisma.user.findFirst({
+      where: { username, privyUserId: null },
+    });
+
+    if (seeded) {
+      user = await prisma.user.update({
+        where: { id: seeded.id },
+        data: {
+          privyUserId: privyUser.id,
+          twitterId: twitter.subject,
+          displayName,
+          avatarUrl,
+          isClaimed: true,
+        },
+      });
+    } else {
+      // Stage 3: brand-new user — create fresh profile
+      user = await prisma.user.create({
+        data: {
+          privyUserId: privyUser.id,
+          twitterId: twitter.subject,
+          username,
+          displayName,
+          avatarUrl,
+          isClaimed: false,
+        },
+      });
+    }
+  }
 
   const jwt = await new SignJWT({ sub: user.id, username: user.username })
     .setProtectedHeader({ alg: 'HS256' })
