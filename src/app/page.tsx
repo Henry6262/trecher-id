@@ -2,6 +2,8 @@ import { prisma } from '@/lib/prisma';
 import { LandingContent } from '@/components/landing-content';
 import { formatPnl } from '@/lib/utils';
 
+export const dynamic = 'force-dynamic';
+
 export default async function LandingPage() {
   // Fetch top traders with their best pinned trade from DB
   const users = await prisma.user.findMany({
