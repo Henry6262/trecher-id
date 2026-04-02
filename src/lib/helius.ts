@@ -70,6 +70,11 @@ interface HeliusNativeTransfer {
   amount: number;
 }
 
+interface HeliusAccountData {
+  account: string;
+  nativeBalanceChange: number; // lamports, positive = received, negative = spent
+}
+
 interface HeliusTransaction {
   signature: string;
   timestamp: number;
@@ -78,16 +83,64 @@ interface HeliusTransaction {
   description: string;
   tokenTransfers: HeliusTokenTransfer[];
   nativeTransfers: HeliusNativeTransfer[];
+  accountData: HeliusAccountData[];
 }
 
 const SOL_MINT = 'So11111111111111111111111111111111111111112';
 
-export async function getWalletTransactions(walletAddress: string): Promise<HeliusTransaction[]> {
+export interface FetchResult {
+  txns: HeliusTransaction[];
+  newestSignature: string | null; // store this as the next cursor
+}
+
+/**
+ * Fetch wallet transactions incrementally.
+ * - Pass `since` (a signature) to only fetch NEW transactions after the last run.
+ * - On first run (no `since`), fetches up to `maxPages` pages going back as far as possible.
+ * - Returns the newest signature so the caller can store it for the next run.
+ */
+export async function getWalletTransactions(
+  walletAddress: string,
+  opts: { since?: string | null; maxPages?: number } = {},
+): Promise<FetchResult> {
   if (!HELIUS_API_KEY) throw new Error('HELIUS_API_KEY not set');
-  const url = `${HELIUS_BASE}/addresses/${walletAddress}/transactions?api-key=${HELIUS_API_KEY}&limit=100`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Helius API error: ${res.status}`);
-  return res.json();
+
+  const maxPages = opts.maxPages ?? (opts.since ? 3 : 10); // 10 pages first run, 3 pages incremental
+  const allTxns: HeliusTransaction[] = [];
+  let before: string | undefined;
+
+  for (let page = 0; page < maxPages; page++) {
+    const params = new URLSearchParams({ 'api-key': HELIUS_API_KEY, limit: '100' });
+    if (before) params.set('before', before);
+
+    let res = await fetch(`${HELIUS_BASE}/addresses/${walletAddress}/transactions?${params}`);
+    // Retry once on 429 with backoff
+    if (res.status === 429) {
+      await new Promise(r => setTimeout(r, 3000));
+      res = await fetch(`${HELIUS_BASE}/addresses/${walletAddress}/transactions?${params}`);
+    }
+    if (!res.ok) throw new Error(`Helius API error: ${res.status}`);
+
+    const txns: HeliusTransaction[] = await res.json();
+    if (txns.length === 0) break;
+
+    // Incremental mode: stop when we hit the last-seen signature
+    if (opts.since) {
+      const cutoffIdx = txns.findIndex(t => t.signature === opts.since);
+      if (cutoffIdx !== -1) {
+        allTxns.push(...txns.slice(0, cutoffIdx));
+        break;
+      }
+    }
+
+    allTxns.push(...txns);
+    before = txns[txns.length - 1].signature;
+  }
+
+  return {
+    txns: allTxns,
+    newestSignature: allTxns.length > 0 ? allTxns[0].signature : (opts.since ?? null),
+  };
 }
 
 export const getWalletSwaps = getWalletTransactions;
@@ -112,7 +165,7 @@ export interface TokenTrade {
 export async function aggregateTradesByToken(
   txns: HeliusTransaction[],
   walletAddress: string,
-  daysBack: number = 3,
+  daysBack: number = 14,
 ): Promise<TokenTrade[]> {
   const cutoff = Math.floor(Date.now() / 1000) - daysBack * 86400;
 
@@ -126,44 +179,36 @@ export async function aggregateTradesByToken(
     if (tx.type !== 'SWAP') continue;
 
     const tokenTransfers = tx.tokenTransfers || [];
-    const nativeTransfers = tx.nativeTransfers || [];
+    const accountData = tx.accountData || [];
 
     const nonSolToken = tokenTransfers.find(t => t.mint !== SOL_MINT);
     if (!nonSolToken) continue;
 
     const tokenMint = nonSolToken.mint;
-
-    // Calculate net SOL flow for this wallet
-    let solSent = 0;
-    let solReceived = 0;
-    for (const nt of nativeTransfers) {
-      if (nt.fromUserAccount === walletAddress) solSent += nt.amount;
-      if (nt.toUserAccount === walletAddress) solReceived += nt.amount;
-    }
-    for (const tt of tokenTransfers) {
-      if (tt.mint === SOL_MINT) {
-        if (tt.fromUserAccount === walletAddress) solSent += tt.tokenAmount * 1e9;
-        if (tt.toUserAccount === walletAddress) solReceived += tt.tokenAmount * 1e9;
-      }
-    }
-
-    const netSolSpent = (solSent - solReceived) / 1e9;
-    const netSolGained = (solReceived - solSent) / 1e9;
-
     const tokenReceived = nonSolToken.toUserAccount === walletAddress;
     const tokenSent = nonSolToken.fromUserAccount === walletAddress;
+    if (!tokenReceived && !tokenSent) continue;
+
+    // Use accountData.nativeBalanceChange — the only reliable SOL flow source.
+    // Positive = wallet gained SOL (sell), negative = wallet spent SOL (buy).
+    const walletAccount = accountData.find(a => a.account === walletAddress);
+    const netLamports = walletAccount?.nativeBalanceChange ?? 0;
+    const netSol = netLamports / 1e9;
 
     if (!tokenMap.has(tokenMint)) {
       tokenMap.set(tokenMint, { buySol: 0, sellSol: 0, txns: [] });
     }
     const entry = tokenMap.get(tokenMint)!;
 
-    if (tokenReceived && netSolSpent > 0.001) {
-      entry.buySol += netSolSpent;
-      entry.txns.push({ type: 'BUY', amountSol: netSolSpent, mcap: 0, timestamp: tx.timestamp });
-    } else if (tokenSent && netSolGained > 0.001) {
-      entry.sellSol += netSolGained;
-      entry.txns.push({ type: 'SELL', amountSol: netSolGained, mcap: 0, timestamp: tx.timestamp });
+    if (tokenReceived && netSol < -0.001) {
+      // BUY: received token, wallet balance went down
+      const cost = Math.abs(netSol);
+      entry.buySol += cost;
+      entry.txns.push({ type: 'BUY', amountSol: cost, mcap: 0, timestamp: tx.timestamp });
+    } else if (tokenSent && netSol > 0.001) {
+      // SELL: sent token, wallet balance went up
+      entry.sellSol += netSol;
+      entry.txns.push({ type: 'SELL', amountSol: netSol, mcap: 0, timestamp: tx.timestamp });
     }
   }
 
