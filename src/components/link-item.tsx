@@ -26,7 +26,8 @@ export function LinkItem({ title, url, icon }: LinkItemProps) {
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center gap-3 px-[18px] py-3.5 cut-sm transition-all bg-[rgba(255,255,255,0.025)] backdrop-blur-sm border border-[rgba(0,212,255,0.06)] hover:bg-[rgba(0,212,255,0.06)] hover:border-[rgba(0,212,255,0.2)] group"
+      className="flex items-center gap-3 px-[18px] py-3.5 cut-sm transition-all border border-[rgba(0,212,255,0.06)] hover:border-[rgba(0,212,255,0.2)] group"
+      style={{ background: 'rgba(8,12,22,0.55)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}
     >
       <IconComponent size={18} className="text-[var(--trench-accent)] flex-shrink-0" />
       <span className="text-[13px] text-[var(--trench-text)] font-medium flex-1">{title}</span>

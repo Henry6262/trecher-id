@@ -134,7 +134,7 @@ export function LandingContent({ traders, featured }: LandingContentProps) {
 
                 {/* Real recent trade if available */}
                 {featured.recentToken && (
-                  <div className="cut-xs mb-2" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(0,212,255,0.06)', padding: '8px 10px' }}>
+                  <div className="cut-xs mb-2" style={{ background: 'rgba(8,12,22,0.55)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid rgba(0,212,255,0.06)', padding: '8px 10px' }}>
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-[11px] font-bold text-white">{featured.recentToken}</span>
                       <span className="text-[11px] font-bold font-mono text-[var(--trench-green)]">{featured.recentPnl}</span>
@@ -175,7 +175,7 @@ export function LandingContent({ traders, featured }: LandingContentProps) {
 
         {/* Leaderboard — traders + deployers */}
         <section className="mx-auto max-w-[900px] px-6 py-16">
-          <div className="mb-8">
+          <div className="mb-8 text-right">
             <div
               className="mb-3 inline-flex items-center gap-1.5 px-3 py-1 text-[9px] font-mono tracking-[2px] text-[var(--trench-accent)]"
               style={{

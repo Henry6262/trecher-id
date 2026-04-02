@@ -75,9 +75,11 @@ export function DeploymentCard({
 
   return (
     <div
-      className="flex-shrink-0 w-[300px] snap-start cut-xs backdrop-blur-sm border border-[rgba(0,212,255,0.08)] hover:border-[rgba(0,212,255,0.2)] transition-colors"
+      className="flex-shrink-0 w-[300px] snap-start cut-xs border border-[rgba(0,212,255,0.08)] hover:border-[rgba(0,212,255,0.2)] transition-colors"
       style={{
-        background: 'rgba(255,255,255,0.025)',
+        background: 'rgba(8,12,22,0.55)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
         opacity: isDead ? 0.6 : 1,
       }}
     >

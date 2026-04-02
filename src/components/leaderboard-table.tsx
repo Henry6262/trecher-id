@@ -102,12 +102,17 @@ interface RankedDeployer {
 
 type LeaderboardMode = 'traders' | 'deployers';
 
+const PAGE_SIZE = 10;
+
 export function LeaderboardTable({ initialPeriod = '7d' }: { initialPeriod?: string }) {
   const [mode, setMode] = useState<LeaderboardMode>('traders');
   const [period, setPeriod] = useState(initialPeriod);
   const [traders, setTraders] = useState<RankedTrader[]>([]);
   const [deployers, setDeployers] = useState<RankedDeployer[]>([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(0);
+
+  useEffect(() => { setPage(0); }, [mode, period]);
 
   useEffect(() => {
     let cancelled = false;
@@ -140,7 +145,9 @@ export function LeaderboardTable({ initialPeriod = '7d' }: { initialPeriod?: str
 
   const activeList = mode === 'traders' ? traders : deployerAsTraders;
   const top3 = activeList.slice(0, 3);
-  const rest = activeList.slice(3);
+  const allRest = activeList.slice(3);
+  const totalPages = Math.ceil(allRest.length / PAGE_SIZE);
+  const rest = allRest.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE);
 
   return (
     <div>
@@ -152,8 +159,10 @@ export function LeaderboardTable({ initialPeriod = '7d' }: { initialPeriod?: str
             onClick={() => setMode(m)}
             className="font-mono text-[11px] tracking-[1px] font-bold px-5 py-2 transition-all cut-sm"
             style={{
-              background: mode === m ? 'rgba(0,212,255,0.12)' : 'transparent',
-              border: mode === m ? '1px solid rgba(0,212,255,0.25)' : '1px solid rgba(255,255,255,0.04)',
+              background: mode === m ? 'rgba(0,212,255,0.18)' : 'rgba(8,12,22,0.55)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              border: mode === m ? '1px solid rgba(0,212,255,0.35)' : '1px solid rgba(255,255,255,0.07)',
               color: mode === m ? '#00D4FF' : '#71717a',
             }}
           >
@@ -171,8 +180,10 @@ export function LeaderboardTable({ initialPeriod = '7d' }: { initialPeriod?: str
               onClick={() => setPeriod(p.key)}
               className="font-mono text-[10px] tracking-[1.5px] font-semibold px-4 py-1.5 transition-all cut-xs"
               style={{
-                background: period === p.key ? 'rgba(0,212,255,0.12)' : 'transparent',
-                border: period === p.key ? '1px solid rgba(0,212,255,0.2)' : '1px solid transparent',
+                background: period === p.key ? 'rgba(0,212,255,0.18)' : 'rgba(8,12,22,0.55)',
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)',
+                border: period === p.key ? '1px solid rgba(0,212,255,0.3)' : '1px solid rgba(255,255,255,0.06)',
                 color: period === p.key ? '#00D4FF' : '#71717a',
               }}
             >
@@ -261,6 +272,42 @@ export function LeaderboardTable({ initialPeriod = '7d' }: { initialPeriod?: str
             })}
           </div>
         </GlassCard>
+      )}
+      {/* Pagination */}
+      {!loading && totalPages > 1 && (
+        <div className="flex items-center justify-center gap-3 mt-4">
+          <button
+            onClick={() => setPage(p => Math.max(0, p - 1))}
+            disabled={page === 0}
+            className="font-mono text-[10px] tracking-[1px] px-4 py-1.5 cut-xs transition-all disabled:opacity-30"
+            style={{
+              background: 'rgba(8,12,22,0.55)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              border: '1px solid rgba(0,212,255,0.15)',
+              color: '#00D4FF',
+            }}
+          >
+            ← PREV
+          </button>
+          <span className="font-mono text-[10px] text-[var(--trench-text-muted)] tracking-[1px]">
+            {page + 1} / {totalPages}
+          </span>
+          <button
+            onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
+            disabled={page >= totalPages - 1}
+            className="font-mono text-[10px] tracking-[1px] px-4 py-1.5 cut-xs transition-all disabled:opacity-30"
+            style={{
+              background: 'rgba(8,12,22,0.55)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              border: '1px solid rgba(0,212,255,0.15)',
+              color: '#00D4FF',
+            }}
+          >
+            NEXT →
+          </button>
+        </div>
       )}
     </div>
   );

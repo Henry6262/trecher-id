@@ -20,8 +20,8 @@ export function TradeCard({ tokenSymbol, tokenName, tokenImage, totalPnlPercent,
   const isWin = totalPnlPercent >= 0;
 
   return (
-    <div className="flex-shrink-0 w-[280px] snap-start flex items-start gap-3 p-3.5 cut-sm backdrop-blur-sm border border-[rgba(0,212,255,0.08)] hover:border-[rgba(0,212,255,0.2)] transition-colors"
-      style={{ background: 'rgba(255,255,255,0.025)' }}
+    <div className="flex-shrink-0 w-[280px] snap-start flex items-start gap-3 p-3.5 cut-sm border border-[rgba(0,212,255,0.08)] hover:border-[rgba(0,212,255,0.2)] transition-colors"
+      style={{ background: 'rgba(8,12,22,0.55)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}
     >
       {/* Token image or fallback */}
       <div

@@ -53,7 +53,7 @@ export function GlassCard({
       edgeSensitivity={25}
       fillOpacity={0.25}
     >
-      <div style={{ clipPath }}>
+      <div style={{ clipPath, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', background: bg }}>
         {children}
       </div>
     </BorderGlow>
