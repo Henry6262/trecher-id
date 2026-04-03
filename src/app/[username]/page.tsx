@@ -123,7 +123,7 @@ export default async function ProfilePage({ params }: Props) {
 
   // Fetch on-chain trades for all wallets and compute advanced stats
   const allTrades = await cached(
-    `trader-stats:${user.id}`,
+    `profile:${user.username}:trades`,
     300, // 5 min TTL
     async () => {
       const results = await Promise.all(
