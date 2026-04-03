@@ -11,6 +11,7 @@ import { GlassCard } from '@/components/glass-card';
 import ShinyText from '@/components/shiny-text';
 import { TraderCarousel } from '@/components/trader-carousel';
 import { LeaderboardTable } from '@/components/leaderboard-table';
+import { TraderSearch } from '@/components/trader-search';
 import { ActivityTicker } from '@/components/activity-ticker';
 import type { TickerItem } from '@/app/api/ticker/route';
 
@@ -222,6 +223,11 @@ export function LandingContent({ traders, featured, ticker }: LandingContentProp
             </GlassCard>
           </div>
         </section>
+
+        {/* Search bar */}
+        <div className="max-w-[900px] mx-auto px-4 sm:px-6 mt-2 mb-6">
+          <TraderSearch />
+        </div>
 
         {/* Divider */}
         <div className="mx-auto max-w-[900px] px-4 sm:px-10">
