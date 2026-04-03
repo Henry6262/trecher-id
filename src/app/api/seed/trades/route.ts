@@ -32,7 +32,7 @@ export async function POST(req: Request) {
 
     for (const wallet of user.wallets) {
       try {
-        const { txns } = await getWalletSwaps(wallet.address, { maxPages: 20 });
+        const { txns } = await getWalletSwaps(wallet.address, { maxPages: 5 });
         // aggregateTradesByToken is now async (fetches DAS metadata)
         const trades = await aggregateTradesByToken(txns, wallet.address, 90);
 
@@ -75,11 +75,12 @@ export async function POST(req: Request) {
         }
 
         results.push(`${user.displayName} — pinned ${toPinn.length} trades (${winners.length} winners) from ${trades.length} tokens`);
-        await new Promise(r => setTimeout(r, 300));
+        await new Promise(r => setTimeout(r, 10000)); // 10s between users to avoid Helius 429
 
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
         errors.push(`${user.displayName}: ${msg}`);
+        if (msg.includes('429')) await new Promise(r => setTimeout(r, 15000)); // backoff on rate limit
       }
     }
   }
