@@ -219,7 +219,7 @@ export function LeaderboardTable({ initialPeriod = '7d' }: { initialPeriod?: str
       {!loading && top3.length > 0 && (
         <div className="relative mb-8">
           <div className="absolute inset-[-20px] pointer-events-none" style={{ background: 'radial-gradient(ellipse at 50% 60%, rgba(255,215,0,0.04) 0%, transparent 50%)' }} />
-          <div className="relative grid gap-3 items-end" style={{ gridTemplateColumns: top3.length >= 3 ? '1fr 1.2fr 1fr' : `repeat(${top3.length}, 1fr)` }}>
+          <div className="relative grid gap-3 items-end grid-cols-3" style={{ gridTemplateColumns: top3.length >= 3 ? '1fr 1.2fr 1fr' : `repeat(${top3.length}, 1fr)` }}>
             {top3.length >= 2 && <PodiumCard trader={top3[1]} place={2} />}
             {top3.length >= 1 && <PodiumCard trader={top3[0]} place={1} />}
             {top3.length >= 3 && <PodiumCard trader={top3[2]} place={3} />}
@@ -233,13 +233,13 @@ export function LeaderboardTable({ initialPeriod = '7d' }: { initialPeriod?: str
           <div className="overflow-x-auto">
             {/* Header */}
             <div
-              className="grid items-center gap-3 px-5 py-2.5 text-[7px] font-mono tracking-[2px] text-[var(--trench-text-muted)]"
-              style={{ gridTemplateColumns: '32px 1fr 100px 60px', borderBottom: '1px solid rgba(0,212,255,0.06)' }}
+              className="grid items-center gap-2 sm:gap-3 px-3 sm:px-5 py-2.5 text-[7px] font-mono tracking-[2px] text-[var(--trench-text-muted)]"
+              style={{ gridTemplateColumns: '28px 1fr 90px 50px', borderBottom: '1px solid rgba(0,212,255,0.06)' }}
             >
               <span>#</span>
               <span>{mode === 'traders' ? 'TRADER' : 'DEPLOYER'}</span>
               <span className="text-right">{mode === 'traders' ? 'PnL' : 'DEV PnL'}</span>
-              <span className="text-right">{mode === 'traders' ? 'WIN' : 'MIGRATED'}</span>
+              <span className="hidden sm:block text-right">{mode === 'traders' ? 'WIN' : 'MIGRATED'}</span>
             </div>
 
             {rest.map((t) => {
@@ -248,33 +248,33 @@ export function LeaderboardTable({ initialPeriod = '7d' }: { initialPeriod?: str
                 <Link
                   key={t.username}
                   href={`/${t.username}`}
-                  className="grid items-center gap-3 px-5 py-2.5 transition-colors hover:bg-[rgba(0,212,255,0.03)]"
-                  style={{ gridTemplateColumns: '32px 1fr 100px 60px', borderBottom: '1px solid rgba(255,255,255,0.02)' }}
+                  className="grid items-center gap-2 sm:gap-3 px-3 sm:px-5 py-2.5 transition-colors hover:bg-[rgba(0,212,255,0.03)]"
+                  style={{ gridTemplateColumns: '28px 1fr 90px 50px', borderBottom: '1px solid rgba(255,255,255,0.02)' }}
                 >
-                  <span className="font-mono text-[12px] font-bold text-[var(--trench-text-muted)]">{t.rank}</span>
-                  <div className="flex items-center gap-2 min-w-0">
-                    <div className="h-7 w-7 flex-shrink-0 overflow-hidden rounded-full" style={{ border: '1.5px solid rgba(0,212,255,0.2)' }}>
+                  <span className="font-mono text-[11px] font-bold text-[var(--trench-text-muted)]">{t.rank}</span>
+                  <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                    <div className="h-6 w-6 sm:h-7 sm:w-7 flex-shrink-0 overflow-hidden rounded-full" style={{ border: '1.5px solid rgba(0,212,255,0.2)' }}>
                       <Image src={t.avatarUrl || `https://unavatar.io/twitter/${t.username}`} alt={t.displayName} width={28} height={28} className="h-full w-full object-cover" unoptimized />
                     </div>
                     <div className="min-w-0 flex items-center gap-1.5">
-                      <span className="text-[11px] font-semibold text-white truncate">@{t.username}</span>
+                      <span className="text-[10px] sm:text-[11px] font-semibold text-white truncate">@{t.username}</span>
                       {t.isClaimed && (
                         <span className="ml-1 text-[10px] font-mono text-[#00D4FF]">✓</span>
                       )}
                       {badge && (
-                        <span className="cut-xs text-[6px] tracking-[0.5px] px-1.5 py-0.5 font-semibold flex-shrink-0" style={{ color: badge.color, background: `${badge.color}14`, border: `1px solid ${badge.color}20` }}>
+                        <span className="hidden sm:inline-flex cut-xs text-[6px] tracking-[0.5px] px-1.5 py-0.5 font-semibold flex-shrink-0" style={{ color: badge.color, background: `${badge.color}14`, border: `1px solid ${badge.color}20` }}>
                           {badge.emoji} {badge.label}
                         </span>
                       )}
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="font-mono text-[12px] font-bold" style={{ color: t.pnlUsd >= 0 ? 'var(--trench-green)' : 'var(--trench-red)' }}>
+                    <div className="font-mono text-[11px] sm:text-[12px] font-bold" style={{ color: t.pnlUsd >= 0 ? 'var(--trench-green)' : 'var(--trench-red)' }}>
                       {formatPnl(t.pnlUsd)}
                     </div>
                     <div className="font-mono text-[8px] text-[var(--trench-text-muted)]">{t.pnlSol >= 0 ? '+' : ''}{t.pnlSol.toFixed(1)} SOL</div>
                   </div>
-                  <div className="text-right font-mono text-[11px] font-semibold text-[var(--trench-accent)]">{t.winRate.toFixed(0)}%</div>
+                  <div className="hidden sm:block text-right font-mono text-[11px] font-semibold text-[var(--trench-accent)]">{t.winRate.toFixed(0)}%</div>
                 </Link>
               );
             })}

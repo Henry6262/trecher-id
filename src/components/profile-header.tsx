@@ -70,7 +70,7 @@ export function ProfileHeader({ avatarUrl, displayName, username, bio, verified,
     <div
       className="relative"
       style={{
-        padding: '28px 28px 24px',
+        padding: '20px 16px 20px',
         background: 'linear-gradient(180deg, rgba(0,212,255,0.05) 0%, transparent 100%)',
       }}
     >
@@ -135,7 +135,7 @@ export function ProfileHeader({ avatarUrl, displayName, username, bio, verified,
       )}
 
       {/* Hero layout — avatar left, info right */}
-      <div className="flex items-start gap-5">
+      <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-5">
         {/* Avatar — left side, cut-corner branded */}
         <div className="relative flex-shrink-0">
           <div className="absolute inset-[-16px] pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(0,212,255,0.08) 0%, transparent 70%)' }} />
@@ -166,9 +166,9 @@ export function ProfileHeader({ avatarUrl, displayName, username, bio, verified,
         </div>
 
         {/* Info — right side */}
-        <div className="flex-1 min-w-0 pt-1">
+        <div className="flex-1 min-w-0 pt-1 w-full sm:w-auto text-center sm:text-left">
           {/* Row: name+badge left, PnL right */}
-          <div className="flex items-start justify-between gap-3">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between gap-2 sm:gap-3">
             <div>
               {/* Name + badge + category */}
               <div className="flex items-center gap-2 mb-0.5 flex-wrap">
@@ -208,9 +208,9 @@ export function ProfileHeader({ avatarUrl, displayName, username, bio, verified,
 
             {/* PnL — far right */}
             {stats && (
-              <div className="text-right flex-shrink-0">
+              <div className="text-right flex-shrink-0 sm:ml-auto">
                 <div
-                  className="font-mono text-[28px] font-black leading-none"
+                  className="font-mono text-[20px] sm:text-[28px] font-black leading-none"
                   style={{
                     color: stats.totalPnlUsd >= 0 ? 'var(--trench-green)' : 'var(--trench-red)',
                     textShadow: stats.totalPnlUsd >= 0 ? '0 0 24px rgba(34,197,94,0.2)' : '0 0 24px rgba(239,68,68,0.2)',
@@ -226,7 +226,7 @@ export function ProfileHeader({ avatarUrl, displayName, username, bio, verified,
       </div>
 
       {/* Share actions */}
-      <div className="flex gap-2 mt-3">
+      <div className="flex flex-wrap gap-2 mt-3 justify-center sm:justify-start">
         <ShareButtons username={username} />
       </div>
 

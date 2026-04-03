@@ -94,7 +94,7 @@ export function LandingContent({ traders, featured, ticker }: LandingContentProp
         <ActivityTicker items={ticker} />
 
         {/* Hero */}
-        <section className="mx-auto grid max-w-[900px] grid-cols-1 items-center gap-12 px-6 pt-16 pb-12 lg:grid-cols-2">
+        <section className="mx-auto grid max-w-[900px] grid-cols-1 items-center gap-8 px-4 sm:px-6 pt-12 sm:pt-16 pb-10 sm:pb-12 lg:grid-cols-2">
           <div>
             <div className="cut-xs mb-6 inline-flex items-center gap-1.5 border border-[rgba(0,212,255,0.12)] bg-[rgba(0,212,255,0.08)] px-3 py-1 text-[10px] font-mono tracking-[2px] text-[var(--trench-accent)]">
               <Check size={10} strokeWidth={3} />
@@ -118,7 +118,7 @@ export function LandingContent({ traders, featured, ticker }: LandingContentProp
           </div>
 
           {/* Preview card — mirrors real profile layout */}
-          <div className="hidden lg:block w-[340px]" style={{ transform: 'perspective(1000px) rotateY(-4deg) rotateX(2deg)' }}>
+          <div className="hidden sm:block w-full sm:w-[340px] mx-auto lg:mx-0" style={{ transform: 'perspective(1000px) rotateY(-4deg) rotateX(2deg)' }}>
             {/* Accent line */}
             <div className="h-[2px] mb-0" style={{ background: 'linear-gradient(90deg, transparent, #00D4FF, transparent)' }} />
 
@@ -224,12 +224,12 @@ export function LandingContent({ traders, featured, ticker }: LandingContentProp
         </section>
 
         {/* Divider */}
-        <div className="mx-auto max-w-[900px] px-10">
+        <div className="mx-auto max-w-[900px] px-4 sm:px-10">
           <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.1), transparent)' }} />
         </div>
 
         {/* Leaderboard — traders + deployers */}
-        <section className="mx-auto max-w-[900px] px-10 py-16">
+        <section className="mx-auto max-w-[900px] px-4 sm:px-10 py-10 sm:py-16">
           <div className="mb-8 text-right">
             <div
               className="mb-3 inline-flex items-center gap-1.5 px-3 py-1 text-[9px] font-mono tracking-[2px] text-[var(--trench-accent)]"
@@ -255,12 +255,12 @@ export function LandingContent({ traders, featured, ticker }: LandingContentProp
         </section>
 
         {/* Divider */}
-        <div className="mx-auto max-w-[900px] px-10">
+        <div className="mx-auto max-w-[900px] px-4 sm:px-10">
           <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.1), transparent)' }} />
         </div>
 
         {/* How it works */}
-        <section className="mx-auto max-w-[900px] px-10 py-16">
+        <section className="mx-auto max-w-[900px] px-4 sm:px-10 py-10 sm:py-16">
           <h2 className="mb-2 text-2xl font-bold text-white">How it <span className="text-[var(--trench-accent)]">works</span></h2>
           <p className="mb-8 text-[12px] text-[var(--trench-text-muted)]">Three steps. Thirty seconds. Zero cost.</p>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -277,20 +277,20 @@ export function LandingContent({ traders, featured, ticker }: LandingContentProp
         </section>
 
         {/* Divider */}
-        <div className="mx-auto max-w-[900px] px-10">
+        <div className="mx-auto max-w-[900px] px-4 sm:px-10">
           <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.1), transparent)' }} />
         </div>
 
         {/* Top Traders — real data from DB */}
         <section className="py-16">
-          <div className="mx-auto mb-8 max-w-[900px] px-10">
-            <div className="flex items-end justify-between">
+          <div className="mx-auto mb-8 max-w-[900px] px-4 sm:px-10">
+            <div className="flex flex-wrap items-end justify-between gap-3">
               <div>
-                <h2 className="mb-1 text-3xl sm:text-4xl font-bold text-white">Top <span className="text-[var(--trench-accent)]">traders</span></h2>
+                <h2 className="mb-1 text-2xl sm:text-3xl lg:text-4xl font-bold text-white">Top <span className="text-[var(--trench-accent)]">traders</span></h2>
                 <p className="text-[13px] text-[var(--trench-text-muted)]">Already on Web3Me. Are you?</p>
               </div>
               {/* View toggle */}
-              <div className="flex gap-1">
+              <div className="flex gap-1 flex-wrap">
                 {(['scroll', 'dome', 'orbits'] as ViewMode[]).map(mode => (
                   <button
                     key={mode}
@@ -343,19 +343,19 @@ export function LandingContent({ traders, featured, ticker }: LandingContentProp
         </section>
 
         {/* Divider */}
-        <div className="mx-auto max-w-[900px] px-10">
+        <div className="mx-auto max-w-[900px] px-4 sm:px-10">
           <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.1), transparent)' }} />
         </div>
 
         {/* Bottom CTA */}
-        <section className="mx-auto max-w-[900px] px-10 py-16 text-center">
+        <section className="mx-auto max-w-[900px] px-4 sm:px-10 py-10 sm:py-16 text-center">
           <h2 className="mb-3 text-3xl font-bold text-white">Claim your <span className="text-[var(--trench-accent)]">Web3Me</span></h2>
           <p className="mb-6 text-[13px] text-[var(--trench-text-muted)]">Your trading speaks for itself. Let it.</p>
           <CutButton href="/login" size="lg">Create Your Web3Me</CutButton>
         </section>
 
         {/* Footer */}
-        <div className="mx-auto max-w-[900px] border-t border-[rgba(0,212,255,0.06)] px-10 py-6 text-center">
+        <div className="mx-auto max-w-[900px] border-t border-[rgba(0,212,255,0.06)] px-4 sm:px-10 py-6 text-center">
           <Link href="/" className="mb-2 inline-block">
             <Image src="/logo.png" alt="Web3Me" width={96} height={24} className="mx-auto h-6 w-auto opacity-30 transition-opacity hover:opacity-50" />
           </Link>
