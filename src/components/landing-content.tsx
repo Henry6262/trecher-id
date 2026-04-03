@@ -37,7 +37,7 @@ interface TraderData {
 
 interface LandingContentProps {
   traders: TraderData[];
-  featured: TraderData;
+  featured: TraderData | null;
   ticker: TickerItem[];
 }
 
@@ -119,7 +119,7 @@ export function LandingContent({ traders, featured, ticker }: LandingContentProp
           </div>
 
           {/* Preview card — mirrors real profile layout */}
-          <div className="hidden sm:block w-full sm:w-[340px] mx-auto lg:mx-0" style={{ transform: 'perspective(1000px) rotateY(-4deg) rotateX(2deg)' }}>
+          {featured && <div className="hidden sm:block w-full sm:w-[340px] mx-auto lg:mx-0" style={{ transform: 'perspective(1000px) rotateY(-4deg) rotateX(2deg)' }}>
             {/* Accent line */}
             <div className="h-[2px] mb-0" style={{ background: 'linear-gradient(90deg, transparent, #00D4FF, transparent)' }} />
 
@@ -221,7 +221,7 @@ export function LandingContent({ traders, featured, ticker }: LandingContentProp
                 <Image src="/logo.png" alt="Web3Me" width={80} height={20} className="h-5 w-auto opacity-30" />
               </div>
             </GlassCard>
-          </div>
+          </div>}
         </section>
 
         {/* Search bar */}

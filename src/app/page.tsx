@@ -7,6 +7,10 @@ import type { TickerItem } from '@/app/api/ticker/route';
 export const dynamic = 'force-dynamic';
 
 export default async function LandingPage() {
+  let traders: { username: string; name: string; avatarUrl: string | null; pnl: string; winRate: string; trades: string; recentToken: string | null; recentTokenImage: string | null; recentPnl: string | null; recentBuy: string | null; recentSell: string | null }[] = [];
+  let ticker: TickerItem[] = [];
+
+  try {
   // Fetch top traders with their best pinned trade from DB
   const users = await prisma.user.findMany({
     include: {
@@ -17,7 +21,7 @@ export default async function LandingPage() {
     take: 15,
   });
 
-  const traders = users.map(u => {
+  traders = users.map(u => {
     let totalPnlUsd = 0;
     let totalWinRate = 0;
     let winRateCount = 0;
@@ -48,7 +52,7 @@ export default async function LandingPage() {
   });
 
   // Fetch ticker items directly (no internal HTTP — same Prisma call as /api/ticker)
-  const ticker = await cached<TickerItem[]>('ticker:recent', 60, async () => {
+  ticker = await cached<TickerItem[]>('ticker:recent', 60, async () => {
     const rows = await prisma.pinnedTrade.findMany({
       orderBy: { pinnedAt: 'desc' },
       take: 20,
@@ -64,8 +68,11 @@ export default async function LandingPage() {
     }));
   });
 
-  // Top trader for the preview card
-  const featured = traders[0];
+  } catch (err) {
+    console.error('[landing] SSR error:', err);
+  }
+
+  const featured = traders[0] ?? null;
 
   return <LandingContent traders={traders} featured={featured} ticker={ticker} />;
 }
