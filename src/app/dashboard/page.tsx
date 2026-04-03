@@ -15,6 +15,8 @@ interface Profile {
   displayName: string | null;
   bio: string | null;
   avatarUrl: string | null;
+  accentColor: string | null;
+  bannerUrl: string | null;
 }
 
 interface LinkItem {
@@ -31,6 +33,8 @@ export default function DashboardPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [displayName, setDisplayName] = useState('');
   const [bio, setBio] = useState('');
+  const [accentColor, setAccentColor] = useState('#00D4FF');
+  const [bannerUrl, setBannerUrl] = useState('');
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState('');
 
@@ -51,6 +55,8 @@ export default function DashboardPage() {
         setProfile(data);
         setDisplayName(data.displayName ?? '');
         setBio(data.bio ?? '');
+        setAccentColor(data.accentColor ?? '#00D4FF');
+        setBannerUrl(data.bannerUrl ?? '');
       })
       .catch(() => {});
 
@@ -75,7 +81,7 @@ export default function DashboardPage() {
       const res = await fetch('/api/profile', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ displayName, bio }),
+        body: JSON.stringify({ displayName, bio, accentColor, bannerUrl }),
       });
       if (res.ok) {
         const updated: Profile = await res.json();
@@ -155,24 +161,33 @@ export default function DashboardPage() {
 
       {/* Profile Preview */}
       {profile && (
-        <GlassCard className="p-5" cut={12}>
+        <GlassCard className="p-5 overflow-hidden" cut={12}>
+          {bannerUrl && (
+            <div className="w-full h-12 overflow-hidden mb-3 -mt-5 -mx-5" style={{ width: 'calc(100% + 40px)' }}>
+              <img src={bannerUrl} alt="" className="w-full h-full object-cover opacity-50" />
+            </div>
+          )}
           <div className="flex items-center gap-3">
             {profile.avatarUrl ? (
               <img src={profile.avatarUrl} alt="" className="w-10 h-10 rounded-full object-cover" />
             ) : (
-              <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold text-black" style={{ background: '#00D4FF' }}>
+              <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold text-black" style={{ background: accentColor }}>
                 {(profile.displayName ?? profile.username).charAt(0).toUpperCase()}
               </div>
             )}
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-mono font-bold text-[var(--trench-text)] truncate">{profile.displayName ?? profile.username}</p>
+              <div className="flex items-center gap-2">
+                <p className="text-sm font-mono font-bold text-[var(--trench-text)] truncate">{profile.displayName ?? profile.username}</p>
+                <div className="w-3 h-3 rounded-full shrink-0" style={{ background: accentColor }} />
+              </div>
               <p className="text-xs font-mono text-[var(--trench-text-muted)]">@{profile.username}</p>
             </div>
             <a
               href={`/${profile.username}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1 text-[10px] font-mono text-[#00D4FF] hover:text-[#33DDFF] tracking-widest transition-colors shrink-0"
+              className="flex items-center gap-1 text-[10px] font-mono tracking-widest transition-colors shrink-0"
+              style={{ color: accentColor }}
             >
               VIEW <ExternalLink size={10} />
             </a>
@@ -203,6 +218,45 @@ export default function DashboardPage() {
               )}
             </div>
           ))}
+        </div>
+      </GlassCard>
+
+      {/* Customize */}
+      <GlassCard className="p-5 space-y-4" cut={12}>
+        <p className="text-[9px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">CUSTOMIZE</p>
+
+        {/* Accent Color */}
+        <div className="space-y-2">
+          <label className="text-xs font-mono text-[var(--trench-text-muted)]">Accent Color</label>
+          <div className="flex gap-2 flex-wrap">
+            {['#00D4FF', '#FF6B00', '#22c55e', '#a855f7', '#ef4444', '#f59e0b', '#ec4899', '#6366f1'].map(color => (
+              <button
+                key={color}
+                onClick={() => setAccentColor(color)}
+                className="w-8 h-8 transition-all"
+                style={{
+                  background: color,
+                  clipPath: 'polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px)',
+                  outline: accentColor === color ? '2px solid white' : '2px solid transparent',
+                  outlineOffset: '2px',
+                }}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Banner URL */}
+        <div className="space-y-2">
+          <label className="text-xs font-mono text-[var(--trench-text-muted)]">Banner Image URL</label>
+          <Input
+            value={bannerUrl}
+            onChange={e => setBannerUrl(e.target.value)}
+            placeholder="https://example.com/banner.jpg"
+            className="bg-transparent border-[var(--trench-border)] text-[var(--trench-text)] font-mono text-sm"
+          />
+          <p className="text-[9px] font-mono text-[var(--trench-text-muted)]">
+            Use any image URL. Recommended: 1200×400px.
+          </p>
         </div>
       </GlassCard>
 
