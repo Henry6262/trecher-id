@@ -265,6 +265,75 @@ export function LandingContent({ traders, featured, ticker }: LandingContentProp
           <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.1), transparent)' }} />
         </div>
 
+        {/* Reward Pool Section */}
+        <section className="max-w-[900px] mx-auto px-4 sm:px-6 py-16">
+          <div className="text-center mb-10">
+            <div
+              className="inline-flex items-center gap-1.5 px-3 py-1 text-[9px] font-mono tracking-[2px] text-[var(--trench-accent)] mb-4"
+              style={{
+                background: 'rgba(0,212,255,0.08)',
+                border: '1px solid rgba(0,212,255,0.12)',
+                clipPath: 'polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px)',
+              }}
+            >
+              REWARD POOL
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">
+              Trade. Rank. <span className="text-[var(--trench-accent)]">Earn.</span>
+            </h2>
+            <p className="text-sm text-[var(--trench-text-muted)] max-w-lg mx-auto">
+              The Web3Me reward pool distributes rewards to the top traders on the leaderboard every week. Your on-chain performance is your ticket.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {[
+              {
+                step: '01',
+                title: 'Leaderboard Rankings',
+                desc: 'Your realized PnL across all linked wallets determines your rank. Updated every 6 hours from on-chain data.',
+              },
+              {
+                step: '02',
+                title: 'Weekly Distribution',
+                desc: 'Every week, the reward pool is distributed to the top performers. Higher rank = larger share of the pool.',
+              },
+              {
+                step: '03',
+                title: 'Claim & Compound',
+                desc: 'Rewards are sent directly to your linked wallet. Keep trading, keep climbing, keep earning.',
+              },
+            ].map((item) => (
+              <GlassCard key={item.step} cut={10}>
+                <div className="p-6">
+                  <div className="text-[var(--trench-accent)] font-mono text-[11px] tracking-widest mb-3">{item.step}</div>
+                  <h3 className="text-sm font-bold text-white mb-2">{item.title}</h3>
+                  <p className="text-xs text-[var(--trench-text-muted)] leading-relaxed">{item.desc}</p>
+                </div>
+              </GlassCard>
+            ))}
+          </div>
+
+          {/* Pool stats preview */}
+          <div className="mt-8 flex justify-center gap-6 text-center">
+            {[
+              { value: 'WEEKLY', label: 'Distribution' },
+              { value: 'TOP 10', label: 'Eligible' },
+              { value: 'ON-CHAIN', label: 'Verified' },
+            ].map((s) => (
+              <div key={s.label}>
+                <div className="text-lg font-bold font-mono text-[var(--trench-accent)]">{s.value}</div>
+                <div className="text-[8px] tracking-[1.5px] text-[var(--trench-text-muted)] mt-1">{s.label}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Divider */}
+        <div className="mx-auto max-w-[900px] px-4 sm:px-10">
+          <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.1), transparent)' }} />
+        </div>
+
         {/* How it works */}
         <section className="mx-auto max-w-[900px] px-4 sm:px-10 py-10 sm:py-16">
           <h2 className="mb-2 text-2xl font-bold text-white">How it <span className="text-[var(--trench-accent)]">works</span></h2>
