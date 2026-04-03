@@ -16,6 +16,8 @@ model User {
   twitterId   String?  @unique
   privyUserId String?  @unique
   isClaimed   Boolean  @default(false)
+  accentColor String?  // hex color like "#FF6B00", null = default cyan #00D4FF
+  bannerUrl   String?  // URL to banner image
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
