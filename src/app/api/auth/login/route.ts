@@ -93,6 +93,17 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  // Fire-and-forget: fetch Twitter banner if user doesn't have one
+  if (!user!.bannerUrl) {
+    fetch(`https://api.fxtwitter.com/${user!.username}`)
+      .then(r => r.json())
+      .then(data => {
+        const banner = data?.user?.banner_url;
+        if (banner) prisma.user.update({ where: { id: user!.id }, data: { bannerUrl: banner } }).catch(() => {});
+      })
+      .catch(() => {});
+  }
+
   const jwt = await new SignJWT({ sub: user!.id, username: user!.username })
     .setProtectedHeader({ alg: 'HS256' })
     .setExpirationTime('7d')
