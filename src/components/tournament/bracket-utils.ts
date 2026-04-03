@@ -39,7 +39,7 @@ const GROUP_NAMES = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
  * Seeds 25-32: H G F E D C B A  (reverse)
  */
 export function seedGroups(traders: RankedTrader[]): Group[] {
-  const groups: Group[][] = Array.from({ length: 8 }, () => []);
+  const groups: RankedTrader[][] = Array.from({ length: 8 }, () => []);
 
   const sorted = [...traders].sort((a, b) => b.pnlUsd - a.pnlUsd).slice(0, 32);
 

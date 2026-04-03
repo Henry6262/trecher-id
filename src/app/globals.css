@@ -191,6 +191,18 @@
   0% { transform: translateY(0); }
   100% { transform: translateY(-150px); }
 }
+@keyframes winnerPulse {
+  0%, 100% { box-shadow: inset 3px 0 0 #00D4FF, 0 0 8px rgba(0,212,255,0.1); }
+  50% { box-shadow: inset 3px 0 0 #00D4FF, 0 0 16px rgba(0,212,255,0.2); }
+}
+@keyframes bracketDraw {
+  from { stroke-dashoffset: 200; }
+  to { stroke-dashoffset: 0; }
+}
+@keyframes crownFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
 
 /* ─── Scrollbar hide ──────────────────────────────────────── */
 .no-scrollbar::-webkit-scrollbar {

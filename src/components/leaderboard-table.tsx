@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Check, Crosshair, Zap, Anchor, Gem } from 'lucide-react';
 import { GlassCard } from '@/components/glass-card';
+import { TournamentBracket } from './tournament/tournament-bracket';
 import { formatPnl } from '@/lib/utils';
 
 const PERIODS = [
@@ -110,13 +111,17 @@ const PAGE_SIZE = 10;
 
 export function LeaderboardTable({ initialPeriod = '7d' }: { initialPeriod?: string }) {
   const [mode, setMode] = useState<LeaderboardMode>('traders');
+  const [viewMode, setViewMode] = useState<'table' | 'bracket'>('table');
   const [period, setPeriod] = useState(initialPeriod);
   const [traders, setTraders] = useState<RankedTrader[]>([]);
   const [deployers, setDeployers] = useState<RankedDeployer[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
 
-  useEffect(() => { setPage(0); }, [mode, period]);
+  useEffect(() => {
+    setPage(0);
+    if (mode === 'deployers') setViewMode('table');
+  }, [mode, period]);
 
   useEffect(() => {
     let cancelled = false;
@@ -198,6 +203,27 @@ export function LeaderboardTable({ initialPeriod = '7d' }: { initialPeriod?: str
         </div>
       )}
 
+      {/* View toggle — Table / Bracket (traders only) */}
+      {mode === 'traders' && (
+        <div className="flex gap-1.5 mb-4">
+          {(['table', 'bracket'] as const).map(v => (
+            <button
+              key={v}
+              onClick={() => setViewMode(v)}
+              disabled={v === 'bracket' && activeList.length < 32}
+              className="cut-sm px-3 py-1.5 text-[9px] font-mono tracking-widest transition-all uppercase disabled:opacity-30"
+              style={{
+                background: viewMode === v ? 'rgba(0,212,255,0.18)' : 'rgba(8,12,22,0.55)',
+                border: viewMode === v ? '1px solid rgba(0,212,255,0.3)' : '1px solid rgba(255,255,255,0.06)',
+                color: viewMode === v ? '#00D4FF' : '#71717a',
+              }}
+            >
+              {v}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Loading */}
       {loading && (
         <div className="flex items-center justify-center py-20">
@@ -215,8 +241,13 @@ export function LeaderboardTable({ initialPeriod = '7d' }: { initialPeriod?: str
         </GlassCard>
       )}
 
+      {/* Bracket view */}
+      {!loading && viewMode === 'bracket' && mode === 'traders' && (
+        <TournamentBracket traders={activeList} />
+      )}
+
       {/* Podium — top 3 */}
-      {!loading && top3.length > 0 && (
+      {!loading && !(viewMode === 'bracket' && mode === 'traders') && top3.length > 0 && (
         <div className="relative mb-8">
           <div className="absolute inset-[-20px] pointer-events-none" style={{ background: 'radial-gradient(ellipse at 50% 60%, rgba(255,215,0,0.04) 0%, transparent 50%)' }} />
           <div className="relative grid gap-3 items-end grid-cols-3" style={{ gridTemplateColumns: top3.length >= 3 ? '1fr 1.2fr 1fr' : `repeat(${top3.length}, 1fr)` }}>
@@ -228,7 +259,7 @@ export function LeaderboardTable({ initialPeriod = '7d' }: { initialPeriod?: str
       )}
 
       {/* Rest of table — 4th onward */}
-      {!loading && rest.length > 0 && (
+      {!loading && !(viewMode === 'bracket' && mode === 'traders') && rest.length > 0 && (
         <GlassCard cut={10} glow={false} bg="rgba(8,12,18,0.6)">
           <div className="overflow-x-auto">
             {/* Header */}
@@ -282,7 +313,7 @@ export function LeaderboardTable({ initialPeriod = '7d' }: { initialPeriod?: str
         </GlassCard>
       )}
       {/* Pagination */}
-      {!loading && totalPages > 1 && (
+      {!loading && !(viewMode === 'bracket' && mode === 'traders') && totalPages > 1 && (
         <div className="flex items-center justify-center gap-3 mt-4">
           <button
             onClick={() => setPage(p => Math.max(0, p - 1))}
