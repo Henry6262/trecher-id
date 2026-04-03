@@ -179,6 +179,8 @@ export default async function ProfilePage({ params }: Props) {
             avatarUrl: user.avatarUrl,
             isClaimed: user.isClaimed,
           }}
+          accentColor={user.accentColor}
+          bannerUrl={user.bannerUrl}
           stats={stats}
           links={links.map((l: DBLink) => ({ id: l.id, title: l.title, url: l.url, icon: l.icon }))}
           pinnedTrades={pinnedTrades}

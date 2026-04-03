@@ -13,9 +13,11 @@ interface Stats { totalPnlUsd: number; winRate: number; totalTrades: number; }
 interface Props {
   username: string;
   allTimeStats: Stats | null | undefined;
+  accentColor?: string | null;
 }
 
-export function ProfileStatsTabs({ username, allTimeStats }: Props) {
+export function ProfileStatsTabs({ username, allTimeStats, accentColor }: Props) {
+  const accent = accentColor || '#00D4FF';
   const [active, setActive] = useState('all');
   const [stats, setStats] = useState<Stats | null>(allTimeStats ?? null);
   const [loading, setLoading] = useState(false);
@@ -44,9 +46,9 @@ export function ProfileStatsTabs({ username, allTimeStats }: Props) {
             onClick={() => switchTab(t.key)}
             className="cut-xs px-2.5 py-1 text-[9px] font-mono tracking-widest transition-all"
             style={{
-              background: active === t.key ? 'rgba(0,212,255,0.18)' : 'rgba(8,12,22,0.55)',
-              border: active === t.key ? '1px solid rgba(0,212,255,0.3)' : '1px solid rgba(255,255,255,0.06)',
-              color: active === t.key ? '#00D4FF' : '#71717a',
+              background: active === t.key ? `${accent}2e` : 'rgba(8,12,22,0.55)',
+              border: active === t.key ? `1px solid ${accent}4d` : '1px solid rgba(255,255,255,0.06)',
+              color: active === t.key ? accent : '#71717a',
             }}
           >
             {t.label}
@@ -61,8 +63,8 @@ export function ProfileStatsTabs({ username, allTimeStats }: Props) {
           { value: String(stats.totalTrades), label: 'TRADES', color: 'white' },
         ].map(s => (
           <div key={s.label} className="flex-1 relative cut-sm overflow-hidden" style={{ background: 'rgba(8,12,18,0.6)' }}>
-            <div style={{ height: '2px', background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.3), transparent)' }} />
-            <div className="flex flex-col items-center justify-center px-3 py-3" style={{ border: '1px solid rgba(0,212,255,0.1)', borderTop: 'none' }}>
+            <div style={{ height: '2px', background: `linear-gradient(90deg, transparent, ${accent}4d, transparent)` }} />
+            <div className="flex flex-col items-center justify-center px-3 py-3" style={{ border: `1px solid ${accent}1a`, borderTop: 'none' }}>
               <span className="text-[17px] font-bold font-mono" style={{ color: s.color }}>{s.value}</span>
               <span className="text-[8px] text-[var(--trench-text-muted)] tracking-[1.5px] mt-1">{s.label}</span>
             </div>

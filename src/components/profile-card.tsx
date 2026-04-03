@@ -45,9 +45,11 @@ interface ProfileCardProps {
   allTrades?: TokenTrade[];
   degenScore?: DegenScoreResult;
   isOwner?: boolean;
+  accentColor?: string | null;
+  bannerUrl?: string | null;
 }
 
-export function ProfileCard({ user, stats, links, pinnedTrades, wallets, traderStats, deployments, allTrades, degenScore, isOwner }: ProfileCardProps) {
+export function ProfileCard({ user, stats, links, pinnedTrades, wallets, traderStats, deployments, allTrades, degenScore, isOwner, accentColor, bannerUrl }: ProfileCardProps) {
   const hasWallets = wallets.length > 0;
 
   // Compute achievements when we have enough data
@@ -60,8 +62,10 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets, traderS
     ? buildTradeCalendar(allTrades)
     : [];
 
+  const accent = accentColor || '#00D4FF';
+
   return (
-    <div className="w-full max-w-[620px] mx-auto">
+    <div className="w-full max-w-[620px] mx-auto" style={{ '--profile-accent': accent } as React.CSSProperties}>
       {/* Logo — links to landing page */}
       <div className="flex justify-center pt-0 pb-3">
         <Link href="/" className="cursor-pointer">
@@ -77,15 +81,23 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets, traderS
       </div>
 
       {/* Accent line */}
-      <div className="h-[2px]" style={{ background: 'linear-gradient(90deg, transparent, #00D4FF, transparent)' }} />
+      <div className="h-[2px]" style={{ background: `linear-gradient(90deg, transparent, ${accent}, transparent)` }} />
 
       {/* Main card — CutCorner with blur */}
       <CutCorner
         cut="lg"
         bg="rgba(8,12,18,0.72)"
-        borderColor="rgba(0,212,255,0.15)"
+        borderColor={`${accent}26`}
         borderWidth={1}
       >
+        {/* Banner */}
+        {bannerUrl && (
+          <div className="relative w-full h-32 sm:h-44 overflow-hidden" style={{ clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)' }}>
+            <img src={bannerUrl} alt="" className="w-full h-full object-cover" />
+            <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(5,5,8,0.3) 0%, rgba(5,5,8,0.85) 100%)' }} />
+          </div>
+        )}
+
         {/* Hero — full width */}
         <ProfileHeader
           avatarUrl={user.avatarUrl}
@@ -99,10 +111,11 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets, traderS
           roi={traderStats?.roi}
           degenScore={degenScore}
           isOwner={isOwner}
+          accentColor={accent}
         />
 
         {/* Divider */}
-        <div className="mx-6" style={{ height: '1px', background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.12) 30%, rgba(0,212,255,0.12) 70%, transparent)' }} />
+        <div className="mx-6" style={{ height: '1px', background: `linear-gradient(90deg, transparent, ${accent}1f 30%, ${accent}1f 70%, transparent)` }} />
 
         {/* Content section — generous padding */}
         <div className="pb-6 pt-5 px-4 sm:px-7">

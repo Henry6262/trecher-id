@@ -8,7 +8,7 @@ import type { DegenScoreResult } from '@/lib/degen-score';
 import { useState } from 'react';
 import { ProfileStatsTabs } from './profile-stats-tabs';
 
-function ShareButtons({ username }: { username: string }) {
+function ShareButtons({ username, accent }: { username: string; accent: string }) {
   const [copied, setCopied] = useState(false);
 
   function copyLink() {
@@ -24,7 +24,7 @@ function ShareButtons({ username }: { username: string }) {
     <>
       <button
         onClick={copyLink}
-        className="cut-xs flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-mono tracking-widest transition-all hover:text-[#00D4FF]"
+        className="cut-xs flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-mono tracking-widest transition-all"
         style={{ background: 'rgba(0,212,255,0.04)', border: '1px solid rgba(0,212,255,0.1)', color: copied ? '#22c55e' : '#71717a' }}
       >
         {copied ? '✓ COPIED' : '🔗 COPY'}
@@ -34,7 +34,7 @@ function ShareButtons({ username }: { username: string }) {
         target="_blank"
         rel="noopener noreferrer"
         className="cut-xs flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-mono tracking-widest transition-all"
-        style={{ background: 'rgba(0,212,255,0.08)', border: '1px solid rgba(0,212,255,0.2)', color: '#00D4FF' }}
+        style={{ background: `${accent}14`, border: `1px solid ${accent}33`, color: accent }}
       >
         📤 SHARE
       </a>
@@ -58,9 +58,11 @@ interface ProfileHeaderProps {
   roi?: number;
   degenScore?: DegenScoreResult;
   isOwner?: boolean;
+  accentColor?: string | null;
 }
 
-export function ProfileHeader({ avatarUrl, displayName, username, bio, verified, isClaimed, stats, wallets, roi, degenScore, isOwner }: ProfileHeaderProps) {
+export function ProfileHeader({ avatarUrl, displayName, username, bio, verified, isClaimed, stats, wallets, roi, degenScore, isOwner, accentColor }: ProfileHeaderProps) {
+  const accent = accentColor || '#00D4FF';
   const [activeWallet, setActiveWallet] = useState(
     () => wallets?.findIndex(w => w.isMain) ?? 0
   );
@@ -71,7 +73,7 @@ export function ProfileHeader({ avatarUrl, displayName, username, bio, verified,
       className="relative"
       style={{
         padding: '20px 16px 20px',
-        background: 'linear-gradient(180deg, rgba(0,212,255,0.05) 0%, transparent 100%)',
+        background: `linear-gradient(180deg, ${accent}0d 0%, transparent 100%)`,
       }}
     >
       {/* Claim banner — unclaimed profiles only */}
@@ -88,7 +90,8 @@ export function ProfileHeader({ avatarUrl, displayName, username, bio, verified,
           </span>
           <a
             href="/login"
-            className="text-[#00D4FF] hover:text-[#33DDFF] transition-colors tracking-widest text-[10px]"
+            className="transition-colors tracking-widest text-[10px]"
+            style={{ color: accent }}
           >
             CLAIM IT →
           </a>
@@ -138,12 +141,12 @@ export function ProfileHeader({ avatarUrl, displayName, username, bio, verified,
       <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-5">
         {/* Avatar — left side, cut-corner branded */}
         <div className="relative flex-shrink-0">
-          <div className="absolute inset-[-16px] pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(0,212,255,0.08) 0%, transparent 70%)' }} />
+          <div className="absolute inset-[-16px] pointer-events-none" style={{ background: `radial-gradient(circle, ${accent}14 0%, transparent 70%)` }} />
           <div
             className="relative w-[110px] h-[110px] animate-[pulseGlow_3s_ease-in-out_infinite]"
             style={{
               clipPath: 'polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px)',
-              background: 'linear-gradient(135deg, rgba(0,212,255,0.5), rgba(0,212,255,0.15), rgba(0,212,255,0.4))',
+              background: `linear-gradient(135deg, ${accent}80, ${accent}26, ${accent}66)`,
               padding: '2px',
             }}
           >
@@ -181,16 +184,16 @@ export function ProfileHeader({ avatarUrl, displayName, username, bio, verified,
                   @{username}
                 </a>
                 {verified && (
-                  <div className="w-[18px] h-[18px] flex items-center justify-center rounded-full flex-shrink-0" style={{ background: '#00D4FF' }}>
+                  <div className="w-[18px] h-[18px] flex items-center justify-center rounded-full flex-shrink-0" style={{ background: accent }}>
                     <Check size={11} strokeWidth={3} className="text-black" />
                   </div>
                 )}
                 {isClaimed && (
-                  <span style={{ clipPath: 'polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px)' }} className="inline-flex items-center px-1.5 py-0.5 font-mono text-[10px] tracking-widest text-[#00D4FF] border border-[#00D4FF]/30 bg-[#00D4FF]/[0.08] ml-2">
+                  <span style={{ clipPath: 'polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px)', color: accent, border: `1px solid ${accent}4d`, background: `${accent}14` }} className="inline-flex items-center px-1.5 py-0.5 font-mono text-[10px] tracking-widest ml-2">
                     ✓ VERIFIED
                   </span>
                 )}
-                <span className="cut-xs text-[7px] tracking-[1px] px-2 py-0.5 font-semibold text-[var(--trench-accent)]" style={{ background: 'rgba(0,212,255,0.08)', border: '1px solid rgba(0,212,255,0.12)' }}>SOLANA TRADER</span>
+                <span className="cut-xs text-[7px] tracking-[1px] px-2 py-0.5 font-semibold" style={{ color: accent, background: `${accent}14`, border: `1px solid ${accent}1f` }}>SOLANA TRADER</span>
               </div>
 
               {/* Degen Badge */}
@@ -227,21 +230,21 @@ export function ProfileHeader({ avatarUrl, displayName, username, bio, verified,
 
       {/* Share actions */}
       <div className="flex flex-wrap gap-2 mt-3 justify-center sm:justify-start">
-        <ShareButtons username={username} />
+        <ShareButtons username={username} accent={accent} />
       </div>
 
-      <ProfileStatsTabs username={username} allTimeStats={stats} />
+      <ProfileStatsTabs username={username} allTimeStats={stats} accentColor={accent} />
 
       {/* Edit button — own profiles only */}
       {isOwner && (
         <div className="absolute bottom-4 right-4 z-10">
           <a
             href="/dashboard"
-            className="cut-xs flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-mono tracking-widest transition-all hover:text-[#00D4FF]"
+            className="cut-xs flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-mono tracking-widest transition-all"
             style={{
-              background: 'rgba(0,212,255,0.06)',
-              border: '1px solid rgba(0,212,255,0.15)',
-              color: '#00D4FF',
+              background: `${accent}0f`,
+              border: `1px solid ${accent}26`,
+              color: accent,
             }}
           >
             ✏ EDIT
