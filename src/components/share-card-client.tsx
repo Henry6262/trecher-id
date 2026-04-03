@@ -74,16 +74,77 @@ export function ShareCardClient({ user, stats, degenScore, pinnedTrades, shareUr
       className="min-h-screen flex flex-col items-center justify-center py-10 px-4"
       style={{ background: '#050508' }}
     >
+      <style>{`
+        @keyframes card-glow {
+          0%, 100% { box-shadow: 0 0 20px rgba(0,212,255,0.1), inset 0 0 20px rgba(0,212,255,0.03); }
+          50% { box-shadow: 0 0 40px rgba(0,212,255,0.25), inset 0 0 30px rgba(0,212,255,0.06); }
+        }
+        @keyframes shimmer {
+          0% { transform: translateX(-100%) skewX(-15deg); }
+          100% { transform: translateX(200%) skewX(-15deg); }
+        }
+        @keyframes stat-glow {
+          0%, 100% { text-shadow: 0 0 8px currentColor; }
+          50% { text-shadow: 0 0 20px currentColor, 0 0 40px currentColor; }
+        }
+        @keyframes slide-up {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes border-flow {
+          0% { background-position: 0% 50%; }
+          100% { background-position: 200% 50%; }
+        }
+        @keyframes avatar-pulse {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(0,212,255,0); }
+          50% { box-shadow: 0 0 0 6px rgba(0,212,255,0.15), 0 0 20px rgba(0,212,255,0.2); }
+        }
+        .card-epic {
+          animation: card-glow 3s ease-in-out infinite;
+          position: relative;
+          overflow: hidden;
+        }
+        .card-epic::after {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: linear-gradient(90deg, transparent, rgba(0,212,255,0.06), transparent);
+          animation: shimmer 4s ease-in-out infinite;
+          pointer-events: none;
+        }
+        .stat-epic {
+          animation: stat-glow 2s ease-in-out infinite;
+        }
+        .pill-epic {
+          animation: slide-up 0.6s ease-out both;
+        }
+        .pill-epic:nth-child(1) { animation-delay: 0.2s; }
+        .pill-epic:nth-child(2) { animation-delay: 0.4s; }
+        .pill-epic:nth-child(3) { animation-delay: 0.6s; }
+        .border-epic {
+          background: linear-gradient(90deg, #00D4FF, #0099CC, #00D4FF, #33DDFF, #00D4FF);
+          background-size: 200% 100%;
+          animation: border-flow 3s linear infinite;
+        }
+        .avatar-epic {
+          animation: avatar-pulse 3s ease-in-out infinite;
+        }
+      `}</style>
+
       {/* Accent line */}
-      <div className="w-full max-w-[560px] h-[2px] mb-0" style={{ background: 'linear-gradient(90deg, transparent, #00D4FF, transparent)' }} />
+      <div className="w-full max-w-[560px] h-[3px] mb-0 border-epic" />
 
       {/* Card capture zone — action buttons are OUTSIDE this ref */}
       <div ref={cardRef} style={{ width: '100%', maxWidth: '560px' }}>
-        <CutCorner cut="lg" bg="rgba(8,12,18,0.88)" borderColor="rgba(0,212,255,0.15)" style={{ width: '100%' }}>
+        <CutCorner cut="lg" bg="rgba(8,12,18,0.88)" borderColor="rgba(0,212,255,0.15)" style={{ width: '100%' }} className="card-epic">
           <div className="flex flex-col items-center gap-5 px-8 py-8">
 
             {/* Avatar */}
             <div
+              className="avatar-epic"
               style={{
                 clipPath: 'polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px)',
                 background: 'linear-gradient(135deg, rgba(0,212,255,0.5), rgba(0,212,255,0.15), rgba(0,212,255,0.4))',
@@ -137,7 +198,7 @@ export function ShareCardClient({ user, stats, degenScore, pinnedTrades, shareUr
                   className="flex-1 cut-sm flex flex-col items-center justify-center py-3 px-2"
                   style={{ background: 'rgba(8,12,18,0.6)', border: '1px solid rgba(0,212,255,0.1)' }}
                 >
-                  <span className="font-mono text-[17px] font-bold" style={{ color: s.color }}>{s.value}</span>
+                  <span className="font-mono text-[17px] font-bold stat-epic" style={{ color: s.color }}>{s.value}</span>
                   <span className="text-[7px] tracking-[1.5px] text-[var(--trench-text-muted)] mt-1">{s.label}</span>
                 </div>
               ))}
@@ -159,6 +220,7 @@ export function ShareCardClient({ user, stats, degenScore, pinnedTrades, shareUr
                         cut="xs"
                         bg="rgba(8,12,22,0.7)"
                         borderColor="rgba(0,212,255,0.1)"
+                        className="pill-epic"
                       >
                         <div className="px-3 py-2 flex items-center gap-1.5">
                           <span className="font-mono text-[11px] font-bold text-white">${trade.tokenSymbol}</span>
