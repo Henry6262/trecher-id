@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Check } from 'lucide-react';
+import { Check, Crosshair, Zap, Anchor, Gem } from 'lucide-react';
 import { GlassCard } from '@/components/glass-card';
 import { formatPnl } from '@/lib/utils';
 
@@ -27,11 +27,11 @@ interface RankedTrader {
 }
 
 /** Assign a category badge based on trading behavior */
-function getCategoryBadge(t: RankedTrader): { emoji: string; label: string; color: string } | null {
-  if (t.winRate >= 70) return { emoji: '🎯', label: 'SNIPER', color: '#f59e0b' };
-  if (t.trades >= 100) return { emoji: '⚡', label: 'ACTIVE', color: '#00D4FF' };
-  if (t.pnlUsd >= 5000) return { emoji: '🐋', label: 'WHALE', color: '#a78bfa' };
-  if (t.winRate >= 50 && t.trades >= 20) return { emoji: '💎', label: 'SOLID', color: '#22c55e' };
+function getCategoryBadge(t: RankedTrader): { icon: React.ReactNode; label: string; color: string } | null {
+  if (t.winRate >= 70) return { icon: <Crosshair size={9} />, label: 'SNIPER', color: '#f59e0b' };
+  if (t.trades >= 100) return { icon: <Zap size={9} />, label: 'ACTIVE', color: '#00D4FF' };
+  if (t.pnlUsd >= 5000) return { icon: <Anchor size={9} />, label: 'WHALE', color: '#a78bfa' };
+  if (t.winRate >= 50 && t.trades >= 20) return { icon: <Gem size={9} />, label: 'SOLID', color: '#22c55e' };
   return null;
 }
 
@@ -74,7 +74,7 @@ function PodiumCard({ trader, place }: { trader: RankedTrader; place: 1 | 2 | 3 
           {badge && (
             <div className="flex justify-center mt-1 mb-2">
               <span className="cut-xs text-[6px] tracking-[1px] px-2 py-0.5 font-semibold" style={{ color: badge.color, background: `${badge.color}14`, border: `1px solid ${badge.color}20` }}>
-                {badge.emoji} {badge.label}
+                {badge.icon} {badge.label}
               </span>
             </div>
           )}
@@ -263,7 +263,7 @@ export function LeaderboardTable({ initialPeriod = '7d' }: { initialPeriod?: str
                       )}
                       {badge && (
                         <span className="hidden sm:inline-flex cut-xs text-[6px] tracking-[0.5px] px-1.5 py-0.5 font-semibold flex-shrink-0" style={{ color: badge.color, background: `${badge.color}14`, border: `1px solid ${badge.color}20` }}>
-                          {badge.emoji} {badge.label}
+                          {badge.icon} {badge.label}
                         </span>
                       )}
                     </div>

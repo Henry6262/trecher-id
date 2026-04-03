@@ -9,8 +9,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  const refreshAvatars = searchParams.get('avatars') === 'true';
+
   const users = await prisma.user.findMany({
-    select: { id: true, username: true, bannerUrl: true },
+    select: { id: true, username: true, bannerUrl: true, avatarUrl: true },
     orderBy: { createdAt: 'asc' },
   });
 
@@ -18,7 +20,7 @@ export async function POST(req: Request) {
   const errors: string[] = [];
 
   for (const user of users) {
-    if (user.bannerUrl) {
+    if (user.bannerUrl && !refreshAvatars) {
       results.push(`${user.username} — already has banner, skipped`);
       continue;
     }
@@ -33,15 +35,17 @@ export async function POST(req: Request) {
 
       const data = await res.json();
       const bannerUrl = data?.user?.banner_url;
+      const avatarUrl = data?.user?.avatar_url?.replace('_normal', '_400x400') ?? null;
+      const updates: Record<string, string> = {};
 
-      if (bannerUrl) {
-        await prisma.user.update({
-          where: { id: user.id },
-          data: { bannerUrl },
-        });
-        results.push(`${user.username} — ✓ banner saved`);
+      if (bannerUrl && !user.bannerUrl) updates.bannerUrl = bannerUrl;
+      if (avatarUrl && refreshAvatars) updates.avatarUrl = avatarUrl;
+
+      if (Object.keys(updates).length > 0) {
+        await prisma.user.update({ where: { id: user.id }, data: updates });
+        results.push(`${user.username} — ✓ ${Object.keys(updates).join(' + ')} updated`);
       } else {
-        results.push(`${user.username} — no banner on Twitter`);
+        results.push(`${user.username} — no updates needed`);
       }
 
       await new Promise(r => setTimeout(r, 1000));

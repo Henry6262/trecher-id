@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { cached } from '@/lib/redis';
 
 const VALID_PERIODS = ['1d', '3d', '7d', 'all'] as const;
 
@@ -13,6 +14,7 @@ export async function GET(req: Request) {
   const limit = Math.min(Math.max(parseInt(searchParams.get('limit') ?? '50', 10) || 50, 1), 100);
   const offset = Math.max(parseInt(searchParams.get('offset') ?? '0', 10) || 0, 0);
 
+  const data = await cached(`leaderboard:${period}:${offset}:${limit}`, 120, async () => {
   const rankings = await prisma.userRanking.findMany({
     where: { period },
     orderBy: { pnlUsd: 'desc' },
@@ -30,7 +32,7 @@ export async function GET(req: Request) {
     },
   });
 
-  const data = rankings.map((r, i) => ({
+  return rankings.map((r, i) => ({
     rank: offset + i + 1,
     username: r.user.username,
     displayName: r.user.displayName,
@@ -42,6 +44,7 @@ export async function GET(req: Request) {
     trades: r.trades,
     updatedAt: r.updatedAt,
   }));
+  });
 
   return NextResponse.json(data);
 }
