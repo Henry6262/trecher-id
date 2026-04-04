@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect } from 'react';
 import { Check } from 'lucide-react';
 import { BorderGlow } from './border-glow';
 
@@ -26,7 +26,7 @@ interface TraderCarouselProps {
 
 export function TraderCarousel({ traders }: TraderCarouselProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [isPaused, setIsPaused] = useState(false);
+  const pausedRef = useRef(false);
   const animRef = useRef<number | null>(null);
   const posRef = useRef(0);
 
@@ -38,7 +38,7 @@ export function TraderCarousel({ traders }: TraderCarouselProps) {
 
     const speed = 0.5;
     function tick() {
-      if (!isPaused && el) {
+      if (!pausedRef.current && el) {
         posRef.current += speed;
         const singleSetWidth = el.scrollWidth / 3;
         if (posRef.current >= singleSetWidth) posRef.current -= singleSetWidth;
@@ -49,7 +49,7 @@ export function TraderCarousel({ traders }: TraderCarouselProps) {
 
     animRef.current = requestAnimationFrame(tick);
     return () => { if (animRef.current) cancelAnimationFrame(animRef.current); };
-  }, [isPaused]);
+  }, []);
 
   return (
     <div className="relative mx-auto max-w-[900px] overflow-hidden">
@@ -60,8 +60,8 @@ export function TraderCarousel({ traders }: TraderCarouselProps) {
       <div
         ref={scrollRef}
         className="flex gap-4 overflow-x-hidden no-scrollbar py-2"
-        onMouseEnter={() => setIsPaused(true)}
-        onMouseLeave={() => setIsPaused(false)}
+        onMouseEnter={() => { pausedRef.current = true; }}
+        onMouseLeave={() => { pausedRef.current = false; }}
       >
         {items.map((t, i) => (
           <BorderGlow

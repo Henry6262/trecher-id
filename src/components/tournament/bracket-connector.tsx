@@ -51,11 +51,6 @@ export function BracketConnector({
           fill="none"
           stroke="rgba(0,212,255,0.25)"
           strokeWidth={1.5}
-          strokeDasharray={200}
-          strokeDashoffset={200}
-          style={{
-            animation: `bracketDraw 0.8s ease-out ${delay + i * 0.05}s forwards`,
-          }}
         />
       ))}
     </svg>

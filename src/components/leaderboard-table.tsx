@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Check, Crosshair, Zap, Anchor, Gem } from 'lucide-react';
@@ -141,7 +141,7 @@ export function LeaderboardTable({ initialPeriod = '7d' }: { initialPeriod?: str
   }, [mode, period]);
 
   // Normalize deployers to RankedTrader shape for shared podium/table
-  const deployerAsTraders: RankedTrader[] = deployers.map(d => ({
+  const deployerAsTraders: RankedTrader[] = useMemo(() => deployers.map(d => ({
     rank: d.rank,
     username: d.username,
     displayName: d.displayName,
@@ -151,7 +151,7 @@ export function LeaderboardTable({ initialPeriod = '7d' }: { initialPeriod?: str
     pnlSol: d.totalDevPnlSol,
     winRate: d.deployCount > 0 ? (d.migratedCount / d.deployCount) * 100 : 0,
     trades: d.deployCount,
-  }));
+  })), [deployers]);
 
   const activeList = mode === 'traders' ? traders : deployerAsTraders;
   const top3 = activeList.slice(0, 3);

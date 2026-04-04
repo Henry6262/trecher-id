@@ -13,7 +13,7 @@ import { TraderCarousel } from '@/components/trader-carousel';
 import { LeaderboardTable } from '@/components/leaderboard-table';
 import { TraderSearch } from '@/components/trader-search';
 import { ActivityTicker } from '@/components/activity-ticker';
-import type { TickerItem } from '@/app/api/ticker/route';
+import type { TickerItem } from '@/lib/types';
 
 const RisingLines = dynamic(() => import('@/components/rising-lines'), { ssr: false });
 const DomeGallery = dynamic(() => import('@/components/DomeGallery'), { ssr: false });

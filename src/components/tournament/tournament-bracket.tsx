@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import Image from 'next/image';
 import { buildBracket } from './bracket-utils';
 import { GroupStage } from './group-stage';
@@ -20,7 +21,7 @@ export function TournamentBracket({ traders }: { traders: RankedTrader[] }) {
     );
   }
 
-  const bracket = buildBracket(traders);
+  const bracket = useMemo(() => buildBracket(traders), [traders]);
 
   return (
     <div className="space-y-8">

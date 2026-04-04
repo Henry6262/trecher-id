@@ -2,7 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { LandingContent } from '@/components/landing-content';
 import { formatPnl } from '@/lib/utils';
 import { cached } from '@/lib/redis';
-import type { TickerItem } from '@/app/api/ticker/route';
+import type { TickerItem } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
 

@@ -43,7 +43,7 @@ function TraderRow({
           ? 'linear-gradient(90deg, rgba(0,212,255,0.08), transparent)'
           : 'transparent',
         borderLeft: isWinner ? '3px solid #00D4FF' : '3px solid transparent',
-        animation: isWinner ? 'winnerPulse 3s ease-in-out infinite' : 'none',
+        // animation removed — too many cards causes GPU thrash
       }}
     >
       {/* Avatar */}

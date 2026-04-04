@@ -4,14 +4,8 @@ import { cached } from '@/lib/redis';
 
 export const runtime = 'nodejs';
 
-export interface TickerItem {
-  username: string;
-  avatarUrl: string | null;
-  tokenSymbol: string;
-  pnlPercent: number;
-  totalPnlSol: number;
-  pinnedAt: string; // ISO string
-}
+import type { TickerItem } from '@/lib/types';
+export type { TickerItem };
 
 export async function GET() {
   const items = await cached<TickerItem[]>('ticker:recent', 60, async () => {

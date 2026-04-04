@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { TrendingUp, TrendingDown } from 'lucide-react';
-import type { TickerItem } from '@/app/api/ticker/route';
+import type { TickerItem } from '@/lib/types';
 
 interface ActivityTickerProps {
   items: TickerItem[];
