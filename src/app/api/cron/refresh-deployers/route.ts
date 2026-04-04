@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getTopDeployers } from '@/lib/dune';
-import { getTokenMetadata } from '@/lib/helius';
 
 export const maxDuration = 120;
 
@@ -23,15 +22,13 @@ export async function GET(req: Request) {
 
   for (const dep of deployers) {
     // Find or create user by wallet address
-    let wallet = await prisma.wallet.findFirst({
+    const wallet = await prisma.wallet.findFirst({
       where: { address: dep.deployer_wallet },
       include: { user: true },
     });
 
-    let userId: string;
-
     if (!wallet) {
-      // Create unclaimed profile
+      // Create unclaimed profile for top deployer
       const shortAddr = dep.deployer_wallet.slice(0, 6) + '...' + dep.deployer_wallet.slice(-4);
       const username = dep.deployer_wallet.slice(0, 12).toLowerCase();
 
@@ -39,7 +36,7 @@ export async function GET(req: Request) {
         data: {
           username,
           displayName: shortAddr,
-          bio: `Top memecoin deployer — ${dep.total_migrated} migrations`,
+          bio: `Top memecoin deployer — ${dep.total_migrated} migrations, ${dep.total_deployed} total tokens`,
           isClaimed: false,
         },
       });
@@ -51,45 +48,20 @@ export async function GET(req: Request) {
           chain: 'solana',
           verified: false,
           isMain: true,
+          totalTrades: dep.total_deployed,
         },
       });
 
-      userId = user.id;
       created++;
     } else {
-      userId = wallet.userId;
-      updated++;
-    }
-
-    // Upsert token deployment for best token (if available)
-    if (dep.best_token_mint) {
-      const metadata = await getTokenMetadata([dep.best_token_mint]);
-      const meta = metadata.get(dep.best_token_mint);
-
-      await prisma.tokenDeployment.upsert({
-        where: { tokenMint: dep.best_token_mint },
-        create: {
-          userId,
-          walletAddress: dep.deployer_wallet,
-          tokenMint: dep.best_token_mint,
-          tokenSymbol: meta?.symbol ?? dep.best_token_mint.slice(0, 6),
-          tokenName: dep.best_token_name ?? meta?.name ?? null,
-          tokenImageUrl: meta?.image ?? null,
-          platform: 'pump.fun',
-          status: 'migrated',
-          mcapAthUsd: dep.best_token_mcap,
-          devPnlSol: dep.dev_pnl_sol,
-          devPnlUsd: dep.dev_pnl_usd,
-          deployedAt: new Date(),
-        },
-        update: {
-          mcapAthUsd: dep.best_token_mcap,
-          devPnlSol: dep.dev_pnl_sol,
-          devPnlUsd: dep.dev_pnl_usd,
-          status: 'migrated',
-          updatedAt: new Date(),
+      // Update existing profile bio with latest stats
+      await prisma.user.update({
+        where: { id: wallet.userId },
+        data: {
+          bio: `Top memecoin deployer — ${dep.total_migrated} migrations, ${dep.total_deployed} total tokens`,
         },
       });
+      updated++;
     }
   }
 

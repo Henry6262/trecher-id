@@ -1,15 +1,40 @@
 const DUNE_API_KEY = process.env.DUNE_API_KEY;
 const DUNE_BASE = 'https://api.dune.com/api/v1';
 
+// Raw row shape from Dune query 6183649 (counterparty_research/memecoin-dev-tracker)
+interface DuneDeployerRaw {
+  creator_address: string;
+  total_tokens_created: number;
+  tokens_created_7d: number;
+  tokens_created_30d: number;
+  graduated_tokens: number;
+  graduated_tokens_7d: number;
+  graduation_ratio: string;
+  graduation_ratio_7d: string;
+  avg_created_per_day_7d: string;
+  pumpfun_created_24h: number;
+  bonk_created_24h: number;
+}
+
+// Normalized shape used by the rest of the app
 export interface DuneDeployer {
   deployer_wallet: string;
   total_deployed: number;
   total_migrated: number;
-  dev_pnl_sol: number;
-  dev_pnl_usd: number;
-  best_token_name: string | null;
-  best_token_mint: string | null;
-  best_token_mcap: number | null;
+  graduation_rate: number;
+  tokens_7d: number;
+  tokens_30d: number;
+}
+
+function normalizeDeployer(raw: DuneDeployerRaw): DuneDeployer {
+  return {
+    deployer_wallet: raw.creator_address,
+    total_deployed: raw.total_tokens_created,
+    total_migrated: raw.graduated_tokens,
+    graduation_rate: parseFloat(raw.graduation_ratio) || 0,
+    tokens_7d: raw.tokens_created_7d,
+    tokens_30d: raw.tokens_created_30d,
+  };
 }
 
 interface DuneQueryResult<T> {
@@ -92,6 +117,6 @@ export async function getTopDeployers(limit = 20): Promise<DuneDeployer[]> {
     throw new Error('DUNE_DEPLOYER_QUERY_ID not set — fork the memecoin dev tracker query and set the ID');
   }
 
-  const rows = await executeDuneQuery<DuneDeployer>(DEPLOYER_QUERY_ID);
-  return rows.slice(0, limit);
+  const rows = await executeDuneQuery<DuneDeployerRaw>(DEPLOYER_QUERY_ID);
+  return rows.slice(0, limit).map(normalizeDeployer);
 }
