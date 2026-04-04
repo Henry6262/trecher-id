@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { getWalletTransactions } from '@/lib/helius';
 import { getSolPrice } from '@/lib/sol-price';
 import { refreshTokenDeployments } from '@/lib/token-deployments';
+import { fetchFxTwitterProfile } from '@/lib/fxtwitter';
 
 // CRON_SECRET env var must be set in Vercel dashboard for manual invocation.
 // Vercel's scheduler uses the x-vercel-cron header automatically (no secret needed).
@@ -184,6 +185,19 @@ export async function GET(req: Request) {
         try {
           await refreshTokenDeployments(user.id, user.wallets.map(w => ({ address: w.address })));
         } catch { /* non-fatal */ }
+
+        // Refresh follower count from fxtwitter (only if username looks like a Twitter handle)
+        if (user.username && !user.username.includes(' ')) {
+          try {
+            const profile = await fetchFxTwitterProfile(user.username);
+            if (profile.followerCount != null) {
+              await prisma.user.update({
+                where: { id: user.id },
+                data: { followerCount: profile.followerCount },
+              });
+            }
+          } catch { /* non-fatal */ }
+        }
 
         processed++;
       } catch (err) {

@@ -2,6 +2,7 @@ import { TradeCard } from './trade-card';
 
 interface PinnedTradeData {
   id: string;
+  tokenMint?: string;
   tokenSymbol: string;
   tokenName?: string | null;
   tokenImage?: string | null;
@@ -26,6 +27,7 @@ export function TradeCarousel({ trades }: TradeCarouselProps) {
         {trades.map((trade) => (
           <TradeCard
             key={trade.id}
+            tokenMint={trade.tokenMint}
             tokenSymbol={trade.tokenSymbol}
             tokenName={trade.tokenName}
             tokenImage={trade.tokenImage}

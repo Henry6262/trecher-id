@@ -32,6 +32,7 @@ interface DBLink {
 
 interface DBPinnedTrade {
   id: string;
+  tokenMint: string;
   tokenSymbol: string;
   tokenName: string | null;
   tokenImageUrl: string | null;
@@ -159,6 +160,7 @@ export default async function ProfilePage({ params }: Props) {
 
   const pinnedTrades = trades.map((t: DBPinnedTrade) => ({
     id: t.id,
+    tokenMint: t.tokenMint,
     tokenSymbol: t.tokenSymbol,
     tokenName: t.tokenName,
     tokenImage: t.tokenImageUrl,
@@ -181,6 +183,7 @@ export default async function ProfilePage({ params }: Props) {
           }}
           accentColor={user.accentColor}
           bannerUrl={user.bannerUrl}
+          followerCount={user.followerCount}
           stats={stats}
           links={links.map((l: DBLink) => ({ id: l.id, title: l.title, url: l.url, icon: l.icon }))}
           pinnedTrades={pinnedTrades}

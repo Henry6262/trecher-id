@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import { ExternalLink } from 'lucide-react';
 import { formatPercent } from '@/lib/utils';
 
 interface Transaction {
@@ -8,6 +9,7 @@ interface Transaction {
 }
 
 interface TradeCardProps {
+  tokenMint?: string;
   tokenSymbol: string;
   tokenName?: string | null;
   tokenImage?: string | null;
@@ -16,12 +18,16 @@ interface TradeCardProps {
   transactions: Transaction[];
 }
 
-export function TradeCard({ tokenSymbol, tokenName, tokenImage, totalPnlPercent, totalPnlSol, transactions }: TradeCardProps) {
+export function TradeCard({ tokenMint, tokenSymbol, tokenName, tokenImage, totalPnlPercent, totalPnlSol, transactions }: TradeCardProps) {
   const isWin = totalPnlPercent >= 0;
+  const dexUrl = tokenMint ? `https://dexscreener.com/solana/${tokenMint}` : null;
+
+  const Wrapper = dexUrl ? 'a' : 'div';
+  const wrapperProps = dexUrl ? { href: dexUrl, target: '_blank', rel: 'noopener noreferrer' } : {};
 
   return (
-    <div className="flex-shrink-0 w-[280px] snap-start flex items-start gap-3 p-3.5 cut-sm border border-[rgba(0,212,255,0.08)] hover:border-[rgba(0,212,255,0.2)] transition-colors"
-      style={{ background: 'rgba(8,12,22,0.55)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}
+    <Wrapper {...wrapperProps} className="flex-shrink-0 w-[280px] snap-start flex items-start gap-3 p-3.5 cut-sm border border-[rgba(0,212,255,0.08)] hover:border-[rgba(0,212,255,0.2)] transition-colors group"
+      style={{ background: 'rgba(8,12,22,0.55)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', textDecoration: 'none' }}
     >
       {/* Token image or fallback */}
       <div
@@ -43,10 +49,13 @@ export function TradeCard({ tokenSymbol, tokenName, tokenImage, totalPnlPercent,
       <div className="flex-1 min-w-0">
         {/* Token name + PnL */}
         <div className="flex items-baseline justify-between mb-0.5">
-          <span className="text-sm font-bold text-[var(--trench-text)] truncate">${tokenSymbol}</span>
-          <span className={`text-[13px] font-bold font-mono flex-shrink-0 ml-2 ${isWin ? 'text-[var(--trench-green)]' : 'text-[var(--trench-red)]'}`}>
-            {formatPercent(totalPnlPercent)}
-          </span>
+          <span className="text-sm font-bold text-[var(--trench-text)] truncate group-hover:text-[var(--trench-accent)] transition-colors">${tokenSymbol}</span>
+          <div className="flex items-center gap-1.5 flex-shrink-0 ml-2">
+            <span className={`text-[13px] font-bold font-mono ${isWin ? 'text-[var(--trench-green)]' : 'text-[var(--trench-red)]'}`}>
+              {formatPercent(totalPnlPercent)}
+            </span>
+            {dexUrl && <ExternalLink size={10} className="text-[var(--trench-text-muted)] opacity-0 group-hover:opacity-100 transition-opacity" />}
+          </div>
         </div>
 
         {/* Meta line */}
@@ -75,6 +84,6 @@ export function TradeCard({ tokenSymbol, tokenName, tokenImage, totalPnlPercent,
           ))}
         </div>
       </div>
-    </div>
+    </Wrapper>
   );
 }

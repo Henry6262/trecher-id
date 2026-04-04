@@ -15,6 +15,8 @@ import { computeDegenScore } from '@/lib/degen-score';
 import type { DegenScoreResult } from '@/lib/degen-score';
 import { computeAchievements } from '@/lib/achievements';
 import { buildTradeCalendar } from '@/lib/trade-calendar';
+import { PnlChart } from './pnl-chart';
+import { PortfolioView } from './portfolio-view';
 
 interface ProfileCardProps {
   user: {
@@ -32,6 +34,7 @@ interface ProfileCardProps {
   links: { id: string; title: string; url: string; icon?: string | null }[];
   pinnedTrades: {
     id: string;
+    tokenMint?: string;
     tokenSymbol: string;
     tokenName?: string | null;
     tokenImage?: string | null;
@@ -44,12 +47,13 @@ interface ProfileCardProps {
   deployments?: DeploymentData[];
   allTrades?: TokenTrade[];
   degenScore?: DegenScoreResult;
+  followerCount?: number | null;
   isOwner?: boolean;
   accentColor?: string | null;
   bannerUrl?: string | null;
 }
 
-export function ProfileCard({ user, stats, links, pinnedTrades, wallets, traderStats, deployments, allTrades, degenScore, isOwner, accentColor, bannerUrl }: ProfileCardProps) {
+export function ProfileCard({ user, stats, links, pinnedTrades, wallets, traderStats, deployments, allTrades, degenScore, followerCount, isOwner, accentColor, bannerUrl }: ProfileCardProps) {
   const hasWallets = wallets.length > 0;
 
   // Compute achievements when we have enough data
@@ -108,6 +112,7 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets, traderS
           isClaimed={user.isClaimed}
           stats={stats}
           wallets={wallets}
+          followerCount={followerCount}
           roi={traderStats?.roi}
           degenScore={degenScore}
           isOwner={isOwner}
@@ -139,12 +144,18 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets, traderS
           {/* Trade calendar */}
           {calendarWeeks.length > 0 && <TradeCalendar weeks={calendarWeeks} />}
 
+          {/* PnL history chart */}
+          <PnlChart username={user.username} />
+
           {/* Pinned trades */}
           {pinnedTrades.length > 0 && (
             <div className="mb-5">
               <TradeCarousel trades={pinnedTrades} />
             </div>
           )}
+
+          {/* Portfolio holdings */}
+          <PortfolioView username={user.username} />
 
           {/* Token deployments */}
           {deployments && deployments.length > 0 && (
