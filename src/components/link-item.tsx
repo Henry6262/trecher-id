@@ -1,4 +1,4 @@
-import { ChevronRight, GraduationCap, MessageCircle, DollarSign, Globe, Gamepad2, Link2, Code2, Play, Twitch, Instagram, type LucideProps } from 'lucide-react';
+import { ChevronRight, GraduationCap, MessageCircle, DollarSign, Globe, Gamepad2, Link2, Code2, Play, Tv, Camera, type LucideProps } from 'lucide-react';
 import type { FC } from 'react';
 
 const ICONS: Record<string, FC<LucideProps>> = {
@@ -12,8 +12,8 @@ const ICONS: Record<string, FC<LucideProps>> = {
   game: Gamepad2,
   github: Code2,
   youtube: Play,
-  twitch: Twitch,
-  instagram: Instagram,
+  twitch: Tv,
+  instagram: Camera,
   default: Link2,
 };
 
