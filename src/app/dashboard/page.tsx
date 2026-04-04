@@ -27,7 +27,18 @@ interface LinkItem {
   order: number;
 }
 
-const ICON_OPTIONS = ['🔗', '🐦', '📸', '💬', '🎮', '📺', '🎵', '📝', '🌐', '💼'];
+const ICON_OPTIONS = [
+  { key: 'default', label: '🔗 Link' },
+  { key: 'twitter', label: '🐦 Twitter' },
+  { key: 'twitch', label: '📺 Twitch' },
+  { key: 'discord', label: '💬 Discord' },
+  { key: 'telegram', label: '💬 Telegram' },
+  { key: 'youtube', label: '▶️ YouTube' },
+  { key: 'instagram', label: '📸 Instagram' },
+  { key: 'github', label: '💻 GitHub' },
+  { key: 'game', label: '🎮 Gaming' },
+  { key: 'globe', label: '🌐 Website' },
+] as const;
 
 export default function DashboardPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -41,7 +52,7 @@ export default function DashboardPage() {
   const [links, setLinks] = useState<LinkItem[]>([]);
   const [newTitle, setNewTitle] = useState('');
   const [newUrl, setNewUrl] = useState('');
-  const [newIcon, setNewIcon] = useState('🔗');
+  const [newIcon, setNewIcon] = useState('default');
   const [addingLink, setAddingLink] = useState(false);
 
   const [walletCount, setWalletCount] = useState(0);
@@ -127,7 +138,7 @@ export default function DashboardPage() {
         });
         setNewTitle('');
         setNewUrl('');
-        setNewIcon('🔗');
+        setNewIcon('default');
       }
     } finally {
       setAddingLink(false);
@@ -318,7 +329,7 @@ export default function DashboardPage() {
                   className="flex items-center justify-between gap-3 py-2 border-b border-[var(--trench-border)] last:border-0"
                 >
                   <div className="flex items-center gap-2 min-w-0">
-                    <span className="text-base leading-none">{link.icon ?? '🔗'}</span>
+                    <span className="text-xs font-mono text-[var(--trench-accent)]">{ICON_OPTIONS.find(o => o.key === link.icon)?.label ?? link.icon ?? '🔗'}</span>
                     <div className="min-w-0">
                       <p className="text-sm font-mono text-[var(--trench-text)] truncate">{link.title}</p>
                       <p className="text-xs font-mono text-[var(--trench-text-muted)] truncate">{link.url}</p>
@@ -346,10 +357,11 @@ export default function DashboardPage() {
               <select
                 value={newIcon}
                 onChange={(e) => setNewIcon(e.target.value)}
-                className="bg-[var(--trench-surface-elevated)] border border-[var(--trench-border)] text-[var(--trench-text)] font-mono text-sm rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[var(--trench-accent)]"
+                className="px-3 py-2 rounded text-sm font-mono"
+              style={{ background: 'rgba(8,12,22,0.8)', border: '1px solid rgba(0,212,255,0.15)', color: 'var(--trench-text)' }}
               >
-                {ICON_OPTIONS.map((icon) => (
-                  <option key={icon} value={icon}>{icon}</option>
+                {ICON_OPTIONS.map(opt => (
+                  <option key={opt.key} value={opt.key}>{opt.label}</option>
                 ))}
               </select>
               <Input

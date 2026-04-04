@@ -181,34 +181,38 @@ export async function aggregateTradesByToken(
     const tokenTransfers = tx.tokenTransfers || [];
     const accountData = tx.accountData || [];
 
-    const nonSolToken = tokenTransfers.find(t => t.mint !== SOL_MINT);
-    if (!nonSolToken) continue;
+    // Process ALL non-SOL tokens in the swap (handles multi-hop routes)
+    const nonSolTokens = tokenTransfers.filter(t => t.mint !== SOL_MINT);
+    if (nonSolTokens.length === 0) continue;
 
-    const tokenMint = nonSolToken.mint;
-    const tokenReceived = nonSolToken.toUserAccount === walletAddress;
-    const tokenSent = nonSolToken.fromUserAccount === walletAddress;
-    if (!tokenReceived && !tokenSent) continue;
-
-    // Use accountData.nativeBalanceChange — the only reliable SOL flow source.
-    // Positive = wallet gained SOL (sell), negative = wallet spent SOL (buy).
     const walletAccount = accountData.find(a => a.account === walletAddress);
     const netLamports = walletAccount?.nativeBalanceChange ?? 0;
     const netSol = netLamports / 1e9;
 
-    if (!tokenMap.has(tokenMint)) {
-      tokenMap.set(tokenMint, { buySol: 0, sellSol: 0, txns: [] });
-    }
-    const entry = tokenMap.get(tokenMint)!;
+    // For multi-token swaps, attribute SOL flow to the token the wallet interacted with
+    for (const token of nonSolTokens) {
+      const tokenMint = token.mint;
+      const tokenReceived = token.toUserAccount === walletAddress;
+      const tokenSent = token.fromUserAccount === walletAddress;
+      if (!tokenReceived && !tokenSent) continue;
 
-    if (tokenReceived && netSol < -0.001) {
-      // BUY: received token, wallet balance went down
-      const cost = Math.abs(netSol);
-      entry.buySol += cost;
-      entry.txns.push({ type: 'BUY', amountSol: cost, mcap: 0, timestamp: tx.timestamp });
-    } else if (tokenSent && netSol > 0.001) {
-      // SELL: sent token, wallet balance went up
-      entry.sellSol += netSol;
-      entry.txns.push({ type: 'SELL', amountSol: netSol, mcap: 0, timestamp: tx.timestamp });
+      if (!tokenMap.has(tokenMint)) {
+        tokenMap.set(tokenMint, { buySol: 0, sellSol: 0, txns: [] });
+      }
+      const entry = tokenMap.get(tokenMint)!;
+
+      // Lower threshold from 0.001 to 0.0001 SOL to catch micro trades
+      if (tokenReceived && netSol < -0.0001) {
+        const cost = Math.abs(netSol);
+        entry.buySol += cost;
+        entry.txns.push({ type: 'BUY', amountSol: cost, mcap: 0, timestamp: tx.timestamp });
+      } else if (tokenSent && netSol > 0.0001) {
+        entry.sellSol += netSol;
+        entry.txns.push({ type: 'SELL', amountSol: netSol, mcap: 0, timestamp: tx.timestamp });
+      }
+
+      // Only attribute SOL to one token per swap to avoid double-counting
+      break;
     }
   }
 

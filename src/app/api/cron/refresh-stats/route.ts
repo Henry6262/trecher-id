@@ -31,29 +31,34 @@ function parseSwaps(txns: Awaited<ReturnType<typeof getWalletTransactions>>['txn
     const tokenTransfers = tx.tokenTransfers || [];
     const accountData = tx.accountData || [];
 
-    const nonSolToken = tokenTransfers.find(t => t.mint !== SOL_MINT);
-    if (!nonSolToken) continue;
-
-    const tokenMint = nonSolToken.mint;
-    const tokenReceived = nonSolToken.toUserAccount === walletAddress;
-    const tokenSent = nonSolToken.fromUserAccount === walletAddress;
-    if (!tokenReceived && !tokenSent) continue;
+    // Process ALL non-SOL tokens (handles multi-hop routes)
+    const nonSolTokens = tokenTransfers.filter(t => t.mint !== SOL_MINT);
+    if (nonSolTokens.length === 0) continue;
 
     const walletAccount = accountData.find(a => a.account === walletAddress);
     const netSol = (walletAccount?.nativeBalanceChange ?? 0) / 1e9;
 
-    if (!tokenMap.has(tokenMint)) {
-      tokenMap.set(tokenMint, { buySol: 0, sellSol: 0, count: 0, firstAt: tx.timestamp, lastAt: tx.timestamp });
-    }
-    const entry = tokenMap.get(tokenMint)!;
-    entry.firstAt = Math.min(entry.firstAt, tx.timestamp);
-    entry.lastAt = Math.max(entry.lastAt, tx.timestamp);
-    entry.count++;
+    for (const token of nonSolTokens) {
+      const tokenMint = token.mint;
+      const tokenReceived = token.toUserAccount === walletAddress;
+      const tokenSent = token.fromUserAccount === walletAddress;
+      if (!tokenReceived && !tokenSent) continue;
 
-    if (tokenReceived && netSol < -0.001) {
-      entry.buySol += Math.abs(netSol);
-    } else if (tokenSent && netSol > 0.001) {
-      entry.sellSol += netSol;
+      if (!tokenMap.has(tokenMint)) {
+        tokenMap.set(tokenMint, { buySol: 0, sellSol: 0, count: 0, firstAt: tx.timestamp, lastAt: tx.timestamp });
+      }
+      const entry = tokenMap.get(tokenMint)!;
+      entry.firstAt = Math.min(entry.firstAt, tx.timestamp);
+      entry.lastAt = Math.max(entry.lastAt, tx.timestamp);
+      entry.count++;
+
+      if (tokenReceived && netSol < -0.0001) {
+        entry.buySol += Math.abs(netSol);
+      } else if (tokenSent && netSol > 0.0001) {
+        entry.sellSol += netSol;
+      }
+
+      break; // attribute SOL to one token per swap
     }
   }
 
@@ -153,8 +158,8 @@ export async function GET(req: Request) {
 
           const pnlSol = periodTrades.reduce((s, t) => s + t.pnlSol, 0);
           const totalTrades = periodTrades.reduce((s, t) => s + t.tradeCount, 0);
-          const wins = periodTrades.filter(t => t.pnlSol > 0).length;
-          const winRate = periodTrades.length > 0 ? (wins / periodTrades.length) * 100 : 0;
+          const wins = periodTrades.reduce((s, t) => s + (t.pnlSol > 0 ? t.tradeCount : 0), 0);
+          const winRate = totalTrades > 0 ? (wins / totalTrades) * 100 : 0;
 
           await prisma.userRanking.upsert({
             where: { userId_period: { userId: user.id, period: period.key } },
@@ -163,22 +168,16 @@ export async function GET(req: Request) {
           });
         }
 
-        // All-time: use all accumulated trades + seed data floor
+        // All-time: use all accumulated on-chain trades (no seed data floor)
         const allTimePnlSol = allTrades.reduce((s, t) => s + t.pnlSol, 0);
         const allTimeTrades = allTrades.reduce((s, t) => s + t.tradeCount, 0);
-        const allTimeWins = allTrades.filter(t => t.pnlSol > 0).length;
-        const allTimeWR = allTrades.length > 0 ? (allTimeWins / allTrades.length) * 100 : 0;
-
-        // Use seed data as floor for all-time (covers history before we started tracking)
-        const seedPnlUsd = user.wallets.reduce((s, w) => s + (w.totalPnlUsd ?? 0), 0);
-        const seedTrades = user.wallets.reduce((s, w) => s + (w.totalTrades ?? 0), 0);
-        const finalPnlSol = Math.max(allTimePnlSol, seedPnlUsd / solPrice);
-        const finalTrades = Math.max(allTimeTrades, seedTrades);
+        const allTimeWins = allTrades.reduce((s, t) => s + (t.pnlSol > 0 ? t.tradeCount : 0), 0);
+        const allTimeWR = allTimeTrades > 0 ? (allTimeWins / allTimeTrades) * 100 : 0;
 
         await prisma.userRanking.upsert({
           where: { userId_period: { userId: user.id, period: 'all' } },
-          create: { userId: user.id, period: 'all', pnlSol: finalPnlSol, pnlUsd: finalPnlSol * solPrice, winRate: allTimeWR, trades: finalTrades },
-          update: { pnlSol: finalPnlSol, pnlUsd: finalPnlSol * solPrice, winRate: allTimeWR, trades: finalTrades, updatedAt: new Date() },
+          create: { userId: user.id, period: 'all', pnlSol: allTimePnlSol, pnlUsd: allTimePnlSol * solPrice, winRate: allTimeWR, trades: allTimeTrades },
+          update: { pnlSol: allTimePnlSol, pnlUsd: allTimePnlSol * solPrice, winRate: allTimeWR, trades: allTimeTrades, updatedAt: new Date() },
         });
 
         // Refresh token deployments
