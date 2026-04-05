@@ -297,8 +297,11 @@ export function ArenaSection() {
       </div>
 
       <section className="max-w-[780px] mx-auto px-6 sm:px-12 lg:px-16 py-16">
-        {/* Header — outside the card */}
+        {/* Header — trophy + title */}
         <div className="text-center mb-6 relative">
+          <div className="mx-auto mb-4 w-[180px] h-[180px] sm:w-[240px] sm:h-[240px] relative" style={{ filter: 'drop-shadow(0 0 40px rgba(0,212,255,0.3)) drop-shadow(0 0 80px rgba(0,212,255,0.1))' }}>
+            <Image src="/trencher-cup.png" alt="Trencher Cup Trophy" fill className="object-contain" priority />
+          </div>
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-1">
             The Trencher <span style={{ color: '#00D4FF' }}>Cup</span>
           </h2>
