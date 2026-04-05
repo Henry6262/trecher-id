@@ -111,7 +111,7 @@ const PAGE_SIZE = 10;
 
 export function LeaderboardTable({ initialPeriod = '7d', initialTraders }: { initialPeriod?: string; initialTraders?: RankedTrader[] }) {
   const [mode, setMode] = useState<LeaderboardMode>('traders');
-  const [viewMode, setViewMode] = useState<'table' | 'bracket'>('table');
+  const [viewMode, setViewMode] = useState<'table' | 'bracket'>('bracket');
   const [period, setPeriod] = useState(initialPeriod);
   const [traders, setTraders] = useState<RankedTrader[]>(initialTraders ?? []);
   const [deployers, setDeployers] = useState<RankedDeployer[]>([]);
@@ -169,76 +169,73 @@ export function LeaderboardTable({ initialPeriod = '7d', initialTraders }: { ini
     <div>
       {/* Controls */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-        {/* Left: Traders / Devs toggle */}
-        <div className="flex items-center gap-2">
-          {(['traders', 'deployers'] as const).map((m) => (
-            <button
-              key={m}
-              onClick={() => setMode(m)}
-              className="font-mono text-[10px] tracking-[1.5px] font-bold px-4 py-1.5 transition-all cut-sm"
+        {viewMode === 'table' ? (
+          <div className="flex items-center gap-2">
+            {(['traders', 'deployers'] as const).map((m) => (
+              <button
+                key={m}
+                onClick={() => setMode(m)}
+                className="font-mono text-[10px] tracking-[1.5px] font-bold px-4 py-1.5 transition-all cut-sm"
+                style={{
+                  background: mode === m ? 'rgba(0,212,255,0.18)' : 'rgba(8,12,22,0.55)',
+                  backdropFilter: 'blur(12px)',
+                  WebkitBackdropFilter: 'blur(12px)',
+                  border: mode === m ? '1px solid rgba(0,212,255,0.35)' : '1px solid rgba(255,255,255,0.07)',
+                  color: mode === m ? '#00D4FF' : '#71717a',
+                }}
+              >
+                {m === 'traders' ? 'TRADERS' : 'DEVS'}
+              </button>
+            ))}
+          </div>
+        ) : <div />}
+
+        <div className="flex items-center gap-3">
+          {viewMode === 'table' && mode === 'traders' && (
+            <>
+              <div className="relative">
+                <select
+                  value={period}
+                  onChange={(e) => setPeriod(e.target.value as typeof period)}
+                  className="appearance-none font-mono text-[10px] tracking-[1.5px] font-semibold pl-3 pr-7 py-1.5 cut-xs cursor-pointer"
+                  style={{
+                    background: 'rgba(8,12,22,0.55)',
+                    backdropFilter: 'blur(12px)',
+                    WebkitBackdropFilter: 'blur(12px)',
+                    border: '1px solid rgba(0,212,255,0.2)',
+                    color: '#00D4FF',
+                    outline: 'none',
+                  }}
+                >
+                  {PERIODS.map((p) => (
+                    <option key={p.key} value={p.key} style={{ background: '#0a0a12', color: '#00D4FF' }}>{p.label}</option>
+                  ))}
+                </select>
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[8px] text-[var(--trench-accent)]">▼</div>
+              </div>
+              <div className="w-px h-5" style={{ background: 'rgba(255,255,255,0.1)' }} />
+            </>
+          )}
+          <div className="relative">
+            <select
+              value={viewMode}
+              onChange={(e) => setViewMode(e.target.value as typeof viewMode)}
+              className="appearance-none font-mono text-[9px] tracking-widest font-semibold pl-3 pr-7 py-1.5 cut-xs cursor-pointer uppercase"
               style={{
-                background: mode === m ? 'rgba(0,212,255,0.18)' : 'rgba(8,12,22,0.55)',
+                background: 'rgba(8,12,22,0.55)',
                 backdropFilter: 'blur(12px)',
                 WebkitBackdropFilter: 'blur(12px)',
-                border: mode === m ? '1px solid rgba(0,212,255,0.35)' : '1px solid rgba(255,255,255,0.07)',
-                color: mode === m ? '#00D4FF' : '#71717a',
+                border: '1px solid rgba(0,212,255,0.2)',
+                color: '#00D4FF',
+                outline: 'none',
               }}
             >
-              {m === 'traders' ? 'TRADERS' : 'DEVS'}
-            </button>
-          ))}
-        </div>
-
-        {/* Right: Period selector + View selector */}
-        {mode === 'traders' && (
-          <div className="flex items-center gap-3">
-            {/* Period dropdown */}
-            <div className="relative">
-              <select
-                value={period}
-                onChange={(e) => setPeriod(e.target.value as typeof period)}
-                className="appearance-none font-mono text-[10px] tracking-[1.5px] font-semibold pl-3 pr-7 py-1.5 cut-xs cursor-pointer"
-                style={{
-                  background: 'rgba(8,12,22,0.55)',
-                  backdropFilter: 'blur(12px)',
-                  WebkitBackdropFilter: 'blur(12px)',
-                  border: '1px solid rgba(0,212,255,0.2)',
-                  color: '#00D4FF',
-                  outline: 'none',
-                }}
-              >
-                {PERIODS.map((p) => (
-                  <option key={p.key} value={p.key} style={{ background: '#0a0a12', color: '#00D4FF' }}>{p.label}</option>
-                ))}
-              </select>
-              <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[8px] text-[var(--trench-accent)]">▼</div>
-            </div>
-
-            {/* Separator */}
-            <div className="w-px h-5" style={{ background: 'rgba(255,255,255,0.1)' }} />
-
-            {/* View dropdown */}
-            <div className="relative">
-              <select
-                value={viewMode}
-                onChange={(e) => setViewMode(e.target.value as typeof viewMode)}
-                className="appearance-none font-mono text-[9px] tracking-widest font-semibold pl-3 pr-7 py-1.5 cut-xs cursor-pointer uppercase"
-                style={{
-                  background: 'rgba(8,12,22,0.55)',
-                  backdropFilter: 'blur(12px)',
-                  WebkitBackdropFilter: 'blur(12px)',
-                  border: '1px solid rgba(0,212,255,0.2)',
-                  color: '#00D4FF',
-                  outline: 'none',
-                }}
-              >
-                <option value="table" style={{ background: '#0a0a12', color: '#00D4FF' }}>TABLE</option>
-                <option value="bracket" style={{ background: '#0a0a12', color: '#00D4FF' }} disabled={activeList.length < 32}>BRACKET</option>
-              </select>
-              <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[8px] text-[var(--trench-accent)]">▼</div>
-            </div>
+              <option value="table" style={{ background: '#0a0a12', color: '#00D4FF' }}>TABLE</option>
+              <option value="bracket" style={{ background: '#0a0a12', color: '#00D4FF' }} disabled={activeList.length < 32}>BRACKET</option>
+            </select>
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[8px] text-[var(--trench-accent)]">▼</div>
           </div>
-        )}
+        </div>
       </div>
 
       {/* Loading */}

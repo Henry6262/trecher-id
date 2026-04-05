@@ -6,7 +6,6 @@ import { Check, ChevronDown, Star } from 'lucide-react';
 import { DegenBadge } from './degen-badge';
 import type { DegenScoreResult } from '@/lib/degen-score';
 import { useState } from 'react';
-import { ProfileStatsTabs } from './profile-stats-tabs';
 
 function ShareButtons({ username, accent }: { username: string; accent: string }) {
   const [copied, setCopied] = useState(false);
@@ -74,7 +73,6 @@ export function ProfileHeader({ avatarUrl, displayName, username, bio, verified,
       className="relative"
       style={{
         padding: '20px 16px 20px',
-        background: `linear-gradient(180deg, ${accent}0d 0%, transparent 100%)`,
       }}
     >
       {/* Claim banner — unclaimed profiles only */}
@@ -234,12 +232,9 @@ export function ProfileHeader({ avatarUrl, displayName, username, bio, verified,
         </div>
       </div>
 
-      {/* Share + Period tabs row */}
-      <div className="flex flex-wrap items-center justify-between mt-3">
-        <div className="flex gap-4">
-          <ShareButtons username={username} accent={accent} />
-        </div>
-        <ProfileStatsTabs username={username} allTimeStats={stats} accentColor={accent} />
+      {/* Share actions */}
+      <div className="flex flex-wrap gap-4 mt-3 justify-center sm:justify-start">
+        <ShareButtons username={username} accent={accent} />
       </div>
 
       {/* Edit button — own profiles only */}

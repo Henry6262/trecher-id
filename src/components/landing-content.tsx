@@ -5,12 +5,10 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Check, AtSign, BarChart3, Zap } from 'lucide-react';
 import { CutButton } from '@/components/cut-button';
-import DecryptedText from '@/components/decrypted-text';
 import { GlassCard } from '@/components/glass-card';
 import ShinyText from '@/components/shiny-text';
 import { LeaderboardTable } from '@/components/leaderboard-table';
 import { ActivityTicker } from '@/components/activity-ticker';
-import { ArenaSection } from '@/components/arena-section';
 import { JourneySection } from '@/components/journey-section';
 import type { TickerItem } from '@/lib/types';
 
@@ -99,9 +97,7 @@ export function LandingContent({ traders, featured, ticker, leaderboardData }: L
 
             <h1 className="mb-4 text-4xl leading-[1] font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
               Your{' '}
-              <span className="text-[var(--trench-accent)]">
-                <DecryptedText text="Web3" speed={80} maxIterations={15} revealDirection="start" animateOn="view" />
-              </span>
+              <span className="text-[var(--trench-accent)]">Web3</span>
               <br />Bio Link
             </h1>
 
@@ -233,14 +229,6 @@ export function LandingContent({ traders, featured, ticker, leaderboardData }: L
           </div>
           <LeaderboardTable initialPeriod="7d" initialTraders={leaderboardData} />
         </section>
-
-        {/* The Arena — Trencher Cup live bracket + vault counter */}
-        <ArenaSection />
-
-        {/* Divider */}
-        <div className="mx-auto max-w-[780px] px-6 sm:px-12 lg:px-16">
-          <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.1), transparent)' }} />
-        </div>
 
         {/* Journey — merged How it works + Reward Pool */}
         <JourneySection />

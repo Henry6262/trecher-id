@@ -124,8 +124,7 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets, traderS
 
         {/* Content section — generous padding */}
         <div className="pb-6 pt-5 px-4 sm:px-7">
-          {/* Achievements */}
-          {achievements.length > 0 && <TrophyCase achievements={achievements} />}
+
 
           {/* Links */}
           {links.length > 0 && (
