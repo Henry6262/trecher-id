@@ -13,6 +13,7 @@ import { TraderCarousel } from '@/components/trader-carousel';
 import { LeaderboardTable } from '@/components/leaderboard-table';
 import { TraderSearch } from '@/components/trader-search';
 import { ActivityTicker } from '@/components/activity-ticker';
+import { ArenaSection } from '@/components/arena-section';
 import type { TickerItem } from '@/lib/types';
 
 const RisingLines = dynamic(() => import('@/components/rising-lines'), { ssr: false });
@@ -259,6 +260,9 @@ export function LandingContent({ traders, featured, ticker }: LandingContentProp
           </div>
           <LeaderboardTable initialPeriod="7d" />
         </section>
+
+        {/* The Arena — Trencher Cup live bracket + vault counter */}
+        <ArenaSection />
 
         {/* Divider */}
         <div className="mx-auto max-w-[900px] px-4 sm:px-10">
