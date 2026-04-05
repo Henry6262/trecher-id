@@ -6,10 +6,10 @@ interface EnhancedStatsProps {
 }
 
 export function EnhancedStats({ stats }: EnhancedStatsProps) {
-  const roiStr = `${stats.roi >= 0 ? '+' : ''}${stats.roi.toFixed(1)}%`;
+  const roiStr = `${stats.roi >= 0 ? '+' : ''}${Math.round(stats.roi)}%`;
   const roiColor = stats.roi >= 0 ? 'green' : 'red';
 
-  const avgTradeStr = `${stats.avgTradeSize.toFixed(1)} SOL`;
+  const avgTradeStr = `${Math.round(stats.avgTradeSize)} SOL`;
 
   const bestStr = stats.bestTrade
     ? `${stats.bestTrade.symbol} +${Math.round(stats.bestTrade.pnlPercent)}%`

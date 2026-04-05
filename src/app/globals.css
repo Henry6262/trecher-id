@@ -4,6 +4,21 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ─── Lenis smooth scrolling ───────────────────────────── */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
 /* ─── Web3Me design tokens ─────────────────────────────── */
 :root {
   --trench-accent: #00D4FF;

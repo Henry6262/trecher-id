@@ -9,6 +9,7 @@ export const dynamic = 'force-dynamic';
 export default async function LandingPage() {
   let traders: { username: string; name: string; avatarUrl: string | null; pnl: string; winRate: string; trades: string; recentToken: string | null; recentTokenImage: string | null; recentPnl: string | null; recentBuy: string | null; recentSell: string | null }[] = [];
   let ticker: TickerItem[] = [];
+  let leaderboardData: { rank: number; username: string; displayName: string; avatarUrl: string | null; isClaimed: boolean; pnlUsd: number; pnlSol: number; winRate: number; trades: number }[] = [];
 
   try {
   // Fetch top traders with their best pinned trade from DB
@@ -68,11 +69,30 @@ export default async function LandingPage() {
     }));
   });
 
+  // Fetch leaderboard server-side for instant render
+  const rankings = await prisma.userRanking.findMany({
+    where: { period: '7d' },
+    orderBy: { pnlUsd: 'desc' },
+    take: 50,
+    include: { user: { select: { username: true, displayName: true, avatarUrl: true, isClaimed: true } } },
+  });
+  leaderboardData = rankings.map((r, i) => ({
+    rank: i + 1,
+    username: r.user.username,
+    displayName: r.user.displayName,
+    avatarUrl: r.user.avatarUrl,
+    isClaimed: r.user.isClaimed,
+    pnlUsd: r.pnlUsd,
+    pnlSol: r.pnlSol,
+    winRate: r.winRate,
+    trades: r.trades,
+  }));
+
   } catch (err) {
     console.error('[landing] SSR error:', err);
   }
 
   const featured = traders[0] ?? null;
 
-  return <LandingContent traders={traders} featured={featured} ticker={ticker} />;
+  return <LandingContent traders={traders} featured={featured} ticker={ticker} leaderboardData={leaderboardData} />;
 }

@@ -65,7 +65,7 @@ export function TradeCard({ tokenMint, tokenSymbol, tokenName, tokenImage, total
           {transactions.length} trade{transactions.length !== 1 ? 's' : ''}
           {totalPnlSol != null && (
             <> &middot; <span className={isWin ? 'text-[var(--trench-green)]' : 'text-[var(--trench-red)]'}>
-              {isWin ? '+' : ''}{totalPnlSol.toFixed(2)} SOL
+              {isWin ? '+' : ''}{Math.round(totalPnlSol)} SOL
             </span></>
           )}
         </div>
@@ -78,7 +78,7 @@ export function TradeCard({ tokenMint, tokenSymbol, tokenName, tokenImage, total
                 {tx.type}
               </span>
               <span className={`font-semibold font-mono ${tx.type === 'SELL' && isWin ? 'text-[var(--trench-green)]' : 'text-[var(--trench-text)]'}`}>
-                {tx.amountSol.toFixed(2)} SOL
+                {Math.round(tx.amountSol)} SOL
               </span>
             </div>
           ))}

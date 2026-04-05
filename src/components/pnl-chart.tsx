@@ -97,7 +97,7 @@ export function PnlChart({ username }: { username: string }) {
         PNL HISTORY
         <div className="flex-1 h-px" style={{ background: 'rgba(0,212,255,0.08)' }} />
         <span className="font-mono text-[8px]">
-          {data[data.length - 1].value >= 0 ? '+' : ''}{data[data.length - 1].value.toFixed(2)} SOL
+          {data[data.length - 1].value >= 0 ? '+' : ''}{Math.round(data[data.length - 1].value)} SOL
         </span>
       </div>
       <div

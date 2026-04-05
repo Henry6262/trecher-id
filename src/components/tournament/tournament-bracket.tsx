@@ -74,7 +74,7 @@ export function TournamentBracket({ traders }: { traders: RankedTrader[] }) {
             }}
           >
             {bracket.champion.pnlUsd >= 0 ? '+' : ''}${Math.abs(bracket.champion.pnlUsd) >= 1000
-              ? `${(bracket.champion.pnlUsd / 1000).toFixed(1)}K`
+              ? `${Math.round(bracket.champion.pnlUsd / 1000)}K`
               : Math.round(bracket.champion.pnlUsd)}
           </div>
         </div>

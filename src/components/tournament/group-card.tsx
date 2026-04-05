@@ -69,7 +69,7 @@ export function GroupCard({ group }: { group: Group }) {
               style={{ color: trader.pnlUsd >= 0 ? 'var(--trench-green)' : 'var(--trench-red)' }}
             >
               {trader.pnlUsd >= 0 ? '+' : ''}${Math.abs(trader.pnlUsd) >= 1000
-                ? `${(trader.pnlUsd / 1000).toFixed(1)}K`
+                ? `${Math.round(trader.pnlUsd / 1000)}K`
                 : Math.round(trader.pnlUsd)}
             </span>
           </Link>

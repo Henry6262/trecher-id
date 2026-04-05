@@ -197,7 +197,7 @@ export function ProfileHeader({ avatarUrl, displayName, username, bio, verified,
                 <span className="cut-xs text-[7px] tracking-[1px] px-2 py-0.5 font-semibold" style={{ color: accent, background: `${accent}14`, border: `1px solid ${accent}1f` }}>SOLANA TRADER</span>
                 {followerCount != null && followerCount > 0 && (
                   <span className="cut-xs text-[7px] tracking-[1px] px-2 py-0.5 font-mono" style={{ color: '#71717a', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-                    {followerCount >= 1000 ? `${(followerCount / 1000).toFixed(1)}K` : followerCount} FOLLOWERS
+                    {followerCount >= 1000 ? `${Math.round(followerCount / 1000)}K` : followerCount} FOLLOWERS
                   </span>
                 )}
               </div>

@@ -51,7 +51,7 @@ export function TradeCalendar({ weeks }: TradeCalendarProps) {
                 key={di}
                 title={
                   day && day.tradeCount > 0
-                    ? `${day.date} · ${day.pnlSol >= 0 ? '+' : ''}${day.pnlSol.toFixed(2)} SOL · ${day.tradeCount} tx`
+                    ? `${day.date} · ${day.pnlSol >= 0 ? '+' : ''}${Math.round(day.pnlSol)} SOL · ${day.tradeCount} tx`
                     : day
                     ? day.date
                     : undefined

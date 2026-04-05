@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { GeistSans } from 'geist/font/sans';
 import { GeistMono } from 'geist/font/mono';
 import { Providers } from '@/components/providers';
+import { LenisSmooth } from '@/components/lenis-provider';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -15,6 +16,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable} dark`}>
       <body className="antialiased min-h-screen">
+        <LenisSmooth />
         <Providers>{children}</Providers>
       </body>
     </html>

@@ -3,24 +3,19 @@
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState } from 'react';
 import { Check } from 'lucide-react';
 import { CutButton } from '@/components/cut-button';
 import DecryptedText from '@/components/decrypted-text';
 import { GlassCard } from '@/components/glass-card';
 import ShinyText from '@/components/shiny-text';
-import { TraderCarousel } from '@/components/trader-carousel';
 import { LeaderboardTable } from '@/components/leaderboard-table';
-import { TraderSearch } from '@/components/trader-search';
 import { ActivityTicker } from '@/components/activity-ticker';
 import { ArenaSection } from '@/components/arena-section';
+import { JourneySection } from '@/components/journey-section';
 import type { TickerItem } from '@/lib/types';
 
 const RisingLines = dynamic(() => import('@/components/rising-lines'), { ssr: false });
 const DomeGallery = dynamic(() => import('@/components/DomeGallery'), { ssr: false });
-const Circles = dynamic(() => import('@/components/circles'), { ssr: false });
-
-type ViewMode = 'scroll' | 'dome' | 'orbits';
 
 interface TraderData {
   username: string;
@@ -36,30 +31,29 @@ interface TraderData {
   recentSell: string | null;
 }
 
+interface LeaderboardTrader {
+  rank: number;
+  username: string;
+  displayName: string;
+  avatarUrl: string | null;
+  isClaimed: boolean;
+  pnlUsd: number;
+  pnlSol: number;
+  winRate: number;
+  trades: number;
+}
+
 interface LandingContentProps {
   traders: TraderData[];
   featured: TraderData | null;
   ticker: TickerItem[];
+  leaderboardData?: LeaderboardTrader[];
 }
 
-const STEPS = [
-  { n: '01', title: 'Sign in with X', desc: 'Connect your Twitter account. Your handle becomes your Web3Me URL.' },
-  { n: '02', title: 'Link your wallets', desc: 'Add Solana wallets. We fetch your real trading history from the blockchain.' },
-  { n: '03', title: 'Share your link', desc: 'Add custom links, pin your best trades. Drop your Web3Me everywhere.' },
-] as const;
 
-export function LandingContent({ traders, featured, ticker }: LandingContentProps) {
-  const [traderView, setTraderView] = useState<ViewMode>('scroll');
-
-  // Build avatar arrays for non-scroll views
+export function LandingContent({ traders, featured, ticker, leaderboardData }: LandingContentProps) {
   const avatarUrls = traders.map(t => t.avatarUrl || `https://unavatar.io/twitter/${t.username}`);
   const domeImages = avatarUrls.map(src => ({ src, alt: '' }));
-  // Distribute into 3 orbital rings: inner=2, mid=3, outer=rest
-  const orbitRows: string[][] = [
-    avatarUrls.slice(0, 2),
-    avatarUrls.slice(2, 5),
-    avatarUrls.slice(5, 10),
-  ].filter(r => r.length > 0);
 
   return (
     <div className="relative min-h-screen" style={{ background: '#050508' }}>
@@ -225,216 +219,68 @@ export function LandingContent({ traders, featured, ticker }: LandingContentProp
           </div>}
         </section>
 
-        {/* Search bar */}
-        <div className="max-w-[900px] mx-auto px-4 sm:px-6 mt-2 mb-6">
-          <TraderSearch />
-        </div>
-
         {/* Divider */}
-        <div className="mx-auto max-w-[900px] px-4 sm:px-10">
+        <div className="mx-auto max-w-[780px] px-6 sm:px-12 lg:px-16">
           <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.1), transparent)' }} />
         </div>
 
         {/* Leaderboard — traders + deployers */}
-        <section className="mx-auto max-w-[900px] px-4 sm:px-10 py-10 sm:py-16">
-          <div className="mb-8 text-right">
-            <div
-              className="mb-3 inline-flex items-center gap-1.5 px-3 py-1 text-[9px] font-mono tracking-[2px] text-[var(--trench-accent)]"
-              style={{
-                background: 'rgba(0,212,255,0.08)',
-                border: '1px solid rgba(0,212,255,0.12)',
-                clipPath: 'polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px)',
-              }}
-            >
-              LEADERBOARD
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-white mb-1">
-              Top <span className="text-[var(--trench-accent)]">Traders</span> &amp; Deployers
+        <section className="mx-auto max-w-[780px] px-6 sm:px-12 lg:px-16 py-10 sm:py-16">
+          <div className="mb-8 text-center">
+            <h2 className="text-2xl sm:text-3xl font-bold text-white">
+              Leaderboard
             </h2>
-            <p className="text-[12px] text-[var(--trench-text-muted)]">
-              Ranked by realized PnL. Updated every 4 hours from on-chain data.{' '}
-              <Link href="/leaderboard" className="text-[var(--trench-accent)] hover:underline">
-                Full leaderboard →
-              </Link>
-            </p>
           </div>
-          <LeaderboardTable initialPeriod="7d" />
+          <LeaderboardTable initialPeriod="7d" initialTraders={leaderboardData} />
         </section>
 
         {/* The Arena — Trencher Cup live bracket + vault counter */}
         <ArenaSection />
 
         {/* Divider */}
-        <div className="mx-auto max-w-[900px] px-4 sm:px-10">
+        <div className="mx-auto max-w-[780px] px-6 sm:px-12 lg:px-16">
           <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.1), transparent)' }} />
         </div>
 
-        {/* Reward Pool Section */}
-        <section className="max-w-[900px] mx-auto px-4 sm:px-6 py-16">
-          <div className="text-center mb-10">
-            <div
-              className="inline-flex items-center gap-1.5 px-3 py-1 text-[9px] font-mono tracking-[2px] text-[var(--trench-accent)] mb-4"
-              style={{
-                background: 'rgba(0,212,255,0.08)',
-                border: '1px solid rgba(0,212,255,0.12)',
-                clipPath: 'polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px)',
-              }}
-            >
-              REWARD POOL
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">
-              Trade. Rank. <span className="text-[var(--trench-accent)]">Earn.</span>
-            </h2>
-            <p className="text-sm text-[var(--trench-text-muted)] max-w-lg mx-auto">
-              The Web3Me reward pool distributes rewards to the top traders on the leaderboard every week. Your on-chain performance is your ticket.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {[
-              {
-                step: '01',
-                title: 'Leaderboard Rankings',
-                desc: 'Your realized PnL across all linked wallets determines your rank. Updated every 6 hours from on-chain data.',
-              },
-              {
-                step: '02',
-                title: 'Weekly Distribution',
-                desc: 'Every week, the reward pool is distributed to the top performers. Higher rank = larger share of the pool.',
-              },
-              {
-                step: '03',
-                title: 'Claim & Compound',
-                desc: 'Rewards are sent directly to your linked wallet. Keep trading, keep climbing, keep earning.',
-              },
-            ].map((item) => (
-              <GlassCard key={item.step} cut={10}>
-                <div className="p-6">
-                  <div className="text-[var(--trench-accent)] font-mono text-[11px] tracking-widest mb-3">{item.step}</div>
-                  <h3 className="text-sm font-bold text-white mb-2">{item.title}</h3>
-                  <p className="text-xs text-[var(--trench-text-muted)] leading-relaxed">{item.desc}</p>
-                </div>
-              </GlassCard>
-            ))}
-          </div>
-
-          {/* Pool stats preview */}
-          <div className="mt-8 flex justify-center gap-6 text-center">
-            {[
-              { value: 'WEEKLY', label: 'Distribution' },
-              { value: 'TOP 10', label: 'Eligible' },
-              { value: 'ON-CHAIN', label: 'Verified' },
-            ].map((s) => (
-              <div key={s.label}>
-                <div className="text-lg font-bold font-mono text-[var(--trench-accent)]">{s.value}</div>
-                <div className="text-[8px] tracking-[1.5px] text-[var(--trench-text-muted)] mt-1">{s.label}</div>
-              </div>
-            ))}
-          </div>
-        </section>
+        {/* Journey — merged How it works + Reward Pool */}
+        <JourneySection />
 
         {/* Divider */}
-        <div className="mx-auto max-w-[900px] px-4 sm:px-10">
+        <div className="mx-auto max-w-[780px] px-6 sm:px-12 lg:px-16">
           <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.1), transparent)' }} />
         </div>
 
-        {/* How it works */}
-        <section className="mx-auto max-w-[900px] px-4 sm:px-10 py-10 sm:py-16">
-          <h2 className="mb-2 text-2xl font-bold text-white">How it <span className="text-[var(--trench-accent)]">works</span></h2>
-          <p className="mb-8 text-[12px] text-[var(--trench-text-muted)]">Three steps. Thirty seconds. Zero cost.</p>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            {STEPS.map(step => (
-              <GlassCard key={step.n} cut={8} bg="rgba(8,12,18,0.7)">
-                <div className="p-5">
-                  <div className="mb-2 text-[28px] font-bold text-[var(--trench-accent)]">{step.n}</div>
-                  <div className="mb-1 text-[13px] font-bold text-white">{step.title}</div>
-                  <div className="text-[10px] leading-relaxed text-[var(--trench-text-muted)]">{step.desc}</div>
-                </div>
-              </GlassCard>
-            ))}
-          </div>
-        </section>
+        {/* Top Traders + CTA — merged */}
+        <section className="py-16 relative">
+          {/* Darkened overlay */}
+          <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(180deg, transparent 0%, rgba(5,5,8,0.4) 40%, rgba(5,5,8,0.7) 100%)' }} />
 
-        {/* Divider */}
-        <div className="mx-auto max-w-[900px] px-4 sm:px-10">
-          <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.1), transparent)' }} />
-        </div>
-
-        {/* Top Traders — real data from DB */}
-        <section className="py-16">
-          <div className="mx-auto mb-8 max-w-[900px] px-4 sm:px-10">
-            <div className="flex flex-wrap items-end justify-between gap-3">
-              <div>
-                <h2 className="mb-1 text-2xl sm:text-3xl lg:text-4xl font-bold text-white">Top <span className="text-[var(--trench-accent)]">traders</span></h2>
-                <p className="text-[13px] text-[var(--trench-text-muted)]">Already on Web3Me. Are you?</p>
-              </div>
-              {/* View toggle */}
-              <div className="flex gap-1 flex-wrap">
-                {(['scroll', 'dome', 'orbits'] as ViewMode[]).map(mode => (
-                  <button
-                    key={mode}
-                    onClick={() => setTraderView(mode)}
-                    className="px-3 py-1 text-[9px] font-mono tracking-[2px] transition-colors"
-                    style={{
-                      background: traderView === mode ? 'rgba(0,212,255,0.12)' : 'rgba(0,212,255,0.04)',
-                      border: `1px solid ${traderView === mode ? 'rgba(0,212,255,0.35)' : 'rgba(0,212,255,0.1)'}`,
-                      color: traderView === mode ? 'var(--trench-accent)' : 'var(--trench-text-muted)',
-                      clipPath: 'polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px)',
-                    }}
-                  >
-                    {mode.toUpperCase()}
-                  </button>
-                ))}
-              </div>
-            </div>
+          <div className="mx-auto mb-8 max-w-[900px] px-6 sm:px-12 lg:px-16 relative">
+            <h2 className="mb-1 text-2xl sm:text-3xl lg:text-4xl font-bold text-white">Top <span className="text-[var(--trench-accent)]">traders</span></h2>
+            <p className="text-[13px] text-[var(--trench-text-muted)]">Already on Web3Me. Are you?</p>
           </div>
 
-          {traderView === 'scroll' && <TraderCarousel traders={traders} />}
+          <div className="h-[520px] w-full relative">
+            <DomeGallery
+              images={domeImages}
+              fit={0.8}
+              minRadius={500}
+              maxVerticalRotationDeg={0}
+              segments={34}
+              dragDampening={2}
+              grayscale={false}
+            />
 
-          {traderView === 'dome' && (
-            <div className="h-[520px] w-full">
-              <DomeGallery
-                images={domeImages}
-                fit={0.8}
-                minRadius={500}
-                maxVerticalRotationDeg={0}
-                segments={34}
-                dragDampening={2}
-                grayscale={false}
-              />
+            {/* CTA overlaid on bottom of gallery */}
+            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 text-center">
+              <p className="mb-3 text-[12px] text-[var(--trench-text-muted)]" style={{ textShadow: '0 0 12px rgba(5,5,8,0.8)' }}>Create yours today.</p>
+              <CutButton href="/login" size="lg">Create Your Web3Me</CutButton>
             </div>
-          )}
-
-          {traderView === 'orbits' && (
-            <div className="flex justify-center overflow-hidden py-4">
-              <Circles
-                rows={orbitRows}
-                circleSize={72}
-                baseRadius={130}
-                orbitGap={110}
-                rotationDuration={18}
-                alternateDirection
-                showPaths
-                animate
-              />
-            </div>
-          )}
-        </section>
-
-        {/* Divider */}
-        <div className="mx-auto max-w-[900px] px-4 sm:px-10">
-          <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.1), transparent)' }} />
-        </div>
-
-        {/* Bottom CTA */}
-        <section className="mx-auto max-w-[900px] px-4 sm:px-10 py-10 sm:py-16 text-center">
-          <h2 className="mb-3 text-3xl font-bold text-white">Claim your <span className="text-[var(--trench-accent)]">Web3Me</span></h2>
-          <p className="mb-6 text-[13px] text-[var(--trench-text-muted)]">Your trading speaks for itself. Let it.</p>
-          <CutButton href="/login" size="lg">Create Your Web3Me</CutButton>
+          </div>
         </section>
 
         {/* Footer */}
-        <div className="mx-auto max-w-[900px] border-t border-[rgba(0,212,255,0.06)] px-4 sm:px-10 py-6 text-center">
+        <div className="mx-auto max-w-[780px] border-t border-[rgba(0,212,255,0.06)] px-6 sm:px-12 lg:px-16 py-6 text-center">
           <Link href="/" className="mb-2 inline-block">
             <Image src="/logo.png" alt="Web3Me" width={96} height={24} className="mx-auto h-6 w-auto opacity-30 transition-opacity hover:opacity-50" />
           </Link>

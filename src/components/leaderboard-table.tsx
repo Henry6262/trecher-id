@@ -109,14 +109,15 @@ type LeaderboardMode = 'traders' | 'deployers';
 
 const PAGE_SIZE = 10;
 
-export function LeaderboardTable({ initialPeriod = '7d' }: { initialPeriod?: string }) {
+export function LeaderboardTable({ initialPeriod = '7d', initialTraders }: { initialPeriod?: string; initialTraders?: RankedTrader[] }) {
   const [mode, setMode] = useState<LeaderboardMode>('traders');
   const [viewMode, setViewMode] = useState<'table' | 'bracket'>('table');
   const [period, setPeriod] = useState(initialPeriod);
-  const [traders, setTraders] = useState<RankedTrader[]>([]);
+  const [traders, setTraders] = useState<RankedTrader[]>(initialTraders ?? []);
   const [deployers, setDeployers] = useState<RankedDeployer[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!initialTraders);
   const [page, setPage] = useState(0);
+  const [initialLoad, setInitialLoad] = useState(!!initialTraders);
 
   useEffect(() => {
     setPage(0);
@@ -124,6 +125,11 @@ export function LeaderboardTable({ initialPeriod = '7d' }: { initialPeriod?: str
   }, [mode, period]);
 
   useEffect(() => {
+    // Skip first fetch if we have server-provided data
+    if (initialLoad && mode === 'traders' && period === initialPeriod) {
+      setInitialLoad(false);
+      return;
+    }
     let cancelled = false;
     setLoading(true);
     if (mode === 'traders') {
@@ -161,68 +167,79 @@ export function LeaderboardTable({ initialPeriod = '7d' }: { initialPeriod?: str
 
   return (
     <div>
-      {/* Mode toggle — Traders / Deployers */}
-      <div className="flex gap-2 mb-4">
-        {(['traders', 'deployers'] as const).map((m) => (
-          <button
-            key={m}
-            onClick={() => setMode(m)}
-            className="font-mono text-[11px] tracking-[1px] font-bold px-5 py-2 transition-all cut-sm"
-            style={{
-              background: mode === m ? 'rgba(0,212,255,0.18)' : 'rgba(8,12,22,0.55)',
-              backdropFilter: 'blur(12px)',
-              WebkitBackdropFilter: 'blur(12px)',
-              border: mode === m ? '1px solid rgba(0,212,255,0.35)' : '1px solid rgba(255,255,255,0.07)',
-              color: mode === m ? '#00D4FF' : '#71717a',
-            }}
-          >
-            {m === 'traders' ? '📊 TRADERS' : '🚀 DEPLOYERS'}
-          </button>
-        ))}
-      </div>
-
-      {/* Period tabs — only for traders */}
-      {mode === 'traders' && (
-        <div className="flex gap-2 mb-6">
-          {PERIODS.map((p) => (
+      {/* Controls */}
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+        {/* Left: Traders / Devs toggle */}
+        <div className="flex items-center gap-2">
+          {(['traders', 'deployers'] as const).map((m) => (
             <button
-              key={p.key}
-              onClick={() => setPeriod(p.key)}
-              className="font-mono text-[10px] tracking-[1.5px] font-semibold px-4 py-1.5 transition-all cut-xs"
+              key={m}
+              onClick={() => setMode(m)}
+              className="font-mono text-[10px] tracking-[1.5px] font-bold px-4 py-1.5 transition-all cut-sm"
               style={{
-                background: period === p.key ? 'rgba(0,212,255,0.18)' : 'rgba(8,12,22,0.55)',
+                background: mode === m ? 'rgba(0,212,255,0.18)' : 'rgba(8,12,22,0.55)',
                 backdropFilter: 'blur(12px)',
                 WebkitBackdropFilter: 'blur(12px)',
-                border: period === p.key ? '1px solid rgba(0,212,255,0.3)' : '1px solid rgba(255,255,255,0.06)',
-                color: period === p.key ? '#00D4FF' : '#71717a',
+                border: mode === m ? '1px solid rgba(0,212,255,0.35)' : '1px solid rgba(255,255,255,0.07)',
+                color: mode === m ? '#00D4FF' : '#71717a',
               }}
             >
-              {p.label}
+              {m === 'traders' ? 'TRADERS' : 'DEVS'}
             </button>
           ))}
         </div>
-      )}
 
-      {/* View toggle — Table / Bracket (traders only) */}
-      {mode === 'traders' && (
-        <div className="flex gap-1.5 mb-4">
-          {(['table', 'bracket'] as const).map(v => (
-            <button
-              key={v}
-              onClick={() => setViewMode(v)}
-              disabled={v === 'bracket' && activeList.length < 32}
-              className="cut-sm px-3 py-1.5 text-[9px] font-mono tracking-widest transition-all uppercase disabled:opacity-30"
-              style={{
-                background: viewMode === v ? 'rgba(0,212,255,0.18)' : 'rgba(8,12,22,0.55)',
-                border: viewMode === v ? '1px solid rgba(0,212,255,0.3)' : '1px solid rgba(255,255,255,0.06)',
-                color: viewMode === v ? '#00D4FF' : '#71717a',
-              }}
-            >
-              {v}
-            </button>
-          ))}
-        </div>
-      )}
+        {/* Right: Period selector + View selector */}
+        {mode === 'traders' && (
+          <div className="flex items-center gap-3">
+            {/* Period dropdown */}
+            <div className="relative">
+              <select
+                value={period}
+                onChange={(e) => setPeriod(e.target.value as typeof period)}
+                className="appearance-none font-mono text-[10px] tracking-[1.5px] font-semibold pl-3 pr-7 py-1.5 cut-xs cursor-pointer"
+                style={{
+                  background: 'rgba(8,12,22,0.55)',
+                  backdropFilter: 'blur(12px)',
+                  WebkitBackdropFilter: 'blur(12px)',
+                  border: '1px solid rgba(0,212,255,0.2)',
+                  color: '#00D4FF',
+                  outline: 'none',
+                }}
+              >
+                {PERIODS.map((p) => (
+                  <option key={p.key} value={p.key} style={{ background: '#0a0a12', color: '#00D4FF' }}>{p.label}</option>
+                ))}
+              </select>
+              <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[8px] text-[var(--trench-accent)]">▼</div>
+            </div>
+
+            {/* Separator */}
+            <div className="w-px h-5" style={{ background: 'rgba(255,255,255,0.1)' }} />
+
+            {/* View dropdown */}
+            <div className="relative">
+              <select
+                value={viewMode}
+                onChange={(e) => setViewMode(e.target.value as typeof viewMode)}
+                className="appearance-none font-mono text-[9px] tracking-widest font-semibold pl-3 pr-7 py-1.5 cut-xs cursor-pointer uppercase"
+                style={{
+                  background: 'rgba(8,12,22,0.55)',
+                  backdropFilter: 'blur(12px)',
+                  WebkitBackdropFilter: 'blur(12px)',
+                  border: '1px solid rgba(0,212,255,0.2)',
+                  color: '#00D4FF',
+                  outline: 'none',
+                }}
+              >
+                <option value="table" style={{ background: '#0a0a12', color: '#00D4FF' }}>TABLE</option>
+                <option value="bracket" style={{ background: '#0a0a12', color: '#00D4FF' }} disabled={activeList.length < 32}>BRACKET</option>
+              </select>
+              <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[8px] text-[var(--trench-accent)]">▼</div>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Loading */}
       {loading && (
@@ -246,71 +263,113 @@ export function LeaderboardTable({ initialPeriod = '7d' }: { initialPeriod?: str
         <TournamentBracket traders={activeList} />
       )}
 
-      {/* Podium — top 3 */}
+      {/* Split layout: Podium left + List right */}
       {!loading && !(viewMode === 'bracket' && mode === 'traders') && top3.length > 0 && (
-        <div className="relative mb-8">
-          <div className="absolute inset-[-20px] pointer-events-none" style={{ background: 'radial-gradient(ellipse at 50% 60%, rgba(255,215,0,0.04) 0%, transparent 50%)' }} />
-          <div className="relative grid gap-3 items-end grid-cols-3" style={{ gridTemplateColumns: top3.length >= 3 ? '1fr 1.2fr 1fr' : `repeat(${top3.length}, 1fr)` }}>
-            {top3.length >= 2 && <PodiumCard trader={top3[1]} place={2} />}
-            {top3.length >= 1 && <PodiumCard trader={top3[0]} place={1} />}
-            {top3.length >= 3 && <PodiumCard trader={top3[2]} place={3} />}
-          </div>
-        </div>
-      )}
+        <div className="flex gap-0 items-stretch">
+          {/* LEFT — Top 3 podium cards */}
+          <div className="w-[280px] flex-shrink-0 flex flex-col gap-2">
+            {/* #1 — big card with PFP background */}
+            {top3[0] && (
+              <Link href={`/${top3[0].username}`} className="block flex-[1.2] relative overflow-hidden cut-sm group" style={{ minHeight: '120px' }}>
+                <div className="absolute inset-0 transition-transform duration-500 group-hover:scale-105" style={{
+                  backgroundImage: `url(${top3[0].avatarUrl || `https://unavatar.io/twitter/${top3[0].username}`})`,
+                  backgroundSize: 'cover', backgroundPosition: 'center 20%',
+                  filter: 'brightness(0.55) saturate(1.2)',
+                }} />
+                <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(5,5,8,0) 0%, rgba(5,5,8,0.75) 50%, rgba(5,5,8,0.95) 100%)' }} />
+                <div className="absolute inset-0 border border-[rgba(255,215,0,0.25)] cut-sm pointer-events-none" />
+                <div className="absolute top-2.5 right-3 text-[20px] z-10" style={{ filter: 'drop-shadow(0 0 8px rgba(255,215,0,0.5))' }}>👑</div>
+                <div className="relative z-1 h-full flex flex-col justify-end p-4">
+                  <div className="text-[8px] tracking-[3px] font-mono mb-1" style={{ color: '#FFD700' }}>1ST PLACE</div>
+                  <div className="text-[14px] font-black text-white mb-0.5">@{top3[0].username}</div>
+                  <div className="text-[8px] text-[rgba(255,255,255,0.4)] mb-2">{Math.round(top3[0].winRate)}% WR · {top3[0].trades} trades</div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[24px] font-black font-mono" style={{ color: '#22c55e', textShadow: '0 0 16px rgba(34,197,94,0.3)' }}>+{Math.round(top3[0].pnlSol)}</span>
+                    <Image src="/sol.png" alt="SOL" width={18} height={18} className="h-[18px] w-auto" />
+                  </div>
+                </div>
+              </Link>
+            )}
 
-      {/* Rest of table — 4th onward */}
-      {!loading && !(viewMode === 'bracket' && mode === 'traders') && rest.length > 0 && (
-        <GlassCard cut={10} glow={false} bg="rgba(8,12,18,0.6)">
-          <div className="overflow-x-auto">
+            {/* #2 and #3 side by side */}
+            <div className="flex gap-2 flex-1">
+              {top3[1] && (
+                <Link href={`/${top3[1].username}`} className="block flex-1 relative overflow-hidden cut-sm group" style={{ minHeight: '100px' }}>
+                  <div className="absolute inset-0 transition-transform duration-500 group-hover:scale-105" style={{
+                    backgroundImage: `url(${top3[1].avatarUrl || `https://unavatar.io/twitter/${top3[1].username}`})`,
+                    backgroundSize: 'cover', backgroundPosition: 'center 20%',
+                    filter: 'brightness(0.5) saturate(1.1)',
+                  }} />
+                  <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(5,5,8,0.1) 0%, rgba(5,5,8,0.9) 75%)' }} />
+                  <div className="absolute inset-0 border border-[rgba(192,192,192,0.2)] cut-sm pointer-events-none" />
+                  <div className="relative z-1 h-full flex flex-col justify-end p-3">
+                    <div className="text-[7px] tracking-[2px] font-mono mb-1" style={{ color: '#C0C0C0' }}>2ND</div>
+                    <div className="text-[11px] font-black text-white mb-1">@{top3[1].username}</div>
+                    <div className="flex items-center gap-1">
+                      <span className="text-[16px] font-black font-mono" style={{ color: '#22c55e' }}>+{Math.round(top3[1].pnlSol)}</span>
+                      <Image src="/sol.png" alt="SOL" width={13} height={13} className="h-[13px] w-auto" />
+                    </div>
+                  </div>
+                </Link>
+              )}
+              {top3[2] && (
+                <Link href={`/${top3[2].username}`} className="block flex-1 relative overflow-hidden cut-sm group" style={{ minHeight: '100px' }}>
+                  <div className="absolute inset-0 transition-transform duration-500 group-hover:scale-105" style={{
+                    backgroundImage: `url(${top3[2].avatarUrl || `https://unavatar.io/twitter/${top3[2].username}`})`,
+                    backgroundSize: 'cover', backgroundPosition: 'center 20%',
+                    filter: 'brightness(0.5) saturate(1.1)',
+                  }} />
+                  <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(5,5,8,0.1) 0%, rgba(5,5,8,0.9) 75%)' }} />
+                  <div className="absolute inset-0 border border-[rgba(205,127,50,0.2)] cut-sm pointer-events-none" />
+                  <div className="relative z-1 h-full flex flex-col justify-end p-3">
+                    <div className="text-[7px] tracking-[2px] font-mono mb-1" style={{ color: '#CD7F32' }}>3RD</div>
+                    <div className="text-[11px] font-black text-white mb-1">@{top3[2].username}</div>
+                    <div className="flex items-center gap-1">
+                      <span className="text-[16px] font-black font-mono" style={{ color: '#22c55e' }}>+{Math.round(top3[2].pnlSol)}</span>
+                      <Image src="/sol.png" alt="SOL" width={13} height={13} className="h-[13px] w-auto" />
+                    </div>
+                  </div>
+                </Link>
+              )}
+            </div>
+          </div>
+
+          {/* Separator */}
+          <div className="w-px mx-4 flex-shrink-0" style={{ background: 'linear-gradient(180deg, transparent, rgba(0,212,255,0.12) 20%, rgba(0,212,255,0.12) 80%, transparent)' }} />
+
+          {/* RIGHT — Compact list #4+ */}
+          <div className="flex-1 min-w-0 flex flex-col">
             {/* Header */}
-            <div
-              className="grid items-center gap-2 sm:gap-3 px-3 sm:px-5 py-2.5 text-[7px] font-mono tracking-[2px] text-[var(--trench-text-muted)]"
-              style={{ gridTemplateColumns: '28px 1fr 90px 50px', borderBottom: '1px solid rgba(0,212,255,0.06)' }}
-            >
-              <span>#</span>
-              <span>{mode === 'traders' ? 'TRADER' : 'DEPLOYER'}</span>
-              <span className="text-right">{mode === 'traders' ? 'PnL' : 'DEV PnL'}</span>
-              <span className="hidden sm:block text-right">{mode === 'traders' ? 'WIN' : 'MIGRATED'}</span>
+            <div className="flex items-center px-3 py-2 text-[7px] font-mono tracking-[2px] text-[#333]" style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+              <span className="w-[22px]">#</span>
+              <span className="w-[28px]" />
+              <span className="flex-1 pl-2">{mode === 'traders' ? 'TRADER' : 'DEV'}</span>
+              <span className="w-[40px] text-right hidden sm:block">WR</span>
+              <span className="w-[80px] text-right">PNL</span>
             </div>
 
-            {rest.map((t) => {
-              const badge = getCategoryBadge(t);
-              return (
-                <Link
-                  key={t.username}
-                  href={`/${t.username}`}
-                  className="grid items-center gap-2 sm:gap-3 px-3 sm:px-5 py-2.5 transition-colors hover:bg-[rgba(0,212,255,0.03)]"
-                  style={{ gridTemplateColumns: '28px 1fr 90px 50px', borderBottom: '1px solid rgba(255,255,255,0.02)' }}
-                >
-                  <span className="font-mono text-[11px] font-bold text-[var(--trench-text-muted)]">{t.rank}</span>
-                  <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-                    <div className="h-6 w-6 sm:h-7 sm:w-7 flex-shrink-0 overflow-hidden rounded-full" style={{ border: '1.5px solid rgba(0,212,255,0.2)' }}>
-                      <Image src={t.avatarUrl || `https://unavatar.io/twitter/${t.username}`} alt={t.displayName} width={28} height={28} className="h-full w-full object-cover" unoptimized />
-                    </div>
-                    <div className="min-w-0 flex items-center gap-1.5">
-                      <span className="text-[10px] sm:text-[11px] font-semibold text-white truncate">@{t.username}</span>
-                      {t.isClaimed && (
-                        <span className="ml-1 text-[10px] font-mono text-[#00D4FF]">✓</span>
-                      )}
-                      {badge && (
-                        <span className="hidden sm:inline-flex cut-xs text-[6px] tracking-[0.5px] px-1.5 py-0.5 font-semibold flex-shrink-0" style={{ color: badge.color, background: `${badge.color}14`, border: `1px solid ${badge.color}20` }}>
-                          {badge.icon} {badge.label}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-mono text-[11px] sm:text-[12px] font-bold" style={{ color: t.pnlUsd >= 0 ? 'var(--trench-green)' : 'var(--trench-red)' }}>
-                      {formatPnl(t.pnlUsd)}
-                    </div>
-                    <div className="font-mono text-[8px] text-[var(--trench-text-muted)]">{t.pnlSol >= 0 ? '+' : ''}{t.pnlSol.toFixed(1)} SOL</div>
-                  </div>
-                  <div className="hidden sm:block text-right font-mono text-[11px] font-semibold text-[var(--trench-accent)]">{t.winRate.toFixed(0)}%</div>
-                </Link>
-              );
-            })}
+            {/* Rows */}
+            {rest.map((t) => (
+              <Link
+                key={t.username}
+                href={`/${t.username}`}
+                className="flex items-center px-3 py-2.5 transition-colors hover:bg-[rgba(0,212,255,0.03)]"
+                style={{ borderBottom: '1px solid rgba(255,255,255,0.02)', textDecoration: 'none' }}
+              >
+                <span className="w-[22px] font-mono text-[11px] font-bold text-[#444]">{t.rank}</span>
+                <div className="w-[28px] h-[28px] rounded-full overflow-hidden flex-shrink-0" style={{ border: '1.5px solid rgba(255,255,255,0.08)' }}>
+                  <Image src={t.avatarUrl || `https://unavatar.io/twitter/${t.username}`} alt={t.displayName} width={28} height={28} className="w-full h-full object-cover" unoptimized />
+                </div>
+                <span className="flex-1 min-w-0 pl-2 text-[12px] font-semibold text-white truncate">@{t.username}</span>
+                <span className="w-[40px] text-right font-mono text-[10px] text-[#555] hidden sm:block">{Math.round(t.winRate)}%</span>
+                <div className="w-[80px] flex items-center justify-end gap-1">
+                  <span className="font-mono text-[13px] font-black" style={{ color: '#22c55e' }}>+{Math.round(t.pnlSol)}</span>
+                  <Image src="/sol.png" alt="SOL" width={12} height={12} className="h-[12px] w-auto" />
+                </div>
+              </Link>
+            ))}
           </div>
-        </GlassCard>
+        </div>
       )}
       {/* Pagination */}
       {!loading && !(viewMode === 'bracket' && mode === 'traders') && totalPages > 1 && (
