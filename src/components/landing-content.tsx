@@ -97,7 +97,7 @@ export function LandingContent({ traders, featured, ticker, leaderboardData }: L
 
             <h1 className="mb-4 text-4xl leading-[1] font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
               Your{' '}
-              <span className="text-[var(--trench-accent)]">Web3</span>
+              <span className="text-[var(--trench-accent)]"><span className="relative inline-block overflow-visible" style={{ width: '0.55em' }}><img src="/logo.png" alt="" className="absolute" style={{ width: 'clamp(50px, 1.4em, 90px)', height: 'auto', top: '-0.25em', left: '-0.15em', filter: 'drop-shadow(0 0 8px rgba(0,212,255,0.3))' }} /><span className="invisible">W</span></span>eb3</span>
               <br />Bio Link
             </h1>
 

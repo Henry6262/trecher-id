@@ -41,10 +41,11 @@ export function TournamentBracket({ traders }: { traders: RankedTrader[] }) {
       const outer = outerRef.current;
       if (!outer) return;
       const rect = outer.getBoundingClientRect();
-      const scrollableDistance = outer.offsetHeight - window.innerHeight;
-      if (scrollableDistance <= 0) return;
-      // How far into the section we've scrolled (0 at top, 1 at bottom)
-      const progress = Math.min(1, Math.max(0, -rect.top / scrollableDistance));
+      // Sticky pins when rect.top <= 0. Horizontal scroll range = total height minus one viewport.
+      const stickyTravel = outer.offsetHeight - BRACKET_H;
+      if (stickyTravel <= 0) return;
+      // Progress: 0 when top of section hits top of viewport, 1 when sticky releases
+      const progress = Math.min(1, Math.max(0, -rect.top / stickyTravel));
       setScrollProgress(progress);
     }
     window.addEventListener('scroll', onScroll, { passive: true });
