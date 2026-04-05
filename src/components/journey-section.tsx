@@ -243,9 +243,9 @@ export function JourneySection() {
         <p className="text-[12px] text-[var(--trench-text-muted)] mt-1">From sign-up to earning rewards</p>
       </div>
 
-      <div className="flex items-stretch min-h-[420px]">
+      <div className="flex flex-col lg:flex-row items-stretch lg:min-h-[420px] gap-6 lg:gap-0">
         {/* LEFT: Timeline */}
-        <div className="w-[260px] flex-shrink-0 relative">
+        <div className="w-full lg:w-[260px] flex-shrink-0 relative">
           <div className="absolute top-5 bottom-5 left-[16px] w-[2px]">
             <div className="absolute inset-0" style={{ background: 'rgba(255,255,255,0.04)' }} />
             <div className="absolute top-0 left-0 right-0 transition-all duration-700 ease-out" style={{
@@ -281,8 +281,8 @@ export function JourneySection() {
           </div>
         </div>
 
-        {/* SEPARATOR */}
-        <div className="w-px flex-shrink-0 mx-5" style={{ background: 'linear-gradient(180deg, transparent 0%, rgba(0,212,255,0.12) 20%, rgba(0,212,255,0.12) 80%, transparent 100%)' }} />
+        {/* SEPARATOR — desktop only */}
+        <div className="hidden lg:block w-px flex-shrink-0 mx-5" style={{ background: 'linear-gradient(180deg, transparent 0%, rgba(0,212,255,0.12) 20%, rgba(0,212,255,0.12) 80%, transparent 100%)' }} />
 
         {/* RIGHT: Glass card */}
         <div className="flex-1 min-w-0">

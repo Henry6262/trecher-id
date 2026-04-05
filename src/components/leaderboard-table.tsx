@@ -265,9 +265,9 @@ export function LeaderboardTable({ initialPeriod = '7d', initialTraders }: { ini
 
       {/* Split layout: Podium left + List right */}
       {!loading && !(viewMode === 'bracket' && mode === 'traders') && top3.length > 0 && (
-        <div className="flex gap-0 items-stretch">
+        <div className="flex flex-col lg:flex-row gap-0 items-stretch">
           {/* LEFT — Top 3 podium cards */}
-          <div className="w-[280px] flex-shrink-0 flex flex-col gap-2">
+          <div className="w-full lg:w-[280px] flex-shrink-0 flex flex-col gap-2">
             {/* #1 — big card with PFP background */}
             {top3[0] && (
               <Link href={`/${top3[0].username}`} className="block flex-[1.2] relative overflow-hidden cut-sm group" style={{ minHeight: '120px' }}>
@@ -334,8 +334,8 @@ export function LeaderboardTable({ initialPeriod = '7d', initialTraders }: { ini
             </div>
           </div>
 
-          {/* Separator */}
-          <div className="w-px mx-4 flex-shrink-0" style={{ background: 'linear-gradient(180deg, transparent, rgba(0,212,255,0.12) 20%, rgba(0,212,255,0.12) 80%, transparent)' }} />
+          {/* Separator — desktop only */}
+          <div className="hidden lg:block w-px mx-4 flex-shrink-0" style={{ background: 'linear-gradient(180deg, transparent, rgba(0,212,255,0.12) 20%, rgba(0,212,255,0.12) 80%, transparent)' }} />
 
           {/* RIGHT — Compact list #4+ */}
           <div className="flex-1 min-w-0 flex flex-col">
