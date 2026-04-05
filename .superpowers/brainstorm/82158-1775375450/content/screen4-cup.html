@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #050508; color: white; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  .mono { font-family: 'SF Mono', 'Fira Code', ui-monospace, monospace; }
+
+  .container { max-width: 560px; margin: 0 auto; padding: 40px 20px; }
+  .label { font-size: 9px; letter-spacing: 3px; color: #FFD700; margin-bottom: 16px; }
+  .section-title { font-size: 16px; font-weight: 800; margin-bottom: 24px; }
+  .section-title span { color: #FFD700; }
+
+  .glass {
+    background: rgba(8,12,18,0.65);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(0,212,255,0.1);
+    clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
+    position: relative;
+    min-height: 380px;
+    overflow: hidden;
+  }
+  .glass::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, #FFD700, transparent);
+    opacity: 0.4;
+  }
+  .step-label { position: absolute; top: 16px; left: 20px; font-size: 8px; letter-spacing: 3px; color: rgba(255,215,0,0.5); }
+
+  .variant { margin-bottom: 32px; cursor: pointer; padding: 4px; border: 2px solid transparent; }
+  .variant:hover { border-color: rgba(255,215,0,0.15); }
+  .variant.selected { border-color: #FFD700; }
+  .variant-label { font-size: 9px; letter-spacing: 2px; color: #FFD700; margin-bottom: 8px; }
+  .variant-desc { font-size: 10px; color: #555; margin-bottom: 12px; }
+
+  /* ═══ A: VS matchup — mini version of Arena ═══ */
+  .a-content { padding: 48px 28px 32px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 380px; }
+
+  .a-cup-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 14px;
+    font-size: 9px; letter-spacing: 3px; color: #FFD700;
+    background: rgba(255,215,0,0.06);
+    border: 1px solid rgba(255,215,0,0.15);
+    clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px);
+    margin-bottom: 16px;
+  }
+  .a-cup-badge .live { width: 5px; height: 5px; border-radius: 50%; background: #22c55e; animation: blink 2s ease-in-out infinite; }
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  .a-vs-stage { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+
+  .a-fighter {
+    text-align: center;
+    width: 120px;
+  }
+  .a-fighter-av {
+    width: 56px; height: 56px; border-radius: 50%;
+    margin: 0 auto 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 900; color: black;
+  }
+  .a-fighter.you .a-fighter-av {
+    background: linear-gradient(135deg, #00D4FF, #0099cc);
+    border: 2px solid rgba(0,212,255,0.4);
+    box-shadow: 0 0 20px rgba(0,212,255,0.3);
+  }
+  .a-fighter.opponent .a-fighter-av {
+    background: linear-gradient(135deg, #555, #333);
+    border: 2px solid rgba(255,255,255,0.1);
+  }
+  .a-fighter-name { font-size: 12px; font-weight: 800; margin-bottom: 2px; }
+  .a-fighter.you .a-fighter-name { color: #00D4FF; }
+  .a-fighter.opponent .a-fighter-name { color: #777; }
+  .a-fighter-pnl { font-size: 14px; font-weight: 900; }
+
+  .a-vs-text {
+    font-size: 28px; font-weight: 900;
+    color: #FFD700;
+    text-shadow: 0 0 20px rgba(255,215,0,0.4);
+    animation: vsGlow 2s ease-in-out infinite;
+  }
+  @keyframes vsGlow {
+    0%, 100% { text-shadow: 0 0 20px rgba(255,215,0,0.2); }
+    50% { text-shadow: 0 0 40px rgba(255,215,0,0.5); }
+  }
+
+  /* PnL bars */
+  .a-bars { width: 100%; max-width: 280px; }
+  .a-bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .a-bar-name { font-size: 9px; width: 50px; text-align: right; }
+  .a-bar-track { flex: 1; height: 6px; background: rgba(255,255,255,0.04); overflow: hidden; }
+  .a-bar-fill { height: 6px; }
+  .a-bar-fill.you-bar { background: linear-gradient(90deg, #00D4FF, #33DDFF); box-shadow: 0 0 8px rgba(0,212,255,0.3); animation: barGrow 2s ease-out forwards; }
+  .a-bar-fill.opp-bar { background: rgba(255,255,255,0.15); animation: barGrow2 2s ease-out forwards; }
+  @keyframes barGrow { from { width: 0; } to { width: 78%; } }
+  @keyframes barGrow2 { from { width: 0; } to { width: 54%; } }
+
+  .a-status {
+    margin-top: 16px;
+    font-size: 11px; font-weight: 800; letter-spacing: 2px;
+    color: #00D4FF;
+    animation: statusPulse 1.5s ease-in-out infinite;
+  }
+  @keyframes statusPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+
+  /* ═══ B: Mini bracket showing your path ═══ */
+  .b-content { padding: 48px 24px 32px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 380px; }
+
+  .b-trophy { font-size: 40px; margin-bottom: 8px; filter: drop-shadow(0 0 16px rgba(255,215,0,0.4)); }
+  .b-cup-label { font-size: 9px; letter-spacing: 3px; color: #FFD700; margin-bottom: 20px; }
+
+  .b-path {
+    display: flex; align-items: center; gap: 4px;
+    width: 100%; max-width: 340px;
+  }
+
+  .b-round {
+    flex: 1;
+    display: flex; flex-direction: column; gap: 3px;
+  }
+  .b-round-label { font-size: 7px; letter-spacing: 1px; color: #444; text-align: center; margin-bottom: 4px; }
+
+  .b-slot {
+    padding: 5px 8px;
+    font-size: 8px; font-weight: 700;
+    background: rgba(8,12,22,0.6);
+    border: 1px solid rgba(255,255,255,0.04);
+    clip-path: polygon(3px 0, 100% 0, 100% calc(100% - 3px), calc(100% - 3px) 100%, 0 100%, 0 3px);
+    display: flex; align-items: center; gap: 4px;
+  }
+  .b-slot.you-slot { border-color: rgba(0,212,255,0.25); background: rgba(0,212,255,0.04); color: #00D4FF; }
+  .b-slot.won { border-color: rgba(0,212,255,0.15); color: rgba(0,212,255,0.5); }
+  .b-slot.lost { opacity: 0.25; text-decoration: line-through; color: #555; }
+  .b-slot.empty { color: #333; }
+  .b-slot .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+  .b-connector { width: 8px; flex-shrink: 0; display: flex; align-items: center; }
+  .b-connector-line { width: 100%; height: 1px; background: rgba(255,215,0,0.12); }
+
+  .b-champ-slot {
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .b-champ-crown { font-size: 20px; animation: crownFloat 3s ease-in-out infinite; }
+  @keyframes crownFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+  .b-champ-q { font-size: 14px; font-weight: 900; color: #FFD700; margin-top: 4px; }
+
+  .b-your-path { margin-top: 16px; font-size: 10px; color: #00D4FF; font-weight: 700; }
+  .b-your-path-sub { font-size: 9px; color: #555; margin-top: 2px; }
+
+  /* ═══ C: Arena preview — reuse the actual VS/KO sequence ═══ */
+  .c-content { padding: 48px 24px 32px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 380px; }
+
+  .c-arena-label {
+    font-size: 8px; letter-spacing: 3px; color: #FFD700;
+    margin-bottom: 4px;
+  }
+  .c-arena-round { font-size: 10px; letter-spacing: 2px; color: rgba(255,215,0,0.6); margin-bottom: 20px; }
+
+  .c-fighters { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+
+  .c-card {
+    width: 140px;
+    padding: 16px 12px;
+    text-align: center;
+    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+  }
+  .c-card.you-card {
+    background: rgba(0,212,255,0.04);
+    border: 1px solid rgba(0,212,255,0.2);
+    animation: cardGlow 2.5s ease-in-out infinite;
+  }
+  @keyframes cardGlow {
+    0%, 100% { box-shadow: 0 0 0 rgba(0,212,255,0); }
+    50% { box-shadow: 0 0 20px rgba(0,212,255,0.1); }
+  }
+  .c-card.opp-card {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .c-card-av { width: 48px; height: 48px; border-radius: 50%; margin: 0 auto 8px; }
+  .c-card.you-card .c-card-av { background: linear-gradient(135deg, #00D4FF, #0099cc); border: 2px solid rgba(0,212,255,0.3); box-shadow: 0 0 16px rgba(0,212,255,0.2); }
+  .c-card.opp-card .c-card-av { background: #222; border: 2px solid rgba(255,255,255,0.08); }
+
+  .c-card-name { font-size: 12px; font-weight: 800; margin-bottom: 4px; }
+  .c-card.you-card .c-card-name { color: #00D4FF; }
+  .c-card.opp-card .c-card-name { color: #777; }
+
+  .c-card-stat { font-size: 9px; color: #555; margin-bottom: 6px; }
+  .c-card-pnl { font-size: 18px; font-weight: 900; }
+  .c-card.you-card .c-card-pnl { color: #00D4FF; text-shadow: 0 0 12px rgba(0,212,255,0.3); }
+  .c-card.opp-card .c-card-pnl { color: #555; }
+
+  .c-vs {
+    font-size: 24px; font-weight: 900; color: #FFD700;
+    text-shadow: 0 0 20px rgba(255,215,0,0.4);
+    flex-shrink: 0;
+  }
+
+  .c-result {
+    font-size: 12px; font-weight: 800; letter-spacing: 2px;
+    padding: 6px 20px;
+    clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px);
+  }
+  .c-result.winning {
+    color: #00D4FF;
+    background: rgba(0,212,255,0.06);
+    border: 1px solid rgba(0,212,255,0.15);
+  }
+
+  .c-bracket-hint { margin-top: 16px; font-size: 9px; color: #555; }
+  .c-bracket-hint span { color: #FFD700; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="label">SCREEN 4 OF 5 — COMPETE</div>
+  <div class="section-title">Pick the <span>Trencher Cup</span> screen visual</div>
+</div>
+
+<!-- A: VS matchup with PnL bars -->
+<div class="variant" data-choice="a" onclick="document.querySelectorAll('.variant').forEach(e=>e.classList.remove('selected'));this.classList.add('selected')">
+  <div class="container">
+    <div class="variant-label">A — VS MATCHUP + PNL BARS</div>
+    <div class="variant-desc">Two fighters face off — your avatar vs opponent. PnL bars race below. "YOU'RE WINNING" status pulsing. Same energy as the Arena section above but condensed into the preview card.</div>
+    <div class="glass">
+      <div class="step-label mono">STEP 4 — COMPETE</div>
+      <div class="a-content">
+        <div class="a-cup-badge mono"><div class="live"></div>TRENCHER CUP — QF</div>
+
+        <div class="a-vs-stage">
+          <div class="a-fighter you">
+            <div class="a-fighter-av">Y</div>
+            <div class="a-fighter-name">@you</div>
+            <div class="a-fighter-pnl mono" style="color:#00D4FF;">+142</div>
+          </div>
+          <div class="a-vs-text">VS</div>
+          <div class="a-fighter opponent">
+            <div class="a-fighter-av">R</div>
+            <div class="a-fighter-name">@rival</div>
+            <div class="a-fighter-pnl mono" style="color:#555;">+98</div>
+          </div>
+        </div>
+
+        <div class="a-bars">
+          <div class="a-bar-row">
+            <div class="a-bar-name mono" style="color:#00D4FF;">@you</div>
+            <div class="a-bar-track"><div class="a-bar-fill you-bar"></div></div>
+          </div>
+          <div class="a-bar-row">
+            <div class="a-bar-name mono" style="color:#555;">@rival</div>
+            <div class="a-bar-track"><div class="a-bar-fill opp-bar"></div></div>
+          </div>
+        </div>
+
+        <div class="a-status mono">ADVANCING TO SEMIFINALS</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- B: Mini bracket showing your path through -->
+<div class="variant" data-choice="b" onclick="document.querySelectorAll('.variant').forEach(e=>e.classList.remove('selected'));this.classList.add('selected')">
+  <div class="container">
+    <div class="variant-label">B — YOUR BRACKET PATH</div>
+    <div class="variant-desc">Mini bracket showing your journey: QF (won) → SF (current) → Final (?). You highlighted in cyan, beaten opponents crossed out, future slots empty. Shows progression through the tournament.</div>
+    <div class="glass">
+      <div class="step-label mono">STEP 4 — COMPETE</div>
+      <div class="b-content">
+        <div class="b-trophy">🏆</div>
+        <div class="b-cup-label mono">TRENCHER CUP — SEASON 1</div>
+
+        <div class="b-path">
+          <!-- QF -->
+          <div class="b-round">
+            <div class="b-round-label mono">QF</div>
+            <div class="b-slot won"><div class="dot" style="background:#00D4FF;"></div> @you</div>
+            <div class="b-slot lost"><div class="dot" style="background:#333;"></div> @loser1</div>
+          </div>
+
+          <div class="b-connector"><div class="b-connector-line"></div></div>
+
+          <!-- SF -->
+          <div class="b-round">
+            <div class="b-round-label mono">SF</div>
+            <div class="b-slot you-slot"><div class="dot" style="background:#00D4FF;"></div> @you ←</div>
+            <div class="b-slot"><div class="dot" style="background:#555;"></div> @rival2</div>
+          </div>
+
+          <div class="b-connector"><div class="b-connector-line"></div></div>
+
+          <!-- Final -->
+          <div class="b-round">
+            <div class="b-round-label mono">FINAL</div>
+            <div class="b-slot empty"><div class="dot" style="background:#333;"></div> TBD</div>
+            <div class="b-slot empty"><div class="dot" style="background:#333;"></div> TBD</div>
+          </div>
+
+          <div class="b-connector"><div class="b-connector-line"></div></div>
+
+          <!-- Champion -->
+          <div class="b-champ-slot">
+            <div class="b-champ-crown">👑</div>
+            <div class="b-champ-q">?</div>
+          </div>
+        </div>
+
+        <div class="b-your-path">You're in the Semifinals</div>
+        <div class="b-your-path-sub">Win 2 more to become Champion</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- C: Full fighter cards — Arena-style -->
+<div class="variant" data-choice="c" onclick="document.querySelectorAll('.variant').forEach(e=>e.classList.remove('selected'));this.classList.add('selected')">
+  <div class="container">
+    <div class="variant-label">C — FIGHTER CARDS</div>
+    <div class="variant-desc">Two full fighter cards side by side (like the Arena's VS intro) — avatar, name, stats, PnL. Gold VS between them. Result badge below. Feels like a fighting game character select.</div>
+    <div class="glass">
+      <div class="step-label mono" style="color:rgba(255,215,0,0.5);">STEP 4 — COMPETE</div>
+      <div class="c-content">
+        <div class="c-arena-label mono">TRENCHER CUP</div>
+        <div class="c-arena-round mono">QUARTERFINAL · LIVE</div>
+
+        <div class="c-fighters">
+          <div class="c-card you-card">
+            <div class="c-card-av"></div>
+            <div class="c-card-name">@you</div>
+            <div class="c-card-stat mono">71% WR · 847 trades</div>
+            <div class="c-card-pnl mono">+142</div>
+          </div>
+
+          <div class="c-vs">VS</div>
+
+          <div class="c-card opp-card">
+            <div class="c-card-av"></div>
+            <div class="c-card-name">@rival</div>
+            <div class="c-card-stat mono">63% WR · 432 trades</div>
+            <div class="c-card-pnl mono">+98</div>
+          </div>
+        </div>
+
+        <div class="c-result winning mono">YOU'RE ADVANCING</div>
+        <div class="c-bracket-hint">Win this to reach the <span>Semifinals</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

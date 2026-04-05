@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #050508; color: white; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  .mono { font-family: 'SF Mono', 'Fira Code', ui-monospace, monospace; }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+  .title { text-align: center; font-size: 24px; font-weight: 800; margin-bottom: 28px; }
+  .title span { color: #00D4FF; }
+
+  .board { display: flex; gap: 20px; align-items: stretch; }
+
+  /* ═══ LEFT: Actual Y shape with SVG lines ═══ */
+  .y-podium { width: 300px; flex-shrink: 0; position: relative; }
+
+  /* The Y structure */
+  .y-top { position: relative; z-index: 2; margin-bottom: 0; }
+  .y-fork { display: flex; gap: 8px; position: relative; z-index: 2; }
+  .y-fork > * { flex: 1; }
+
+  /* SVG Y connector drawn behind */
+  .y-svg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  /* #1 card — PFP background */
+  .card-1st {
+    position: relative;
+    overflow: hidden;
+    min-height: 150px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+  }
+
+  .card-1st .bg {
+    position: absolute; inset: 0;
+    background-size: cover; background-position: center top;
+    filter: brightness(0.35) saturate(1.3);
+  }
+  .card-1st .bg::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(5,5,8,0.1) 0%, rgba(5,5,8,0.85) 65%, rgba(5,5,8,0.98) 100%);
+  }
+  .card-1st .info {
+    position: relative; z-index: 1;
+    padding: 14px 16px;
+  }
+  .card-1st .crown {
+    position: absolute; top: 10px; right: 12px; z-index: 2;
+    font-size: 22px; filter: drop-shadow(0 0 8px rgba(255,215,0,0.5));
+  }
+  .card-1st .rank-label { font-size: 8px; letter-spacing: 3px; color: #FFD700; margin-bottom: 4px; }
+  .card-1st .name { font-size: 15px; font-weight: 900; }
+  .card-1st .meta { font-size: 8px; color: rgba(255,255,255,0.4); margin-top: 2px; margin-bottom: 8px; }
+  .card-1st .pnl { font-size: 26px; font-weight: 900; color: #22c55e; text-shadow: 0 0 16px rgba(34,197,94,0.3); line-height: 1; }
+  .card-1st .pnl-sub { font-size: 7px; letter-spacing: 2px; color: rgba(255,255,255,0.25); margin-top: 2px; }
+  .card-1st::before {
+    content: ''; position: absolute; inset: 0;
+    border: 1px solid rgba(255,215,0,0.2); z-index: 3; pointer-events: none;
+    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+  }
+
+  /* Runner-up cards */
+  .card-runner {
+    position: relative;
+    overflow: hidden;
+    min-height: 110px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+  }
+  .card-runner .bg {
+    position: absolute; inset: 0;
+    background-size: cover; background-position: center top;
+    filter: brightness(0.3) saturate(1.1);
+  }
+  .card-runner .bg::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(5,5,8,0.05) 0%, rgba(5,5,8,0.9) 75%);
+  }
+  .card-runner .info {
+    position: relative; z-index: 1;
+    padding: 10px 12px;
+  }
+  .card-runner .rank-label { font-size: 8px; letter-spacing: 2px; margin-bottom: 3px; }
+  .card-runner .name { font-size: 12px; font-weight: 800; }
+  .card-runner .pnl { font-size: 17px; font-weight: 900; color: #22c55e; line-height: 1; margin-top: 4px; }
+
+  .card-runner.silver::before {
+    content: ''; position: absolute; inset: 0;
+    border: 1px solid rgba(192,192,192,0.2); z-index: 3; pointer-events: none;
+    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+  }
+  .card-runner.bronze::before {
+    content: ''; position: absolute; inset: 0;
+    border: 1px solid rgba(205,127,50,0.2); z-index: 3; pointer-events: none;
+    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+  }
+
+  /* ═══ RIGHT: compact list ═══ */
+  .list-side { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+  .list-header {
+    display: flex; align-items: center; padding: 8px 12px;
+    font-size: 8px; letter-spacing: 1.5px; color: #333;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+
+  .row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.025);
+    transition: background 0.15s;
+  }
+  .row:hover { background: rgba(0,212,255,0.03); }
+  .row .rank { font-size: 10px; font-weight: 700; color: #444; width: 20px; text-align: center; }
+  .row .avatar { width: 26px; height: 26px; border-radius: 50%; background: #1a1a2e; flex-shrink: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; color: #555; }
+  .row .name { font-size: 11px; font-weight: 600; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row .wr { font-size: 9px; color: #00D4FF; width: 36px; text-align: right; }
+  .row .pnl { font-size: 11px; font-weight: 700; color: #22c55e; width: 65px; text-align: right; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="title">Top <span>Traders</span> & Devs</div>
+
+  <div class="board">
+    <!-- LEFT: Y-shaped podium with actual Y connector lines -->
+    <div class="y-podium">
+      <!-- SVG Y shape drawn as the connector -->
+      <svg class="y-svg" viewBox="0 0 300 290" preserveAspectRatio="none" style="height: 100%;">
+        <!-- Stem: center bottom of #1 card down to fork point -->
+        <line x1="150" y1="150" x2="150" y2="172" stroke="rgba(255,215,0,0.25)" stroke-width="1.5" />
+        <!-- Left fork: center down to left card -->
+        <line x1="150" y1="172" x2="73" y2="185" stroke="rgba(192,192,192,0.2)" stroke-width="1.5" />
+        <!-- Right fork: center down to right card -->
+        <line x1="150" y1="172" x2="227" y2="185" stroke="rgba(205,127,50,0.2)" stroke-width="1.5" />
+        <!-- Fork point glow -->
+        <circle cx="150" cy="172" r="3" fill="rgba(255,215,0,0.4)" />
+        <!-- Gold glow on stem -->
+        <line x1="150" y1="150" x2="150" y2="172" stroke="rgba(255,215,0,0.08)" stroke-width="6" />
+      </svg>
+
+      <!-- #1 — top of Y -->
+      <div class="y-top">
+        <div class="card-1st">
+          <div class="bg" style="background-image: url('https://unavatar.io/twitter/blknoiz06');"></div>
+          <div class="crown">👑</div>
+          <div class="info">
+            <div class="rank-label mono">1ST PLACE</div>
+            <div class="name">@ansem</div>
+            <div class="meta">71% WR · 847 trades · SNIPER</div>
+            <div class="pnl mono">+142 SOL</div>
+            <div class="pnl-sub mono">REALIZED PNL</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Y fork gap — the lines connect through here -->
+      <div style="height: 28px;"></div>
+
+      <!-- #2 and #3 — the two arms of the Y -->
+      <div class="y-fork">
+        <div class="card-runner silver">
+          <div class="bg" style="background-image: url('https://unavatar.io/twitter/ansaborern');"></div>
+          <div class="info">
+            <div class="rank-label mono" style="color:#C0C0C0;">2ND</div>
+            <div class="name">@blknoiz06</div>
+            <div class="pnl mono">+98 SOL</div>
+          </div>
+        </div>
+        <div class="card-runner bronze">
+          <div class="bg" style="background-image: url('https://unavatar.io/twitter/CryptoGodJohn');"></div>
+          <div class="info">
+            <div class="rank-label mono" style="color:#CD7F32;">3RD</div>
+            <div class="name">@cryptowiz</div>
+            <div class="pnl mono">+76 SOL</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: compact list #4-13 -->
+    <div class="list-side">
+      <div class="list-header">
+        <div style="width:20px">#</div>
+        <div style="width:26px"></div>
+        <div style="flex:1;padding-left:10px">TRADER</div>
+        <div style="width:36px;text-align:right">WR</div>
+        <div style="width:65px;text-align:right">PNL</div>
+      </div>
+      <div class="row"><div class="rank mono">4</div><div class="avatar">D</div><div class="name">@sol_whale</div><div class="wr mono">62%</div><div class="pnl mono">+54 SOL</div></div>
+      <div class="row"><div class="rank mono">5</div><div class="avatar">E</div><div class="name">@degen_mike</div><div class="wr mono">59%</div><div class="pnl mono">+47 SOL</div></div>
+      <div class="row"><div class="rank mono">6</div><div class="avatar">F</div><div class="name">@pump_master</div><div class="wr mono">55%</div><div class="pnl mono">+41 SOL</div></div>
+      <div class="row"><div class="rank mono">7</div><div class="avatar">G</div><div class="name">@trencher_og</div><div class="wr mono">53%</div><div class="pnl mono">+38 SOL</div></div>
+      <div class="row"><div class="rank mono">8</div><div class="avatar">H</div><div class="name">@alpha_calls</div><div class="wr mono">51%</div><div class="pnl mono">+33 SOL</div></div>
+      <div class="row"><div class="rank mono">9</div><div class="avatar">I</div><div class="name">@sniper_sol</div><div class="wr mono">49%</div><div class="pnl mono">+29 SOL</div></div>
+      <div class="row"><div class="rank mono">10</div><div class="avatar">J</div><div class="name">@memecoin_king</div><div class="wr mono">47%</div><div class="pnl mono">+24 SOL</div></div>
+      <div class="row"><div class="rank mono">11</div><div class="avatar">K</div><div class="name">@ape_in_first</div><div class="wr mono">45%</div><div class="pnl mono">+21 SOL</div></div>
+      <div class="row"><div class="rank mono">12</div><div class="avatar">L</div><div class="name">@chart_reader</div><div class="wr mono">44%</div><div class="pnl mono">+18 SOL</div></div>
+      <div class="row"><div class="rank mono">13</div><div class="avatar">M</div><div class="name">@based_trader</div><div class="wr mono">42%</div><div class="pnl mono">+15 SOL</div></div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

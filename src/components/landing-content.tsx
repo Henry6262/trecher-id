@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Check } from 'lucide-react';
+import { Check, AtSign, BarChart3, Zap } from 'lucide-react';
 import { CutButton } from '@/components/cut-button';
 import DecryptedText from '@/components/decrypted-text';
 import { GlassCard } from '@/components/glass-card';
@@ -169,12 +169,12 @@ export function LandingContent({ traders, featured, ticker, leaderboardData }: L
               {/* Links */}
               <div className="px-5 pt-4 pb-3 flex flex-col gap-1.5">
                 {[
-                  { icon: '𝕏', label: `Follow @${featured.username}` },
-                  { icon: '📊', label: 'Trading Dashboard' },
-                  { icon: '⚡', label: 'Latest Calls' },
+                  { icon: <AtSign size={13} />, label: `Follow @${featured.username}` },
+                  { icon: <BarChart3 size={13} />, label: 'Trading Dashboard' },
+                  { icon: <Zap size={13} />, label: 'Latest Calls' },
                 ].map(l => (
                   <div key={l.label} className="flex items-center gap-2.5 px-3 py-2" style={{ background: 'rgba(0,212,255,0.04)', border: '1px solid rgba(0,212,255,0.08)', clipPath: 'polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px)' }}>
-                    <span className="text-[13px]">{l.icon}</span>
+                    <span className="text-[var(--trench-accent)]">{l.icon}</span>
                     <span className="flex-1 text-[11px] text-white">{l.label}</span>
                     <span className="text-[13px] text-[var(--trench-text-muted)]">›</span>
                   </div>
@@ -227,7 +227,7 @@ export function LandingContent({ traders, featured, ticker, leaderboardData }: L
         {/* Leaderboard — traders + deployers */}
         <section className="mx-auto max-w-[780px] px-6 sm:px-12 lg:px-16 py-10 sm:py-16">
           <div className="mb-8 text-center">
-            <h2 className="text-2xl sm:text-3xl font-bold text-white">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white">
               Leaderboard
             </h2>
           </div>
@@ -250,17 +250,22 @@ export function LandingContent({ traders, featured, ticker, leaderboardData }: L
           <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.1), transparent)' }} />
         </div>
 
-        {/* Top Traders + CTA — merged */}
-        <section className="py-16 relative">
-          {/* Darkened overlay */}
+        {/* Top Traders — gallery is the page ending */}
+        <section className="relative">
           <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(180deg, transparent 0%, rgba(5,5,8,0.4) 40%, rgba(5,5,8,0.7) 100%)' }} />
 
-          <div className="mx-auto mb-8 max-w-[900px] px-6 sm:px-12 lg:px-16 relative">
-            <h2 className="mb-1 text-2xl sm:text-3xl lg:text-4xl font-bold text-white">Top <span className="text-[var(--trench-accent)]">traders</span></h2>
+          <div className="mx-auto mb-6 max-w-[780px] px-6 sm:px-12 lg:px-16 relative text-center">
+            <h2 className="mb-1 text-2xl sm:text-3xl lg:text-4xl font-bold text-white">Top <span className="text-[var(--trench-accent)]">Traders</span></h2>
             <p className="text-[13px] text-[var(--trench-text-muted)]">Already on Web3Me. Are you?</p>
           </div>
 
           <div className="h-[520px] w-full relative">
+            {/* CTA centered on gallery */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 text-center px-10 py-8 cut-sm" style={{ background: 'rgba(5,5,8,0.6)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', boxShadow: '0 0 60px rgba(5,5,8,0.8), 0 0 120px rgba(5,5,8,0.4)' }}>
+              <p className="mb-3 text-[12px] text-[var(--trench-text-muted)]">Create yours today.</p>
+              <CutButton href="/login" size="lg">Create Your Web3Me</CutButton>
+            </div>
+
             <DomeGallery
               images={domeImages}
               fit={0.8}
@@ -270,23 +275,17 @@ export function LandingContent({ traders, featured, ticker, leaderboardData }: L
               dragDampening={2}
               grayscale={false}
             />
+          </div>
 
-            {/* CTA overlaid on bottom of gallery */}
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 text-center">
-              <p className="mb-3 text-[12px] text-[var(--trench-text-muted)]" style={{ textShadow: '0 0 12px rgba(5,5,8,0.8)' }}>Create yours today.</p>
-              <CutButton href="/login" size="lg">Create Your Web3Me</CutButton>
-            </div>
+          {/* Footer — overlaid at bottom of gallery */}
+          <div className="absolute bottom-0 left-0 right-0 py-4 text-center z-10">
+            <Link href="/" className="mb-1 inline-block">
+              <Image src="/logo.png" alt="Web3Me" width={96} height={24} className="mx-auto h-5 w-auto opacity-20 transition-opacity hover:opacity-40" />
+            </Link>
+            <br />
+            <span className="text-[8px] font-mono tracking-[2px] text-[rgba(255,255,255,0.15)]">WEB3ME &middot; SOLANA &middot; 2026</span>
           </div>
         </section>
-
-        {/* Footer */}
-        <div className="mx-auto max-w-[780px] border-t border-[rgba(0,212,255,0.06)] px-6 sm:px-12 lg:px-16 py-6 text-center">
-          <Link href="/" className="mb-2 inline-block">
-            <Image src="/logo.png" alt="Web3Me" width={96} height={24} className="mx-auto h-6 w-auto opacity-30 transition-opacity hover:opacity-50" />
-          </Link>
-          <br />
-          <span className="text-[9px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">WEB3ME &middot; SOLANA &middot; 2026</span>
-        </div>
       </div>
     </div>
   );

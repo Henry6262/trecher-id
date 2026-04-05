@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #050508; color: white; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  .mono { font-family: 'SF Mono', 'Fira Code', ui-monospace, monospace; }
+
+  .container { max-width: 560px; margin: 0 auto; padding: 40px 20px; }
+  .label { font-size: 9px; letter-spacing: 3px; color: #FFD700; margin-bottom: 16px; }
+  .section-title { font-size: 16px; font-weight: 800; margin-bottom: 24px; }
+  .section-title span { color: #FFD700; }
+
+  .glass {
+    background: rgba(8,12,18,0.65);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(0,212,255,0.1);
+    clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
+    position: relative;
+    min-height: 380px;
+    overflow: hidden;
+  }
+  .glass::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, #FFD700, transparent);
+    opacity: 0.4;
+  }
+  .step-label { position: absolute; top: 16px; left: 20px; font-size: 8px; letter-spacing: 3px; color: rgba(255,215,0,0.5); }
+
+  .variant { margin-bottom: 32px; cursor: pointer; padding: 4px; border: 2px solid transparent; }
+  .variant:hover { border-color: rgba(255,215,0,0.15); }
+  .variant.selected { border-color: #FFD700; }
+  .variant-label { font-size: 9px; letter-spacing: 2px; color: #FFD700; margin-bottom: 8px; }
+  .variant-desc { font-size: 10px; color: #555; margin-bottom: 12px; }
+
+  /* ═══ A: Chest / Candy Machine filling up ═══ */
+  .a-content { padding: 48px 32px 32px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 380px; }
+
+  .a-chest-area { position: relative; width: 220px; height: 180px; margin-bottom: 16px; }
+
+  /* The chest */
+  .a-chest {
+    position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 140px; height: 90px;
+  }
+  .a-chest-body {
+    position: absolute; bottom: 0; width: 100%; height: 60px;
+    background: linear-gradient(180deg, #3a2a0a, #2a1a05);
+    border: 2px solid rgba(255,215,0,0.3);
+    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+    overflow: hidden;
+  }
+  /* Inner glow when full */
+  .a-chest-body::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(255,215,0,0.15) 0%, rgba(255,215,0,0.03) 100%);
+    animation: chestGlow 3s ease-in-out infinite;
+  }
+  @keyframes chestGlow {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+  }
+
+  .a-chest-lid {
+    position: absolute; bottom: 56px; width: 100%; height: 36px;
+    background: linear-gradient(180deg, #4a3a15, #3a2a0a);
+    border: 2px solid rgba(255,215,0,0.3);
+    border-bottom: none;
+    clip-path: polygon(0 30%, 6px 0, calc(100% - 6px) 0, 100% 30%, 100% 100%, 0 100%);
+    transform-origin: bottom center;
+    animation: lidBounce 4s ease-in-out infinite;
+  }
+  @keyframes lidBounce {
+    0%, 70%, 100% { transform: rotateX(0deg); }
+    10%, 20% { transform: rotateX(-15deg); }
+  }
+
+  .a-chest-lock {
+    position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%);
+    width: 16px; height: 16px; border-radius: 50%;
+    background: #FFD700;
+    box-shadow: 0 0 10px rgba(255,215,0,0.4);
+    z-index: 2;
+  }
+
+  /* Coins flying into chest */
+  .a-fly-coin {
+    position: absolute;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #9945FF, #14F195);
+    box-shadow: 0 0 6px rgba(153,69,255,0.3);
+    animation: flyCoin 2s ease-in forwards;
+    opacity: 0;
+  }
+  @keyframes flyCoin {
+    0% { opacity: 1; transform: translate(0, 0) scale(1); }
+    80% { opacity: 1; }
+    100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(0.3); }
+  }
+  .a-fly-coin:nth-child(1) { top: 10px; left: 10px; --tx: 90px; --ty: 120px; animation-delay: 0.3s; }
+  .a-fly-coin:nth-child(2) { top: 20px; right: 10px; --tx: -70px; --ty: 110px; animation-delay: 0.9s; }
+  .a-fly-coin:nth-child(3) { top: 0; left: 50%; --tx: -10px; --ty: 130px; animation-delay: 1.5s; }
+  .a-fly-coin:nth-child(4) { top: 30px; left: 30px; --tx: 60px; --ty: 100px; animation-delay: 2.1s; }
+  .a-fly-coin:nth-child(5) { top: 10px; right: 30px; --tx: -50px; --ty: 120px; animation-delay: 2.7s; }
+
+  .a-amount-row {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 4px;
+  }
+  .a-vault-num { font-size: 36px; font-weight: 900; color: #FFD700; text-shadow: 0 0 20px rgba(255,215,0,0.3); }
+  .a-vault-num img { height: 24px; }
+  .a-fee-tag { font-size: 11px; color: #FFD700; font-weight: 700; margin-bottom: 20px; }
+
+  .a-payout {
+    width: 100%; max-width: 280px;
+    padding: 14px 20px;
+    background: rgba(0,212,255,0.03);
+    border: 1px solid rgba(0,212,255,0.08);
+    clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px);
+    text-align: center;
+  }
+  .a-payout-label { font-size: 8px; letter-spacing: 2px; color: #777; margin-bottom: 4px; }
+  .a-payout-val { font-size: 24px; font-weight: 900; color: #00D4FF; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .a-payout-val img { height: 18px; }
+  .a-payout-when { font-size: 9px; color: #555; margin-top: 4px; }
+
+  /* ═══ B: Simplified flywheel — just 3 nodes ═══ */
+  .b-content { padding: 48px 32px 32px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 380px; }
+
+  .b-flow {
+    display: flex; align-items: center; gap: 0;
+    margin-bottom: 24px;
+    width: 100%; max-width: 340px;
+  }
+
+  .b-node {
+    flex: 1;
+    text-align: center;
+    padding: 16px 8px;
+    background: rgba(8,12,22,0.6);
+    border: 1px solid rgba(255,255,255,0.04);
+    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+  }
+  .b-node-icon { font-size: 28px; margin-bottom: 6px; }
+  .b-node-title { font-size: 10px; font-weight: 800; margin-bottom: 2px; }
+  .b-node-val { font-size: 13px; font-weight: 900; }
+
+  .b-arrow {
+    font-size: 16px; color: rgba(255,215,0,0.3);
+    flex-shrink: 0; padding: 0 4px;
+    animation: arrowPulse 1.5s ease-in-out infinite;
+  }
+  .b-arrow:nth-child(4) { animation-delay: 0.5s; }
+  @keyframes arrowPulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; color: #FFD700; } }
+
+  .b-vault-total {
+    font-size: 40px; font-weight: 900; color: #00D4FF;
+    text-shadow: 0 0 24px rgba(0,212,255,0.3);
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 4px;
+  }
+  .b-vault-total img { height: 28px; }
+  .b-vault-desc { font-size: 11px; color: #555; margin-bottom: 20px; }
+
+  .b-your-cut {
+    width: 100%; max-width: 280px;
+    padding: 14px 20px;
+    background: rgba(0,212,255,0.03);
+    border: 1px solid rgba(0,212,255,0.08);
+    clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px);
+    text-align: center;
+  }
+  .b-cut-label { font-size: 8px; letter-spacing: 2px; color: #777; margin-bottom: 4px; }
+  .b-cut-val { font-size: 24px; font-weight: 900; color: #00D4FF; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .b-cut-val img { height: 18px; }
+  .b-cut-when { font-size: 9px; color: #555; margin-top: 4px; }
+
+  /* ═══ C: Slot machine / candy machine ═══ */
+  .c-content { padding: 48px 28px 32px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 380px; }
+
+  .c-machine {
+    position: relative;
+    width: 180px; height: 200px;
+    margin-bottom: 20px;
+  }
+
+  .c-machine-body {
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, #1a1a2e, #111128);
+    border: 2px solid rgba(255,215,0,0.2);
+    clip-path: polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%, 0 8px);
+    overflow: hidden;
+  }
+
+  .c-machine-top {
+    height: 30px;
+    background: linear-gradient(180deg, rgba(255,215,0,0.1), transparent);
+    border-bottom: 1px solid rgba(255,215,0,0.1);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 8px; letter-spacing: 3px; color: #FFD700;
+  }
+
+  /* Dispensing window */
+  .c-dispense {
+    padding: 12px;
+    height: 120px;
+    display: flex; flex-wrap: wrap; gap: 4px;
+    align-content: flex-end;
+    justify-content: center;
+  }
+
+  .c-token {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #9945FF, #14F195);
+    box-shadow: 0 0 6px rgba(153,69,255,0.2);
+    opacity: 0;
+    animation: tokenAppear 0.3s ease-out forwards;
+  }
+  .c-token:nth-child(1) { animation-delay: 0.2s; }
+  .c-token:nth-child(2) { animation-delay: 0.5s; }
+  .c-token:nth-child(3) { animation-delay: 0.8s; }
+  .c-token:nth-child(4) { animation-delay: 1.1s; }
+  .c-token:nth-child(5) { animation-delay: 1.4s; }
+  .c-token:nth-child(6) { animation-delay: 1.7s; }
+  .c-token:nth-child(7) { animation-delay: 2.0s; }
+  .c-token:nth-child(8) { animation-delay: 2.3s; }
+  .c-token:nth-child(9) { animation-delay: 2.6s; }
+  .c-token:nth-child(10) { animation-delay: 2.9s; }
+  .c-token:nth-child(11) { animation-delay: 3.2s; }
+  .c-token:nth-child(12) { animation-delay: 3.5s; }
+  @keyframes tokenAppear {
+    from { opacity: 0; transform: translateY(-10px) scale(0.5); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* Dispense slot */
+  .c-slot {
+    height: 30px;
+    background: rgba(0,0,0,0.4);
+    border-top: 1px solid rgba(255,215,0,0.1);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .c-slot-opening {
+    width: 50px; height: 12px;
+    background: rgba(0,0,0,0.6);
+    border-radius: 6px;
+    border: 1px solid rgba(255,215,0,0.15);
+  }
+
+  .c-machine-label { font-size: 10px; letter-spacing: 2px; color: #FFD700; margin-bottom: 4px; }
+
+  .c-amount { font-size: 36px; font-weight: 900; color: #00D4FF; text-shadow: 0 0 20px rgba(0,212,255,0.3); display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .c-amount img { height: 24px; }
+  .c-fee { font-size: 11px; color: #FFD700; font-weight: 700; margin-bottom: 16px; }
+
+  .c-share {
+    width: 100%; max-width: 280px;
+    padding: 14px 20px;
+    background: rgba(0,212,255,0.03);
+    border: 1px solid rgba(0,212,255,0.08);
+    clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px);
+    text-align: center;
+  }
+  .c-share-label { font-size: 8px; letter-spacing: 2px; color: #777; margin-bottom: 4px; }
+  .c-share-val { font-size: 24px; font-weight: 900; color: #00D4FF; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .c-share-val img { height: 18px; }
+  .c-share-when { font-size: 9px; color: #555; margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="label">SCREEN 5 OF 5 — EARN</div>
+  <div class="section-title">Pick the <span>Vault</span> screen visual</div>
+</div>
+
+<!-- A: Treasure chest with coins flying in -->
+<div class="variant" data-choice="a" onclick="document.querySelectorAll('.variant').forEach(e=>e.classList.remove('selected'));this.classList.add('selected')">
+  <div class="container">
+    <div class="variant-label">A — TREASURE CHEST</div>
+    <div class="variant-desc">A treasure chest with glowing gold edges. SOL coins fly in from all directions, lid bounces as they land. Inner glow pulses. Below: vault total + your weekly share. Feels like loot dropping.</div>
+    <div class="glass">
+      <div class="step-label mono" style="color:rgba(255,215,0,0.5);">STEP 5 — EARN</div>
+      <div class="a-content">
+        <div class="a-chest-area">
+          <div class="a-fly-coin"></div>
+          <div class="a-fly-coin"></div>
+          <div class="a-fly-coin"></div>
+          <div class="a-fly-coin"></div>
+          <div class="a-fly-coin"></div>
+          <div class="a-chest">
+            <div class="a-chest-lid"></div>
+            <div class="a-chest-lock"></div>
+            <div class="a-chest-body"></div>
+          </div>
+        </div>
+
+        <div class="a-amount-row">
+          <span class="a-vault-num mono">127</span>
+          <img src="/sol.png" alt="SOL" style="height:24px;">
+        </div>
+        <div class="a-fee-tag mono">69% of every $WEB3ME trade</div>
+
+        <div class="a-payout">
+          <div class="a-payout-label mono">YOUR WEEKLY SHARE (#7)</div>
+          <div class="a-payout-val mono">+4 <img src="/sol.png" alt="SOL"></div>
+          <div class="a-payout-when">Sent to your wallet every Sunday</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- B: Simplified 3-node flow -->
+<div class="variant" data-choice="b" onclick="document.querySelectorAll('.variant').forEach(e=>e.classList.remove('selected'));this.classList.add('selected')">
+  <div class="container">
+    <div class="variant-label">B — SIMPLE FLOW</div>
+    <div class="variant-desc">Three nodes in a row: Trade → Vault → Payout. Arrows pulse between them. Big vault amount in the center. Your cut below. Clean, simple, no complexity. Just shows where the money goes.</div>
+    <div class="glass">
+      <div class="step-label mono" style="color:rgba(255,215,0,0.5);">STEP 5 — EARN</div>
+      <div class="b-content">
+        <div class="b-flow">
+          <div class="b-node">
+            <div class="b-node-icon">💱</div>
+            <div class="b-node-title" style="color:#FFD700;">TRADE</div>
+            <div class="b-node-val mono" style="color:#FFD700;">$WEB3ME</div>
+          </div>
+          <div class="b-arrow">→</div>
+          <div class="b-node" style="border-color:rgba(255,215,0,0.15);">
+            <div class="b-node-icon">🏦</div>
+            <div class="b-node-title" style="color:#FFD700;">VAULT</div>
+            <div class="b-node-val mono" style="color:#FFD700;">69%</div>
+          </div>
+          <div class="b-arrow">→</div>
+          <div class="b-node" style="border-color:rgba(0,212,255,0.15);">
+            <div class="b-node-icon">💰</div>
+            <div class="b-node-title" style="color:#00D4FF;">PAYOUT</div>
+            <div class="b-node-val mono" style="color:#00D4FF;">TOP 10</div>
+          </div>
+        </div>
+
+        <div class="b-vault-total mono">127 <img src="/sol.png" alt="SOL"></div>
+        <div class="b-vault-desc">and growing every second</div>
+
+        <div class="b-your-cut">
+          <div class="b-cut-label mono">YOUR WEEKLY SHARE (#7)</div>
+          <div class="b-cut-val mono">+4 <img src="/sol.png" alt="SOL"></div>
+          <div class="b-cut-when">Sent to your wallet every Sunday</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- C: Candy machine dispensing tokens -->
+<div class="variant" data-choice="c" onclick="document.querySelectorAll('.variant').forEach(e=>e.classList.remove('selected'));this.classList.add('selected')">
+  <div class="container">
+    <div class="variant-label">C — CANDY MACHINE</div>
+    <div class="variant-desc">A gumball/candy machine shape filling up with SOL tokens one by one. Gold-trimmed machine with a dispensing slot at the bottom. Tokens appear with a drop animation. Your share below.</div>
+    <div class="glass">
+      <div class="step-label mono" style="color:rgba(255,215,0,0.5);">STEP 5 — EARN</div>
+      <div class="c-content">
+        <div class="c-machine">
+          <div class="c-machine-body">
+            <div class="c-machine-top mono">REWARD VAULT</div>
+            <div class="c-dispense">
+              <div class="c-token"></div>
+              <div class="c-token"></div>
+              <div class="c-token"></div>
+              <div class="c-token"></div>
+              <div class="c-token"></div>
+              <div class="c-token"></div>
+              <div class="c-token"></div>
+              <div class="c-token"></div>
+              <div class="c-token"></div>
+              <div class="c-token"></div>
+              <div class="c-token"></div>
+              <div class="c-token"></div>
+            </div>
+            <div class="c-slot"><div class="c-slot-opening"></div></div>
+          </div>
+        </div>
+
+        <div class="c-machine-label mono">REWARD VAULT</div>
+        <div class="c-amount mono">127 <img src="/sol.png" alt="SOL"></div>
+        <div class="c-fee mono">69% of every $WEB3ME trade</div>
+
+        <div class="c-share">
+          <div class="c-share-label mono">YOUR WEEKLY SHARE (#7)</div>
+          <div class="c-share-val mono">+4 <img src="/sol.png" alt="SOL"></div>
+          <div class="c-share-when">Sent to your wallet every Sunday</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

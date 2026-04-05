@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #050508; color: white; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  .mono { font-family: 'SF Mono', 'Fira Code', ui-monospace, monospace; }
+  .cut { clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px); }
+
+  .section { max-width: 900px; margin: 0 auto; padding: 60px 20px; }
+  .divider { max-width: 900px; margin: 0 auto; padding: 0 20px; }
+  .divider-line { height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent); }
+  .variant-badge { font-size: 9px; letter-spacing: 3px; color: #FFD700; margin-bottom: 12px; display: block; }
+  .variant-title { font-size: 18px; font-weight: 800; margin-bottom: 4px; }
+  .variant-desc { font-size: 11px; color: #555; margin-bottom: 24px; }
+
+  /* ═══ Shared: Animated step flow ═══ */
+  .flow-container { position: relative; }
+
+  /* Step indicator */
+  .step-dot {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 900; flex-shrink: 0;
+    transition: all 0.5s;
+  }
+  .step-dot.active {
+    background: #00D4FF;
+    color: black;
+    box-shadow: 0 0 20px rgba(0,212,255,0.4);
+  }
+  .step-dot.done {
+    background: #22c55e;
+    color: black;
+    box-shadow: 0 0 12px rgba(34,197,94,0.3);
+  }
+  .step-dot.pending {
+    background: rgba(255,255,255,0.06);
+    color: #555;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+
+  /* Step connector line */
+  .step-line {
+    height: 2px; flex: 1;
+    transition: background 0.5s;
+  }
+  .step-line.done { background: linear-gradient(90deg, #22c55e, #00D4FF); }
+  .step-line.pending { background: rgba(255,255,255,0.04); }
+
+  /* ═══ VARIANT A: Stacked timeline with animated content ═══ */
+  .timeline-a {
+    position: relative;
+  }
+
+  .timeline-row {
+    display: flex;
+    gap: 20px;
+    padding: 20px 0;
+    position: relative;
+    opacity: 0.3;
+    transition: all 0.6s;
+  }
+  .timeline-row.active { opacity: 1; }
+  .timeline-row.done { opacity: 0.7; }
+
+  .timeline-num {
+    width: 40px; height: 40px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 900;
+    flex-shrink: 0;
+    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+    transition: all 0.5s;
+  }
+  .timeline-row.active .timeline-num { background: #00D4FF; color: black; box-shadow: 0 0 20px rgba(0,212,255,0.3); }
+  .timeline-row.done .timeline-num { background: #22c55e; color: black; }
+  .timeline-row.pending .timeline-num { background: rgba(255,255,255,0.04); color: #333; border: 1px solid rgba(255,255,255,0.06); }
+
+  .timeline-content { flex: 1; }
+  .timeline-title { font-size: 14px; font-weight: 800; margin-bottom: 4px; }
+  .timeline-desc { font-size: 11px; color: #888; line-height: 1.5; }
+  .timeline-row.active .timeline-title { color: #00D4FF; }
+  .timeline-row.done .timeline-title { color: #22c55e; }
+
+  /* Animated visual next to the step */
+  .timeline-visual {
+    width: 200px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    padding: 16px;
+    background: rgba(8,12,22,0.4);
+    border: 1px solid rgba(0,212,255,0.06);
+    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+  }
+
+  /* ═══ VARIANT B: Split — How it works left, Rewards right ═══ */
+  .split-b { display: flex; gap: 24px; }
+  .split-left { flex: 1; }
+  .split-right { flex: 1; }
+
+  .split-card {
+    padding: 20px;
+    background: rgba(8,12,22,0.5);
+    border: 1px solid rgba(255,255,255,0.04);
+    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+    margin-bottom: 8px;
+    transition: all 0.3s;
+  }
+  .split-card.active { border-color: rgba(0,212,255,0.2); background: rgba(0,212,255,0.03); }
+  .split-card .num { font-size: 20px; font-weight: 900; color: #00D4FF; margin-bottom: 6px; }
+  .split-card .title { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .split-card .desc { font-size: 10px; color: #666; line-height: 1.5; }
+
+  /* ═══ VARIANT C: Single animated journey — 6 steps as one flow ═══ */
+  .journey-c { position: relative; }
+
+  .journey-header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .journey-header h2 { font-size: 26px; font-weight: 900; }
+  .journey-header h2 span { color: #00D4FF; }
+  .journey-header p { font-size: 11px; color: #555; margin-top: 6px; }
+
+  /* Progress bar at top */
+  .journey-progress {
+    display: flex; align-items: center; gap: 0;
+    margin-bottom: 32px;
+    padding: 0 20px;
+  }
+
+  /* Active step content — big visual */
+  .journey-stage {
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 32px;
+    padding: 24px;
+    background: rgba(8,12,22,0.4);
+    border: 1px solid rgba(0,212,255,0.08);
+    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .journey-stage::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #00D4FF, transparent);
+  }
+
+  .journey-left {
+    flex: 1;
+  }
+  .journey-left .step-label { font-size: 8px; letter-spacing: 3px; color: #00D4FF; margin-bottom: 8px; }
+  .journey-left h3 { font-size: 20px; font-weight: 900; margin-bottom: 8px; }
+  .journey-left p { font-size: 12px; color: #888; line-height: 1.6; max-width: 320px; }
+
+  .journey-right {
+    width: 280px; flex-shrink: 0;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+
+  /* Mini animated visual per step */
+  .mini-visual {
+    padding: 12px 16px;
+    background: rgba(0,212,255,0.03);
+    border: 1px solid rgba(0,212,255,0.08);
+    font-size: 10px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .mini-visual .icon { font-size: 18px; flex-shrink: 0; }
+  .mini-visual .label { color: #888; }
+  .mini-visual .value { color: #00D4FF; font-weight: 700; margin-left: auto; }
+
+  /* Selectable */
+  .selectable { cursor: pointer; position: relative; border: 2px solid transparent; padding: 2px; margin-bottom: 40px; }
+  .selectable:hover { border-color: rgba(0,212,255,0.15); }
+  .selectable.selected { border-color: #FFD700; }
+</style>
+</head>
+<body>
+
+<!-- ═══ VARIANT A: Vertical timeline — auto-playing steps ═══ -->
+<div class="selectable" data-choice="a" onclick="document.querySelectorAll('.selectable').forEach(e=>e.classList.remove('selected'));this.classList.add('selected')">
+<div class="section">
+  <span class="variant-badge">VARIANT A</span>
+  <div class="variant-title">Auto-playing vertical timeline</div>
+  <div class="variant-desc">All 6 steps in one vertical flow. Auto-plays through each step — the active step expands with a visual animation, completed steps show green checkmarks. Loops forever.</div>
+
+  <div style="text-align:center;margin-bottom:24px;">
+    <h2 style="font-size:24px;font-weight:900;">Your <span style="color:#00D4FF">journey</span></h2>
+    <p style="font-size:11px;color:#555;margin-top:4px;">From sign-up to earning rewards in 6 steps</p>
+  </div>
+
+  <div class="timeline-a">
+    <!-- Step 1 — done -->
+    <div class="timeline-row done">
+      <div class="timeline-num">1</div>
+      <div class="timeline-content">
+        <div class="timeline-title">Sign in with X</div>
+        <div class="timeline-desc">Connect your Twitter account. Your handle becomes your Web3Me URL.</div>
+      </div>
+    </div>
+
+    <!-- Step 2 — done -->
+    <div class="timeline-row done">
+      <div class="timeline-num">2</div>
+      <div class="timeline-content">
+        <div class="timeline-title">Link your wallets</div>
+        <div class="timeline-desc">Add Solana wallets. We fetch your real trading history from the blockchain.</div>
+      </div>
+    </div>
+
+    <!-- Step 3 — active -->
+    <div class="timeline-row active">
+      <div class="timeline-num">3</div>
+      <div class="timeline-content">
+        <div class="timeline-title">Share your link</div>
+        <div class="timeline-desc">Add custom links, pin your best trades. Drop your Web3Me everywhere.</div>
+      </div>
+      <div class="timeline-visual">
+        <div style="text-align:center;">
+          <div style="font-size:10px;color:#00D4FF;letter-spacing:2px;margin-bottom:8px;">YOUR PROFILE</div>
+          <div style="font-size:14px;font-weight:800;">web3me.fun/<span style="color:#00D4FF">you</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4 — pending -->
+    <div class="timeline-row pending">
+      <div class="timeline-num">4</div>
+      <div class="timeline-content">
+        <div class="timeline-title">Climb the leaderboard</div>
+        <div class="timeline-desc">Your realized PnL determines your rank. Updated hourly from on-chain data.</div>
+      </div>
+    </div>
+
+    <!-- Step 5 — pending -->
+    <div class="timeline-row pending">
+      <div class="timeline-num">5</div>
+      <div class="timeline-content">
+        <div class="timeline-title">Compete in the Trencher Cup</div>
+        <div class="timeline-desc">Top 32 qualify. Group stage, knockout bracket, champion takes the vault.</div>
+      </div>
+    </div>
+
+    <!-- Step 6 — pending -->
+    <div class="timeline-row pending">
+      <div class="timeline-num">6</div>
+      <div class="timeline-content">
+        <div class="timeline-title">Earn from the Reward Vault</div>
+        <div class="timeline-desc">69% of all $WEB3ME fees flow into the vault. Weekly payouts to top 10. Cup prizes for top 4.</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="divider"><div class="divider-line"></div></div>
+
+<!-- ═══ VARIANT B: Side-by-side split ═══ -->
+<div class="selectable" data-choice="b" onclick="document.querySelectorAll('.selectable').forEach(e=>e.classList.remove('selected'));this.classList.add('selected')">
+<div class="section">
+  <span class="variant-badge">VARIANT B</span>
+  <div class="variant-title">Split — Get Started (left) + Earn Rewards (right)</div>
+  <div class="variant-desc">Two columns. Left: how to set up (3 steps). Right: how you earn (3 steps). Both auto-play with the active step highlighted.</div>
+
+  <div style="text-align:center;margin-bottom:24px;">
+    <h2 style="font-size:24px;font-weight:900;">Your <span style="color:#00D4FF">journey</span></h2>
+  </div>
+
+  <div class="split-b">
+    <div class="split-left">
+      <div style="font-size:9px;letter-spacing:2px;color:#555;margin-bottom:12px;">GET STARTED</div>
+      <div class="split-card active">
+        <div class="num mono">01</div>
+        <div class="title">Sign in with X</div>
+        <div class="desc">Connect your Twitter account. Your handle becomes your Web3Me URL.</div>
+      </div>
+      <div class="split-card">
+        <div class="num mono" style="color:#333">02</div>
+        <div class="title" style="color:#888">Link your wallets</div>
+        <div class="desc">Add Solana wallets. We fetch your real trading history from the blockchain.</div>
+      </div>
+      <div class="split-card">
+        <div class="num mono" style="color:#333">03</div>
+        <div class="title" style="color:#888">Share your link</div>
+        <div class="desc">Add custom links, pin your best trades. Drop your Web3Me everywhere.</div>
+      </div>
+    </div>
+
+    <div style="width:1px;background:linear-gradient(180deg,transparent,rgba(0,212,255,0.12),transparent);flex-shrink:0;"></div>
+
+    <div class="split-right">
+      <div style="font-size:9px;letter-spacing:2px;color:#FFD700;margin-bottom:12px;">EARN REWARDS</div>
+      <div class="split-card">
+        <div class="num mono" style="color:#FFD700">04</div>
+        <div class="title">Climb the leaderboard</div>
+        <div class="desc">Your realized PnL across all wallets determines your rank. Updated hourly.</div>
+      </div>
+      <div class="split-card">
+        <div class="num mono" style="color:#FFD700">05</div>
+        <div class="title">Compete in Trencher Cup</div>
+        <div class="desc">Top 32 qualify. World Cup format — groups, knockout, champion takes the vault.</div>
+      </div>
+      <div class="split-card">
+        <div class="num mono" style="color:#FFD700">06</div>
+        <div class="title">Earn from the Vault</div>
+        <div class="desc">69% of $WEB3ME fees → vault. Weekly top 10 payouts + Cup prizes for top 4.</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="divider"><div class="divider-line"></div></div>
+
+<!-- ═══ VARIANT C: Single animated stage — cycling through 6 steps ═══ -->
+<div class="selectable" data-choice="c" onclick="document.querySelectorAll('.selectable').forEach(e=>e.classList.remove('selected'));this.classList.add('selected')">
+<div class="section">
+  <span class="variant-badge">VARIANT C</span>
+  <div class="variant-title">Single animated stage — auto-cycling</div>
+  <div class="variant-desc">One big stage area that cycles through all 6 steps. Progress dots at top show where you are. Each step has a unique visual animation on the right. Like the Arena's VS/battle/KO flow but for the journey.</div>
+
+  <div class="journey-c">
+    <div class="journey-header">
+      <h2>Your <span>journey</span></h2>
+      <p>From sign-up to earning rewards</p>
+    </div>
+
+    <!-- Progress dots -->
+    <div class="journey-progress">
+      <div class="step-dot done" style="font-size:10px">✓</div>
+      <div class="step-line done"></div>
+      <div class="step-dot done" style="font-size:10px">✓</div>
+      <div class="step-line done"></div>
+      <div class="step-dot active" style="font-size:10px">3</div>
+      <div class="step-line pending"></div>
+      <div class="step-dot pending" style="font-size:10px">4</div>
+      <div class="step-line pending"></div>
+      <div class="step-dot pending" style="font-size:10px">5</div>
+      <div class="step-line pending"></div>
+      <div class="step-dot pending" style="font-size:10px">6</div>
+    </div>
+
+    <!-- Active step — big visual -->
+    <div class="journey-stage">
+      <div class="journey-left">
+        <div class="step-label mono">STEP 3 OF 6</div>
+        <h3>Share your <span style="color:#00D4FF">link</span></h3>
+        <p>Add custom links, pin your best trades. Drop your Web3Me URL in your Twitter bio, Telegram, Discord — everywhere.</p>
+      </div>
+      <div class="journey-right">
+        <div class="mini-visual cut">
+          <div class="icon">🔗</div>
+          <div class="label">Profile URL</div>
+          <div class="value">web3me.fun/you</div>
+        </div>
+        <div class="mini-visual cut">
+          <div class="icon">📌</div>
+          <div class="label">Pinned trades</div>
+          <div class="value">3 trades</div>
+        </div>
+        <div class="mini-visual cut">
+          <div class="icon">📤</div>
+          <div class="label">Share card</div>
+          <div class="value">1-click</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- Auto-play the timeline variant -->
+<script>
+  // Variant A auto-play
+  const rows = document.querySelectorAll('.timeline-row');
+  let currentStep = 2;
+
+  setInterval(() => {
+    rows.forEach((r, i) => {
+      r.classList.remove('active', 'done', 'pending');
+      if (i < currentStep) r.classList.add('done');
+      else if (i === currentStep) r.classList.add('active');
+      else r.classList.add('pending');
+    });
+    currentStep = (currentStep + 1) % rows.length;
+  }, 2500);
+</script>
+
+</body>
+</html>

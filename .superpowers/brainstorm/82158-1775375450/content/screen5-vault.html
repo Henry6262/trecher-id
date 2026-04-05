@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #050508; color: white; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  .mono { font-family: 'SF Mono', 'Fira Code', ui-monospace, monospace; }
+
+  .container { max-width: 560px; margin: 0 auto; padding: 40px 20px; }
+  .label { font-size: 9px; letter-spacing: 3px; color: #FFD700; margin-bottom: 16px; }
+  .section-title { font-size: 16px; font-weight: 800; margin-bottom: 24px; }
+  .section-title span { color: #FFD700; }
+
+  .glass {
+    background: rgba(8,12,18,0.65);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(0,212,255,0.1);
+    clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
+    position: relative;
+    min-height: 380px;
+    overflow: hidden;
+  }
+  .glass::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, #FFD700, transparent);
+    opacity: 0.4;
+  }
+  .step-label { position: absolute; top: 16px; left: 20px; font-size: 8px; letter-spacing: 3px; color: rgba(255,215,0,0.5); }
+
+  .variant { margin-bottom: 32px; cursor: pointer; padding: 4px; border: 2px solid transparent; }
+  .variant:hover { border-color: rgba(255,215,0,0.15); }
+  .variant.selected { border-color: #FFD700; }
+  .variant-label { font-size: 9px; letter-spacing: 2px; color: #FFD700; margin-bottom: 8px; }
+  .variant-desc { font-size: 10px; color: #555; margin-bottom: 12px; }
+
+  /* ═══ A: Vault filling animation + your share ═══ */
+  .a-content { padding: 48px 32px 32px; display: flex; flex-direction: column; align-items: center; justify-center: center; min-height: 380px; }
+
+  .a-vault-visual {
+    position: relative;
+    width: 200px; height: 140px;
+    margin-bottom: 20px;
+  }
+
+  .a-vault-box {
+    position: absolute; bottom: 0;
+    width: 100%; height: 100px;
+    border: 2px solid rgba(255,215,0,0.2);
+    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+    overflow: hidden;
+  }
+
+  .a-vault-fill {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: linear-gradient(180deg, rgba(0,212,255,0.15), rgba(0,212,255,0.06));
+    border-top: 1px solid rgba(0,212,255,0.2);
+    animation: vaultFill 4s ease-out forwards;
+  }
+  @keyframes vaultFill { from { height: 10%; } to { height: 72%; } }
+
+  .a-vault-label {
+    position: absolute; top: -24px; left: 50%; transform: translateX(-50%);
+    font-size: 8px; letter-spacing: 3px; color: #FFD700;
+  }
+
+  /* SOL coins dropping in */
+  .a-coin {
+    position: absolute;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #9945FF, #14F195);
+    top: -20px;
+    animation: coinDrop 1.5s ease-in forwards;
+    box-shadow: 0 0 8px rgba(153,69,255,0.3);
+  }
+  .a-coin:nth-child(2) { left: 30%; animation-delay: 0.5s; }
+  .a-coin:nth-child(3) { left: 55%; animation-delay: 1.2s; }
+  .a-coin:nth-child(4) { left: 75%; animation-delay: 2s; }
+  @keyframes coinDrop {
+    0% { transform: translateY(0); opacity: 1; }
+    70% { opacity: 1; }
+    100% { transform: translateY(120px); opacity: 0; }
+  }
+
+  .a-amount {
+    font-size: 36px; font-weight: 900; color: #00D4FF;
+    text-shadow: 0 0 24px rgba(0,212,255,0.3);
+    margin-bottom: 4px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .a-amount img { height: 24px; width: auto; }
+
+  .a-69 {
+    font-size: 11px; color: #FFD700; font-weight: 700;
+    margin-bottom: 20px;
+  }
+
+  .a-your-share {
+    width: 100%; max-width: 300px;
+    padding: 16px 20px;
+    background: rgba(0,212,255,0.03);
+    border: 1px solid rgba(0,212,255,0.1);
+    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+    text-align: center;
+  }
+
+  .a-share-label { font-size: 9px; letter-spacing: 2px; color: #777; margin-bottom: 6px; }
+  .a-share-amount {
+    font-size: 28px; font-weight: 900; color: #00D4FF;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .a-share-amount img { height: 20px; width: auto; }
+  .a-share-when { font-size: 10px; color: #555; margin-top: 6px; }
+
+  /* ═══ B: Transaction receipt style ═══ */
+  .b-content { padding: 48px 32px 32px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 380px; }
+
+  .b-receipt {
+    width: 100%; max-width: 300px;
+    background: rgba(8,12,22,0.8);
+    border: 1px solid rgba(0,212,255,0.08);
+    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+    overflow: hidden;
+  }
+
+  .b-receipt-header {
+    padding: 16px 20px;
+    text-align: center;
+    border-bottom: 1px dashed rgba(255,255,255,0.06);
+  }
+  .b-receipt-title { font-size: 10px; letter-spacing: 3px; color: #FFD700; margin-bottom: 4px; }
+  .b-receipt-subtitle { font-size: 9px; color: #555; }
+
+  .b-receipt-body { padding: 16px 20px; }
+  .b-receipt-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.02);
+  }
+  .b-receipt-key { font-size: 10px; color: #777; }
+  .b-receipt-val { font-size: 11px; font-weight: 700; }
+
+  .b-receipt-total {
+    padding: 16px 20px;
+    border-top: 1px dashed rgba(255,255,255,0.06);
+    text-align: center;
+  }
+  .b-receipt-total-label { font-size: 8px; letter-spacing: 2px; color: #777; margin-bottom: 4px; }
+  .b-receipt-total-amount {
+    font-size: 32px; font-weight: 900; color: #00D4FF;
+    text-shadow: 0 0 16px rgba(0,212,255,0.3);
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .b-receipt-total-amount img { height: 22px; width: auto; }
+
+  .b-receipt-footer {
+    padding: 12px 20px;
+    text-align: center;
+    background: rgba(0,212,255,0.02);
+    font-size: 9px; color: #555;
+  }
+  .b-receipt-footer span { color: #00D4FF; }
+
+  .b-tx-hash {
+    margin-top: 12px;
+    font-size: 9px; color: #333;
+    text-align: center;
+    opacity: 0;
+    animation: fadeIn 0.5s ease-out 2s forwards;
+  }
+  @keyframes fadeIn { to { opacity: 1; } }
+
+  /* ═══ C: Flywheel diagram ═══ */
+  .c-content { padding: 48px 28px 32px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 380px; }
+
+  .c-flywheel {
+    position: relative;
+    width: 240px; height: 240px;
+    margin-bottom: 16px;
+  }
+
+  .c-center {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: rgba(0,212,255,0.06);
+    border: 2px solid rgba(0,212,255,0.2);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    box-shadow: 0 0 30px rgba(0,212,255,0.1);
+    z-index: 2;
+  }
+  .c-center-val { font-size: 16px; font-weight: 900; color: #00D4FF; }
+  .c-center-lbl { font-size: 6px; letter-spacing: 1px; color: #555; }
+
+  .c-node {
+    position: absolute;
+    width: 70px;
+    text-align: center;
+    font-size: 8px; font-weight: 700;
+    padding: 8px 6px;
+    background: rgba(8,12,22,0.7);
+    border: 1px solid rgba(255,255,255,0.06);
+    clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px);
+  }
+  .c-node.n1 { top: 0; left: 50%; transform: translateX(-50%); color: #FFD700; border-color: rgba(255,215,0,0.15); }
+  .c-node.n2 { top: 50%; right: 0; transform: translateY(-50%); color: #00D4FF; border-color: rgba(0,212,255,0.15); }
+  .c-node.n3 { bottom: 0; left: 50%; transform: translateX(-50%); color: #00D4FF; border-color: rgba(0,212,255,0.15); }
+  .c-node.n4 { top: 50%; left: 0; transform: translateY(-50%); color: #FFD700; border-color: rgba(255,215,0,0.15); }
+
+  /* Rotating arrow ring */
+  .c-ring {
+    position: absolute; inset: 20px;
+    border: 1px dashed rgba(0,212,255,0.1);
+    border-radius: 50%;
+    animation: ringRotate 12s linear infinite;
+  }
+  @keyframes ringRotate { to { transform: rotate(360deg); } }
+  .c-ring-arrow {
+    position: absolute; top: -4px; left: 50%; transform: translateX(-50%);
+    font-size: 10px; color: #00D4FF;
+  }
+
+  .c-desc { font-size: 11px; color: #777; text-align: center; max-width: 280px; line-height: 1.5; }
+  .c-desc span { color: #FFD700; font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="label">SCREEN 5 OF 5 — EARN</div>
+  <div class="section-title">Pick the <span>Vault / Earn</span> screen visual</div>
+</div>
+
+<!-- A: Vault filling with coins + your share -->
+<div class="variant" data-choice="a" onclick="document.querySelectorAll('.variant').forEach(e=>e.classList.remove('selected'));this.classList.add('selected')">
+  <div class="container">
+    <div class="variant-label">A — VAULT FILLING</div>
+    <div class="variant-desc">A vault container visually filling up with an animated liquid level. SOL coins drop in from above. Below: your share card showing how much you'd earn at your rank. Makes the vault feel physical and tangible.</div>
+    <div class="glass">
+      <div class="step-label mono" style="color:rgba(255,215,0,0.5);">STEP 5 — EARN</div>
+      <div class="a-content">
+        <div class="a-vault-visual">
+          <div class="a-vault-label mono">REWARD VAULT</div>
+          <div class="a-vault-box">
+            <div class="a-vault-fill"></div>
+            <div class="a-coin" style="left:20%;"></div>
+            <div class="a-coin"></div>
+            <div class="a-coin"></div>
+            <div class="a-coin"></div>
+          </div>
+        </div>
+
+        <div class="a-amount mono">127 <img src="/sol.png" alt="SOL"></div>
+        <div class="a-69 mono">69% of every $WEB3ME trade</div>
+
+        <div class="a-your-share">
+          <div class="a-share-label mono">YOUR WEEKLY SHARE (RANK #7)</div>
+          <div class="a-share-amount mono">+4 <img src="/sol.png" alt="SOL"></div>
+          <div class="a-share-when">Sent to your wallet every Sunday</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- B: Transaction receipt -->
+<div class="variant" data-choice="b" onclick="document.querySelectorAll('.variant').forEach(e=>e.classList.remove('selected'));this.classList.add('selected')">
+  <div class="container">
+    <div class="variant-label">B — PAYOUT RECEIPT</div>
+    <div class="variant-desc">A clean transaction receipt showing a real payout: your rank, the pool size, your share %, and the final amount. Like a bank statement but for degen rewards. TX hash fades in at the bottom for on-chain proof.</div>
+    <div class="glass">
+      <div class="step-label mono" style="color:rgba(255,215,0,0.5);">STEP 5 — EARN</div>
+      <div class="b-content">
+        <div class="b-receipt">
+          <div class="b-receipt-header">
+            <div class="b-receipt-title mono">WEEKLY PAYOUT</div>
+            <div class="b-receipt-subtitle mono">Sunday, April 6, 2026</div>
+          </div>
+          <div class="b-receipt-body">
+            <div class="b-receipt-row">
+              <span class="b-receipt-key">Your Rank</span>
+              <span class="b-receipt-val mono" style="color:#00D4FF;">#7</span>
+            </div>
+            <div class="b-receipt-row">
+              <span class="b-receipt-key">Pool Size</span>
+              <span class="b-receipt-val mono" style="color:#FFD700;">127 SOL</span>
+            </div>
+            <div class="b-receipt-row">
+              <span class="b-receipt-key">Your Share</span>
+              <span class="b-receipt-val mono" style="color:#00D4FF;">6%</span>
+            </div>
+            <div class="b-receipt-row">
+              <span class="b-receipt-key">Source</span>
+              <span class="b-receipt-val mono" style="color:#FFD700;">69% of fees</span>
+            </div>
+          </div>
+          <div class="b-receipt-total">
+            <div class="b-receipt-total-label mono">PAYOUT</div>
+            <div class="b-receipt-total-amount mono">+4 <img src="/sol.png" alt="SOL"></div>
+          </div>
+          <div class="b-receipt-footer">
+            Sent to <span class="mono">7xKp...3mQz</span>
+          </div>
+        </div>
+        <div class="b-tx-hash mono">TX: 5Kx9...mPq2 · Confirmed ✓</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- C: Flywheel diagram -->
+<div class="variant" data-choice="c" onclick="document.querySelectorAll('.variant').forEach(e=>e.classList.remove('selected'));this.classList.add('selected')">
+  <div class="container">
+    <div class="variant-label">C — FLYWHEEL</div>
+    <div class="variant-desc">A rotating flywheel diagram: Trade → Rank → Compete → Earn → Trade. Center shows the vault amount. Rotating dashed ring with arrow. Shows the endless cycle of the reward system.</div>
+    <div class="glass">
+      <div class="step-label mono" style="color:rgba(255,215,0,0.5);">STEP 5 — EARN</div>
+      <div class="c-content">
+        <div class="c-flywheel">
+          <div class="c-ring"><div class="c-ring-arrow">→</div></div>
+          <div class="c-center">
+            <div class="c-center-val mono">127</div>
+            <div class="c-center-lbl mono">SOL VAULT</div>
+          </div>
+          <div class="c-node n1">$WEB3ME<br>TRADES</div>
+          <div class="c-node n2">69% →<br>VAULT</div>
+          <div class="c-node n3">TOP 10<br>PAYOUT</div>
+          <div class="c-node n4">BIGGER<br>PRIZES</div>
+        </div>
+        <div class="c-desc">
+          More volume → bigger vault → bigger prizes → more traders → <span>repeat forever</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

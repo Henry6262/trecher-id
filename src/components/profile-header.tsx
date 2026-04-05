@@ -99,9 +99,9 @@ export function ProfileHeader({ avatarUrl, displayName, username, bio, verified,
         </div>
       )}
 
-      {/* Wallet selector — absolute top-right */}
+      {/* Wallet selector — top-right of card */}
       {wallets && wallets.length > 0 && (
-        <div className="absolute top-4 right-4 z-10">
+        <div className="absolute -top-1 right-4 z-10">
           <button
             onClick={() => setWalletOpen(!walletOpen)}
             className="cut-xs flex items-center gap-1.5 text-[8px] font-mono text-[var(--trench-text-muted)] px-2 py-1 transition-all hover:text-[var(--trench-accent)]"
@@ -234,12 +234,13 @@ export function ProfileHeader({ avatarUrl, displayName, username, bio, verified,
         </div>
       </div>
 
-      {/* Share actions */}
-      <div className="flex flex-wrap gap-2 mt-3 justify-center sm:justify-start">
-        <ShareButtons username={username} accent={accent} />
+      {/* Share + Period tabs row */}
+      <div className="flex flex-wrap items-center justify-between mt-3">
+        <div className="flex gap-4">
+          <ShareButtons username={username} accent={accent} />
+        </div>
+        <ProfileStatsTabs username={username} allTimeStats={stats} accentColor={accent} />
       </div>
-
-      <ProfileStatsTabs username={username} allTimeStats={stats} accentColor={accent} />
 
       {/* Edit button — own profiles only */}
       {isOwner && (

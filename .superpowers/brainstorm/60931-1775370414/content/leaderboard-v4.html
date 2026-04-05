@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #050508; color: white; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  .mono { font-family: 'SF Mono', 'Fira Code', ui-monospace, monospace; }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+  .title { text-align: center; font-size: 24px; font-weight: 800; margin-bottom: 28px; }
+  .title span { color: #00D4FF; }
+
+  .board { display: flex; gap: 20px; align-items: stretch; }
+
+  /* ═══ LEFT: Y shape — images ARE the Y ═══ */
+  .y-shape {
+    width: 300px;
+    flex-shrink: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 0;
+    position: relative;
+  }
+
+  /* #1 spans full width — top of Y (the stem) */
+  .y-1st {
+    grid-column: 1 / -1;
+    position: relative;
+    overflow: hidden;
+    height: 180px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    /* Y stem shape — straight bottom with angled cuts into the fork */
+    clip-path: polygon(
+      8px 0, 100% 0,
+      100% calc(100% - 8px), calc(100% - 8px) 100%,
+      calc(50% + 4px) 100%, calc(50% + 4px) calc(100% - 0px),
+      calc(50% - 4px) calc(100% - 0px), calc(50% - 4px) 100%,
+      0 100%, 0 8px
+    );
+  }
+
+  .y-1st .bg {
+    position: absolute; inset: 0;
+    background-size: cover; background-position: center 20%;
+    filter: brightness(0.35) saturate(1.3);
+  }
+  .y-1st .bg::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(5,5,8,0) 0%, rgba(5,5,8,0.7) 50%, rgba(5,5,8,0.95) 100%);
+  }
+  .y-1st .info { position: relative; z-index: 1; padding: 14px 16px; }
+  .y-1st .crown { position: absolute; top: 10px; right: 12px; z-index: 2; font-size: 22px; filter: drop-shadow(0 0 8px rgba(255,215,0,0.5)); }
+  .y-1st .rank-label { font-size: 8px; letter-spacing: 3px; color: #FFD700; margin-bottom: 4px; }
+  .y-1st .name { font-size: 15px; font-weight: 900; }
+  .y-1st .meta { font-size: 8px; color: rgba(255,255,255,0.4); margin-top: 2px; margin-bottom: 8px; }
+  .y-1st .pnl { font-size: 26px; font-weight: 900; color: #22c55e; text-shadow: 0 0 16px rgba(34,197,94,0.3); line-height: 1; display: flex; align-items: center; gap: 6px; }
+  .y-1st .pnl img { height: 18px; width: auto; }
+  .y-1st::before { content: ''; position: absolute; inset: 0; border: 1px solid rgba(255,215,0,0.25); z-index: 3; pointer-events: none; clip-path: inherit; }
+
+  /* #2 — left arm of Y */
+  .y-2nd {
+    position: relative;
+    overflow: hidden;
+    height: 130px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    /* Left arm — top-right is cut diagonally to form the Y fork */
+    clip-path: polygon(
+      0 12px,
+      calc(100% - 4px) 12px,
+      100% 0,
+      100% 100%,
+      calc(100% - 6px) 100%,
+      0 100%,
+      0 12px
+    );
+    margin-top: -1px;
+  }
+  .y-2nd .bg {
+    position: absolute; inset: 0;
+    background-size: cover; background-position: center 20%;
+    filter: brightness(0.3) saturate(1.1);
+  }
+  .y-2nd .bg::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(5,5,8,0.3) 0%, rgba(5,5,8,0.9) 80%);
+  }
+  .y-2nd .info { position: relative; z-index: 1; padding: 10px 12px; }
+  .y-2nd .rank-label { font-size: 8px; letter-spacing: 2px; color: #C0C0C0; margin-bottom: 3px; }
+  .y-2nd .name { font-size: 12px; font-weight: 800; }
+  .y-2nd .pnl { font-size: 17px; font-weight: 900; color: #22c55e; line-height: 1; margin-top: 4px; display: flex; align-items: center; gap: 4px; }
+  .y-2nd .pnl img { height: 13px; width: auto; }
+  .y-2nd::before { content: ''; position: absolute; inset: 0; border: 1px solid rgba(192,192,192,0.2); z-index: 3; pointer-events: none; clip-path: inherit; }
+
+  /* #3 — right arm of Y */
+  .y-3rd {
+    position: relative;
+    overflow: hidden;
+    height: 130px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    /* Right arm — top-left is cut diagonally to form the Y fork */
+    clip-path: polygon(
+      0 0,
+      4px 12px,
+      100% 12px,
+      100% 100%,
+      6px 100%,
+      0 100%,
+      0 0
+    );
+    margin-top: -1px;
+  }
+  .y-3rd .bg {
+    position: absolute; inset: 0;
+    background-size: cover; background-position: center 20%;
+    filter: brightness(0.3) saturate(1.1);
+  }
+  .y-3rd .bg::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(5,5,8,0.3) 0%, rgba(5,5,8,0.9) 80%);
+  }
+  .y-3rd .info { position: relative; z-index: 1; padding: 10px 12px; }
+  .y-3rd .rank-label { font-size: 8px; letter-spacing: 2px; color: #CD7F32; margin-bottom: 3px; }
+  .y-3rd .name { font-size: 12px; font-weight: 800; }
+  .y-3rd .pnl { font-size: 17px; font-weight: 900; color: #22c55e; line-height: 1; margin-top: 4px; display: flex; align-items: center; gap: 4px; }
+  .y-3rd .pnl img { height: 13px; width: auto; }
+  .y-3rd::before { content: ''; position: absolute; inset: 0; border: 1px solid rgba(205,127,50,0.2); z-index: 3; pointer-events: none; clip-path: inherit; }
+
+  /* The V gap between the two arms — the fork of the Y */
+  .y-shape::after {
+    content: '';
+    position: absolute;
+    top: 179px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0; height: 0;
+    border-left: 12px solid transparent;
+    border-right: 12px solid transparent;
+    border-bottom: 14px solid #050508;
+    z-index: 4;
+  }
+
+  /* ═══ RIGHT: compact list with SOL logo ═══ */
+  .list-side { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+  .list-header {
+    display: flex; align-items: center; padding: 8px 12px;
+    font-size: 8px; letter-spacing: 1.5px; color: #333;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+
+  .row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.025);
+    transition: background 0.15s;
+  }
+  .row:hover { background: rgba(0,212,255,0.03); }
+  .row .rank { font-size: 11px; font-weight: 800; color: #333; width: 22px; text-align: center; }
+  .row .avatar {
+    width: 28px; height: 28px; border-radius: 50%; background: #1a1a2e; flex-shrink: 0;
+    overflow: hidden; display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700; color: #555;
+  }
+  .row .name { font-size: 12px; font-weight: 600; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: white; }
+  .row .wr { font-size: 10px; color: #555; width: 40px; text-align: right; }
+  .row .pnl {
+    font-size: 13px; font-weight: 800; color: #22c55e; width: 80px; text-align: right;
+    display: flex; align-items: center; justify-content: flex-end; gap: 4px;
+  }
+  .row .pnl img { height: 12px; width: auto; }
+
+  .sol-logo { height: 12px; width: auto; display: inline-block; vertical-align: middle; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="title">Top <span>Traders</span> & Devs</div>
+
+  <div class="board">
+    <!-- LEFT: Y shape — the images themselves form the Y -->
+    <div class="y-shape">
+      <!-- #1 — full width, top of Y stem -->
+      <div class="y-1st">
+        <div class="bg" style="background-image: url('https://unavatar.io/twitter/blknoiz06');"></div>
+        <div class="crown">👑</div>
+        <div class="info">
+          <div class="rank-label mono">1ST PLACE</div>
+          <div class="name">@ansem</div>
+          <div class="meta">71% WR · 847 trades</div>
+          <div class="pnl mono">+142 <img src="/Users/henry/Documents/Gazillion-dollars/Ponzinomics/use-case-apps/devprint/apps/dashboard/dist/logos/sol.png" alt="SOL"></div>
+        </div>
+      </div>
+
+      <!-- #2 — left arm -->
+      <div class="y-2nd">
+        <div class="bg" style="background-image: url('https://unavatar.io/twitter/ansaborern');"></div>
+        <div class="info">
+          <div class="rank-label mono">2ND</div>
+          <div class="name">@blknoiz06</div>
+          <div class="pnl mono">+98 <img src="/Users/henry/Documents/Gazillion-dollars/Ponzinomics/use-case-apps/devprint/apps/dashboard/dist/logos/sol.png" alt="SOL"></div>
+        </div>
+      </div>
+
+      <!-- #3 — right arm -->
+      <div class="y-3rd">
+        <div class="bg" style="background-image: url('https://unavatar.io/twitter/CryptoGodJohn');"></div>
+        <div class="info">
+          <div class="rank-label mono">3RD</div>
+          <div class="name">@cryptowiz</div>
+          <div class="pnl mono">+76 <img src="/Users/henry/Documents/Gazillion-dollars/Ponzinomics/use-case-apps/devprint/apps/dashboard/dist/logos/sol.png" alt="SOL"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: compact list with SOL logo instead of "SOL" text -->
+    <div class="list-side">
+      <div class="list-header">
+        <div style="width:22px">#</div>
+        <div style="width:28px"></div>
+        <div style="flex:1;padding-left:10px">TRADER</div>
+        <div style="width:40px;text-align:right">WR</div>
+        <div style="width:80px;text-align:right">PNL</div>
+      </div>
+      <div class="row"><div class="rank mono">4</div><div class="avatar">D</div><div class="name">@sol_whale</div><div class="wr mono">62%</div><div class="pnl mono">+54 <img src="/Users/henry/Documents/Gazillion-dollars/Ponzinomics/use-case-apps/devprint/apps/dashboard/dist/logos/sol.png" alt="SOL"></div></div>
+      <div class="row"><div class="rank mono">5</div><div class="avatar">E</div><div class="name">@degen_mike</div><div class="wr mono">59%</div><div class="pnl mono">+47 <img src="/Users/henry/Documents/Gazillion-dollars/Ponzinomics/use-case-apps/devprint/apps/dashboard/dist/logos/sol.png" alt="SOL"></div></div>
+      <div class="row"><div class="rank mono">6</div><div class="avatar">F</div><div class="name">@pump_master</div><div class="wr mono">55%</div><div class="pnl mono">+41 <img src="/Users/henry/Documents/Gazillion-dollars/Ponzinomics/use-case-apps/devprint/apps/dashboard/dist/logos/sol.png" alt="SOL"></div></div>
+      <div class="row"><div class="rank mono">7</div><div class="avatar">G</div><div class="name">@trencher_og</div><div class="wr mono">53%</div><div class="pnl mono">+38 <img src="/Users/henry/Documents/Gazillion-dollars/Ponzinomics/use-case-apps/devprint/apps/dashboard/dist/logos/sol.png" alt="SOL"></div></div>
+      <div class="row"><div class="rank mono">8</div><div class="avatar">H</div><div class="name">@alpha_calls</div><div class="wr mono">51%</div><div class="pnl mono">+33 <img src="/Users/henry/Documents/Gazillion-dollars/Ponzinomics/use-case-apps/devprint/apps/dashboard/dist/logos/sol.png" alt="SOL"></div></div>
+      <div class="row"><div class="rank mono">9</div><div class="avatar">I</div><div class="name">@sniper_sol</div><div class="wr mono">49%</div><div class="pnl mono">+29 <img src="/Users/henry/Documents/Gazillion-dollars/Ponzinomics/use-case-apps/devprint/apps/dashboard/dist/logos/sol.png" alt="SOL"></div></div>
+      <div class="row"><div class="rank mono">10</div><div class="avatar">J</div><div class="name">@memecoin_king</div><div class="wr mono">47%</div><div class="pnl mono">+24 <img src="/Users/henry/Documents/Gazillion-dollars/Ponzinomics/use-case-apps/devprint/apps/dashboard/dist/logos/sol.png" alt="SOL"></div></div>
+      <div class="row"><div class="rank mono">11</div><div class="avatar">K</div><div class="name">@ape_in_first</div><div class="wr mono">45%</div><div class="pnl mono">+21 <img src="/Users/henry/Documents/Gazillion-dollars/Ponzinomics/use-case-apps/devprint/apps/dashboard/dist/logos/sol.png" alt="SOL"></div></div>
+      <div class="row"><div class="rank mono">12</div><div class="avatar">L</div><div class="name">@chart_reader</div><div class="wr mono">44%</div><div class="pnl mono">+18 <img src="/Users/henry/Documents/Gazillion-dollars/Ponzinomics/use-case-apps/devprint/apps/dashboard/dist/logos/sol.png" alt="SOL"></div></div>
+      <div class="row"><div class="rank mono">13</div><div class="avatar">M</div><div class="name">@based_trader</div><div class="wr mono">42%</div><div class="pnl mono">+15 <img src="/Users/henry/Documents/Gazillion-dollars/Ponzinomics/use-case-apps/devprint/apps/dashboard/dist/logos/sol.png" alt="SOL"></div></div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

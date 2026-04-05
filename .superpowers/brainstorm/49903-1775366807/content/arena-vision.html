@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #050508; color: white; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; overflow-x: hidden; }
+
+  .arena-section {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 60px 24px;
+    position: relative;
+  }
+
+  /* Ambient glow behind the whole section */
+  .arena-section::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(255,215,0,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .arena-header {
+    text-align: center;
+    margin-bottom: 40px;
+    position: relative;
+  }
+
+  .arena-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 14px;
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: #FFD700;
+    background: rgba(255,215,0,0.08);
+    border: 1px solid rgba(255,215,0,0.2);
+    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+    margin-bottom: 12px;
+  }
+
+  .arena-badge .live-dot {
+    width: 6px; height: 6px;
+    background: #22c55e;
+    border-radius: 50%;
+    animation: livePulse 2s ease-in-out infinite;
+  }
+
+  @keyframes livePulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 4px #22c55e; }
+    50% { opacity: 0.4; box-shadow: 0 0 8px #22c55e; }
+  }
+
+  .arena-title {
+    font-size: 28px;
+    font-weight: 900;
+    margin-bottom: 6px;
+  }
+  .arena-title span { color: #FFD700; }
+
+  .arena-subtitle {
+    font-size: 12px;
+    color: #666;
+  }
+
+  /* === BRACKET === */
+  .bracket-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    position: relative;
+    margin-bottom: 32px;
+  }
+
+  .round {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    position: relative;
+  }
+
+  .round-label {
+    text-align: center;
+    font-size: 8px;
+    letter-spacing: 2px;
+    color: #555;
+    margin-bottom: 8px;
+  }
+
+  .matchup {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    position: relative;
+  }
+
+  .player {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    min-width: 180px;
+    background: rgba(8,12,22,0.8);
+    border: 1px solid rgba(255,255,255,0.06);
+    transition: all 0.3s;
+    position: relative;
+    clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px);
+  }
+
+  .player.winner {
+    border-color: rgba(34,197,94,0.3);
+    background: rgba(34,197,94,0.06);
+  }
+
+  .player.winner .pnl { color: #22c55e; text-shadow: 0 0 12px rgba(34,197,94,0.4); }
+
+  .player.loser {
+    opacity: 0.4;
+    border-color: rgba(255,255,255,0.03);
+  }
+
+  .player.active {
+    border-color: rgba(255,215,0,0.3);
+    background: rgba(255,215,0,0.04);
+    animation: activeGlow 3s ease-in-out infinite;
+  }
+
+  @keyframes activeGlow {
+    0%, 100% { box-shadow: 0 0 0 rgba(255,215,0,0); }
+    50% { box-shadow: 0 0 20px rgba(255,215,0,0.1); }
+  }
+
+  .avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #333, #222);
+    flex-shrink: 0;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .player-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .player-name {
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .player-meta {
+    font-size: 8px;
+    color: #555;
+    letter-spacing: 0.5px;
+  }
+
+  .pnl {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 13px;
+    font-weight: 800;
+    flex-shrink: 0;
+    color: #888;
+  }
+
+  .pnl.positive { color: #22c55e; }
+  .pnl.negative { color: #ef4444; }
+
+  /* Animated PnL counter */
+  .pnl.ticking {
+    animation: tickGlow 0.5s ease-out;
+  }
+
+  @keyframes tickGlow {
+    0% { transform: scale(1.15); color: #FFD700; }
+    100% { transform: scale(1); }
+  }
+
+  /* Connector lines */
+  .connector {
+    width: 32px;
+    position: relative;
+  }
+
+  .connector svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .connector-line {
+    stroke: rgba(255,215,0,0.15);
+    stroke-width: 1;
+    fill: none;
+  }
+
+  .connector-line.active {
+    stroke: rgba(255,215,0,0.4);
+    stroke-width: 1.5;
+    filter: drop-shadow(0 0 4px rgba(255,215,0,0.2));
+  }
+
+  /* Champion spotlight */
+  .champion-slot {
+    text-align: center;
+    padding: 16px;
+    position: relative;
+  }
+
+  .champion-slot .crown {
+    font-size: 28px;
+    margin-bottom: 4px;
+    animation: crownFloat 3s ease-in-out infinite;
+  }
+
+  @keyframes crownFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+  }
+
+  .champion-slot .label {
+    font-size: 8px;
+    letter-spacing: 3px;
+    color: #FFD700;
+  }
+
+  .champion-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    margin: 8px auto;
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    box-shadow: 0 0 30px rgba(255,215,0,0.3), 0 0 60px rgba(255,215,0,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 900;
+    color: black;
+  }
+
+  /* Bottom bar: vault counter */
+  .vault-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    background: rgba(8,12,22,0.6);
+    border: 1px solid rgba(255,215,0,0.1);
+    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+    margin-top: 24px;
+  }
+
+  .vault-label {
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: #FFD700;
+  }
+
+  .vault-amount {
+    font-family: 'SF Mono', monospace;
+    font-size: 24px;
+    font-weight: 900;
+    color: #22c55e;
+    text-shadow: 0 0 20px rgba(34,197,94,0.3);
+  }
+
+  .vault-sub {
+    font-size: 9px;
+    color: #555;
+    text-align: right;
+  }
+
+  .vault-pulse {
+    animation: vaultPulse 4s ease-in-out infinite;
+  }
+
+  @keyframes vaultPulse {
+    0%, 100% { text-shadow: 0 0 20px rgba(34,197,94,0.2); }
+    50% { text-shadow: 0 0 40px rgba(34,197,94,0.5), 0 0 80px rgba(34,197,94,0.2); }
+  }
+
+  /* CTA */
+  .arena-cta {
+    text-align: center;
+    margin-top: 24px;
+  }
+
+  .arena-cta a {
+    display: inline-block;
+    padding: 10px 24px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: black;
+    background: #FFD700;
+    text-decoration: none;
+    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+    transition: all 0.2s;
+  }
+
+  .arena-cta a:hover {
+    background: #FFC107;
+    box-shadow: 0 0 20px rgba(255,215,0,0.3);
+  }
+
+  /* Explanation panel at bottom */
+  .explanation {
+    margin-top: 60px;
+    padding: 24px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .explanation h3 {
+    font-size: 14px;
+    margin-bottom: 16px;
+    color: #FFD700;
+  }
+
+  .explanation .feature {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding: 12px;
+    background: rgba(255,255,255,0.02);
+    border-left: 2px solid rgba(255,215,0,0.3);
+  }
+
+  .explanation .feature .num {
+    font-size: 18px;
+    font-weight: 900;
+    color: #FFD700;
+    flex-shrink: 0;
+    width: 28px;
+  }
+
+  .explanation .feature h4 {
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+
+  .explanation .feature p {
+    font-size: 11px;
+    color: #888;
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+  <div class="arena-section">
+    <!-- Header -->
+    <div class="arena-header">
+      <div class="arena-badge">
+        <div class="live-dot"></div>
+        TRENCHER CUP — SEASON 1
+      </div>
+      <div class="arena-title">The <span>Arena</span></div>
+      <div class="arena-subtitle">32 traders. One champion. Real money on the line.</div>
+    </div>
+
+    <!-- Bracket — showing QF → SF → Final -->
+    <div class="bracket-container">
+      <!-- QF Left -->
+      <div class="round">
+        <div class="round-label">QUARTERFINALS</div>
+        <div class="matchup">
+          <div class="player winner">
+            <div class="avatar" style="background: linear-gradient(135deg, #1DA1F2, #0d8bd9);"></div>
+            <div class="player-info">
+              <div class="player-name">@ansem</div>
+              <div class="player-meta">63% WR · 847 trades</div>
+            </div>
+            <div class="pnl positive">+142.3</div>
+          </div>
+          <div class="player loser">
+            <div class="avatar" style="background: linear-gradient(135deg, #6366f1, #4f46e5);"></div>
+            <div class="player-info">
+              <div class="player-name">@crashiux</div>
+              <div class="player-meta">51% WR · 432 trades</div>
+            </div>
+            <div class="pnl positive">+89.1</div>
+          </div>
+        </div>
+        <div class="matchup">
+          <div class="player active">
+            <div class="avatar" style="background: linear-gradient(135deg, #f59e0b, #d97706);"></div>
+            <div class="player-info">
+              <div class="player-name">@blknoiz06</div>
+              <div class="player-meta">71% WR · 1,203 trades</div>
+            </div>
+            <div class="pnl positive ticking">+67.8</div>
+          </div>
+          <div class="player active">
+            <div class="avatar" style="background: linear-gradient(135deg, #ec4899, #db2777);"></div>
+            <div class="player-info">
+              <div class="player-name">@degentrader</div>
+              <div class="player-meta">58% WR · 965 trades</div>
+            </div>
+            <div class="pnl positive">+61.2</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Connector -->
+      <div class="connector" style="height: 240px;">
+        <svg viewBox="0 0 32 240" preserveAspectRatio="none">
+          <path class="connector-line active" d="M 0 48 H 16 V 90 H 32" />
+          <path class="connector-line" d="M 0 96 H 16 V 90 H 32" />
+          <path class="connector-line" d="M 0 168 H 16 V 190 H 32" />
+          <path class="connector-line" d="M 0 216 H 16 V 190 H 32" />
+        </svg>
+      </div>
+
+      <!-- SF -->
+      <div class="round">
+        <div class="round-label">SEMIFINALS</div>
+        <div class="matchup">
+          <div class="player winner">
+            <div class="avatar" style="background: linear-gradient(135deg, #1DA1F2, #0d8bd9);"></div>
+            <div class="player-info">
+              <div class="player-name">@ansem</div>
+              <div class="player-meta">advancing</div>
+            </div>
+            <div class="pnl positive">+142.3</div>
+          </div>
+          <div class="player" style="border-color: rgba(255,215,0,0.15); background: rgba(255,215,0,0.02);">
+            <div class="avatar" style="background: rgba(255,215,0,0.2);display:flex;align-items:center;justify-content:center;font-size:10px;color:#FFD700;">?</div>
+            <div class="player-info">
+              <div class="player-name" style="color:#FFD700;">TBD</div>
+              <div class="player-meta">QF2 in progress...</div>
+            </div>
+            <div class="pnl" style="color:#FFD700;">LIVE</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Connector to Final -->
+      <div class="connector" style="height: 240px;">
+        <svg viewBox="0 0 32 240" preserveAspectRatio="none">
+          <path class="connector-line" d="M 0 80 H 16 V 120 H 32" style="stroke: rgba(255,215,0,0.08);" />
+        </svg>
+      </div>
+
+      <!-- Champion -->
+      <div class="champion-slot">
+        <div class="round-label">CHAMPION</div>
+        <div class="crown">👑</div>
+        <div class="champion-avatar">?</div>
+        <div class="label">WHO TAKES IT ALL?</div>
+      </div>
+    </div>
+
+    <!-- Vault bar -->
+    <div class="vault-bar">
+      <div>
+        <div class="vault-label">SEASON 1 PRIZE POOL</div>
+        <div style="font-size:9px;color:#555;margin-top:2px;">69% of all $WEB3ME fees</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="vault-amount vault-pulse">127.4 SOL</div>
+        <div class="vault-sub">+3.2 today · Next payout in 2d 14h</div>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="arena-cta">
+      <a href="#">ENTER THE ARENA →</a>
+    </div>
+  </div>
+
+  <!-- Explanation of the animations/interactions -->
+  <div class="arena-section explanation">
+    <h3>What makes this section alive:</h3>
+
+    <div class="feature">
+      <div class="num">1</div>
+      <div>
+        <h4>PnL Ticking Animation</h4>
+        <p>Active matchups have PnL numbers that tick up/down every few seconds with a gold flash + scale animation. Creates tension — you see the lead changing in real time. Uses a WebSocket or polling from the leaderboard API.</p>
+      </div>
+    </div>
+
+    <div class="feature">
+      <div class="num">2</div>
+      <div>
+        <h4>Bracket Progression</h4>
+        <p>When a matchup resolves, the winner's card slides into the next round with a green glow trail. The loser fades to 40% opacity. SVG connector lines light up gold as winners advance. The whole bracket tells a story of who's winning.</p>
+      </div>
+    </div>
+
+    <div class="feature">
+      <div class="num">3</div>
+      <div>
+        <h4>Vault Counter Pulses</h4>
+        <p>The SOL amount at the bottom has a breathing green glow. On each $WEB3ME trade detected, a brief gold flash ripples across the bar and the number ticks up. The "today" counter increments visibly. Makes the vault feel alive.</p>
+      </div>
+    </div>
+
+    <div class="feature">
+      <div class="num">4</div>
+      <div>
+        <h4>Champion Mystery</h4>
+        <p>The champion slot has a floating crown animation and a "?" avatar with a gold gradient glow. Creates anticipation. When the final resolves, the winner's avatar and name slam into the champion slot with a particle burst.</p>
+      </div>
+    </div>
+
+    <div class="feature">
+      <div class="num">5</div>
+      <div>
+        <h4>Responsive Bracket</h4>
+        <p>On mobile: collapses to a vertical bracket showing only the current active matchup with swipe to see others. On desktop: full horizontal bracket as shown. The vault bar sticks to the bottom of the section on scroll.</p>
+      </div>
+    </div>
+
+    <div class="feature">
+      <div class="num">6</div>
+      <div>
+        <h4>Real Trader Data</h4>
+        <p>Uses real avatars (fxtwitter), real usernames, real PnL from the leaderboard API. This isn't a mock — visitors see actual Solana traders competing with actual on-chain performance. That's what makes it hit different.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Animate the PnL ticking -->
+  <script>
+    // Simulate PnL ticking on the active matchup
+    const tickingEl = document.querySelector('.pnl.ticking');
+    if (tickingEl) {
+      let val = 67.8;
+      setInterval(() => {
+        val += (Math.random() - 0.35) * 0.8;
+        val = Math.round(val * 10) / 10;
+        tickingEl.textContent = '+' + val.toFixed(1);
+        tickingEl.style.animation = 'none';
+        void tickingEl.offsetHeight;
+        tickingEl.style.animation = 'tickGlow 0.5s ease-out';
+      }, 3000);
+    }
+
+    // Simulate vault counter growing
+    const vaultEl = document.querySelector('.vault-amount');
+    if (vaultEl) {
+      let vault = 127.4;
+      setInterval(() => {
+        vault += Math.random() * 0.15;
+        vault = Math.round(vault * 10) / 10;
+        vaultEl.textContent = vault.toFixed(1) + ' SOL';
+      }, 5000);
+    }
+  </script>
+</body>
+</html>

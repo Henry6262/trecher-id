@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #050508; color: white; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  .mono { font-family: 'SF Mono', 'Fira Code', ui-monospace, monospace; }
+
+  .container { max-width: 560px; margin: 0 auto; padding: 40px 20px; }
+  .label { font-size: 9px; letter-spacing: 3px; color: #FFD700; margin-bottom: 16px; }
+  .section-title { font-size: 16px; font-weight: 800; margin-bottom: 24px; }
+  .section-title span { color: #00D4FF; }
+
+  .glass {
+    background: rgba(8,12,18,0.65);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(0,212,255,0.1);
+    clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
+    position: relative;
+    min-height: 380px;
+    overflow: hidden;
+  }
+  .glass::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, #00D4FF, transparent);
+    opacity: 0.4;
+  }
+  .step-label { position: absolute; top: 16px; left: 20px; font-size: 8px; letter-spacing: 3px; color: rgba(0,212,255,0.5); }
+
+  .variant { margin-bottom: 32px; cursor: pointer; padding: 4px; border: 2px solid transparent; }
+  .variant:hover { border-color: rgba(0,212,255,0.15); }
+  .variant.selected { border-color: #FFD700; }
+  .variant-label { font-size: 9px; letter-spacing: 2px; color: #FFD700; margin-bottom: 8px; }
+  .variant-desc { font-size: 10px; color: #555; margin-bottom: 12px; }
+
+  /* ═══ A: Mini leaderboard with "you" highlighted, climbing ═══ */
+  .a-content { padding: 48px 32px 32px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 380px; }
+
+  .a-board {
+    width: 100%; max-width: 340px;
+    background: rgba(8,12,22,0.6);
+    border: 1px solid rgba(255,255,255,0.04);
+    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+    overflow: hidden;
+  }
+
+  .a-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.02);
+    transition: all 0.5s;
+  }
+  .a-row.you {
+    background: rgba(0,212,255,0.06);
+    border-color: rgba(0,212,255,0.1);
+    animation: youGlow 2s ease-in-out infinite;
+  }
+  @keyframes youGlow {
+    0%, 100% { box-shadow: inset 0 0 0 rgba(0,212,255,0); }
+    50% { box-shadow: inset 0 0 20px rgba(0,212,255,0.06); }
+  }
+  .a-rank { font-size: 12px; font-weight: 900; width: 24px; text-align: center; }
+  .a-rank.gold { color: #FFD700; }
+  .a-rank.silver { color: #C0C0C0; }
+  .a-rank.bronze { color: #CD7F32; }
+  .a-rank.you-rank { color: #00D4FF; }
+  .a-rank.dim { color: #333; }
+  .a-av { width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0; }
+  .a-name { font-size: 11px; font-weight: 600; flex: 1; }
+  .a-row.you .a-name { color: #00D4FF; font-weight: 800; }
+  .a-pnl { font-size: 12px; font-weight: 800; color: #00D4FF; }
+
+  .a-climb {
+    margin-top: 16px;
+    text-align: center;
+  }
+  .a-climb-arrow { font-size: 18px; color: #00D4FF; animation: climbBounce 1s ease-in-out infinite; }
+  @keyframes climbBounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+  .a-climb-text { font-size: 12px; color: #00D4FF; font-weight: 700; margin-top: 4px; }
+  .a-climb-sub { font-size: 9px; color: #555; margin-top: 2px; }
+
+  /* ═══ B: Big rank number with overtaking animation ═══ */
+  .b-content { padding: 48px 32px 32px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 380px; gap: 8px; }
+
+  .b-rank-label { font-size: 10px; letter-spacing: 3px; color: #555; }
+  .b-rank-num { font-size: 80px; font-weight: 900; color: #00D4FF; text-shadow: 0 0 40px rgba(0,212,255,0.3); line-height: 1; }
+  .b-rank-change { font-size: 14px; color: #00D4FF; font-weight: 700; margin-top: 4px; }
+
+  .b-overtake {
+    margin-top: 20px;
+    width: 100%; max-width: 300px;
+    position: relative;
+    height: 100px;
+  }
+
+  .b-lane {
+    position: absolute;
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 12px;
+    background: rgba(8,12,22,0.6);
+    border: 1px solid rgba(255,255,255,0.04);
+    clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px);
+    width: 180px;
+    transition: all 1.5s ease-in-out;
+  }
+
+  .b-lane.you-lane {
+    bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    border-color: rgba(0,212,255,0.2);
+    background: rgba(0,212,255,0.04);
+    animation: overtake 4s ease-in-out infinite;
+    z-index: 2;
+  }
+  @keyframes overtake {
+    0%, 100% { bottom: 0; }
+    30%, 70% { bottom: 50px; }
+  }
+
+  .b-lane.other-lane {
+    bottom: 50px; left: 50%;
+    transform: translateX(-50%);
+    opacity: 0.4;
+    animation: getOvertaken 4s ease-in-out infinite;
+  }
+  @keyframes getOvertaken {
+    0%, 100% { bottom: 50px; opacity: 0.4; }
+    30%, 70% { bottom: 0; opacity: 0.3; }
+  }
+
+  .b-lane-av { width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0; }
+  .b-lane-name { font-size: 10px; font-weight: 700; flex: 1; }
+  .b-lane-pnl { font-size: 10px; font-weight: 800; }
+
+  /* ═══ C: Actual mini leaderboard from the site ═══ */
+  .c-content { padding: 48px 24px 32px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 380px; }
+
+  .c-podium { display: flex; align-items: flex-end; gap: 6px; margin-bottom: 16px; }
+  .c-pod {
+    text-align: center;
+    padding: 10px 14px;
+    background: rgba(8,12,22,0.6);
+    border: 1px solid rgba(255,255,255,0.04);
+    clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px);
+  }
+  .c-pod.first { border-color: rgba(255,215,0,0.2); min-height: 100px; }
+  .c-pod.second { border-color: rgba(192,192,192,0.15); min-height: 80px; }
+  .c-pod.third { border-color: rgba(205,127,50,0.15); min-height: 70px; }
+  .c-pod-rank { font-size: 10px; font-weight: 900; letter-spacing: 2px; margin-bottom: 6px; }
+  .c-pod-av { width: 28px; height: 28px; border-radius: 50%; margin: 0 auto 4px; }
+  .c-pod-name { font-size: 9px; font-weight: 600; }
+  .c-pod-pnl { font-size: 11px; font-weight: 800; color: #00D4FF; margin-top: 2px; }
+
+  .c-you-entry {
+    width: 100%; max-width: 340px;
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 16px;
+    background: rgba(0,212,255,0.04);
+    border: 1px solid rgba(0,212,255,0.15);
+    clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px);
+    animation: youPulse 2.5s ease-in-out infinite;
+  }
+  @keyframes youPulse {
+    0%, 100% { border-color: rgba(0,212,255,0.15); }
+    50% { border-color: rgba(0,212,255,0.35); box-shadow: 0 0 16px rgba(0,212,255,0.08); }
+  }
+  .c-you-rank { font-size: 16px; font-weight: 900; color: #00D4FF; width: 30px; }
+  .c-you-av { width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, #1DA1F2, #00D4FF); flex-shrink: 0; border: 2px solid rgba(0,212,255,0.3); }
+  .c-you-info { flex: 1; }
+  .c-you-name { font-size: 12px; font-weight: 800; color: #00D4FF; }
+  .c-you-meta { font-size: 9px; color: #555; margin-top: 1px; }
+  .c-you-pnl { font-size: 16px; font-weight: 900; color: #00D4FF; }
+
+  .c-climb-badge {
+    margin-top: 12px;
+    font-size: 11px; font-weight: 700; color: #00D4FF;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .c-climb-badge .arrow { animation: climbBounce 1s ease-in-out infinite; }
+  @keyframes climbBounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="label">SCREEN 3 OF 5 — RANK</div>
+  <div class="section-title">Pick the <span>Leaderboard</span> screen visual</div>
+</div>
+
+<!-- A: Mini leaderboard with you highlighted -->
+<div class="variant" data-choice="a" onclick="document.querySelectorAll('.variant').forEach(e=>e.classList.remove('selected'));this.classList.add('selected')">
+  <div class="container">
+    <div class="variant-label">A — MINI LEADERBOARD</div>
+    <div class="variant-desc">A compact leaderboard showing top 5 + you highlighted at #7 with a pulsing glow. Climbing arrow below. Shows you IN the competition — not just a number.</div>
+    <div class="glass">
+      <div class="step-label mono">STEP 3 — RANK</div>
+      <div class="a-content">
+        <div class="a-board">
+          <div class="a-row">
+            <div class="a-rank gold mono">1</div>
+            <div class="a-av" style="background: linear-gradient(135deg, #FFD700, #FFA500);"></div>
+            <div class="a-name" style="color:#ccc;">@ansem</div>
+            <div class="a-pnl mono">+142</div>
+          </div>
+          <div class="a-row">
+            <div class="a-rank silver mono">2</div>
+            <div class="a-av" style="background: linear-gradient(135deg, #C0C0C0, #888);"></div>
+            <div class="a-name" style="color:#999;">@blknoiz06</div>
+            <div class="a-pnl mono">+98</div>
+          </div>
+          <div class="a-row">
+            <div class="a-rank bronze mono">3</div>
+            <div class="a-av" style="background: linear-gradient(135deg, #CD7F32, #8B5A2B);"></div>
+            <div class="a-name" style="color:#888;">@cryptowiz</div>
+            <div class="a-pnl mono">+76</div>
+          </div>
+          <div class="a-row" style="border-bottom: 1px dashed rgba(255,255,255,0.04); padding: 4px 14px;">
+            <div style="width:100%;text-align:center;font-size:8px;color:#333;letter-spacing:2px;">· · ·</div>
+          </div>
+          <div class="a-row you">
+            <div class="a-rank you-rank mono">7</div>
+            <div class="a-av" style="background: linear-gradient(135deg, #1DA1F2, #00D4FF); border: 2px solid rgba(0,212,255,0.3);"></div>
+            <div class="a-name">@you</div>
+            <div class="a-pnl mono" style="font-size:14px;">+42</div>
+          </div>
+          <div class="a-row">
+            <div class="a-rank dim mono">8</div>
+            <div class="a-av" style="background: #222;"></div>
+            <div class="a-name" style="color:#444;">@trader_8</div>
+            <div class="a-pnl mono" style="color:#555;">+38</div>
+          </div>
+        </div>
+
+        <div class="a-climb">
+          <div class="a-climb-arrow">↑</div>
+          <div class="a-climb-text">Climbing 12 positions this week</div>
+          <div class="a-climb-sub">Updated hourly from on-chain data</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- B: Big rank + overtaking animation -->
+<div class="variant" data-choice="b" onclick="document.querySelectorAll('.variant').forEach(e=>e.classList.remove('selected'));this.classList.add('selected')">
+  <div class="container">
+    <div class="variant-label">B — RANK + OVERTAKE</div>
+    <div class="variant-desc">Big rank number at top, then an animated overtake scene — your card slides above another trader's card. Shows the feeling of passing someone on the leaderboard.</div>
+    <div class="glass">
+      <div class="step-label mono">STEP 3 — RANK</div>
+      <div class="b-content">
+        <div class="b-rank-label mono">YOUR RANK</div>
+        <div class="b-rank-num mono">#7</div>
+        <div class="b-rank-change">↑ 12 positions</div>
+
+        <div class="b-overtake">
+          <div class="b-lane other-lane">
+            <div class="b-lane-av" style="background:#333;"></div>
+            <div class="b-lane-name" style="color:#555;">@trader_6</div>
+            <div class="b-lane-pnl" style="color:#555;">+45</div>
+          </div>
+          <div class="b-lane you-lane">
+            <div class="b-lane-av" style="background:linear-gradient(135deg, #1DA1F2, #00D4FF);"></div>
+            <div class="b-lane-name" style="color:#00D4FF;">@you</div>
+            <div class="b-lane-pnl" style="color:#00D4FF;">+47</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- C: Podium + your entry -->
+<div class="variant" data-choice="c" onclick="document.querySelectorAll('.variant').forEach(e=>e.classList.remove('selected'));this.classList.add('selected')">
+  <div class="container">
+    <div class="variant-label">C — PODIUM + YOUR SPOT</div>
+    <div class="variant-desc">Top 3 podium at top (mini version of the actual leaderboard), then your entry below with a pulsing border. Shows the goal (podium) and where you are.</div>
+    <div class="glass">
+      <div class="step-label mono">STEP 3 — RANK</div>
+      <div class="c-content">
+        <div class="c-podium">
+          <div class="c-pod second">
+            <div class="c-pod-rank mono" style="color:#C0C0C0;">2ND</div>
+            <div class="c-pod-av" style="background:linear-gradient(135deg, #C0C0C0, #888);"></div>
+            <div class="c-pod-name" style="color:#888;">@blknoiz</div>
+            <div class="c-pod-pnl mono">+98</div>
+          </div>
+          <div class="c-pod first">
+            <div class="c-pod-rank mono" style="color:#FFD700;">1ST</div>
+            <div class="c-pod-av" style="background:linear-gradient(135deg, #FFD700, #FFA500); border: 2px solid rgba(255,215,0,0.3);"></div>
+            <div class="c-pod-name" style="color:#ccc;">@ansem</div>
+            <div class="c-pod-pnl mono" style="font-size:13px;">+142</div>
+          </div>
+          <div class="c-pod third">
+            <div class="c-pod-rank mono" style="color:#CD7F32;">3RD</div>
+            <div class="c-pod-av" style="background:linear-gradient(135deg, #CD7F32, #8B5A2B);"></div>
+            <div class="c-pod-name" style="color:#777;">@cryptowiz</div>
+            <div class="c-pod-pnl mono">+76</div>
+          </div>
+        </div>
+
+        <div class="c-you-entry">
+          <div class="c-you-rank mono">#7</div>
+          <div class="c-you-av"></div>
+          <div class="c-you-info">
+            <div class="c-you-name">@you</div>
+            <div class="c-you-meta">71% WR · 847 trades</div>
+          </div>
+          <div class="c-you-pnl mono">+42</div>
+        </div>
+
+        <div class="c-climb-badge">
+          <span class="arrow">↑</span> Climbing — 12 positions this week
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -239,7 +239,7 @@ export function JourneySection() {
   return (
     <section className="max-w-[780px] mx-auto px-6 sm:px-12 lg:px-16 py-16">
       <div className="text-center mb-10">
-        <h2 className="text-2xl sm:text-3xl font-bold text-white">Your <span className="text-[var(--trench-accent)]">journey</span></h2>
+        <h2 className="text-3xl sm:text-4xl font-bold text-white">Your <span className="text-[var(--trench-accent)]">journey</span></h2>
         <p className="text-[12px] text-[var(--trench-text-muted)] mt-1">From sign-up to earning rewards</p>
       </div>
 

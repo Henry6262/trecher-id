@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #050508; color: white; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  .mono { font-family: 'SF Mono', 'Fira Code', ui-monospace, monospace; }
+
+  .container { max-width: 560px; margin: 0 auto; padding: 40px 20px; }
+  .label { font-size: 9px; letter-spacing: 3px; color: #FFD700; margin-bottom: 16px; }
+  .section-title { font-size: 16px; font-weight: 800; margin-bottom: 24px; }
+  .section-title span { color: #00D4FF; }
+
+  .glass {
+    background: rgba(8,12,18,0.65);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(0,212,255,0.1);
+    clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
+    position: relative;
+    min-height: 380px;
+    overflow: hidden;
+  }
+  .glass::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, #00D4FF, transparent);
+    opacity: 0.4;
+  }
+  .step-label { position: absolute; top: 16px; left: 20px; font-size: 8px; letter-spacing: 3px; color: rgba(0,212,255,0.5); }
+
+  .variant { margin-bottom: 32px; cursor: pointer; padding: 4px; border: 2px solid transparent; }
+  .variant:hover { border-color: rgba(0,212,255,0.15); }
+  .variant.selected { border-color: #FFD700; }
+  .variant-label { font-size: 9px; letter-spacing: 2px; color: #FFD700; margin-bottom: 8px; }
+  .variant-desc { font-size: 10px; color: #555; margin-bottom: 12px; }
+
+  /* ═══ A: Live trade feed appearing ═══ */
+  .a-content { padding: 48px 32px 32px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 380px; gap: 12px; }
+
+  .a-wallet-connected {
+    display: flex; align-items: center; gap: 10px;
+    width: 100%; max-width: 340px;
+    padding: 12px 16px;
+    background: rgba(0,212,255,0.03);
+    border: 1px solid rgba(0,212,255,0.12);
+    clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px);
+  }
+  .a-wallet-icon { font-size: 20px; }
+  .a-wallet-addr { font-size: 12px; color: #888; flex: 1; }
+  .a-wallet-badge { font-size: 9px; letter-spacing: 1px; color: #00D4FF; font-weight: 700; padding: 2px 8px; background: rgba(0,212,255,0.08); }
+
+  .a-scanning {
+    width: 100%; max-width: 340px;
+    padding: 10px 16px;
+    display: flex; align-items: center; gap: 8px;
+    font-size: 11px; color: #00D4FF;
+  }
+  .a-spinner { width: 14px; height: 14px; border: 2px solid rgba(0,212,255,0.15); border-top-color: #00D4FF; border-radius: 50%; animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .a-trade-feed {
+    width: 100%; max-width: 340px;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+
+  .a-trade {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 12px;
+    background: rgba(8,12,22,0.6);
+    border: 1px solid rgba(255,255,255,0.03);
+    clip-path: polygon(3px 0, 100% 0, 100% calc(100% - 3px), calc(100% - 3px) 100%, 0 100%, 0 3px);
+    opacity: 0;
+    animation: tradeFadeIn 0.4s ease-out forwards;
+  }
+  .a-trade:nth-child(1) { animation-delay: 0.5s; }
+  .a-trade:nth-child(2) { animation-delay: 1.0s; }
+  .a-trade:nth-child(3) { animation-delay: 1.5s; }
+  .a-trade:nth-child(4) { animation-delay: 2.0s; }
+  .a-trade:nth-child(5) { animation-delay: 2.5s; }
+
+  @keyframes tradeFadeIn {
+    from { opacity: 0; transform: translateX(-12px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .a-trade-token { width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 700; color: black; }
+  .a-trade-info { flex: 1; }
+  .a-trade-name { font-size: 10px; font-weight: 700; }
+  .a-trade-type { font-size: 8px; }
+  .a-trade-pnl { font-size: 11px; font-weight: 800; }
+
+  .a-counter {
+    width: 100%; max-width: 340px;
+    text-align: center;
+    padding: 8px;
+    font-size: 10px; color: #555;
+    opacity: 0;
+    animation: tradeFadeIn 0.4s ease-out 3s forwards;
+  }
+  .a-counter span { color: #00D4FF; font-weight: 800; font-size: 14px; }
+
+  /* ═══ B: Wallet visual with SOL flowing in ═══ */
+  .b-content { padding: 48px 32px 32px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 380px; }
+
+  .b-wallet-visual {
+    position: relative;
+    width: 260px; height: 160px;
+    margin-bottom: 20px;
+  }
+
+  .b-sol-orb {
+    position: absolute;
+    width: 60px; height: 60px;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: linear-gradient(135deg, #9945FF, #14F195);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 40px rgba(153,69,255,0.3), 0 0 80px rgba(20,241,149,0.15);
+    animation: orbBreathe 3s ease-in-out infinite;
+  }
+  @keyframes orbBreathe {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); }
+    50% { transform: translate(-50%, -50%) scale(1.08); }
+  }
+  .b-sol-orb img { width: 32px; height: 32px; }
+
+  /* Orbiting trade dots */
+  .b-orbit-dot {
+    position: absolute;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    animation: orbit 4s linear infinite;
+  }
+  @keyframes orbit {
+    from { transform: rotate(0deg) translateX(80px) rotate(0deg); }
+    to { transform: rotate(360deg) translateX(80px) rotate(-360deg); }
+  }
+  .b-orbit-dot:nth-child(2) { animation-delay: -1s; background: #22c55e; top: 50%; left: 50%; }
+  .b-orbit-dot:nth-child(3) { animation-delay: -2s; background: #00D4FF; top: 50%; left: 50%; }
+  .b-orbit-dot:nth-child(4) { animation-delay: -3s; background: #f59e0b; top: 50%; left: 50%; }
+
+  .b-stats-row {
+    display: flex; gap: 12px;
+    margin-top: 12px;
+  }
+  .b-stat {
+    text-align: center;
+    padding: 10px 16px;
+    background: rgba(8,12,22,0.5);
+    border: 1px solid rgba(255,255,255,0.04);
+    clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px);
+    flex: 1;
+  }
+  .b-stat-val { font-size: 18px; font-weight: 900; }
+  .b-stat-lbl { font-size: 7px; letter-spacing: 1px; color: #555; margin-top: 2px; }
+
+  .b-bottom { margin-top: 16px; text-align: center; font-size: 10px; color: #555; }
+  .b-bottom span { color: #00D4FF; }
+
+  /* ═══ C: Blockchain scan animation ═══ */
+  .c-content { padding: 48px 32px 32px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 380px; }
+
+  .c-scan-window {
+    width: 100%; max-width: 340px;
+    background: rgba(8,12,22,0.8);
+    border: 1px solid rgba(0,212,255,0.08);
+    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+    overflow: hidden;
+  }
+
+  .c-scan-header {
+    display: flex; align-items: center; gap: 6px;
+    padding: 8px 12px;
+    background: rgba(0,212,255,0.03);
+    border-bottom: 1px solid rgba(0,212,255,0.06);
+    font-size: 9px; color: #00D4FF; letter-spacing: 1px;
+  }
+  .c-scan-dot { width: 6px; height: 6px; border-radius: 50%; background: #00D4FF; animation: scanBlink 1s ease-in-out infinite; }
+  @keyframes scanBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  .c-scan-body { padding: 12px; }
+
+  .c-scan-line {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.02);
+    font-size: 9px;
+    opacity: 0;
+    animation: scanLineIn 0.3s ease-out forwards;
+  }
+  .c-scan-line:nth-child(1) { animation-delay: 0.2s; }
+  .c-scan-line:nth-child(2) { animation-delay: 0.5s; }
+  .c-scan-line:nth-child(3) { animation-delay: 0.8s; }
+  .c-scan-line:nth-child(4) { animation-delay: 1.1s; }
+  .c-scan-line:nth-child(5) { animation-delay: 1.4s; }
+  .c-scan-line:nth-child(6) { animation-delay: 1.7s; }
+  @keyframes scanLineIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .c-scan-hash { color: #555; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .c-scan-type { font-weight: 700; width: 40px; }
+  .c-scan-type.buy { color: #00D4FF; }
+  .c-scan-type.sell { color: #f59e0b; }
+  .c-scan-amount { font-weight: 700; width: 50px; text-align: right; }
+
+  .c-scan-progress {
+    margin-top: 16px;
+    width: 100%; max-width: 340px;
+  }
+  .c-prog-bar { height: 3px; background: rgba(255,255,255,0.04); overflow: hidden; }
+  .c-prog-fill { height: 3px; background: linear-gradient(90deg, #00D4FF, #33DDFF); width: 0%; animation: progFill 3s ease-out forwards; }
+  @keyframes progFill { to { width: 100%; } }
+  .c-prog-text { display: flex; justify-content: space-between; margin-top: 6px; font-size: 9px; }
+  .c-prog-text .left { color: #00D4FF; }
+  .c-prog-text .right { color: #555; }
+
+  .c-result {
+    margin-top: 16px;
+    width: 100%; max-width: 340px;
+    display: flex; gap: 8px;
+    opacity: 0;
+    animation: tradeFadeIn 0.4s ease-out 2.5s forwards;
+  }
+  .c-result-box {
+    flex: 1; padding: 10px;
+    background: rgba(0,212,255,0.03);
+    border: 1px solid rgba(0,212,255,0.08);
+    text-align: center;
+    clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px);
+  }
+  .c-result-val { font-size: 16px; font-weight: 900; }
+  .c-result-lbl { font-size: 7px; letter-spacing: 1px; color: #555; margin-top: 2px; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="label">SCREEN 2 OF 5 — WALLETS</div>
+  <div class="section-title">Pick the <span>Link Wallets</span> screen visual</div>
+</div>
+
+<!-- A: Live trade feed appearing one by one -->
+<div class="variant" data-choice="a" onclick="document.querySelectorAll('.variant').forEach(e=>e.classList.remove('selected'));this.classList.add('selected')">
+  <div class="container">
+    <div class="variant-label">A — LIVE TRADE FEED</div>
+    <div class="variant-desc">Wallet connects, then individual trades start appearing one by one from the blockchain — sliding in from the left. Each shows token, type (BUY/SELL), and PnL. Counter at the bottom counts total trades found.</div>
+    <div class="glass">
+      <div class="step-label mono">STEP 2 — WALLETS</div>
+      <div class="a-content">
+        <div class="a-wallet-connected">
+          <div class="a-wallet-icon">◎</div>
+          <div class="a-wallet-addr mono">7xKp...3mQz</div>
+          <div class="a-wallet-badge mono">CONNECTED</div>
+        </div>
+
+        <div class="a-scanning">
+          <div class="a-spinner"></div>
+          <span>Scanning Solana blockchain...</span>
+        </div>
+
+        <div class="a-trade-feed">
+          <div class="a-trade">
+            <div class="a-trade-token" style="background: linear-gradient(135deg, #22c55e, #16a34a);">B</div>
+            <div class="a-trade-info">
+              <div class="a-trade-name">$BONK</div>
+              <div class="a-trade-type" style="color:#00D4FF">BUY · 2.4 SOL</div>
+            </div>
+            <div class="a-trade-pnl" style="color:#22c55e">+340%</div>
+          </div>
+          <div class="a-trade">
+            <div class="a-trade-token" style="background: linear-gradient(135deg, #f59e0b, #d97706);">W</div>
+            <div class="a-trade-info">
+              <div class="a-trade-name">$WIF</div>
+              <div class="a-trade-type" style="color:#f59e0b">SELL · 8.1 SOL</div>
+            </div>
+            <div class="a-trade-pnl" style="color:#22c55e">+89%</div>
+          </div>
+          <div class="a-trade">
+            <div class="a-trade-token" style="background: linear-gradient(135deg, #ef4444, #dc2626);">P</div>
+            <div class="a-trade-info">
+              <div class="a-trade-name">$POPCAT</div>
+              <div class="a-trade-type" style="color:#ef4444">SELL · 1.2 SOL</div>
+            </div>
+            <div class="a-trade-pnl" style="color:#ef4444">-42%</div>
+          </div>
+          <div class="a-trade">
+            <div class="a-trade-token" style="background: linear-gradient(135deg, #a78bfa, #7c3aed);">J</div>
+            <div class="a-trade-info">
+              <div class="a-trade-name">$JUP</div>
+              <div class="a-trade-type" style="color:#00D4FF">BUY · 5.0 SOL</div>
+            </div>
+            <div class="a-trade-pnl" style="color:#22c55e">+127%</div>
+          </div>
+          <div class="a-trade">
+            <div class="a-trade-token" style="background: linear-gradient(135deg, #00D4FF, #0099cc);">R</div>
+            <div class="a-trade-info">
+              <div class="a-trade-name">$RAY</div>
+              <div class="a-trade-type" style="color:#f59e0b">SELL · 3.3 SOL</div>
+            </div>
+            <div class="a-trade-pnl" style="color:#22c55e">+64%</div>
+          </div>
+        </div>
+
+        <div class="a-counter"><span>847</span> trades found across 142 tokens</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- B: SOL orb with orbiting dots -->
+<div class="variant" data-choice="b" onclick="document.querySelectorAll('.variant').forEach(e=>e.classList.remove('selected'));this.classList.add('selected')">
+  <div class="container">
+    <div class="variant-label">B — SOLANA ORB</div>
+    <div class="variant-desc">A glowing Solana orb in the center with trade dots orbiting around it. Stats appear below showing what was discovered. More abstract/visual, less literal.</div>
+    <div class="glass">
+      <div class="step-label mono">STEP 2 — WALLETS</div>
+      <div class="b-content">
+        <div class="b-wallet-visual">
+          <div class="b-sol-orb"><img src="/sol.png" alt="SOL"></div>
+          <div class="b-orbit-dot" style="top:50%;left:50%;background:#22c55e;"></div>
+          <div class="b-orbit-dot"></div>
+          <div class="b-orbit-dot"></div>
+        </div>
+
+        <div style="font-size:13px;font-weight:800;text-align:center;margin-bottom:4px;">Indexing your wallets</div>
+        <div style="font-size:10px;color:#555;text-align:center;margin-bottom:16px;">Every swap on Solana, tracked and verified</div>
+
+        <div class="b-stats-row">
+          <div class="b-stat">
+            <div class="b-stat-val mono" style="color:#00D4FF">847</div>
+            <div class="b-stat-lbl mono">TRADES</div>
+          </div>
+          <div class="b-stat">
+            <div class="b-stat-val mono" style="color:#22c55e">142</div>
+            <div class="b-stat-lbl mono">TOKENS</div>
+          </div>
+          <div class="b-stat">
+            <div class="b-stat-val mono" style="color:#f59e0b">+68</div>
+            <div class="b-stat-lbl mono">PNL (SOL)</div>
+          </div>
+        </div>
+
+        <div class="b-bottom">Powered by <span>Helius</span> · sub-second indexing</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- C: Blockchain scan terminal -->
+<div class="variant" data-choice="c" onclick="document.querySelectorAll('.variant').forEach(e=>e.classList.remove('selected'));this.classList.add('selected')">
+  <div class="container">
+    <div class="variant-label">C — BLOCKCHAIN SCANNER</div>
+    <div class="variant-desc">A terminal-like scan window showing transaction hashes being processed in real-time. Progress bar filling up. Then summary stats appear. Feels technical and powerful — like watching a hacker tool work.</div>
+    <div class="glass">
+      <div class="step-label mono">STEP 2 — WALLETS</div>
+      <div class="c-content">
+        <div class="c-scan-window">
+          <div class="c-scan-header">
+            <div class="c-scan-dot"></div>
+            <span class="mono">SCANNING SOLANA MAINNET</span>
+          </div>
+          <div class="c-scan-body">
+            <div class="c-scan-line">
+              <span class="c-scan-hash mono">5Kx9...mPq2</span>
+              <span class="c-scan-type buy mono">BUY</span>
+              <span class="c-scan-amount mono" style="color:#00D4FF">2.4 SOL</span>
+            </div>
+            <div class="c-scan-line">
+              <span class="c-scan-hash mono">8Wr3...nLk7</span>
+              <span class="c-scan-type sell mono">SELL</span>
+              <span class="c-scan-amount mono" style="color:#22c55e">8.1 SOL</span>
+            </div>
+            <div class="c-scan-line">
+              <span class="c-scan-hash mono">3Fd2...pQm9</span>
+              <span class="c-scan-type buy mono">BUY</span>
+              <span class="c-scan-amount mono" style="color:#00D4FF">1.2 SOL</span>
+            </div>
+            <div class="c-scan-line">
+              <span class="c-scan-hash mono">7Mn4...xRt1</span>
+              <span class="c-scan-type sell mono">SELL</span>
+              <span class="c-scan-amount mono" style="color:#22c55e">5.0 SOL</span>
+            </div>
+            <div class="c-scan-line">
+              <span class="c-scan-hash mono">2Bk8...wYz5</span>
+              <span class="c-scan-type buy mono">BUY</span>
+              <span class="c-scan-amount mono" style="color:#00D4FF">3.3 SOL</span>
+            </div>
+            <div class="c-scan-line">
+              <span class="c-scan-hash mono">9Jt6...hVm3</span>
+              <span class="c-scan-type sell mono">SELL</span>
+              <span class="c-scan-amount mono" style="color:#22c55e">12.7 SOL</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="c-scan-progress">
+          <div class="c-prog-bar"><div class="c-prog-fill"></div></div>
+          <div class="c-prog-text">
+            <span class="left mono">847 transactions indexed</span>
+            <span class="right mono">100%</span>
+          </div>
+        </div>
+
+        <div class="c-result">
+          <div class="c-result-box">
+            <div class="c-result-val mono" style="color:#22c55e">+68</div>
+            <div class="c-result-lbl mono">NET PNL (SOL)</div>
+          </div>
+          <div class="c-result-box">
+            <div class="c-result-val mono" style="color:#00D4FF">71%</div>
+            <div class="c-result-lbl mono">WIN RATE</div>
+          </div>
+          <div class="c-result-box">
+            <div class="c-result-val mono" style="color:white">142</div>
+            <div class="c-result-lbl mono">TOKENS</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

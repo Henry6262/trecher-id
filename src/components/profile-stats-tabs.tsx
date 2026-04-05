@@ -37,40 +37,21 @@ export function ProfileStatsTabs({ username, allTimeStats, accentColor }: Props)
   if (!stats && !loading) return null;
 
   return (
-    <div className="mt-5">
-      {/* Tab pills */}
-      <div className="flex gap-1.5 mb-3">
-        {TABS.map(t => (
-          <button
-            key={t.key}
-            onClick={() => switchTab(t.key)}
-            className="cut-xs px-2.5 py-1 text-[9px] font-mono tracking-widest transition-all"
-            style={{
-              background: active === t.key ? `${accent}2e` : 'rgba(8,12,22,0.55)',
-              border: active === t.key ? `1px solid ${accent}4d` : '1px solid rgba(255,255,255,0.06)',
-              color: active === t.key ? accent : '#71717a',
-            }}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Stats strip */}
-      <div className={`flex gap-2 transition-opacity ${loading ? 'opacity-40' : 'opacity-100'}`}>
-        {stats && [
-          { value: `${stats.winRate.toFixed(0)}%`, label: 'WIN RATE', color: stats.winRate >= 50 ? 'var(--trench-green)' : 'var(--trench-red)' },
-          { value: String(stats.totalTrades), label: 'TRADES', color: 'white' },
-        ].map(s => (
-          <div key={s.label} className="flex-1 relative cut-sm overflow-hidden" style={{ background: 'rgba(8,12,18,0.6)' }}>
-            <div style={{ height: '2px', background: `linear-gradient(90deg, transparent, ${accent}4d, transparent)` }} />
-            <div className="flex flex-col items-center justify-center px-3 py-3" style={{ border: `1px solid ${accent}1a`, borderTop: 'none' }}>
-              <span className="text-[17px] font-bold font-mono" style={{ color: s.color }}>{s.value}</span>
-              <span className="text-[8px] text-[var(--trench-text-muted)] tracking-[1.5px] mt-1">{s.label}</span>
-            </div>
-          </div>
-        ))}
-      </div>
+    <div className="flex gap-1.5">
+      {TABS.map(t => (
+        <button
+          key={t.key}
+          onClick={() => switchTab(t.key)}
+          className="cut-xs px-2.5 py-1 text-[9px] font-mono tracking-widest transition-all"
+          style={{
+            background: active === t.key ? `${accent}2e` : 'rgba(8,12,22,0.55)',
+            border: active === t.key ? `1px solid ${accent}4d` : '1px solid rgba(255,255,255,0.06)',
+            color: active === t.key ? accent : '#71717a',
+          }}
+        >
+          {t.label}
+        </button>
+      ))}
     </div>
   );
 }

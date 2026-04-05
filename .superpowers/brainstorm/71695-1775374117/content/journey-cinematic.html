@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #050508; color: white; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  .mono { font-family: 'SF Mono', 'Fira Code', ui-monospace, monospace; }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 60px 20px; }
+
+  /* Header */
+  .header { text-align: center; margin-bottom: 32px; }
+  .header h2 { font-size: 26px; font-weight: 900; }
+  .header h2 span { color: #00D4FF; }
+  .header p { font-size: 11px; color: #555; margin-top: 6px; }
+
+  /* Main layout: left timeline + right preview */
+  .cinema { display: flex; gap: 0; min-height: 420px; }
+
+  /* LEFT: Steps with connector line */
+  .steps-col {
+    width: 320px; flex-shrink: 0;
+    position: relative;
+    padding-right: 24px;
+  }
+
+  /* Vertical line connecting all steps */
+  .steps-col::after {
+    content: '';
+    position: absolute;
+    top: 24px; bottom: 24px;
+    left: 16px;
+    width: 2px;
+    background: linear-gradient(180deg, #22c55e, #22c55e 30%, #00D4FF 50%, rgba(255,255,255,0.06) 55%, rgba(255,255,255,0.06));
+    z-index: 0;
+  }
+
+  .step {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 14px 0;
+    position: relative;
+    z-index: 1;
+    cursor: pointer;
+    transition: all 0.4s;
+  }
+
+  .step .dot {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 900;
+    flex-shrink: 0;
+    transition: all 0.4s;
+  }
+
+  .step.done .dot { background: #22c55e; color: black; box-shadow: 0 0 12px rgba(34,197,94,0.3); }
+  .step.active .dot { background: #00D4FF; color: black; box-shadow: 0 0 20px rgba(0,212,255,0.5); transform: scale(1.15); }
+  .step.pending .dot { background: rgba(255,255,255,0.04); color: #333; border: 1px solid rgba(255,255,255,0.08); }
+
+  .step .info { padding-top: 4px; }
+  .step .info .title {
+    font-size: 13px; font-weight: 800;
+    transition: color 0.3s;
+    margin-bottom: 2px;
+  }
+  .step.done .info .title { color: #22c55e; }
+  .step.active .info .title { color: #00D4FF; }
+  .step.pending .info .title { color: #444; }
+
+  .step .info .desc {
+    font-size: 10px; line-height: 1.5;
+    transition: color 0.3s;
+    max-width: 240px;
+  }
+  .step.active .info .desc { color: #888; }
+  .step.done .info .desc { color: #555; }
+  .step.pending .info .desc { color: #333; }
+
+  /* RIGHT: Live preview that changes with each step */
+  .preview-col {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .preview-frame {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    border: 1px solid rgba(0,212,255,0.08);
+    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+    background: rgba(8,12,22,0.5);
+    overflow: hidden;
+  }
+
+  .preview-frame::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #00D4FF, transparent);
+    opacity: 0.6;
+  }
+
+  /* Each preview screen */
+  .preview-screen {
+    position: absolute;
+    inset: 0;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.5s ease-out;
+    pointer-events: none;
+  }
+  .preview-screen.visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  /* ─── Screen 1: Sign in ─── */
+  .screen-signin {
+    align-items: center;
+    text-align: center;
+  }
+  .twitter-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 12px 28px;
+    background: white;
+    color: black;
+    font-size: 13px; font-weight: 700;
+    border-radius: 999px;
+    margin-bottom: 16px;
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 0 rgba(255,255,255,0); }
+    50% { box-shadow: 0 0 30px rgba(255,255,255,0.15); }
+  }
+  .url-preview {
+    font-size: 12px; color: #555;
+    margin-top: 8px;
+  }
+  .url-preview span { color: #00D4FF; font-weight: 700; }
+
+  /* ─── Screen 2: Wallets ─── */
+  .wallet-card {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px;
+    background: rgba(0,212,255,0.03);
+    border: 1px solid rgba(0,212,255,0.08);
+    margin-bottom: 6px;
+    clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px);
+  }
+  .wallet-icon { font-size: 18px; }
+  .wallet-addr { font-size: 10px; color: #888; flex: 1; }
+  .wallet-status { font-size: 8px; letter-spacing: 1px; color: #22c55e; font-weight: 700; }
+  .trades-loading {
+    margin-top: 12px;
+    padding: 10px 14px;
+    background: rgba(34,197,94,0.04);
+    border: 1px solid rgba(34,197,94,0.1);
+    font-size: 10px; color: #22c55e;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .spinner { width: 12px; height: 12px; border: 2px solid rgba(34,197,94,0.2); border-top-color: #22c55e; border-radius: 50%; animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ─── Screen 3: Profile preview ─── */
+  .mini-profile {
+    background: rgba(8,12,22,0.8);
+    border: 1px solid rgba(0,212,255,0.1);
+    padding: 16px;
+    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+  }
+  .mini-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .mini-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #1DA1F2, #0d8bd9); }
+  .mini-name { font-size: 13px; font-weight: 800; }
+  .mini-handle { font-size: 9px; color: #00D4FF; }
+  .mini-stats { display: flex; gap: 8px; margin-bottom: 10px; }
+  .mini-stat { flex: 1; padding: 6px; background: rgba(0,212,255,0.03); text-align: center; }
+  .mini-stat .val { font-size: 12px; font-weight: 800; color: #22c55e; }
+  .mini-stat .lbl { font-size: 7px; color: #555; letter-spacing: 1px; margin-top: 2px; }
+  .mini-link { display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: rgba(0,212,255,0.03); border: 1px solid rgba(0,212,255,0.06); margin-bottom: 4px; font-size: 9px; color: #888; }
+
+  /* ─── Screen 4: Leaderboard climb ─── */
+  .rank-display { text-align: center; }
+  .rank-label { font-size: 8px; letter-spacing: 3px; color: #555; margin-bottom: 8px; }
+  .rank-number { font-size: 64px; font-weight: 900; color: #00D4FF; text-shadow: 0 0 30px rgba(0,212,255,0.3); line-height: 1; }
+  .rank-change { font-size: 11px; color: #22c55e; margin-top: 8px; font-weight: 700; }
+  .rank-bar { margin-top: 16px; }
+  .rank-bar-bg { height: 6px; background: rgba(255,255,255,0.04); width: 100%; }
+  .rank-bar-fill { height: 6px; background: linear-gradient(90deg, #22c55e, #00D4FF); width: 72%; transition: width 1s; }
+  .rank-bar-label { display: flex; justify-content: space-between; font-size: 8px; color: #555; margin-top: 4px; }
+
+  /* ─── Screen 5: Trencher Cup ─── */
+  .cup-visual { text-align: center; }
+  .cup-trophy { font-size: 48px; margin-bottom: 8px; filter: drop-shadow(0 0 20px rgba(255,215,0,0.4)); }
+  .cup-title { font-size: 9px; letter-spacing: 3px; color: #FFD700; margin-bottom: 16px; }
+  .cup-bracket { display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .cup-slot { padding: 6px 12px; font-size: 9px; font-weight: 700; }
+  .cup-slot.you { background: rgba(0,212,255,0.1); border: 1px solid rgba(0,212,255,0.3); color: #00D4FF; }
+  .cup-slot.other { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); color: #555; }
+  .cup-vs { color: #FFD700; font-size: 12px; font-weight: 900; }
+
+  /* ─── Screen 6: Vault earning ─── */
+  .vault-visual { text-align: center; }
+  .vault-label { font-size: 8px; letter-spacing: 3px; color: #FFD700; margin-bottom: 8px; }
+  .vault-amount { font-size: 42px; font-weight: 900; color: #22c55e; text-shadow: 0 0 24px rgba(34,197,94,0.3); line-height: 1; }
+  .vault-sub { font-size: 10px; color: #555; margin-top: 6px; }
+  .vault-your-share { margin-top: 20px; padding: 12px 16px; background: rgba(34,197,94,0.06); border: 1px solid rgba(34,197,94,0.15); }
+  .vault-your-share .label { font-size: 8px; letter-spacing: 2px; color: #888; margin-bottom: 4px; }
+  .vault-your-share .amount { font-size: 20px; font-weight: 900; color: #22c55e; }
+  .vault-your-share .rank-info { font-size: 9px; color: #555; margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h2>Your <span>journey</span></h2>
+    <p>From sign-up to earning rewards</p>
+  </div>
+
+  <div class="cinema">
+    <!-- LEFT: Steps timeline -->
+    <div class="steps-col">
+      <div class="step done" data-screen="0">
+        <div class="dot">✓</div>
+        <div class="info">
+          <div class="title">Sign in with X</div>
+          <div class="desc">Connect your Twitter. Your handle becomes your URL.</div>
+        </div>
+      </div>
+      <div class="step done" data-screen="1">
+        <div class="dot">✓</div>
+        <div class="info">
+          <div class="title">Link your wallets</div>
+          <div class="desc">Add Solana wallets. We fetch your trading history.</div>
+        </div>
+      </div>
+      <div class="step active" data-screen="2">
+        <div class="dot">3</div>
+        <div class="info">
+          <div class="title">Share your profile</div>
+          <div class="desc">Pin trades, add links. Drop your Web3Me everywhere.</div>
+        </div>
+      </div>
+      <div class="step pending" data-screen="3">
+        <div class="dot">4</div>
+        <div class="info">
+          <div class="title">Climb the leaderboard</div>
+          <div class="desc">Your PnL determines your rank. Updated hourly.</div>
+        </div>
+      </div>
+      <div class="step pending" data-screen="4">
+        <div class="dot">5</div>
+        <div class="info">
+          <div class="title">Enter the Trencher Cup</div>
+          <div class="desc">Top 32 qualify. Groups, knockout, champion.</div>
+        </div>
+      </div>
+      <div class="step pending" data-screen="5">
+        <div class="dot">6</div>
+        <div class="info">
+          <div class="title">Earn from the Vault</div>
+          <div class="desc">69% of $WEB3ME fees. Weekly payouts + Cup prizes.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Live preview -->
+    <div class="preview-col">
+      <div class="preview-frame">
+        <!-- Screen 1: Sign in -->
+        <div class="preview-screen screen-signin" data-idx="0">
+          <div class="twitter-btn">𝕏 Sign in with Twitter</div>
+          <div style="font-size:11px;color:#888;margin-top:12px;">One click. No passwords.</div>
+          <div class="url-preview">Your profile: <span>web3me.fun/yourusername</span></div>
+        </div>
+
+        <!-- Screen 2: Wallets -->
+        <div class="preview-screen" data-idx="1">
+          <div style="font-size:9px;letter-spacing:2px;color:#555;margin-bottom:12px;">LINKING WALLETS</div>
+          <div class="wallet-card">
+            <div class="wallet-icon">◎</div>
+            <div class="wallet-addr mono">7xKp...3mQz</div>
+            <div class="wallet-status">LINKED</div>
+          </div>
+          <div class="wallet-card">
+            <div class="wallet-icon">◎</div>
+            <div class="wallet-addr mono">9dFr...7nWx</div>
+            <div class="wallet-status">SYNCING...</div>
+          </div>
+          <div class="trades-loading">
+            <div class="spinner"></div>
+            <span>Fetching 847 trades from Solana...</span>
+          </div>
+        </div>
+
+        <!-- Screen 3: Profile -->
+        <div class="preview-screen visible" data-idx="2">
+          <div class="mini-profile">
+            <div class="mini-header">
+              <div class="mini-avatar"></div>
+              <div>
+                <div class="mini-name">@yourusername</div>
+                <div class="mini-handle">web3me.fun/yourusername</div>
+              </div>
+            </div>
+            <div class="mini-stats">
+              <div class="mini-stat"><div class="val mono">+142</div><div class="lbl">PNL (SOL)</div></div>
+              <div class="mini-stat"><div class="val mono" style="color:#00D4FF">71%</div><div class="lbl">WIN RATE</div></div>
+              <div class="mini-stat"><div class="val mono" style="color:white">847</div><div class="lbl">TRADES</div></div>
+            </div>
+            <div class="mini-link">🔗 Follow @yourusername</div>
+            <div class="mini-link">📊 Trading Dashboard</div>
+          </div>
+        </div>
+
+        <!-- Screen 4: Leaderboard -->
+        <div class="preview-screen" data-idx="3">
+          <div class="rank-display">
+            <div class="rank-label mono">YOUR RANK</div>
+            <div class="rank-number mono" id="rank-num">#7</div>
+            <div class="rank-change">↑ 12 positions this week</div>
+            <div class="rank-bar">
+              <div class="rank-bar-bg"><div class="rank-bar-fill"></div></div>
+              <div class="rank-bar-label"><span>#50</span><span>YOU #7</span><span>#1</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Screen 5: Trencher Cup -->
+        <div class="preview-screen" data-idx="4">
+          <div class="cup-visual">
+            <div class="cup-trophy">🏆</div>
+            <div class="cup-title mono">TRENCHER CUP — QUARTERFINAL</div>
+            <div class="cup-bracket">
+              <div class="cup-slot you cut">@you +142</div>
+              <div class="cup-vs">VS</div>
+              <div class="cup-slot other cut">@rival +98</div>
+            </div>
+            <div style="margin-top:16px;font-size:9px;color:#22c55e;font-weight:700;">YOU'RE WINNING</div>
+          </div>
+        </div>
+
+        <!-- Screen 6: Vault -->
+        <div class="preview-screen" data-idx="5">
+          <div class="vault-visual">
+            <div class="vault-label mono">REWARD VAULT</div>
+            <div class="vault-amount mono" id="vault-num">127 SOL</div>
+            <div class="vault-sub">69% of all $WEB3ME fees</div>
+            <div class="vault-your-share">
+              <div class="label mono">YOUR WEEKLY SHARE (RANK #7)</div>
+              <div class="amount mono">+4 SOL</div>
+              <div class="rank-info">Sent directly to your wallet every Sunday</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const steps = document.querySelectorAll('.step');
+  const screens = document.querySelectorAll('.preview-screen');
+  let current = 2;
+
+  function setActive(idx) {
+    steps.forEach((s, i) => {
+      s.classList.remove('done', 'active', 'pending');
+      if (i < idx) { s.classList.add('done'); s.querySelector('.dot').textContent = '✓'; }
+      else if (i === idx) { s.classList.add('active'); s.querySelector('.dot').textContent = String(i + 1); }
+      else { s.classList.add('pending'); s.querySelector('.dot').textContent = String(i + 1); }
+    });
+    screens.forEach((s, i) => {
+      s.classList.toggle('visible', i === idx);
+    });
+
+    // Animate rank number on screen 4
+    if (idx === 3) {
+      const el = document.getElementById('rank-num');
+      let r = 50;
+      const iv = setInterval(() => { r -= 3; if (r <= 7) { r = 7; clearInterval(iv); } el.textContent = '#' + r; }, 100);
+    }
+  }
+
+  // Click to jump
+  steps.forEach((s, i) => {
+    s.addEventListener('click', () => { current = i; setActive(i); });
+  });
+
+  // Auto-play
+  setInterval(() => {
+    current = (current + 1) % steps.length;
+    setActive(current);
+  }, 4000);
+</script>
+
+</body>
+</html>

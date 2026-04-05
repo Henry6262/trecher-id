@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import Image from 'next/image';
+import { GlassCard } from './glass-card';
 
 // ─── Types ───────────────────────────────────────────────────
 
@@ -62,7 +63,7 @@ function Slot({
     neutral: { bg: 'rgba(8,12,22,0.6)', border: 'rgba(255,255,255,0.06)', opacity: 1, nameColor: 'white', pnlColor: '#888', filter: '', strikethrough: false },
     winner: { bg: 'rgba(34,197,94,0.04)', border: 'rgba(34,197,94,0.25)', opacity: 1, nameColor: 'white', pnlColor: '#22c55e', filter: '', strikethrough: false },
     loser: { bg: 'rgba(8,12,22,0.3)', border: 'rgba(255,255,255,0.03)', opacity: 0.3, nameColor: '#555', pnlColor: '#444', filter: 'grayscale(100%)', strikethrough: true },
-    latest: { bg: 'rgba(255,215,0,0.08)', border: 'rgba(255,215,0,0.5)', opacity: 1, nameColor: '#FFD700', pnlColor: '#FFD700', filter: '', strikethrough: false },
+    latest: { bg: 'rgba(0,212,255,0.08)', border: 'rgba(0,212,255,0.5)', opacity: 1, nameColor: '#00D4FF', pnlColor: '#00D4FF', filter: '', strikethrough: false },
     empty: { bg: '', border: '', opacity: 1, nameColor: '', pnlColor: '', filter: '', strikethrough: false },
   }[state];
 
@@ -114,9 +115,9 @@ function Connector({ pairs, pairHeight, pairGap, litPairs }: { pairs: number; pa
     <svg width={W} height={totalH} className="flex-shrink-0" style={{ minWidth: W }}>
       {paths.map((p, i) => (
         <path key={i} d={p.d} fill="none"
-          stroke={p.lit ? 'rgba(255,215,0,0.45)' : 'rgba(255,255,255,0.05)'}
+          stroke={p.lit ? 'rgba(0,212,255,0.7)' : 'rgba(255,255,255,0.1)'}
           strokeWidth={p.lit ? 1.5 : 1}
-          style={p.lit ? { filter: 'drop-shadow(0 0 4px rgba(255,215,0,0.25))' } : {}}
+          style={p.lit ? { filter: 'drop-shadow(0 0 6px rgba(0,212,255,0.4))' } : {}}
         />
       ))}
     </svg>
@@ -292,30 +293,33 @@ export function ArenaSection() {
   return (
     <>
       <div className="mx-auto max-w-[780px] px-6 sm:px-12 lg:px-16">
-        <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,215,0,0.15), transparent)' }} />
+        <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.15), transparent)' }} />
       </div>
 
-      <section className="max-w-[780px] mx-auto px-6 sm:px-12 lg:px-16 py-16 relative overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(255,215,0,0.05) 0%, transparent 70%)' }} />
-
-        {/* Header */}
-        <div className="text-center mb-8 relative">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 text-[9px] font-mono tracking-[3px] mb-4"
-            style={{ color: '#FFD700', background: 'rgba(255,215,0,0.08)', border: '1px solid rgba(255,215,0,0.2)', clipPath: 'polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px)' }}>
-            <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e] animate-pulse" />
-            TRENCHER CUP — SEASON 1
-          </div>
-          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-1">
-            The <span style={{ color: '#FFD700' }}>Arena</span>
+      <section className="max-w-[780px] mx-auto px-6 sm:px-12 lg:px-16 py-16">
+        {/* Header — outside the card */}
+        <div className="text-center mb-6 relative">
+          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-1">
+            The Trencher <span style={{ color: '#00D4FF' }}>Cup</span>
           </h2>
           <p className="text-[12px] text-[var(--trench-text-muted)]">32 traders. One champion. Real money on the line.</p>
+        </div>
+
+        <GlassCard cut={14} bg="rgba(8,12,18,0.55)">
+        <div className="relative overflow-hidden px-6 sm:px-8 py-10">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(0,212,255,0.05) 0%, transparent 70%)' }} />
+
+        {/* Reward info — absolute top right */}
+        <div className="absolute top-4 right-5 text-right z-10">
+          <div className="text-[22px] font-black font-mono" style={{ color: '#22c55e', textShadow: '0 0 16px rgba(34,197,94,0.2)' }}>{vaultSol} SOL</div>
+          <div className="text-[8px] tracking-[1px] text-[var(--trench-text-muted)]">69% of fees · growing</div>
         </div>
 
         {/* Match animation stage */}
         <div className="relative min-h-[280px] flex flex-col items-center justify-center mb-8">
           <div className="text-center mb-5">
             <div className="text-[8px] tracking-[3px] text-[var(--trench-text-muted)]">{currentMatch.round}</div>
-            <div className="text-[10px] tracking-[2px] font-mono" style={{ color: '#FFD700' }}>{currentMatch.label}</div>
+            <div className="text-[10px] tracking-[2px] font-mono" style={{ color: '#00D4FF' }}>{currentMatch.label}</div>
           </div>
 
           {/* INTRO */}
@@ -329,7 +333,7 @@ export function ArenaSection() {
                 </div>
               </div>
               <div className="animate-[vsSlam_0.4s_ease-out_0.3s_both]">
-                <div className="text-[36px] sm:text-[48px] font-black" style={{ color: '#FFD700', textShadow: '0 0 30px rgba(255,215,0,0.5), 0 0 60px rgba(255,215,0,0.2)', letterSpacing: '4px' }}>VS</div>
+                <div className="text-[36px] sm:text-[48px] font-black" style={{ color: '#00D4FF', textShadow: '0 0 30px rgba(0,212,255,0.5), 0 0 60px rgba(0,212,255,0.2)', letterSpacing: '4px' }}>VS</div>
               </div>
               <div className="flex flex-col items-center gap-3 animate-[slideFromRight_0.6s_ease-out_forwards]">
                 <div style={{ filter: 'drop-shadow(0 0 20px rgba(239,68,68,0.3))' }}><Avatar trader={currentMatch.p2} size={90} /></div>
@@ -360,9 +364,9 @@ export function ArenaSection() {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <div className="flex-1 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,215,0,0.2), transparent)' }} />
-                <span className="text-[10px] font-mono tracking-[2px]" style={{ color: '#FFD700' }}>VS</span>
-                <div className="flex-1 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,215,0,0.2), transparent)' }} />
+                <div className="flex-1 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.2), transparent)' }} />
+                <span className="text-[10px] font-mono tracking-[2px]" style={{ color: '#00D4FF' }}>VS</span>
+                <div className="flex-1 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.2), transparent)' }} />
               </div>
               <div className="flex items-center gap-3">
                 <Avatar trader={currentMatch.p2} size={48} />
@@ -440,26 +444,27 @@ export function ArenaSection() {
                 <Connector pairs={1} pairHeight={PAIR_H * 2 + PAIR_H + PAIR_GAP} pairGap={0}
                   litPairs={[!!champion]} />
 
-                {/* Champion — replaces Final column */}
-                <div className="flex-shrink-0 flex flex-col items-center justify-center" style={{ paddingTop: PAIR_H / 2 }}>
-                  <div className="text-center text-[7px] tracking-[2px] mb-3" style={{ color: '#FFD700' }}>CHAMPION</div>
+                {/* Champion — replaces Final column, texts absolute so avatar is perfectly centered */}
+                <div className="flex-shrink-0 flex items-center justify-center relative" style={{ width: '80px', alignSelf: 'center' }}>
+                  {/* CHAMPION label — absolute above */}
+                  <div className="absolute -top-5 left-1/2 -translate-x-1/2 text-[7px] tracking-[2px] whitespace-nowrap" style={{ color: '#00D4FF' }}>CHAMPION</div>
+
                   {champion ? (
-                    <div className="text-center animate-[winnerPop_0.5s_ease-out_forwards]">
-                      <div className="w-14 h-14 rounded-full mx-auto overflow-hidden" style={{ border: '3px solid #FFD700', boxShadow: '0 0 30px rgba(255,215,0,0.4)' }}>
+                    <div className="relative animate-[winnerPop_0.5s_ease-out_forwards]">
+                      <div className="w-[60px] h-[60px] rounded-full mx-auto overflow-hidden" style={{ border: '3px solid #00D4FF', boxShadow: '0 0 30px rgba(0,212,255,0.4)' }}>
                         {champion.avatarUrl ? (
-                          <Image src={champion.avatarUrl} alt="" width={56} height={56} className="w-full h-full object-cover" unoptimized />
+                          <Image src={champion.avatarUrl} alt="" width={60} height={60} className="w-full h-full object-cover" unoptimized />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-[18px] font-black" style={{ background: 'linear-gradient(135deg, #FFD700, #FFA500)', color: '#000' }}>
+                          <div className="w-full h-full flex items-center justify-center text-[20px] font-black" style={{ background: 'linear-gradient(135deg, #00D4FF, #33DDFF)', color: '#000' }}>
                             {champion.username.charAt(0).toUpperCase()}
                           </div>
                         )}
                       </div>
-                      <div className="text-[9px] font-black mt-2" style={{ color: '#FFD700' }}>@{champion.username}</div>
+                      {/* Name — absolute below */}
+                      <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[9px] font-black whitespace-nowrap" style={{ color: '#00D4FF' }}>@{champion.username}</div>
                     </div>
                   ) : (
-                    <div className="text-center">
-                      <div className="w-12 h-12 rounded-full mx-auto flex items-center justify-center text-[16px] font-black" style={{ background: 'linear-gradient(135deg, #FFD700, #FFA500)', color: '#000', boxShadow: '0 0 20px rgba(255,215,0,0.2)' }}>?</div>
-                    </div>
+                    <div className="w-[56px] h-[56px] rounded-full flex items-center justify-center text-[18px] font-black" style={{ background: 'linear-gradient(135deg, #00D4FF, #33DDFF)', color: '#000', boxShadow: '0 0 20px rgba(0,212,255,0.2)' }}>?</div>
                   )}
                 </div>
               </div>
@@ -478,26 +483,16 @@ export function ArenaSection() {
         <div className="flex justify-center gap-1.5 mt-2">
           {allMatchups.map((_, i) => (
             <div key={i} className="h-1 rounded-full transition-all duration-300"
-              style={{ width: i === matchIdx ? '24px' : '8px', background: i < matchIdx ? '#22c55e' : i === matchIdx ? '#FFD700' : 'rgba(255,255,255,0.1)' }} />
+              style={{ width: i === matchIdx ? '24px' : '8px', background: i < matchIdx ? '#22c55e' : i === matchIdx ? '#00D4FF' : 'rgba(255,255,255,0.1)' }} />
           ))}
-        </div>
-
-        {/* Vault */}
-        <div className="flex items-center justify-between px-5 py-4 mt-8 cut-sm" style={{ background: 'rgba(8,12,22,0.6)', border: '1px solid rgba(255,215,0,0.1)' }}>
-          <div>
-            <div className="text-[9px] tracking-[2px] font-mono" style={{ color: '#FFD700' }}>SEASON 1 PRIZE POOL</div>
-            <div className="text-[8px] text-[var(--trench-text-muted)] mt-0.5">69% of all $WEB3ME fees</div>
-          </div>
-          <div className="text-right">
-            <div className="text-[22px] sm:text-[26px] font-black font-mono" style={{ color: '#22c55e', textShadow: '0 0 16px rgba(34,197,94,0.2)' }}>{vaultSol} SOL</div>
-            <div className="text-[8px] text-[var(--trench-text-muted)]">growing every second</div>
-          </div>
         </div>
 
         {/* CTA */}
         <div className="text-center mt-6">
-          <a href="/leaderboard" className="inline-block px-6 py-2.5 text-[10px] font-bold tracking-[2px] text-black cut-xs" style={{ background: '#FFD700', textDecoration: 'none' }}>ENTER THE ARENA →</a>
+          <a href="/leaderboard" className="inline-block px-6 py-2.5 text-[10px] font-bold tracking-[2px] text-black cut-xs" style={{ background: '#00D4FF', textDecoration: 'none' }}>ENTER THE ARENA →</a>
         </div>
+        </div>
+        </GlassCard>
       </section>
 
       <style jsx global>{`
@@ -507,7 +502,7 @@ export function ArenaSection() {
         @keyframes winnerPop { 0% { transform: scale(0.8); opacity: 0.5; } 50% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
         @keyframes loserFade { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(0.85) translateY(16px); opacity: 0.25; } }
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: scale(1); } }
-        @keyframes winnerGlow { 0%, 100% { box-shadow: 0 0 0 rgba(255,215,0,0); } 50% { box-shadow: 0 0 16px rgba(255,215,0,0.2); } }
+        @keyframes winnerGlow { 0%, 100% { box-shadow: 0 0 0 rgba(0,212,255,0); } 50% { box-shadow: 0 0 16px rgba(0,212,255,0.2); } }
       `}</style>
     </>
   );

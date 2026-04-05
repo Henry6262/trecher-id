@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #050508; color: white; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+
+  .variant { max-width: 900px; margin: 0 auto; padding: 40px 20px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+  .variant-label { font-size: 9px; letter-spacing: 3px; color: #FFD700; margin-bottom: 8px; }
+  .variant-title { font-size: 18px; font-weight: 800; color: white; margin-bottom: 4px; }
+  .variant-desc { font-size: 11px; color: #666; margin-bottom: 20px; }
+
+  /* Shared */
+  .cut { clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px); }
+  .cut-sm { clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px); }
+  .mono { font-family: 'SF Mono', 'Fira Code', ui-monospace, monospace; }
+
+  /* ═══ VARIANT A: Podium cards left, compact table right ═══ */
+
+  .layout-a { display: flex; gap: 16px; align-items: stretch; }
+  .layout-a .podium { width: 280px; flex-shrink: 0; display: flex; flex-direction: column; gap: 8px; }
+
+  .podium-card {
+    padding: 14px 16px;
+    background: rgba(8,12,22,0.7);
+    border: 1px solid rgba(255,255,255,0.06);
+    display: flex; align-items: center; gap: 12px;
+    transition: all 0.2s;
+  }
+  .podium-card:hover { border-color: rgba(0,212,255,0.15); }
+
+  .podium-card.gold { border-color: rgba(255,215,0,0.2); background: rgba(255,215,0,0.04); }
+  .podium-card.silver { border-color: rgba(192,192,192,0.15); }
+  .podium-card.bronze { border-color: rgba(205,127,50,0.15); }
+
+  .podium-rank { font-size: 20px; font-weight: 900; width: 28px; text-align: center; }
+  .podium-rank.r1 { color: #FFD700; text-shadow: 0 0 12px rgba(255,215,0,0.3); }
+  .podium-rank.r2 { color: #C0C0C0; }
+  .podium-rank.r3 { color: #CD7F32; }
+
+  .podium-avatar { width: 44px; height: 44px; border-radius: 50%; background: #222; flex-shrink: 0; overflow: hidden; }
+  .podium-avatar.gold { border: 2px solid rgba(255,215,0,0.5); box-shadow: 0 0 16px rgba(255,215,0,0.2); }
+  .podium-avatar.silver { border: 2px solid rgba(192,192,192,0.3); }
+  .podium-avatar.bronze { border: 2px solid rgba(205,127,50,0.3); }
+  .podium-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+  .podium-info { flex: 1; min-width: 0; }
+  .podium-name { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .podium-meta { font-size: 9px; color: #555; margin-top: 2px; }
+  .podium-pnl { font-size: 16px; font-weight: 900; flex-shrink: 0; }
+  .podium-pnl.green { color: #22c55e; }
+
+  /* Table right */
+  .layout-a .table-side { flex: 1; min-width: 0; }
+
+  .compact-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    transition: background 0.15s;
+  }
+  .compact-row:hover { background: rgba(0,212,255,0.03); }
+  .compact-row .rank { font-size: 10px; font-weight: 700; color: #555; width: 20px; text-align: center; }
+  .compact-row .avatar { width: 24px; height: 24px; border-radius: 50%; background: #222; flex-shrink: 0; overflow: hidden; }
+  .compact-row .avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .compact-row .name { font-size: 11px; font-weight: 600; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .compact-row .wr { font-size: 9px; color: #00D4FF; width: 36px; text-align: right; }
+  .compact-row .pnl { font-size: 11px; font-weight: 700; color: #22c55e; width: 60px; text-align: right; }
+
+  /* ═══ VARIANT B: Stacked podium left (tall cards), dense list right ═══ */
+
+  .layout-b { display: flex; gap: 16px; align-items: stretch; }
+  .layout-b .podium-tall { width: 200px; flex-shrink: 0; display: flex; flex-direction: column; gap: 6px; }
+
+  .tall-card {
+    flex: 1;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 16px 12px;
+    background: rgba(8,12,22,0.7);
+    border: 1px solid rgba(255,255,255,0.06);
+    text-align: center;
+  }
+  .tall-card.gold { border-color: rgba(255,215,0,0.2); background: rgba(255,215,0,0.04); }
+  .tall-card .tall-rank { font-size: 11px; font-weight: 900; letter-spacing: 3px; margin-bottom: 8px; }
+  .tall-card .tall-avatar { width: 48px; height: 48px; border-radius: 50%; background: #222; margin-bottom: 6px; overflow: hidden; }
+  .tall-card.gold .tall-avatar { border: 2px solid rgba(255,215,0,0.4); box-shadow: 0 0 20px rgba(255,215,0,0.2); width: 56px; height: 56px; }
+  .tall-card .tall-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .tall-card .tall-name { font-size: 11px; font-weight: 700; }
+  .tall-card .tall-pnl { font-size: 14px; font-weight: 900; color: #22c55e; margin-top: 4px; }
+  .tall-card.gold .tall-pnl { font-size: 16px; }
+
+  .layout-b .list-side { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+  .dense-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.025);
+    flex: 1;
+  }
+  .dense-row .rank { font-size: 9px; font-weight: 700; color: #444; width: 16px; }
+  .dense-row .avatar { width: 20px; height: 20px; border-radius: 50%; background: #222; flex-shrink: 0; overflow: hidden; }
+  .dense-row .avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .dense-row .name { font-size: 10px; font-weight: 600; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .dense-row .stats { font-size: 8px; color: #555; width: 50px; text-align: right; }
+  .dense-row .pnl { font-size: 10px; font-weight: 700; color: #22c55e; width: 55px; text-align: right; }
+
+  /* ═══ VARIANT C: Side podium with highlight bar + scrollable list ═══ */
+
+  .layout-c { display: flex; gap: 20px; align-items: stretch; }
+  .layout-c .hero-col { width: 260px; flex-shrink: 0; }
+
+  .hero-1st {
+    padding: 24px 20px;
+    background: rgba(255,215,0,0.04);
+    border: 1px solid rgba(255,215,0,0.15);
+    text-align: center;
+    margin-bottom: 8px;
+  }
+  .hero-1st .crown { font-size: 24px; margin-bottom: 6px; }
+  .hero-1st .h-avatar { width: 64px; height: 64px; border-radius: 50%; margin: 0 auto 8px; background: #222; border: 3px solid rgba(255,215,0,0.4); box-shadow: 0 0 24px rgba(255,215,0,0.2); overflow: hidden; }
+  .hero-1st .h-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .hero-1st .h-name { font-size: 15px; font-weight: 800; }
+  .hero-1st .h-pnl { font-size: 22px; font-weight: 900; color: #22c55e; margin-top: 6px; text-shadow: 0 0 12px rgba(34,197,94,0.3); }
+  .hero-1st .h-meta { font-size: 9px; color: #666; margin-top: 4px; }
+
+  .mini-podium { display: flex; gap: 6px; }
+  .mini-card {
+    flex: 1; padding: 12px 8px; text-align: center;
+    background: rgba(8,12,22,0.7); border: 1px solid rgba(255,255,255,0.06);
+  }
+  .mini-card .m-rank { font-size: 9px; font-weight: 900; letter-spacing: 2px; margin-bottom: 6px; }
+  .mini-card .m-avatar { width: 32px; height: 32px; border-radius: 50%; margin: 0 auto 4px; background: #222; overflow: hidden; }
+  .mini-card.silver .m-avatar { border: 2px solid rgba(192,192,192,0.3); }
+  .mini-card.bronze .m-avatar { border: 2px solid rgba(205,127,50,0.3); }
+  .mini-card .m-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .mini-card .m-name { font-size: 9px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .mini-card .m-pnl { font-size: 11px; font-weight: 800; color: #22c55e; margin-top: 2px; }
+
+  .layout-c .list-col { flex: 1; min-width: 0; }
+  .layout-c .list-header {
+    display: flex; align-items: center; gap: 8px; padding: 6px 10px;
+    font-size: 8px; letter-spacing: 2px; color: #444;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+
+  /* Selectable */
+  .selectable { cursor: pointer; position: relative; }
+  .selectable::after {
+    content: ''; position: absolute; inset: -2px; border: 2px solid transparent; pointer-events: none; transition: border-color 0.2s;
+  }
+  .selectable:hover::after { border-color: rgba(0,212,255,0.2); }
+  .selectable.selected::after { border-color: #FFD700; }
+
+  /* Fake avatars */
+  .fake-av { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 10px; color: #555; background: linear-gradient(135deg, #1a1a2e, #16213e); }
+</style>
+</head>
+<body>
+
+<!-- ═══ VARIANT A ═══ -->
+<div class="variant selectable" data-choice="a" onclick="document.querySelectorAll('.selectable').forEach(e=>e.classList.remove('selected'));this.classList.add('selected')">
+  <div class="variant-label">VARIANT A</div>
+  <div class="variant-title">Horizontal cards + compact rows</div>
+  <div class="variant-desc">Top 3 as horizontal cards on the left, #4-13 as a compact table on the right. Clean separation.</div>
+
+  <div class="layout-a">
+    <div class="podium">
+      <div class="podium-card gold cut">
+        <div class="podium-rank r1 mono">1</div>
+        <div class="podium-avatar gold"><div class="fake-av">A</div></div>
+        <div class="podium-info">
+          <div class="podium-name">@ansem</div>
+          <div class="podium-meta">71% WR · 847 trades</div>
+        </div>
+        <div class="podium-pnl green mono">+142 SOL</div>
+      </div>
+      <div class="podium-card silver cut">
+        <div class="podium-rank r2 mono">2</div>
+        <div class="podium-avatar silver"><div class="fake-av">B</div></div>
+        <div class="podium-info">
+          <div class="podium-name">@blknoiz06</div>
+          <div class="podium-meta">63% WR · 1,203 trades</div>
+        </div>
+        <div class="podium-pnl green mono">+98 SOL</div>
+      </div>
+      <div class="podium-card bronze cut">
+        <div class="podium-rank r3 mono">3</div>
+        <div class="podium-avatar bronze"><div class="fake-av">C</div></div>
+        <div class="podium-info">
+          <div class="podium-name">@cryptowizard</div>
+          <div class="podium-meta">58% WR · 654 trades</div>
+        </div>
+        <div class="podium-pnl green mono">+76 SOL</div>
+      </div>
+    </div>
+
+    <div class="table-side">
+      <div class="compact-row" style="border-bottom: 1px solid rgba(255,255,255,0.06); margin-bottom: 4px; padding-bottom: 6px;">
+        <div class="rank" style="color: #444; font-size: 8px; letter-spacing: 1px;">RANK</div>
+        <div class="avatar" style="visibility:hidden"></div>
+        <div class="name" style="color: #444; font-size: 8px; letter-spacing: 1px;">TRADER</div>
+        <div class="wr" style="color: #444; font-size: 8px; letter-spacing: 1px;">WR</div>
+        <div class="pnl" style="color: #444; font-size: 8px; letter-spacing: 1px;">PNL</div>
+      </div>
+      <div class="compact-row"><div class="rank">4</div><div class="avatar"><div class="fake-av" style="font-size:8px">D</div></div><div class="name">@sol_whale</div><div class="wr mono">62%</div><div class="pnl mono">+54 SOL</div></div>
+      <div class="compact-row"><div class="rank">5</div><div class="avatar"><div class="fake-av" style="font-size:8px">E</div></div><div class="name">@degen_mike</div><div class="wr mono">59%</div><div class="pnl mono">+47 SOL</div></div>
+      <div class="compact-row"><div class="rank">6</div><div class="avatar"><div class="fake-av" style="font-size:8px">F</div></div><div class="name">@pump_master</div><div class="wr mono">55%</div><div class="pnl mono">+41 SOL</div></div>
+      <div class="compact-row"><div class="rank">7</div><div class="avatar"><div class="fake-av" style="font-size:8px">G</div></div><div class="name">@trencher_og</div><div class="wr mono">53%</div><div class="pnl mono">+38 SOL</div></div>
+      <div class="compact-row"><div class="rank">8</div><div class="avatar"><div class="fake-av" style="font-size:8px">H</div></div><div class="name">@alpha_calls</div><div class="wr mono">51%</div><div class="pnl mono">+33 SOL</div></div>
+      <div class="compact-row"><div class="rank">9</div><div class="avatar"><div class="fake-av" style="font-size:8px">I</div></div><div class="name">@sniper_sol</div><div class="wr mono">49%</div><div class="pnl mono">+29 SOL</div></div>
+      <div class="compact-row"><div class="rank">10</div><div class="avatar"><div class="fake-av" style="font-size:8px">J</div></div><div class="name">@memecoin_king</div><div class="wr mono">47%</div><div class="pnl mono">+24 SOL</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ VARIANT B ═══ -->
+<div class="variant selectable" data-choice="b" onclick="document.querySelectorAll('.selectable').forEach(e=>e.classList.remove('selected'));this.classList.add('selected')">
+  <div class="variant-label">VARIANT B</div>
+  <div class="variant-title">Tall podium cards + ultra-dense list</div>
+  <div class="variant-desc">Top 3 as tall vertical cards with centered avatars, #4-13 as a dense list filling the remaining height.</div>
+
+  <div class="layout-b">
+    <div class="podium-tall">
+      <div class="tall-card gold cut">
+        <div class="tall-rank mono" style="color:#FFD700">1ST</div>
+        <div class="tall-avatar"><div class="fake-av">A</div></div>
+        <div class="tall-name">@ansem</div>
+        <div class="tall-pnl mono">+142 SOL</div>
+      </div>
+      <div class="tall-card cut" style="border-color: rgba(192,192,192,0.15);">
+        <div class="tall-rank mono" style="color:#C0C0C0">2ND</div>
+        <div class="tall-avatar" style="border: 2px solid rgba(192,192,192,0.3);"><div class="fake-av">B</div></div>
+        <div class="tall-name">@blknoiz06</div>
+        <div class="tall-pnl mono">+98 SOL</div>
+      </div>
+      <div class="tall-card cut" style="border-color: rgba(205,127,50,0.15);">
+        <div class="tall-rank mono" style="color:#CD7F32">3RD</div>
+        <div class="tall-avatar" style="border: 2px solid rgba(205,127,50,0.3);"><div class="fake-av">C</div></div>
+        <div class="tall-name">@cryptowizard</div>
+        <div class="tall-pnl mono">+76 SOL</div>
+      </div>
+    </div>
+
+    <div class="list-side">
+      <div class="dense-row"><div class="rank">4</div><div class="avatar"><div class="fake-av" style="font-size:7px">D</div></div><div class="name">@sol_whale</div><div class="stats mono">62% WR</div><div class="pnl mono">+54 SOL</div></div>
+      <div class="dense-row"><div class="rank">5</div><div class="avatar"><div class="fake-av" style="font-size:7px">E</div></div><div class="name">@degen_mike</div><div class="stats mono">59% WR</div><div class="pnl mono">+47 SOL</div></div>
+      <div class="dense-row"><div class="rank">6</div><div class="avatar"><div class="fake-av" style="font-size:7px">F</div></div><div class="name">@pump_master</div><div class="stats mono">55% WR</div><div class="pnl mono">+41 SOL</div></div>
+      <div class="dense-row"><div class="rank">7</div><div class="avatar"><div class="fake-av" style="font-size:7px">G</div></div><div class="name">@trencher_og</div><div class="stats mono">53% WR</div><div class="pnl mono">+38 SOL</div></div>
+      <div class="dense-row"><div class="rank">8</div><div class="avatar"><div class="fake-av" style="font-size:7px">H</div></div><div class="name">@alpha_calls</div><div class="stats mono">51% WR</div><div class="pnl mono">+33 SOL</div></div>
+      <div class="dense-row"><div class="rank">9</div><div class="avatar"><div class="fake-av" style="font-size:7px">I</div></div><div class="name">@sniper_sol</div><div class="stats mono">49% WR</div><div class="pnl mono">+29 SOL</div></div>
+      <div class="dense-row"><div class="rank">10</div><div class="avatar"><div class="fake-av" style="font-size:7px">J</div></div><div class="name">@memecoin_king</div><div class="stats mono">47% WR</div><div class="pnl mono">+24 SOL</div></div>
+      <div class="dense-row"><div class="rank">11</div><div class="avatar"><div class="fake-av" style="font-size:7px">K</div></div><div class="name">@ape_in_first</div><div class="stats mono">45% WR</div><div class="pnl mono">+21 SOL</div></div>
+      <div class="dense-row"><div class="rank">12</div><div class="avatar"><div class="fake-av" style="font-size:7px">L</div></div><div class="name">@chart_reader</div><div class="stats mono">44% WR</div><div class="pnl mono">+18 SOL</div></div>
+      <div class="dense-row"><div class="rank">13</div><div class="avatar"><div class="fake-av" style="font-size:7px">M</div></div><div class="name">@based_trader</div><div class="stats mono">42% WR</div><div class="pnl mono">+15 SOL</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ VARIANT C ═══ -->
+<div class="variant selectable" data-choice="c" onclick="document.querySelectorAll('.selectable').forEach(e=>e.classList.remove('selected'));this.classList.add('selected')">
+  <div class="variant-label">VARIANT C</div>
+  <div class="variant-title">Hero #1 + mini 2nd/3rd + list</div>
+  <div class="variant-desc">#1 gets a big hero card, #2 and #3 are small side-by-side below it. #4-13 fills the right column. Maximum focus on the leader.</div>
+
+  <div class="layout-c">
+    <div class="hero-col">
+      <div class="hero-1st cut">
+        <div class="crown">👑</div>
+        <div class="h-avatar"><div class="fake-av" style="font-size:18px">A</div></div>
+        <div class="h-name">@ansem</div>
+        <div class="h-pnl mono">+142 SOL</div>
+        <div class="h-meta">71% WR · 847 trades · SNIPER</div>
+      </div>
+      <div class="mini-podium">
+        <div class="mini-card silver cut-sm">
+          <div class="m-rank mono" style="color:#C0C0C0">2ND</div>
+          <div class="m-avatar"><div class="fake-av" style="font-size:9px">B</div></div>
+          <div class="m-name">@blknoiz06</div>
+          <div class="m-pnl mono">+98 SOL</div>
+        </div>
+        <div class="mini-card bronze cut-sm">
+          <div class="m-rank mono" style="color:#CD7F32">3RD</div>
+          <div class="m-avatar"><div class="fake-av" style="font-size:9px">C</div></div>
+          <div class="m-name">@cryptowiz</div>
+          <div class="m-pnl mono">+76 SOL</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="list-col">
+      <div class="layout-c list-header">
+        <div style="width:16px">#</div>
+        <div style="width:20px"></div>
+        <div style="flex:1">TRADER</div>
+        <div style="width:50px;text-align:right">WR</div>
+        <div style="width:60px;text-align:right">PNL</div>
+      </div>
+      <div class="compact-row"><div class="rank">4</div><div class="avatar"><div class="fake-av" style="font-size:8px">D</div></div><div class="name">@sol_whale</div><div class="wr mono">62%</div><div class="pnl mono">+54 SOL</div></div>
+      <div class="compact-row"><div class="rank">5</div><div class="avatar"><div class="fake-av" style="font-size:8px">E</div></div><div class="name">@degen_mike</div><div class="wr mono">59%</div><div class="pnl mono">+47 SOL</div></div>
+      <div class="compact-row"><div class="rank">6</div><div class="avatar"><div class="fake-av" style="font-size:8px">F</div></div><div class="name">@pump_master</div><div class="wr mono">55%</div><div class="pnl mono">+41 SOL</div></div>
+      <div class="compact-row"><div class="rank">7</div><div class="avatar"><div class="fake-av" style="font-size:8px">G</div></div><div class="name">@trencher_og</div><div class="wr mono">53%</div><div class="pnl mono">+38 SOL</div></div>
+      <div class="compact-row"><div class="rank">8</div><div class="avatar"><div class="fake-av" style="font-size:8px">H</div></div><div class="name">@alpha_calls</div><div class="wr mono">51%</div><div class="pnl mono">+33 SOL</div></div>
+      <div class="compact-row"><div class="rank">9</div><div class="avatar"><div class="fake-av" style="font-size:8px">I</div></div><div class="name">@sniper_sol</div><div class="wr mono">49%</div><div class="pnl mono">+29 SOL</div></div>
+      <div class="compact-row"><div class="rank">10</div><div class="avatar"><div class="fake-av" style="font-size:8px">J</div></div><div class="name">@memecoin_king</div><div class="wr mono">47%</div><div class="pnl mono">+24 SOL</div></div>
+      <div class="compact-row"><div class="rank">11</div><div class="avatar"><div class="fake-av" style="font-size:8px">K</div></div><div class="name">@ape_in_first</div><div class="wr mono">45%</div><div class="pnl mono">+21 SOL</div></div>
+      <div class="compact-row"><div class="rank">12</div><div class="avatar"><div class="fake-av" style="font-size:8px">L</div></div><div class="name">@chart_reader</div><div class="wr mono">44%</div><div class="pnl mono">+18 SOL</div></div>
+      <div class="compact-row"><div class="rank">13</div><div class="avatar"><div class="fake-av" style="font-size:8px">M</div></div><div class="name">@based_trader</div><div class="wr mono">42%</div><div class="pnl mono">+15 SOL</div></div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

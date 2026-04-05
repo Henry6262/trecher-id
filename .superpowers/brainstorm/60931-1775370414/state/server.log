@@ -1,0 +1,6 @@
+{"type":"server-started","port":60383,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:60383","screen_dir":"/Users/henry/Documents/Gazillion-dollars/Ponzinomics/use-case-apps/web3me/.superpowers/brainstorm/60931-1775370414/content","state_dir":"/Users/henry/Documents/Gazillion-dollars/Ponzinomics/use-case-apps/web3me/.superpowers/brainstorm/60931-1775370414/state"}
+{"type":"screen-added","file":"/Users/henry/Documents/Gazillion-dollars/Ponzinomics/use-case-apps/web3me/.superpowers/brainstorm/60931-1775370414/content/leaderboard-layouts.html"}
+{"type":"screen-added","file":"/Users/henry/Documents/Gazillion-dollars/Ponzinomics/use-case-apps/web3me/.superpowers/brainstorm/60931-1775370414/content/leaderboard-v2.html"}
+{"type":"screen-added","file":"/Users/henry/Documents/Gazillion-dollars/Ponzinomics/use-case-apps/web3me/.superpowers/brainstorm/60931-1775370414/content/leaderboard-v3.html"}
+{"type":"screen-added","file":"/Users/henry/Documents/Gazillion-dollars/Ponzinomics/use-case-apps/web3me/.superpowers/brainstorm/60931-1775370414/content/leaderboard-v4.html"}
+{"type":"server-stopped","reason":"idle timeout"}
