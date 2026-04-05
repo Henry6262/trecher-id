@@ -16,7 +16,7 @@ const ROUND_LABELS: Record<string, string> = {
 
 const BRACKET_H = 420;
 // Total horizontal distance the bracket needs to scroll
-const SCROLL_WIDTH = 1400;
+const SCROLL_WIDTH = 2200;
 
 function RoundColumn({ label, matchups, gap }: { label: string; matchups: Matchup[]; gap: string }) {
   return (
@@ -42,9 +42,12 @@ export function TournamentBracket({ traders }: { traders: RankedTrader[] }) {
       if (!outer) return;
       const rect = outer.getBoundingClientRect();
       // Sticky pins when rect.top <= 0. Horizontal scroll range = total height minus one viewport.
-      const stickyTravel = outer.offsetHeight - BRACKET_H;
+      // Sticky offset from top of viewport
+      const stickyTop = (window.innerHeight - BRACKET_H) / 2;
+      // Total distance the outer container scrolls while sticky is pinned
+      const stickyTravel = outer.offsetHeight - window.innerHeight;
       if (stickyTravel <= 0) return;
-      // Progress: 0 when top of section hits top of viewport, 1 when sticky releases
+      // Progress starts when section top goes above viewport (rect.top goes negative)
       const progress = Math.min(1, Math.max(0, -rect.top / stickyTravel));
       setScrollProgress(progress);
     }
@@ -84,8 +87,8 @@ export function TournamentBracket({ traders }: { traders: RankedTrader[] }) {
       {/* Sticky wrapper — pins the bracket to viewport while scrolling */}
       <div
         ref={stickyRef}
-        className="sticky top-0 overflow-hidden"
-        style={{ height: BRACKET_H }}
+        className="sticky overflow-hidden"
+        style={{ height: BRACKET_H, top: `calc(50vh - ${BRACKET_H / 2}px)` }}
       >
         {/* Edge fades */}
         <div className="absolute left-0 top-0 bottom-0 w-16 z-10 pointer-events-none" style={{ background: 'linear-gradient(90deg, rgba(5,5,8,1) 0%, transparent 100%)' }} />
