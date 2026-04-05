@@ -21,16 +21,31 @@ function parseSwapsForRecalc(
   }>();
 
   for (const tx of txns) {
-    if (tx.type !== 'SWAP') continue;
+    if (tx.type !== 'SWAP' && tx.type !== 'TRANSFER' && tx.type !== 'UNKNOWN') continue;
 
     const tokenTransfers = tx.tokenTransfers || [];
+    const nativeTransfers = tx.nativeTransfers || [];
     const accountData = tx.accountData || [];
 
     const nonSolTokens = tokenTransfers.filter(t => t.mint !== SOL_MINT);
     if (nonSolTokens.length === 0) continue;
 
-    const walletAccount = accountData.find(a => a.account === walletAddress);
-    const netSol = (walletAccount?.nativeBalanceChange ?? 0) / 1e9;
+    if (tx.type !== 'SWAP') {
+      const hasNativeFlow = nativeTransfers.some(n => n.fromUserAccount === walletAddress || n.toUserAccount === walletAddress);
+      if (!hasNativeFlow) continue;
+    }
+
+    let solSpent = 0;
+    let solReceived = 0;
+    for (const nt of nativeTransfers) {
+      const amountSol = nt.amount / 1e9;
+      if (nt.fromUserAccount === walletAddress) solSpent += amountSol;
+      if (nt.toUserAccount === walletAddress) solReceived += amountSol;
+    }
+    const netSol = solReceived - solSpent;
+    const effectiveNetSol = (solSpent === 0 && solReceived === 0)
+      ? (accountData.find(a => a.account === walletAddress)?.nativeBalanceChange ?? 0) / 1e9
+      : netSol;
 
     for (const token of nonSolTokens) {
       const tokenMint = token.mint;
@@ -46,10 +61,10 @@ function parseSwapsForRecalc(
       entry.lastAt = Math.max(entry.lastAt, tx.timestamp);
       entry.count++;
 
-      if (tokenReceived && netSol < -0.0001) {
-        entry.buySol += Math.abs(netSol);
-      } else if (tokenSent && netSol > 0.0001) {
-        entry.sellSol += netSol;
+      if (tokenReceived && effectiveNetSol < -0.0001) {
+        entry.buySol += Math.abs(effectiveNetSol);
+      } else if (tokenSent && effectiveNetSol > 0.0001) {
+        entry.sellSol += effectiveNetSol;
       }
 
       break;

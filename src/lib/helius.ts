@@ -105,7 +105,7 @@ export async function getWalletTransactions(
 ): Promise<FetchResult> {
   if (!HELIUS_API_KEY) throw new Error('HELIUS_API_KEY not set');
 
-  const maxPages = opts.maxPages ?? (opts.since ? 3 : 10); // 10 pages first run, 3 pages incremental
+  const maxPages = opts.maxPages ?? (opts.since ? 5 : 20); // 20 pages first run (2000 txns), 5 pages incremental
   const allTxns: HeliusTransaction[] = [];
   let before: string | undefined;
 
@@ -176,20 +176,38 @@ export async function aggregateTradesByToken(
 
   for (const tx of txns) {
     if (tx.timestamp < cutoff) continue;
-    if (tx.type !== 'SWAP') continue;
+    // Accept SWAP + common DEX interaction types that Helius may classify differently
+    if (tx.type !== 'SWAP' && tx.type !== 'TRANSFER' && tx.type !== 'UNKNOWN') continue;
 
     const tokenTransfers = tx.tokenTransfers || [];
+    const nativeTransfers = tx.nativeTransfers || [];
     const accountData = tx.accountData || [];
 
-    // Process ALL non-SOL tokens in the swap (handles multi-hop routes)
+    // Must have non-SOL token transfers to be a trade
     const nonSolTokens = tokenTransfers.filter(t => t.mint !== SOL_MINT);
     if (nonSolTokens.length === 0) continue;
 
-    const walletAccount = accountData.find(a => a.account === walletAddress);
-    const netLamports = walletAccount?.nativeBalanceChange ?? 0;
-    const netSol = netLamports / 1e9;
+    // For non-SWAP types, require both token AND SOL movement (filters out plain transfers)
+    if (tx.type !== 'SWAP') {
+      const hasNativeFlow = nativeTransfers.some(n => n.fromUserAccount === walletAddress || n.toUserAccount === walletAddress);
+      if (!hasNativeFlow) continue;
+    }
 
-    // For multi-token swaps, attribute SOL flow to the token the wallet interacted with
+    // Compute SOL flow from nativeTransfers (excludes gas) instead of nativeBalanceChange (includes gas)
+    let solSpent = 0;
+    let solReceived = 0;
+    for (const nt of nativeTransfers) {
+      const amountSol = nt.amount / 1e9;
+      if (nt.fromUserAccount === walletAddress) solSpent += amountSol;
+      if (nt.toUserAccount === walletAddress) solReceived += amountSol;
+    }
+    const netSol = solReceived - solSpent;
+
+    // Fallback to accountData if no native transfers found (some edge cases)
+    const effectiveNetSol = (solSpent === 0 && solReceived === 0)
+      ? (accountData.find(a => a.account === walletAddress)?.nativeBalanceChange ?? 0) / 1e9
+      : netSol;
+
     for (const token of nonSolTokens) {
       const tokenMint = token.mint;
       const tokenReceived = token.toUserAccount === walletAddress;
@@ -201,17 +219,15 @@ export async function aggregateTradesByToken(
       }
       const entry = tokenMap.get(tokenMint)!;
 
-      // Lower threshold from 0.001 to 0.0001 SOL to catch micro trades
-      if (tokenReceived && netSol < -0.0001) {
-        const cost = Math.abs(netSol);
+      if (tokenReceived && effectiveNetSol < -0.0001) {
+        const cost = Math.abs(effectiveNetSol);
         entry.buySol += cost;
         entry.txns.push({ type: 'BUY', amountSol: cost, mcap: 0, timestamp: tx.timestamp });
-      } else if (tokenSent && netSol > 0.0001) {
-        entry.sellSol += netSol;
-        entry.txns.push({ type: 'SELL', amountSol: netSol, mcap: 0, timestamp: tx.timestamp });
+      } else if (tokenSent && effectiveNetSol > 0.0001) {
+        entry.sellSol += effectiveNetSol;
+        entry.txns.push({ type: 'SELL', amountSol: effectiveNetSol, mcap: 0, timestamp: tx.timestamp });
       }
 
-      // Only attribute SOL to one token per swap to avoid double-counting
       break;
     }
   }
