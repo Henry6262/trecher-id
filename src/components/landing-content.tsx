@@ -382,7 +382,7 @@ export function LandingContent({ traders, featured, ticker, leaderboardData, ref
               The Trencher <span style={{ color: '#00D4FF' }}>Cup</span>
             </h2>
           </div>
-          <LeaderboardTable initialPeriod="7d" initialTraders={leaderboardData} />
+          <LeaderboardTable initialPeriod="7d" initialTraders={leaderboardData} variant="bracket" />
         </section>
 
         {/* Journey — merged How it works + Reward Pool */}

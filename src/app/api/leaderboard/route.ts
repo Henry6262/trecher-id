@@ -16,7 +16,7 @@ export async function GET(req: Request) {
 
   const data = await cached(`leaderboard:${period}:${offset}:${limit}`, 120, async () => {
   const rankings = await prisma.userRanking.findMany({
-    where: { period },
+    where: { period, trades: { gt: 0 } },
     orderBy: { pnlUsd: 'desc' },
     take: limit,
     skip: offset,
