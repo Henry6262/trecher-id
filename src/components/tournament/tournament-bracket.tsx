@@ -114,8 +114,8 @@ export function TournamentBracket({ traders }: { traders: RankedTrader[] }) {
           <div className="relative z-10 h-full flex flex-col items-center justify-center pointer-events-none pr-4 pl-8 ml-auto" style={{ marginRight: -30 }}>
             <div className="text-center mb-2">
               <div className="text-[10px] font-mono tracking-[4px] text-[var(--trench-text-muted)] mb-1">SEASON 1</div>
-              <h3 className="text-[28px] sm:text-[36px] font-black text-white leading-[0.9]">The Trencher</h3>
-              <h3 className="text-[32px] sm:text-[42px] font-black leading-[0.9]" style={{ color: '#00D4FF', textShadow: '0 0 30px rgba(0,212,255,0.3), 0 0 60px rgba(0,212,255,0.1)' }}>Cup</h3>
+              <h3 className="text-[22px] sm:text-[28px] font-black text-white leading-[0.9]">The Trencher</h3>
+              <h3 className="text-[26px] sm:text-[34px] font-black leading-[0.9]" style={{ color: '#00D4FF', textShadow: '0 0 30px rgba(0,212,255,0.3), 0 0 60px rgba(0,212,255,0.1)' }}>Cup</h3>
             </div>
 
             <div

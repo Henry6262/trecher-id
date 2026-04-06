@@ -99,7 +99,7 @@ export function LandingContent({ traders, featured, ticker, leaderboardData }: L
               Your{' '}
               <span className="text-[var(--trench-accent)]">
                 <span className="relative inline-block" style={{ width: 50, verticalAlign: 'baseline' }}>
-                  <img src="/logo.png" alt="" className="!max-w-none absolute" style={{ width: 100, height: 'auto', bottom: 2, left: -12, filter: 'drop-shadow(0 0 8px rgba(0,212,255,0.3))' }} />
+                  <img src="/logo.png" alt="" className="!max-w-none absolute" style={{ width: 100, height: 'auto', bottom: -8, left: -12, filter: 'drop-shadow(0 0 8px rgba(0,212,255,0.3))' }} />
                   <span style={{ visibility: 'hidden' }}>W</span>
                 </span>eb3
               </span>
@@ -225,11 +225,11 @@ export function LandingContent({ traders, featured, ticker, leaderboardData }: L
           <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.1), transparent)' }} />
         </div>
 
-        {/* Leaderboard — traders + deployers */}
+        {/* The Trencher Cup */}
         <section className="mx-auto max-w-[780px] px-6 sm:px-12 lg:px-16 py-10 sm:py-16">
           <div className="mb-8 text-center">
             <h2 className="text-3xl sm:text-4xl font-bold text-white">
-              Leaderboard
+              The Trencher <span style={{ color: '#00D4FF' }}>Cup</span>
             </h2>
           </div>
           <LeaderboardTable initialPeriod="7d" initialTraders={leaderboardData} />

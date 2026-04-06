@@ -94,7 +94,7 @@ function Slot({
 // ─── SVG Connector ───────────────────────────────────────────
 
 function Connector({ pairs, pairHeight, pairGap, litPairs }: { pairs: number; pairHeight: number; pairGap: number; litPairs: boolean[] }) {
-  const W = 32;
+  const W = 24;
   const totalH = pairs * pairHeight + (pairs - 1) * pairGap;
   const paths: { d: string; lit: boolean }[] = [];
 
@@ -296,10 +296,10 @@ export function ArenaSection() {
         <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.15), transparent)' }} />
       </div>
 
-      <section className="max-w-[780px] mx-auto px-6 sm:px-12 lg:px-16 py-16">
+      <section className="max-w-[780px] mx-auto px-4 sm:px-8 lg:px-12 py-16">
         {/* Header — trophy + title */}
         <div className="text-center mb-6 relative">
-          <div className="mx-auto mb-4 w-[180px] h-[180px] sm:w-[240px] sm:h-[240px] relative" style={{ filter: 'drop-shadow(0 0 40px rgba(0,212,255,0.3)) drop-shadow(0 0 80px rgba(0,212,255,0.1))' }}>
+          <div className="mx-auto mb-4 w-[220px] h-[220px] sm:w-[300px] sm:h-[300px] relative" style={{ filter: 'drop-shadow(0 0 40px rgba(0,212,255,0.3)) drop-shadow(0 0 80px rgba(0,212,255,0.1))' }}>
             <Image src="/trencher-cup.png" alt="Trencher Cup Trophy" fill className="object-contain" priority />
           </div>
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-1">
@@ -309,7 +309,7 @@ export function ArenaSection() {
         </div>
 
         <GlassCard cut={14} bg="rgba(8,12,18,0.55)">
-        <div className="relative overflow-hidden px-6 sm:px-8 py-10">
+        <div className="relative overflow-hidden px-4 sm:px-6 py-10">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(0,212,255,0.05) 0%, transparent 70%)' }} />
 
         {/* Reward info — absolute top right */}
@@ -448,7 +448,7 @@ export function ArenaSection() {
                   litPairs={[!!champion]} />
 
                 {/* Champion — replaces Final column, texts absolute so avatar is perfectly centered */}
-                <div className="flex-shrink-0 flex items-center justify-center relative" style={{ width: '80px', alignSelf: 'center' }}>
+                <div className="flex-shrink-0 flex items-center justify-center relative" style={{ width: '64px', alignSelf: 'center' }}>
                   {/* CHAMPION label — absolute above */}
                   <div className="absolute -top-5 left-1/2 -translate-x-1/2 text-[7px] tracking-[2px] whitespace-nowrap" style={{ color: '#00D4FF' }}>CHAMPION</div>
 
