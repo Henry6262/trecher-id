@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Web3Me — Profile Card Mockups</title>
+</head>
+<body style="margin:0;padding:60px 20px;background:#050508;min-height:100vh;display:flex;justify-content:center;align-items:flex-start;gap:60px;flex-wrap:wrap;font-family:system-ui,-apple-system,sans-serif;color:#e0e0e0;">
+
+<!-- VARIANT A -->
+<div style="display:flex;flex-direction:column;align-items:center;gap:16px;">
+  <span style="font-size:11px;letter-spacing:3px;color:rgba(0,212,255,0.5);font-weight:600;">VARIANT A</span>
+  <div style="
+    width:340px;
+    background:rgba(8,12,18,0.82);
+    backdrop-filter:blur(20px);
+    -webkit-backdrop-filter:blur(20px);
+    border:1px solid rgba(0,212,255,0.08);
+    clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,16px 100%,0 calc(100% - 16px));
+    transform:perspective(1000px) rotateY(-4deg) rotateX(2deg);
+    overflow:hidden;
+  ">
+    <!-- Banner -->
+    <div style="height:32px;background:linear-gradient(135deg,#1a1a2e,#0a0a12);"></div>
+
+    <!-- Profile header -->
+    <div style="padding:16px 18px 12px;display:flex;align-items:flex-start;gap:12px;">
+      <!-- Avatar -->
+      <div style="position:relative;flex-shrink:0;">
+        <div style="
+          width:48px;height:48px;
+          clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px));
+          background:linear-gradient(135deg,#0a1628,#0d1f3c);
+          box-shadow:0 0 12px rgba(0,212,255,0.25);
+          outline:2px solid rgba(0,212,255,0.4);
+          outline-offset:-1px;
+          display:flex;align-items:center;justify-content:center;
+          font-size:20px;color:#00D4FF;font-weight:700;
+        ">CW</div>
+        <!-- Verified badge -->
+        <div style="position:absolute;bottom:-2px;right:-2px;width:16px;height:16px;background:#00D4FF;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid #0a0a12;">
+          <svg width="8" height="8" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#050508" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+
+      <!-- Name + handle -->
+      <div style="flex:1;min-width:0;">
+        <div style="font-weight:700;font-size:15px;color:#f0f0f0;">CryptoWhale</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.35);margin-top:1px;">@cryptowhale</div>
+        <div style="margin-top:4px;display:inline-block;font-size:9px;letter-spacing:1.5px;color:rgba(0,212,255,0.6);border:1px solid rgba(0,212,255,0.15);padding:2px 6px;clip-path:polygon(0 0,calc(100% - 4px) 0,100% 4px,100% 100%,4px 100%,0 calc(100% - 4px));">SOLANA TRADER</div>
+      </div>
+
+      <!-- Big PnL -->
+      <div style="font-family:'SF Mono',Consolas,'Courier New',monospace;font-size:22px;font-weight:700;color:#22c55e;white-space:nowrap;padding-top:4px;">+$127K</div>
+    </div>
+
+    <!-- Stat boxes -->
+    <div style="padding:0 18px;display:flex;gap:8px;">
+      <div style="flex:1;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px));padding:10px 10px 8px;text-align:center;">
+        <div style="font-size:9px;letter-spacing:1px;color:rgba(255,255,255,0.3);margin-bottom:4px;">TOTAL PNL</div>
+        <div style="font-family:'SF Mono',Consolas,'Courier New',monospace;font-size:16px;font-weight:700;color:#22c55e;">+$127K</div>
+      </div>
+      <div style="flex:1;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px));padding:10px 10px 8px;text-align:center;">
+        <div style="font-size:9px;letter-spacing:1px;color:rgba(255,255,255,0.3);margin-bottom:4px;">WIN RATE</div>
+        <div style="font-family:'SF Mono',Consolas,'Courier New',monospace;font-size:16px;font-weight:700;color:#f0f0f0;">68%</div>
+      </div>
+      <div style="flex:1;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px));padding:10px 10px 8px;text-align:center;">
+        <div style="font-size:9px;letter-spacing:1px;color:rgba(255,255,255,0.3);margin-bottom:4px;">TRADES</div>
+        <div style="font-family:'SF Mono',Consolas,'Courier New',monospace;font-size:16px;font-weight:700;color:#f0f0f0;">1,247</div>
+      </div>
+    </div>
+
+    <!-- Mini trade calendar -->
+    <div style="padding:14px 18px 8px;">
+      <div style="display:grid;grid-template-columns:repeat(12,1fr);gap:3px;" id="calA"></div>
+    </div>
+
+    <!-- Footer -->
+    <div style="padding:8px 0 14px;text-align:center;">
+      <span style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.15);letter-spacing:2px;">web3me</span>
+    </div>
+  </div>
+</div>
+
+<!-- VARIANT B -->
+<div style="display:flex;flex-direction:column;align-items:center;gap:16px;">
+  <span style="font-size:11px;letter-spacing:3px;color:rgba(0,212,255,0.5);font-weight:600;">VARIANT B</span>
+  <div style="
+    width:340px;
+    background:rgba(8,12,18,0.82);
+    backdrop-filter:blur(20px);
+    -webkit-backdrop-filter:blur(20px);
+    border:1px solid rgba(0,212,255,0.08);
+    clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,16px 100%,0 calc(100% - 16px));
+    transform:perspective(1000px) rotateY(-4deg) rotateX(2deg);
+    overflow:hidden;
+  ">
+    <!-- Banner -->
+    <div style="height:32px;background:linear-gradient(135deg,#1a1a2e,#0a0a12);"></div>
+
+    <!-- Profile header -->
+    <div style="padding:16px 18px 0;display:flex;align-items:center;gap:12px;">
+      <!-- Avatar -->
+      <div style="position:relative;flex-shrink:0;">
+        <div style="
+          width:48px;height:48px;
+          clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px));
+          background:linear-gradient(135deg,#0a1628,#0d1f3c);
+          box-shadow:0 0 12px rgba(0,212,255,0.25);
+          outline:2px solid rgba(0,212,255,0.4);
+          outline-offset:-1px;
+          display:flex;align-items:center;justify-content:center;
+          font-size:20px;color:#00D4FF;font-weight:700;
+        ">CW</div>
+        <div style="position:absolute;bottom:-2px;right:-2px;width:16px;height:16px;background:#00D4FF;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid #0a0a12;">
+          <svg width="8" height="8" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#050508" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+      <div>
+        <div style="font-weight:700;font-size:15px;color:#f0f0f0;">CryptoWhale</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.35);">@cryptowhale</div>
+      </div>
+    </div>
+
+    <!-- Big PnL hero -->
+    <div style="padding:20px 18px 16px;text-align:center;">
+      <div style="font-family:'SF Mono',Consolas,'Courier New',monospace;font-size:36px;font-weight:800;color:#22c55e;text-shadow:0 0 30px rgba(34,197,94,0.3),0 0 60px rgba(34,197,94,0.1);">+$127K</div>
+      <div style="font-size:10px;letter-spacing:1.5px;color:rgba(255,255,255,0.25);margin-top:4px;">ALL-TIME P&amp;L</div>
+    </div>
+
+    <!-- Pinned trade card -->
+    <div style="margin:0 18px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));padding:12px 14px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div style="width:6px;height:6px;background:#22c55e;border-radius:50;clip-path:polygon(0 0,100% 0,100% 100%,0 100%);"></div>
+          <span style="font-weight:700;font-size:14px;color:#f0f0f0;">$BONK</span>
+          <span style="font-size:9px;letter-spacing:1px;color:rgba(255,255,255,0.25);border:1px solid rgba(255,255,255,0.1);padding:1px 5px;">PINNED</span>
+        </div>
+        <span style="font-family:'SF Mono',Consolas,'Courier New',monospace;font-size:16px;font-weight:700;color:#22c55e;">+342%</span>
+      </div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.35);">Bought 2.1 SOL → Sold 9.3 SOL</div>
+    </div>
+
+    <!-- Sparkline -->
+    <div style="padding:12px 18px 4px;display:flex;justify-content:center;">
+      <svg width="200" height="30" viewBox="0 0 200 30" fill="none">
+        <defs>
+          <linearGradient id="sparkGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#22c55e" stop-opacity="0.2"/>
+            <stop offset="100%" stop-color="#22c55e" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <path d="M0 28 L15 25 L30 26 L45 22 L60 23 L75 18 L90 20 L105 14 L120 16 L135 10 L150 12 L165 6 L180 8 L195 3 L200 2" stroke="#22c55e" stroke-width="1.5" fill="none"/>
+        <path d="M0 28 L15 25 L30 26 L45 22 L60 23 L75 18 L90 20 L105 14 L120 16 L135 10 L150 12 L165 6 L180 8 L195 3 L200 2 L200 30 L0 30 Z" fill="url(#sparkGrad)"/>
+      </svg>
+    </div>
+
+    <!-- Link rows -->
+    <div style="padding:8px 18px 0;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-top:1px solid rgba(255,255,255,0.05);">
+        <span style="font-size:12px;color:rgba(255,255,255,0.5);">Follow @cryptowhale</span>
+        <span style="font-size:14px;color:rgba(0,212,255,0.5);">›</span>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-top:1px solid rgba(255,255,255,0.05);">
+        <span style="font-size:12px;color:rgba(255,255,255,0.5);">Trading Dashboard</span>
+        <span style="font-size:14px;color:rgba(0,212,255,0.5);">›</span>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div style="padding:10px 0 14px;text-align:center;">
+      <span style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.15);letter-spacing:2px;">web3me</span>
+    </div>
+  </div>
+</div>
+
+<script>
+// Generate mini trade calendar for Variant A
+(function() {
+  const cal = document.getElementById('calA');
+  // Activity pattern: 3 rows x 12 cols = 36 squares
+  const pattern = [
+    0.1, 0.3, 0.5, 0.2, 0.8, 0.6, 0.9, 0.4, 0.7, 1.0, 0.5, 0.3,
+    0.2, 0.4, 0.1, 0.6, 0.3, 0.9, 0.5, 0.8, 0.2, 0.7, 0.4, 0.6,
+    0.5, 0.7, 0.3, 0.8, 0.1, 0.4, 0.7, 0.2, 0.9, 0.5, 0.8, 1.0,
+  ];
+  pattern.forEach(function(op) {
+    const sq = document.createElement('div');
+    sq.style.cssText = 'width:8px;height:8px;border-radius:1px;background:rgba(34,197,94,' + (op * 0.8 + 0.05) + ');';
+    cal.appendChild(sq);
+  });
+})();
+</script>
+
+</body>
+</html>

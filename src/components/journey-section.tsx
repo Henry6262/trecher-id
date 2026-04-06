@@ -98,9 +98,9 @@ function ScreenRank() {
   ];
 
   return (
-    <div className="flex flex-col items-center justify-center h-full gap-4">
+    <div className="flex flex-col items-center justify-center h-full">
       {/* Podium */}
-      <div className="flex items-end gap-1">
+      <div className="flex items-end gap-1 -mt-4">
         {podium.map(p => (
           <div key={p.rank} className="flex flex-col items-center">
             {/* Avatar */}
@@ -115,7 +115,7 @@ function ScreenRank() {
             </div>
             {/* Name */}
             <div className="text-[8px] font-bold mb-1" style={{ color: p.rank === 1 ? '#bbb' : '#666' }}>{p.name}</div>
-            {/* Podium block — wider, no rank label */}
+            {/* Podium block */}
             <div className="w-[90px] relative overflow-hidden flex items-center justify-center" style={{
               height: p.barH,
               background: `linear-gradient(180deg, ${p.color}15 0%, ${p.color}06 100%)`,
@@ -136,8 +136,8 @@ function ScreenRank() {
         ))}
       </div>
 
-      {/* Your position */}
-      <div className="flex items-center gap-2.5 w-full max-w-[260px] px-3.5 py-2 cut-xs animate-[youPulse_2.5s_ease-in-out_infinite]" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)' }}>
+      {/* Your position — spaced from podium */}
+      <div className="flex items-center gap-2.5 w-full max-w-[260px] px-3.5 py-2 cut-xs animate-[youPulse_2.5s_ease-in-out_infinite] mt-8" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)' }}>
         <span className="text-[16px] font-black font-mono text-white">#7</span>
         <div className="rounded-full flex-shrink-0 flex items-center justify-center text-[9px] font-black" style={{ width: 24, height: 24, background: 'linear-gradient(145deg, #ddd, #999)', border: '1.5px solid rgba(255,255,255,0.2)', color: '#0a0a12' }}>Y</div>
         <div className="text-[11px] font-black text-white flex-1">@you</div>
@@ -147,7 +147,7 @@ function ScreenRank() {
         </div>
       </div>
 
-      <div className="flex items-center gap-1.5 text-[10px] font-bold text-[#999]">
+      <div className="flex items-center gap-1.5 text-[10px] font-bold text-[#999] mt-3">
         <span className="text-[#22c55e] animate-[arrowBounce_1s_ease-in-out_infinite]">↑</span>
         Climbed 12 spots this week
       </div>
@@ -269,7 +269,7 @@ export function JourneySection() {
   return (
     <section className="max-w-[780px] mx-auto px-6 sm:px-12 lg:px-16 py-16">
       <div className="text-center mb-10">
-        <h2 className="text-3xl sm:text-4xl font-bold text-white">Your <span className="text-[var(--trench-accent)]">journey</span></h2>
+        <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight">Your <span className="text-[var(--trench-accent)]">journey</span></h2>
         <p className="text-[12px] text-[var(--trench-text-muted)] mt-1">From sign-up to earning rewards</p>
       </div>
 
