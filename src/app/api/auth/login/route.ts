@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { privyClient } from '@/lib/privy';
+import { invalidatePublicProfileCache } from '@/lib/profile';
 import { prisma } from '@/lib/prisma';
+import { redis } from '@/lib/redis';
 import { SignJWT } from 'jose';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client';
 
@@ -93,16 +95,72 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  // --- Referral processing ---
+  const refCode = req.cookies.get('ref_code')?.value;
+  if (refCode && user) {
+    try {
+      // Only process if user doesn't already have a referrer
+      const currentUser = await prisma.user.findUnique({
+        where: { id: user.id },
+        select: { referredById: true },
+      });
+
+      if (!currentUser?.referredById) {
+        const referrer = await prisma.user.findFirst({
+          where: { username: { equals: refCode, mode: 'insensitive' } },
+          select: { id: true },
+        });
+
+        if (referrer && referrer.id !== user.id) {
+          // Check follower count anti-bot gate
+          const minFollowers = parseInt(process.env.MIN_REFERRAL_FOLLOWERS ?? '5', 10);
+          const skipValidation = (user.followerCount ?? 0) < minFollowers;
+
+          await prisma.$transaction([
+            prisma.user.update({
+              where: { id: user.id },
+              data: { referredById: referrer.id },
+            }),
+            prisma.referral.create({
+              data: {
+                referrerId: referrer.id,
+                referredUserId: user.id,
+                status: skipValidation ? 'pending' : 'validated',
+                validatedAt: skipValidation ? null : new Date(),
+              },
+            }),
+          ]);
+
+          // Invalidate referrer's cached stats
+          try {
+            await redis.del(`referral:stats:${referrer.id}`);
+          } catch {
+            // Redis down — cache will expire naturally
+          }
+        }
+      }
+    } catch {
+      // Referral processing is non-critical — don't block login
+    }
+  }
+
   // Fire-and-forget: fetch Twitter banner if user doesn't have one
   if (!user!.bannerUrl) {
     fetch(`https://api.fxtwitter.com/${user!.username}`)
       .then(r => r.json())
       .then(data => {
         const banner = data?.user?.banner_url;
-        if (banner) prisma.user.update({ where: { id: user!.id }, data: { bannerUrl: banner } }).catch(() => {});
+        if (banner) {
+          prisma.user
+            .update({ where: { id: user!.id }, data: { bannerUrl: banner } })
+            .then(() => invalidatePublicProfileCache(user!.username))
+            .catch(() => {});
+        }
       })
       .catch(() => {});
   }
+
+  await invalidatePublicProfileCache(user!.username);
 
   const jwt = await new SignJWT({ sub: user!.id, username: user!.username })
     .setProtectedHeader({ alg: 'HS256' })
@@ -125,6 +183,11 @@ export async function POST(req: NextRequest) {
     maxAge: 60 * 60 * 24 * 7,
     path: '/',
   });
+
+  // Clear referral cookie after processing
+  if (refCode) {
+    response.cookies.set('ref_code', '', { maxAge: 0, path: '/' });
+  }
 
   return response;
 }

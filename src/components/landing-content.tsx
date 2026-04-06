@@ -1,19 +1,23 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Check, AtSign, BarChart3, Zap } from 'lucide-react';
+import { Check, Globe, ChevronRight } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { AvatarImage } from '@/components/avatar-image';
 import { CutButton } from '@/components/cut-button';
-import { GlassCard } from '@/components/glass-card';
 import ShinyText from '@/components/shiny-text';
 import { LeaderboardTable } from '@/components/leaderboard-table';
 import { ActivityTicker } from '@/components/activity-ticker';
 import { JourneySection } from '@/components/journey-section';
+import { ReferralSection } from '@/components/referral-section';
+import { normalizeImageUrl } from '@/lib/images';
 import type { TickerItem } from '@/lib/types';
 
-const RisingLines = dynamic(() => import('@/components/rising-lines'), { ssr: false });
+const Lightspeed = dynamic(() => import('@/components/lightspeed'), { ssr: false });
+const ShaderCard = dynamic(() => import('@/components/shader-card'), { ssr: false });
 const DomeGallery = dynamic(() => import('@/components/DomeGallery'), { ssr: false });
 
 interface TraderData {
@@ -47,6 +51,7 @@ interface LandingContentProps {
   featured: TraderData | null;
   ticker: TickerItem[];
   leaderboardData?: LeaderboardTrader[];
+  refCode?: string | null;
 }
 
 
@@ -84,40 +89,92 @@ function MiniCalendar() {
   );
 }
 
-function MiniSparkline() {
+
+const MOCK_TRADES = [
+  { symbol: '$WIF', pnl: '+312%', buy: '2.4', sell: '9.9', img: 'https://dd.dexscreener.com/ds-data/tokens/solana/EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm.png' },
+  { symbol: '$BONK', pnl: '+89%', buy: '5.1', sell: '9.6', img: 'https://dd.dexscreener.com/ds-data/tokens/solana/DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263.png' },
+  { symbol: '$JUP', pnl: '+156%', buy: '3.0', sell: '7.7', img: 'https://dd.dexscreener.com/ds-data/tokens/solana/JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN.png' },
+];
+
+function TradeCard({ trade, onHover, onLeave, isHovered }: { trade: typeof MOCK_TRADES[0]; onHover: () => void; onLeave: () => void; isHovered: boolean }) {
   return (
-    <svg viewBox="0 0 280 40" className="w-full" style={{ height: 40 }}>
-      <defs>
-        <linearGradient id="sparkFill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="rgba(34,197,94,0.3)" />
-          <stop offset="100%" stopColor="rgba(34,197,94,0)" />
-        </linearGradient>
-      </defs>
-      <path d="M0 35 Q20 32, 40 28 T80 24 T120 20 T160 16 T200 10 T240 8 T280 4" fill="none" stroke="#22c55e" strokeWidth="1.5" />
-      <path d="M0 35 Q20 32, 40 28 T80 24 T120 20 T160 16 T200 10 T240 8 T280 4 V40 H0 Z" fill="url(#sparkFill)" />
-    </svg>
+    <div
+      className="relative flex-shrink-0 w-[90px] cursor-pointer"
+      onMouseEnter={onHover}
+      onMouseLeave={onLeave}
+    >
+      <div
+        className="p-2.5 flex flex-col items-center gap-1.5 transition-all duration-200"
+        style={{
+          background: isHovered ? 'rgba(0,212,255,0.06)' : 'rgba(255,255,255,0.02)',
+          border: isHovered ? '1px solid rgba(0,212,255,0.2)' : '1px solid rgba(255,255,255,0.05)',
+          clipPath: 'polygon(5px 0,100% 0,100% calc(100% - 5px),calc(100% - 5px) 100%,0 100%,0 5px)',
+        }}
+      >
+        <img src={trade.img} alt={trade.symbol} className="w-8 h-8 rounded-full" />
+        <span className="text-[10px] font-bold text-white">{trade.symbol}</span>
+        <span className="text-[11px] font-bold font-mono text-[#22c55e]">{trade.pnl}</span>
+      </div>
+
+      {/* Hover detail popup */}
+      <AnimatePresence>
+        {isHovered && (
+          <motion.div
+            initial={{ opacity: 0, y: 6, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 6, scale: 0.95 }}
+            transition={{ duration: 0.15, ease: 'easeOut' }}
+            className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 pointer-events-none"
+          >
+            <div
+              className="w-[160px] p-3 flex flex-col gap-2"
+              style={{
+                background: 'rgba(8,12,18,0.95)',
+                border: '1px solid rgba(0,212,255,0.2)',
+                backdropFilter: 'blur(16px)',
+                WebkitBackdropFilter: 'blur(16px)',
+                clipPath: 'polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px)',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.6), 0 0 20px rgba(0,212,255,0.08)',
+              }}
+            >
+              <div className="flex items-center gap-2">
+                <img src={trade.img} alt="" className="w-7 h-7 rounded-full" />
+                <div>
+                  <div className="text-[11px] font-bold text-white">{trade.symbol}</div>
+                  <div className="text-[13px] font-black font-mono text-[#22c55e]">{trade.pnl}</div>
+                </div>
+              </div>
+              <div className="flex gap-1.5">
+                <div className="flex-1 flex justify-between text-[8px] px-2 py-1" style={{ background: 'rgba(255,255,255,0.03)', clipPath: 'polygon(3px 0,100% 0,100% calc(100% - 3px),calc(100% - 3px) 100%,0 100%,0 3px)' }}>
+                  <span className="text-[#22c55e] font-semibold">BUY</span>
+                  <span className="text-white font-semibold">{trade.buy} SOL</span>
+                </div>
+                <div className="flex-1 flex justify-between text-[8px] px-2 py-1" style={{ background: 'rgba(255,255,255,0.03)', clipPath: 'polygon(3px 0,100% 0,100% calc(100% - 3px),calc(100% - 3px) 100%,0 100%,0 3px)' }}>
+                  <span className="text-[#ef4444] font-semibold">SELL</span>
+                  <span className="text-[#22c55e] font-semibold">{trade.sell} SOL</span>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
 
-function PreviewCard({ featured }: { featured: TraderData }) {
-  const [chartView, setChartView] = useState<'calendar' | 'chart'>('calendar');
+function PreviewCardInner({ featured }: { featured: TraderData }) {
+  const [hoveredTrade, setHoveredTrade] = useState<number | null>(null);
 
   return (
-    <div className="hidden sm:block w-full sm:w-[340px] mx-auto lg:mx-0" style={{ transform: 'perspective(1000px) rotateY(-4deg) rotateX(2deg)' }}>
-      {/* Banner strip */}
-      <div className="h-[32px] relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #0a0a12 100%)', borderBottom: '1px solid rgba(0,212,255,0.1)' }}>
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.06), transparent)' }} />
-      </div>
-
-      {/* Main card */}
-      <GlassCard cut={0} bg="rgba(8,12,18,0.82)">
-        {/* Profile header */}
-        <div className="px-5 pt-5 pb-4">
-          <div className="flex items-start gap-4 mb-4">
-            {/* Avatar — cut corner style */}
+    <div className="w-full h-full flex flex-col" style={{ transform: 'perspective(1000px) rotateY(-4deg) rotateX(2deg)' }}>
+      <div className="flex-1 flex flex-col" style={{ background: 'rgba(8,12,18,0.72)' }}>
+        {/* Profile header with metrics on right */}
+        <div className="px-5 pt-5 pb-3 relative">
+          <div className="flex items-start gap-3.5">
+            {/* Avatar */}
             <div className="relative flex-shrink-0">
               <div className="overflow-hidden" style={{ width: 56, height: 56, clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)', border: '2px solid rgba(0,212,255,0.35)', boxShadow: '0 0 20px rgba(0,212,255,0.15)' }}>
-                <Image
+                <AvatarImage
                   src={featured.avatarUrl || `https://unavatar.io/twitter/${featured.username}`}
                   alt={featured.name}
                   width={56}
@@ -125,125 +182,109 @@ function PreviewCard({ featured }: { featured: TraderData }) {
                   className="h-full w-full object-cover"
                 />
               </div>
-              {/* Verified badge */}
-              <div className="absolute -bottom-0.5 -right-0.5 flex h-[16px] w-[16px] items-center justify-center rounded-full" style={{ background: '#00D4FF', border: '2px solid rgba(8,12,18,0.9)' }}>
-                <Check size={8} strokeWidth={3} className="text-black" />
+              <div className="absolute -bottom-0.5 -right-0.5 flex h-[18px] w-[18px] items-center justify-center rounded-full" style={{ background: '#00D4FF', border: '2px solid rgba(8,12,18,0.9)' }}>
+                <Check size={9} strokeWidth={3} className="text-black" />
               </div>
             </div>
 
-            {/* Name + handle + PnL */}
+            {/* Name + handle */}
             <div className="flex-1 min-w-0 pt-0.5">
-              <div className="flex items-center gap-1.5 mb-0.5">
-                <span className="text-[14px] font-bold text-white leading-tight truncate">{featured.name}</span>
-                <span className="text-[7px] font-mono tracking-[1px] px-1.5 py-0.5" style={{ background: 'rgba(0,212,255,0.08)', color: 'rgba(0,212,255,0.6)', border: '1px solid rgba(0,212,255,0.12)' }}>SOLANA TRADER</span>
-              </div>
-              <div className="text-[10px] text-[var(--trench-text-muted)] mb-2">@{featured.username}</div>
-              <div className="text-[20px] font-black font-mono" style={{ color: '#22c55e', textShadow: '0 0 12px rgba(34,197,94,0.2)' }}>{featured.pnl}</div>
+              <span className="text-[15px] font-bold text-white leading-tight truncate block">{featured.name}</span>
+              <div className="text-[11px] text-[var(--trench-text-muted)]">@{featured.username}</div>
+              <div className="text-[18px] font-black font-mono mt-1" style={{ color: '#22c55e', textShadow: '0 0 12px rgba(34,197,94,0.2)' }}>{featured.pnl}</div>
             </div>
-          </div>
 
-          {/* Stats row */}
-          <div className="flex gap-2 mb-1">
-            {[
-              { val: featured.pnl, label: 'TOTAL PnL', color: 'var(--trench-green)' },
-              { val: featured.winRate, label: 'WIN RATE', color: 'white' },
-              { val: featured.trades, label: 'TRADES', color: 'white' },
-            ].map(s => (
-              <div key={s.label} className="flex-1 flex flex-col items-center py-2 px-1" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', clipPath: 'polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px)' }}>
-                <span className="font-mono text-[12px] font-bold" style={{ color: s.color }}>{s.val}</span>
-                <span className="text-[6px] tracking-[1px] text-[var(--trench-text-muted)] mt-0.5">{s.label}</span>
-              </div>
-            ))}
+            {/* Metrics stacked vertically — absolute right */}
+            <div className="absolute top-5 right-5 flex flex-col gap-1.5">
+              {[
+                { val: featured.winRate, label: 'WIN RATE' },
+                { val: featured.trades, label: 'TRADES' },
+              ].map(s => (
+                <div key={s.label} className="flex flex-col items-end">
+                  <span className="font-mono text-[12px] font-bold text-white leading-none">{s.val}</span>
+                  <span className="text-[6px] tracking-[1px] text-[var(--trench-text-muted)] mt-0.5">{s.label}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
         {/* Divider */}
         <div className="mx-5" style={{ height: '1px', background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.06) 30%, rgba(255,255,255,0.06) 70%, transparent)' }} />
 
-        {/* Calendar / Chart toggle section */}
-        <div className="px-5 py-4">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-[7px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">
-              {chartView === 'calendar' ? 'TRADE ACTIVITY' : 'PnL HISTORY'}
-            </span>
-            <div className="flex gap-0.5 p-0.5" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 4 }}>
-              <button
-                onClick={() => setChartView('calendar')}
-                className="px-2 py-0.5 text-[7px] font-mono tracking-[1px] transition-all rounded-[3px]"
-                style={{
-                  background: chartView === 'calendar' ? 'rgba(255,255,255,0.08)' : 'transparent',
-                  color: chartView === 'calendar' ? 'white' : '#555',
-                }}
-              >
-                GRID
-              </button>
-              <button
-                onClick={() => setChartView('chart')}
-                className="px-2 py-0.5 text-[7px] font-mono tracking-[1px] transition-all rounded-[3px]"
-                style={{
-                  background: chartView === 'chart' ? 'rgba(255,255,255,0.08)' : 'transparent',
-                  color: chartView === 'chart' ? 'white' : '#555',
-                }}
-              >
-                CHART
-              </button>
-            </div>
+        {/* Link — single */}
+        <div className="px-5 py-3">
+          <div className="text-[7px] font-mono tracking-[2px] text-[var(--trench-text-muted)] mb-2">LINKS</div>
+          <div className="flex items-center gap-2.5 px-3 py-2" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', clipPath: 'polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px)' }}>
+            <Globe size={14} className="flex-shrink-0 text-[rgba(0,212,255,0.7)]" />
+            <span className="text-[11px] text-white font-medium flex-1">My Website</span>
+            <ChevronRight size={14} className="text-[rgba(255,255,255,0.2)] flex-shrink-0" />
           </div>
-          {chartView === 'calendar' ? <MiniCalendar /> : <MiniSparkline />}
         </div>
 
         {/* Divider */}
         <div className="mx-5" style={{ height: '1px', background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)' }} />
 
-        {/* Pinned trade */}
-        {featured.recentToken && (
-          <div className="px-5 py-4">
-            <div className="text-[7px] font-mono tracking-[2px] text-[var(--trench-text-muted)] mb-2">PINNED TRADE</div>
-            <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', padding: '10px 12px', clipPath: 'polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px)' }}>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[12px] font-bold text-white">{featured.recentToken}</span>
-                <span className="text-[12px] font-bold font-mono text-[var(--trench-green)]">{featured.recentPnl}</span>
-              </div>
-              <div className="flex gap-2">
-                {featured.recentBuy && (
-                  <div className="flex-1 flex justify-between text-[8px] px-2 py-1" style={{ background: 'rgba(255,255,255,0.02)', clipPath: 'polygon(3px 0,100% 0,100% calc(100% - 3px),calc(100% - 3px) 100%,0 100%,0 3px)' }}>
-                    <span className="text-[var(--trench-green)] font-semibold">BUY</span>
-                    <span className="text-white font-semibold">{featured.recentBuy} SOL</span>
-                  </div>
-                )}
-                {featured.recentSell && (
-                  <div className="flex-1 flex justify-between text-[8px] px-2 py-1" style={{ background: 'rgba(255,255,255,0.02)', clipPath: 'polygon(3px 0,100% 0,100% calc(100% - 3px),calc(100% - 3px) 100%,0 100%,0 3px)' }}>
-                    <span className="text-[var(--trench-red)] font-semibold">SELL</span>
-                    <span className="text-[var(--trench-green)] font-semibold">{featured.recentSell} SOL</span>
-                  </div>
-                )}
-              </div>
+        {/* Trades carousel — auto-scrolling with hover previews */}
+        <div className="py-3">
+          <div className="px-5 text-[7px] font-mono tracking-[2px] text-[var(--trench-text-muted)] mb-2">TRADES</div>
+          <div className="overflow-hidden">
+            <div
+              className="flex gap-2 px-5"
+              style={{ animation: hoveredTrade !== null ? 'none' : 'preview-scroll 12s linear infinite' }}
+            >
+              {[...MOCK_TRADES, ...MOCK_TRADES].map((t, i) => (
+                <TradeCard
+                  key={i}
+                  trade={t}
+                  isHovered={hoveredTrade === i}
+                  onHover={() => setHoveredTrade(i)}
+                  onLeave={() => setHoveredTrade(null)}
+                />
+              ))}
             </div>
           </div>
-        )}
+        </div>
 
         {/* Footer */}
-        <div className="flex justify-center py-3 border-t border-[rgba(255,255,255,0.04)]">
-          <Image src="/logo.png" alt="Web3Me" width={80} height={20} className="h-5 w-auto opacity-30" />
+        <div className="mt-auto flex justify-center py-2.5 border-t border-[rgba(255,255,255,0.04)]">
+          <Image src="/logo.png" alt="Web3Me" width={80} height={20} className="h-4 w-auto opacity-30" />
         </div>
-      </GlassCard>
+      </div>
     </div>
   );
 }
 
-export function LandingContent({ traders, featured, ticker, leaderboardData }: LandingContentProps) {
-  const avatarUrls = traders.map(t => t.avatarUrl || `https://unavatar.io/twitter/${t.username}`);
+export function LandingContent({ traders, featured, ticker, leaderboardData, refCode }: LandingContentProps) {
+  // Capture referral code from URL into localStorage + HttpOnly cookie
+  useEffect(() => {
+    if (!refCode) return;
+    localStorage.setItem('web3me_ref', refCode);
+    fetch('/api/referral/capture', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code: refCode }),
+    }).catch(() => {});
+  }, [refCode]);
+
+  const avatarUrls = traders.map((t) => normalizeImageUrl(t.avatarUrl) || `https://unavatar.io/twitter/${t.username}`);
   const domeImages = avatarUrls.map(src => ({ src, alt: '' }));
 
   return (
     <div className="relative min-h-screen" style={{ background: '#050508' }}>
-      <div className="fixed inset-0 opacity-75" style={{ zIndex: 0 }}>
-        <RisingLines
-          color="#00D4FF" horizonColor="#00D4FF" haloColor="#33DDFF"
-          riseSpeed={0.08} riseScale={10} riseIntensity={1.3}
-          flowSpeed={0.15} flowDensity={4} flowIntensity={0.7}
-          horizonIntensity={0.9} haloIntensity={7.5} horizonHeight={-0.85}
-          circleScale={-0.5} scale={6.5} brightness={1.1}
+      <div className="fixed inset-0" style={{ zIndex: 0 }}>
+        <Lightspeed
+          primaryColor="#00D4FF"
+          secondaryColor="#0066AA"
+          tertiaryColor="#00A3CC"
+          speed={0.7}
+          streakCount={140}
+          stretchFactor={0.045}
+          intensity={1.1}
+          fadePower={2.0}
+          opacity={1.0}
+          quality="medium"
+          interactionEnabled={true}
         />
       </div>
 
@@ -296,8 +337,30 @@ export function LandingContent({ traders, featured, ticker, leaderboardData }: L
             <p className="mt-4 text-[9px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">FREE &middot; 30 SECONDS &middot; SIGN IN WITH X</p>
           </div>
 
-          {/* Preview card — mirrors real profile layout */}
-          {featured && <PreviewCard featured={featured} />}
+          {/* Preview card — shader-backed profile card */}
+          {featured && (
+            <div className="hidden sm:flex justify-center lg:justify-end">
+              <ShaderCard
+                width={360}
+                height={380}
+                color="#00D4FF"
+                speed={0.6}
+                positionY={0.35}
+                scale={2.5}
+                branchIntensity={0.8}
+                verticalExtent={1.0}
+                horizontalExtent={1.2}
+                effectRadius={1.2}
+                waveAmount={0.3}
+                blur={8}
+                opacity={1.0}
+                className="rounded-2xl shadow-[0_0_40px_rgba(0,212,255,0.12),0_8px_32px_rgba(0,0,0,0.5)] border border-[rgba(0,212,255,0.2)]"
+                borderRadius="16px"
+              >
+                <PreviewCardInner featured={featured} />
+              </ShaderCard>
+            </div>
+          )}
         </section>
 
         {/* Divider */}
@@ -308,6 +371,13 @@ export function LandingContent({ traders, featured, ticker, leaderboardData }: L
         {/* The Trencher Cup */}
         <section className="mx-auto max-w-[780px] px-6 sm:px-12 lg:px-16 py-10 sm:py-16">
           <div className="mb-8 text-center">
+            <div className="mb-4 flex items-center justify-center gap-4">
+              <div className="h-px flex-1 max-w-[120px]" style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(0,212,255,0.55) 55%, rgba(0,212,255,0.08) 100%)' }} />
+              <div className="text-[9px] font-mono tracking-[3px] uppercase" style={{ color: 'rgba(0,212,255,0.75)' }}>
+                Tournament
+              </div>
+              <div className="h-px flex-1 max-w-[120px]" style={{ background: 'linear-gradient(90deg, rgba(0,212,255,0.08) 0%, rgba(0,212,255,0.55) 45%, transparent 100%)' }} />
+            </div>
             <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight">
               The Trencher <span style={{ color: '#00D4FF' }}>Cup</span>
             </h2>
@@ -323,11 +393,26 @@ export function LandingContent({ traders, featured, ticker, leaderboardData }: L
           <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.1), transparent)' }} />
         </div>
 
+        {/* Referral Section */}
+        <ReferralSection />
+
+        {/* Divider */}
+        <div className="mx-auto max-w-[780px] px-6 sm:px-12 lg:px-16">
+          <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.1), transparent)' }} />
+        </div>
+
         {/* Top Traders — gallery is the page ending */}
         <section className="relative">
           <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(180deg, transparent 0%, rgba(5,5,8,0.4) 40%, rgba(5,5,8,0.7) 100%)' }} />
 
           <div className="mx-auto mb-6 max-w-[780px] px-6 sm:px-12 lg:px-16 relative text-center">
+            <div className="mb-4 flex items-center justify-center gap-4">
+              <div className="h-px flex-1 max-w-[120px]" style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(0,212,255,0.55) 55%, rgba(0,212,255,0.08) 100%)' }} />
+              <div className="text-[9px] font-mono tracking-[3px] uppercase" style={{ color: 'rgba(0,212,255,0.75)' }}>
+                Community
+              </div>
+              <div className="h-px flex-1 max-w-[120px]" style={{ background: 'linear-gradient(90deg, rgba(0,212,255,0.08) 0%, rgba(0,212,255,0.55) 45%, transparent 100%)' }} />
+            </div>
             <h2 className="mb-1 text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight">Top <span className="text-[var(--trench-accent)]">Traders</span></h2>
             <p className="text-[13px] text-[var(--trench-text-muted)]">Already on Web3Me. Are you?</p>
           </div>

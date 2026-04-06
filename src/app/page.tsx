@@ -6,7 +6,8 @@ import type { TickerItem } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
 
-export default async function LandingPage() {
+export default async function LandingPage({ searchParams }: { searchParams: Promise<{ ref?: string }> }) {
+  const { ref: refCode } = await searchParams;
   let traders: { username: string; name: string; avatarUrl: string | null; pnl: string; winRate: string; trades: string; recentToken: string | null; recentTokenImage: string | null; recentPnl: string | null; recentBuy: string | null; recentSell: string | null }[] = [];
   let ticker: TickerItem[] = [];
   let leaderboardData: { rank: number; username: string; displayName: string; avatarUrl: string | null; isClaimed: boolean; pnlUsd: number; pnlSol: number; winRate: number; trades: number }[] = [];
@@ -94,5 +95,5 @@ export default async function LandingPage() {
 
   const featured = traders[0] ?? null;
 
-  return <LandingContent traders={traders} featured={featured} ticker={ticker} leaderboardData={leaderboardData} />;
+  return <LandingContent traders={traders} featured={featured} ticker={ticker} leaderboardData={leaderboardData} refCode={refCode} />;
 }

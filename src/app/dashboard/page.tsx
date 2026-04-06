@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { GlassCard } from '@/components/glass-card';
 import { ExternalLink, CheckCircle2, Circle } from 'lucide-react';
+import { ReferralBanner } from '@/components/referral-banner';
 
 interface Profile {
   id: string;
@@ -159,6 +160,9 @@ export default function DashboardPage() {
           <Link href="/dashboard/wallets" className="text-[var(--trench-text-muted)] hover:text-[var(--trench-text)] transition-colors">
             WALLETS
           </Link>
+          <Link href="/dashboard/referrals" className="text-[var(--trench-text-muted)] hover:text-[var(--trench-text)] transition-colors">
+            REFERRALS
+          </Link>
           {profile?.username && (
             <Link
               href={`/${profile.username}`}
@@ -215,6 +219,7 @@ export default function DashboardPage() {
             { label: 'Link a wallet', done: walletCount > 0, href: '/dashboard/wallets' },
             { label: 'Add a link', done: linkCount > 0, href: '/dashboard' },
             { label: 'Pin a trade', done: pinnedCount > 0, href: '/dashboard/trades' },
+            { label: 'Share your referral link', done: false, href: '/dashboard/referrals' },
           ].map(step => (
             <div key={step.label} className="flex items-center gap-2.5">
               {step.done
@@ -231,6 +236,9 @@ export default function DashboardPage() {
           ))}
         </div>
       </GlassCard>
+
+      {/* Referral Banner */}
+      <ReferralBanner />
 
       {/* Customize */}
       <GlassCard className="p-5 space-y-4" cut={12}>
@@ -260,6 +268,7 @@ export default function DashboardPage() {
         <div className="space-y-2">
           <label className="text-xs font-mono text-[var(--trench-text-muted)]">Banner Image URL</label>
           <Input
+            aria-label="Banner Image URL"
             value={bannerUrl}
             onChange={e => setBannerUrl(e.target.value)}
             placeholder="https://example.com/banner.jpg"
@@ -283,6 +292,7 @@ export default function DashboardPage() {
                 Display Name
               </label>
               <Input
+                aria-label="Display Name"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
                 placeholder="Your name"
@@ -294,6 +304,7 @@ export default function DashboardPage() {
                 Bio
               </label>
               <Textarea
+                aria-label="Bio"
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
                 placeholder="Short bio..."
@@ -355,6 +366,7 @@ export default function DashboardPage() {
             <p className="text-xs font-mono text-[var(--trench-text-muted)]">Add a link</p>
             <div className="flex gap-2">
               <select
+                aria-label="Link Icon"
                 value={newIcon}
                 onChange={(e) => setNewIcon(e.target.value)}
                 className="px-3 py-2 rounded text-sm font-mono"
@@ -365,6 +377,7 @@ export default function DashboardPage() {
                 ))}
               </select>
               <Input
+                aria-label="Link Label"
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
                 placeholder="Label"
@@ -372,6 +385,7 @@ export default function DashboardPage() {
               />
             </div>
             <Input
+              aria-label="Link URL"
               value={newUrl}
               onChange={(e) => setNewUrl(e.target.value)}
               placeholder="https://..."

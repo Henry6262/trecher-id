@@ -219,6 +219,12 @@ html.lenis body {
   50% { transform: translateY(-3px); }
 }
 
+/* ─── Preview card trade scroll ──────────────────────────── */
+@keyframes preview-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
 /* ─── Scrollbar hide ──────────────────────────────────────── */
 .no-scrollbar::-webkit-scrollbar {
   display: none;

@@ -22,6 +22,13 @@ model User {
   createdAt      DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  // Referral system
+  referredById     String?
+  referredBy       User?      @relation("Referrals", fields: [referredById], references: [id])
+  referrals        User[]     @relation("Referrals")
+  givenReferrals   Referral[] @relation("ReferrerReferrals")
+  receivedReferral Referral?  @relation("ReferredReferral")
+
   links            Link[]
   wallets          Wallet[]
   pinnedTrades     PinnedTrade[]
@@ -141,4 +148,17 @@ model TokenDeployment {
 
   @@index([userId])
   @@index([walletAddress])
+}
+
+model Referral {
+  id             String    @id @default(cuid())
+  referrerId     String
+  referrer       User      @relation("ReferrerReferrals", fields: [referrerId], references: [id])
+  referredUserId String    @unique
+  referredUser   User      @relation("ReferredReferral", fields: [referredUserId], references: [id])
+  status         String    @default("pending") // "pending" | "validated" | "revoked"
+  validatedAt    DateTime?
+  createdAt      DateTime  @default(now())
+
+  @@index([referrerId, status])
 }
