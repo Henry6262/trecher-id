@@ -73,7 +73,7 @@ export function PortfolioView({ username }: { username: string }) {
             href={`https://dexscreener.com/solana/${h.mint}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 px-3 py-2.5 cut-xs border border-[rgba(0,212,255,0.06)] hover:border-[rgba(0,212,255,0.15)] transition-colors group"
+            className="flex items-center gap-3 px-3.5 py-3 cut-xs border border-[rgba(0,212,255,0.06)] hover:border-[rgba(0,212,255,0.15)] transition-colors group"
             style={{ background: 'rgba(8,12,22,0.4)', textDecoration: 'none' }}
           >
             {/* Token image */}

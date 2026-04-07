@@ -102,7 +102,7 @@ export function PnlChart({ username }: { username: string }) {
       </div>
       <div
         ref={containerRef}
-        className="cut-sm overflow-hidden"
+        className="cut-sm overflow-hidden border"
         style={{ background: 'rgba(8,12,22,0.4)', border: '1px solid rgba(0,212,255,0.06)' }}
       />
     </div>

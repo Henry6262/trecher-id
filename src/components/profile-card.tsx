@@ -11,7 +11,6 @@ import { TrophyCase } from './trophy-case';
 import { TradeCalendar } from './trade-calendar';
 import type { TraderStats } from '@/lib/trade-stats';
 import type { TokenTrade } from '@/lib/helius';
-import { computeDegenScore } from '@/lib/degen-score';
 import type { DegenScoreResult } from '@/lib/degen-score';
 import { computeAchievements } from '@/lib/achievements';
 import { buildTradeCalendar } from '@/lib/trade-calendar';
@@ -55,8 +54,6 @@ interface ProfileCardProps {
 
 export function ProfileCard({ user, stats, links, pinnedTrades, wallets, traderStats, deployments, allTrades, degenScore, followerCount, isOwner, accentColor, bannerUrl }: ProfileCardProps) {
   const hasWallets = wallets.length > 0;
-
-  // Compute achievements when we have enough data
   const achievements = traderStats && degenScore
     ? computeAchievements(stats, traderStats, degenScore)
     : [];
@@ -64,6 +61,34 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets, traderS
   // Build calendar from on-chain trade data if available
   const calendarWeeks = allTrades && allTrades.length > 0
     ? buildTradeCalendar(allTrades)
+    : [];
+  const showTradeSection = calendarWeeks.length > 0 || !!traderStats || pinnedTrades.length > 0;
+  const showPortfolioSection = true;
+  const showDeploymentsSection = !!(deployments && deployments.length > 0);
+  const notableTrades = traderStats
+    ? [
+        traderStats.bestTrade
+          ? {
+              label: 'TOP WIN',
+              symbol: traderStats.bestTrade.symbol,
+              pnlPercent: traderStats.bestTrade.pnlPercent,
+              tone: 'green' as const,
+            }
+          : null,
+        traderStats.worstTrade
+          ? {
+              label: 'TOP LOSS',
+              symbol: traderStats.worstTrade.symbol,
+              pnlPercent: traderStats.worstTrade.pnlPercent,
+              tone: 'red' as const,
+            }
+          : null,
+      ].filter((trade): trade is {
+        label: string;
+        symbol: string;
+        pnlPercent: number;
+        tone: 'green' | 'red';
+      } => trade !== null)
     : [];
 
   const accent = accentColor || '#00D4FF';
@@ -97,7 +122,13 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets, traderS
         {/* Banner */}
         {bannerUrl && (
           <div className="relative w-full h-32 sm:h-44 overflow-hidden" style={{ clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)' }}>
-            <img src={bannerUrl} alt="" className="w-full h-full object-cover" />
+            <Image
+              src={bannerUrl}
+              alt=""
+              fill
+              className="object-cover"
+              unoptimized
+            />
             <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(5,5,8,0.3) 0%, rgba(5,5,8,0.85) 100%)' }} />
           </div>
         )}
@@ -113,7 +144,6 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets, traderS
           stats={stats}
           wallets={wallets}
           followerCount={followerCount}
-          roi={traderStats?.roi}
           degenScore={degenScore}
           isOwner={isOwner}
           accentColor={accent}
@@ -136,32 +166,97 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets, traderS
           )}
 
           {/* Divider between links and trades */}
-          {links.length > 0 && (pinnedTrades.length > 0 || (deployments && deployments.length > 0)) && (
+          {links.length > 0 && showTradeSection && (
             <div className="mb-5" style={{ height: '1px', background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.08), transparent)' }} />
           )}
 
           {/* Trade calendar */}
           {calendarWeeks.length > 0 && <TradeCalendar weeks={calendarWeeks} />}
 
+          {/* Advanced stats */}
+          {traderStats && (
+            <div className="mb-5">
+              <div className="text-[7px] font-mono tracking-[2px] text-[var(--trench-text-muted)] mb-2">
+                STATS
+              </div>
+              <EnhancedStats stats={traderStats} />
+            </div>
+          )}
+
+          {/* Top win / top loss */}
+          {notableTrades.length > 0 && (
+            <div className="mb-5">
+              <div className="flex items-center gap-2 text-[9px] text-[var(--trench-text-muted)] tracking-[2px] mb-3">
+                NOTABLE TRADES
+                <div className="flex-1 h-px" style={{ background: 'rgba(0,212,255,0.08)' }} />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {notableTrades.map((trade) => {
+                  const color = trade.tone === 'green' ? 'var(--trench-green)' : 'var(--trench-red)';
+                  const glow = trade.tone === 'green'
+                    ? '0 0 18px rgba(34,197,94,0.12)'
+                    : '0 0 18px rgba(239,68,68,0.12)';
+
+                  return (
+                    <div
+                      key={trade.label}
+                      className="cut-sm px-3.5 py-3"
+                      style={{
+                        background: 'rgba(255,255,255,0.03)',
+                        border: '1px solid rgba(0,212,255,0.08)',
+                        boxShadow: glow,
+                      }}
+                    >
+                      <div className="text-[8px] font-mono tracking-[2px] text-[var(--trench-text-muted)] mb-1.5">
+                        {trade.label}
+                      </div>
+                      <div className="flex items-end justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="text-[14px] font-bold text-[var(--trench-text)] truncate">
+                            ${trade.symbol}
+                          </div>
+                          <div className="text-[9px] font-mono text-[var(--trench-text-muted)]">
+                            Based on indexed trade history
+                          </div>
+                        </div>
+                        <div
+                          className="text-[18px] font-black font-mono leading-none"
+                          style={{ color, textShadow: glow }}
+                        >
+                          {trade.pnlPercent >= 0 ? '+' : ''}{Math.round(trade.pnlPercent)}%
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Achievements */}
+          {achievements.length > 0 && <TrophyCase achievements={achievements} />}
+
           {/* PnL history chart */}
           <PnlChart username={user.username} />
 
           {/* Pinned trades */}
-          {pinnedTrades.length > 0 && (
-            <div className="mb-5">
-              <TradeCarousel trades={pinnedTrades} />
-            </div>
+          {pinnedTrades.length > 0 && <TradeCarousel trades={pinnedTrades} />}
+
+          {/* Divider between trade stack and portfolio */}
+          {showTradeSection && showPortfolioSection && (
+            <div className="mb-5" style={{ height: '1px', background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.08), transparent)' }} />
           )}
 
           {/* Portfolio holdings */}
           <PortfolioView username={user.username} />
 
-          {/* Token deployments */}
-          {deployments && deployments.length > 0 && (
-            <div className="mb-5">
-              <DeploymentCarousel deployments={deployments} />
-            </div>
+          {/* Divider between portfolio and deployments */}
+          {showPortfolioSection && showDeploymentsSection && (
+            <div className="mb-5" style={{ height: '1px', background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.08), transparent)' }} />
           )}
+
+          {/* Token deployments */}
+          {deployments && deployments.length > 0 && <DeploymentCarousel deployments={deployments} />}
 
         </div>
 

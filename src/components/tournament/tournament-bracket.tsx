@@ -2,6 +2,8 @@
 
 import { useMemo, useRef, useEffect, useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
+import { AvatarImage } from '@/components/avatar-image';
 import { buildBracket } from './bracket-utils';
 import { GroupCard } from './group-card';
 import { MatchupCard } from './matchup-card';
@@ -35,6 +37,10 @@ export function TournamentBracket({ traders }: { traders: RankedTrader[] }) {
   const outerRef = useRef<HTMLDivElement>(null);
   const stickyRef = useRef<HTMLDivElement>(null);
   const [scrollProgress, setScrollProgress] = useState(0);
+  const bracket = useMemo(
+    () => (traders.length >= 32 ? buildBracket(traders) : null),
+    [traders],
+  );
 
   useEffect(() => {
     function onScroll() {
@@ -42,8 +48,6 @@ export function TournamentBracket({ traders }: { traders: RankedTrader[] }) {
       if (!outer) return;
       const rect = outer.getBoundingClientRect();
       // Sticky pins when rect.top <= 0. Horizontal scroll range = total height minus one viewport.
-      // Sticky offset from top of viewport
-      const stickyTop = (window.innerHeight - BRACKET_H) / 2;
       // Total distance the outer container scrolls while sticky is pinned
       const stickyTravel = outer.offsetHeight - window.innerHeight;
       if (stickyTravel <= 0) return;
@@ -56,16 +60,23 @@ export function TournamentBracket({ traders }: { traders: RankedTrader[] }) {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  if (traders.length < 32) {
+  if (!bracket) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 gap-2">
-        <span className="text-[13px] text-[var(--trench-text-muted)] font-mono">Not enough traders for bracket (need 32)</span>
-        <span className="text-[10px] text-[var(--trench-text-muted)]">Currently {traders.length} traders ranked</span>
+      <div
+        className="cut-sm flex flex-col items-center justify-center gap-3 px-6 py-14 text-center"
+        style={{ background: 'rgba(8,12,18,0.72)', border: '1px solid rgba(0,212,255,0.08)' }}
+      >
+        <span className="text-[13px] text-[var(--trench-text)] font-mono">Not enough traders for bracket yet</span>
+        <span className="text-[10px] text-[var(--trench-text-muted)]">Need 32 ranked traders. Currently at {traders.length}.</span>
+        <div className="flex flex-wrap items-center justify-center gap-2 text-[9px] font-mono tracking-[1.5px] text-[var(--trench-text-muted)]">
+          <span className="cut-xs px-2.5 py-1" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>TOP 32 QUALIFY</span>
+          <span className="cut-xs px-2.5 py-1" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>TOP 2 PER GROUP ADVANCE</span>
+          <span className="cut-xs px-2.5 py-1" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>CHAMPION TAKES 69%</span>
+        </div>
       </div>
     );
   }
 
-  const bracket = useMemo(() => buildBracket(traders), [traders]);
   const ROW_H = 72;
   const champ = bracket.champion;
 
@@ -81,15 +92,22 @@ export function TournamentBracket({ traders }: { traders: RankedTrader[] }) {
   const trophyRotate = (1 - overlayProgress) * 8;
 
   return (
-    // Outer container — tall enough to give vertical scroll room for horizontal travel
-    // SCROLL_WIDTH of extra height converts to horizontal travel, plus bracket height
-    <div ref={outerRef} style={{ height: SCROLL_WIDTH }}>
-      {/* Sticky wrapper — pins the bracket to viewport while scrolling */}
-      <div
-        ref={stickyRef}
-        className="sticky overflow-hidden"
-        style={{ height: BRACKET_H, top: `calc(50vh - ${BRACKET_H / 2}px)` }}
-      >
+    <div>
+      <div className="mb-5 flex flex-wrap items-center justify-center gap-2 text-[9px] font-mono tracking-[1.5px] text-[var(--trench-text-muted)]">
+        <span className="cut-xs px-2.5 py-1" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>TOP 32 BY 7D PNL</span>
+        <span className="cut-xs px-2.5 py-1" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>TOP 2 FROM EACH GROUP ADVANCE</span>
+        <span className="cut-xs px-2.5 py-1" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>CHAMPION TAKES 69% OF FEES</span>
+      </div>
+
+      {/* Outer container — tall enough to give vertical scroll room for horizontal travel */}
+      {/* SCROLL_WIDTH of extra height converts to horizontal travel, plus bracket height */}
+      <div ref={outerRef} style={{ height: SCROLL_WIDTH }}>
+        {/* Sticky wrapper — pins the bracket to viewport while scrolling */}
+        <div
+          ref={stickyRef}
+          className="sticky overflow-hidden"
+          style={{ height: BRACKET_H, top: `calc(50vh - ${BRACKET_H / 2}px)` }}
+        >
         {/* Edge fades */}
         <div className="absolute left-0 top-0 bottom-0 w-16 z-10 pointer-events-none" style={{ background: 'linear-gradient(90deg, rgba(5,5,8,1) 0%, transparent 100%)' }} />
         <div className="absolute left-0 top-0 right-0 h-10 z-10 pointer-events-none" style={{ background: 'linear-gradient(180deg, rgba(5,5,8,1) 0%, transparent 100%)' }} />
@@ -100,7 +118,7 @@ export function TournamentBracket({ traders }: { traders: RankedTrader[] }) {
         <div
           className="absolute top-0 right-0 bottom-0 z-20 pointer-events-none"
           style={{
-            width: '50%',
+            width: '56%',
             transform: `translateX(${overlaySlide}%)`,
             opacity: overlayOpacity,
             transition: 'opacity 0.05s linear, transform 0.05s linear',
@@ -108,18 +126,25 @@ export function TournamentBracket({ traders }: { traders: RankedTrader[] }) {
         >
           <div
             className="absolute inset-0 pointer-events-none"
-            style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(5,5,8,0.8) 20%, #050508 40%)' }}
+            style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(5,5,8,0.45) 12%, rgba(5,5,8,0.88) 28%, #050508 52%)' }}
           />
 
-          <div className="relative z-10 h-full flex flex-col items-center justify-center pointer-events-none pr-4 pl-8 ml-auto" style={{ marginRight: -30 }}>
-            <div className="text-center mb-2">
-              <div className="text-[10px] font-mono tracking-[4px] text-[var(--trench-text-muted)] mb-1">SEASON 1</div>
-              <h3 className="text-[22px] sm:text-[28px] font-black text-white leading-[0.9]">The Trencher</h3>
-              <h3 className="text-[26px] sm:text-[34px] font-black leading-[0.9]" style={{ color: '#00D4FF', textShadow: '0 0 30px rgba(0,212,255,0.3), 0 0 60px rgba(0,212,255,0.1)' }}>Cup</h3>
+          <div className="relative z-10 flex h-full flex-col justify-between px-6 py-7 sm:px-8">
+            <div className="ml-auto w-full max-w-[390px] text-center sm:text-right">
+              <div className="mb-2 text-[11px] font-mono tracking-[6px] text-[var(--trench-text-muted)]">SEASON 1</div>
+              <h3 className="text-[48px] sm:text-[60px] font-black text-white leading-[0.84] tracking-[-0.04em]">
+                The Trencher
+              </h3>
+              <h3
+                className="text-[52px] sm:text-[70px] font-black leading-[0.84] tracking-[-0.05em]"
+                style={{ color: '#59C8FF', textShadow: '0 0 34px rgba(0,212,255,0.28), 0 0 68px rgba(0,212,255,0.1)' }}
+              >
+                Cup
+              </h3>
             </div>
 
             <div
-              className="relative w-[160px] h-[160px] sm:w-[200px] sm:h-[200px] my-2"
+              className="relative ml-auto mr-2 h-[230px] w-[230px] sm:h-[270px] sm:w-[270px]"
               style={{
                 filter: 'drop-shadow(0 0 30px rgba(0,212,255,0.35)) drop-shadow(0 0 60px rgba(0,212,255,0.15))',
                 transform: `scale(${trophyScale}) rotate(${trophyRotate}deg)`,
@@ -128,49 +153,78 @@ export function TournamentBracket({ traders }: { traders: RankedTrader[] }) {
               <Image src="/trencher-cup.png" alt="Trencher Cup" fill className="object-contain" priority />
             </div>
 
-            {champ && (
-              <div className="flex items-center gap-3 mt-1 mb-3">
-                <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0" style={{ border: '2.5px solid rgba(255,215,0,0.6)', boxShadow: '0 0 16px rgba(255,215,0,0.2)' }}>
-                  <Image src={champ.avatarUrl || `https://unavatar.io/twitter/${champ.username}`} alt="" width={40} height={40} className="w-full h-full object-cover" unoptimized />
-                </div>
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[13px] font-black text-white">@{champ.username}</span>
-                    <span className="text-[8px] font-mono tracking-[2px] px-1.5 py-0.5 cut-xs" style={{ background: 'rgba(255,215,0,0.15)', color: '#FFD700', border: '1px solid rgba(255,215,0,0.25)' }}>CHAMPION</span>
+            <div className="flex flex-col gap-5 ml-auto max-w-[390px] w-full">
+              {/* Champion card */}
+              {champ ? (
+                <div
+                  className="w-full px-4 py-3"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(8,12,18,0.92) 0%, rgba(7,10,18,0.74) 100%)',
+                    border: '1px solid rgba(255,215,0,0.22)',
+                    boxShadow: '0 0 24px rgba(255,215,0,0.08)',
+                    clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)',
+                  }}
+                >
+                  <div className="mb-2 text-[8px] font-mono tracking-[3px]" style={{ color: '#FFD700' }}>
+                    TOURNAMENT CHAMPION
                   </div>
-                  <div className="text-[16px] font-mono font-black" style={{ color: '#22c55e', textShadow: '0 0 12px rgba(34,197,94,0.25)' }}>
-                    {champ.pnlUsd >= 0 ? '+' : ''}${Math.abs(champ.pnlUsd) >= 1000 ? `${Math.round(champ.pnlUsd / 1000)}K` : Math.round(champ.pnlUsd)}
+                  <div className="flex items-center gap-3">
+                    <div className="h-11 w-11 rounded-full overflow-hidden flex-shrink-0" style={{ border: '2.5px solid rgba(255,215,0,0.65)', boxShadow: '0 0 18px rgba(255,215,0,0.16)' }}>
+                      <AvatarImage
+                        src={champ.avatarUrl || `https://unavatar.io/twitter/${champ.username}`}
+                        alt={champ.username}
+                        width={44}
+                        height={44}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-[14px] font-black text-white">@{champ.username}</div>
+                      <div className="text-[20px] font-mono font-black" style={{ color: '#62D26F', textShadow: '0 0 14px rgba(34,197,94,0.22)' }}>
+                        {champ.pnlUsd >= 0 ? '+' : ''}${Math.abs(champ.pnlUsd) >= 1000 ? `${Math.round(champ.pnlUsd / 1000)}K` : Math.round(champ.pnlUsd)}
+                      </div>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <div className="text-[28px] font-black font-mono leading-none" style={{ color: '#62D26F', textShadow: '0 0 18px rgba(34,197,94,0.26)' }}>
+                        69%
+                      </div>
+                      <div className="mt-1 text-[7px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">
+                        OF ALL FEES
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              ) : (
+                <div />
+              )}
 
-            <div className="flex items-center gap-4">
-              <div className="text-center">
-                <div className="text-[24px] font-black font-mono" style={{ color: '#22c55e', textShadow: '0 0 16px rgba(34,197,94,0.3)' }}>69%</div>
-                <div className="text-[7px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">OF ALL FEES</div>
+              {/* CTA */}
+              <div className="w-full">
+                <Link
+                  href="/leaderboard"
+                  className="pointer-events-auto w-full inline-flex items-center justify-center px-9 py-4 text-[12px] font-bold tracking-[3px] text-black"
+                  style={{
+                    background: '#59C8FF',
+                    boxShadow: '0 0 24px rgba(0,212,255,0.24)',
+                    clipPath: 'polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px)',
+                  }}
+                >
+                  ENTER THE ARENA →
+                </Link>
               </div>
-              <div className="w-px h-8" style={{ background: 'rgba(255,255,255,0.08)' }} />
-              <a
-                href="/leaderboard"
-                className="pointer-events-auto inline-block px-5 py-2.5 text-[9px] font-bold tracking-[2px] text-black cut-xs"
-                style={{ background: '#00D4FF', textDecoration: 'none', boxShadow: '0 0 20px rgba(0,212,255,0.3)', position: 'relative', zIndex: 50 }}
-              >
-                ENTER THE ARENA →
-              </a>
             </div>
           </div>
         </div>
 
-        {/* Bracket strip — translates horizontally based on vertical scroll */}
-        <div
-          className="flex items-stretch gap-0 will-change-transform"
-          style={{
-            minWidth: SCROLL_WIDTH,
-            minHeight: BRACKET_H,
-            transform: `translateX(${translateX}px)`,
-          }}
-        >
+          {/* Bracket strip — translates horizontally based on vertical scroll */}
+          <div
+            className="flex items-stretch gap-0 will-change-transform"
+            style={{
+              minWidth: SCROLL_WIDTH,
+              minHeight: BRACKET_H,
+              transform: `translateX(${translateX}px)`,
+            }}
+          >
           {/* Groups: 4-col grid = 2 rows */}
           <div className="flex-shrink-0" style={{ width: 920 }}>
             <div className="text-[8px] font-mono tracking-[2px] text-[var(--trench-text-muted)] mb-3 text-center">
@@ -200,6 +254,7 @@ export function TournamentBracket({ traders }: { traders: RankedTrader[] }) {
           <RoundColumn label={ROUND_LABELS.final} matchups={bracket.knockoutRounds.final} gap="0px" />
 
           <div className="flex-shrink-0" style={{ width: 260 }} />
+          </div>
         </div>
       </div>
     </div>

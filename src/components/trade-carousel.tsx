@@ -18,12 +18,15 @@ interface TradeCarouselProps {
 export function TradeCarousel({ trades }: TradeCarouselProps) {
   if (trades.length === 0) return null;
   return (
-    <div className="px-5 pb-4">
+    <div className="mb-5">
       <div className="flex items-center gap-2 text-[9px] text-[var(--trench-text-muted)] tracking-[2px] mb-3">
         PINNED TRADES
         <div className="flex-1 h-px" style={{ background: 'rgba(0,212,255,0.08)' }} />
+        <span className="font-mono text-[8px] text-[var(--trench-text-muted)]">
+          {trades.length} LIVE
+        </span>
       </div>
-      <div className="flex gap-2.5 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-1">
+      <div className="-mx-1 flex gap-2.5 overflow-x-auto no-scrollbar px-1 pb-1 snap-x snap-mandatory">
         {trades.map((trade) => (
           <TradeCard
             key={trade.id}

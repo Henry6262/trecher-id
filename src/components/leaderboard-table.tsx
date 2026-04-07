@@ -1,13 +1,11 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Check, Crosshair, Zap, Anchor, Gem } from 'lucide-react';
 import { AvatarImage } from '@/components/avatar-image';
 import { GlassCard } from '@/components/glass-card';
 import { TournamentBracket } from './tournament/tournament-bracket';
-import { formatPnl } from '@/lib/utils';
 
 const PERIODS = [
   { key: '1d', label: '1D' },
@@ -26,14 +24,6 @@ interface RankedTrader {
   pnlSol: number;
   winRate: number;
   trades: number;
-}
-
-function getCategoryBadge(t: RankedTrader): { icon: React.ReactNode; label: string; color: string } | null {
-  if (t.winRate >= 70) return { icon: <Crosshair size={9} />, label: 'SNIPER', color: '#f59e0b' };
-  if (t.trades >= 100) return { icon: <Zap size={9} />, label: 'ACTIVE', color: '#00D4FF' };
-  if (t.pnlUsd >= 5000) return { icon: <Anchor size={9} />, label: 'WHALE', color: '#a78bfa' };
-  if (t.winRate >= 50 && t.trades >= 20) return { icon: <Gem size={9} />, label: 'SOLID', color: '#22c55e' };
-  return null;
 }
 
 interface RankedDeployer {
@@ -64,26 +54,20 @@ export function LeaderboardTable({
   variant?: 'bracket' | 'full';
 }) {
   const [mode, setMode] = useState<LeaderboardMode>('traders');
-  const [viewMode, setViewMode] = useState<'table' | 'bracket'>(variant === 'bracket' ? 'bracket' : 'table');
   const [period, setPeriod] = useState(initialPeriod);
   const [traders, setTraders] = useState<RankedTrader[]>(initialTraders ?? []);
   const [deployers, setDeployers] = useState<RankedDeployer[]>([]);
   const [loading, setLoading] = useState(!initialTraders);
   const [page, setPage] = useState(0);
-  const [initialLoad, setInitialLoad] = useState(!!initialTraders);
+  const skippedInitialFetch = useRef(!!initialTraders);
 
   useEffect(() => {
-    setPage(0);
-    if (mode === 'deployers') setViewMode('table');
-  }, [mode, period]);
-
-  useEffect(() => {
-    if (initialLoad && mode === 'traders' && period === initialPeriod) {
-      setInitialLoad(false);
+    if (skippedInitialFetch.current && mode === 'traders' && period === initialPeriod) {
+      skippedInitialFetch.current = false;
       return;
     }
+
     let cancelled = false;
-    setLoading(true);
     if (mode === 'traders') {
       fetch(`/api/leaderboard?period=${period}&limit=50`)
         .then((res) => res.json())
@@ -96,7 +80,7 @@ export function LeaderboardTable({
         .catch(() => { if (!cancelled) setLoading(false); });
     }
     return () => { cancelled = true; };
-  }, [mode, period]);
+  }, [mode, period, initialPeriod]);
 
   const deployerAsTraders: RankedTrader[] = useMemo(() => deployers.map(d => ({
     rank: d.rank,
@@ -109,6 +93,10 @@ export function LeaderboardTable({
     winRate: d.deployCount > 0 ? (d.migratedCount / d.deployCount) * 100 : 0,
     trades: d.deployCount,
   })), [deployers]);
+  const deployerByUsername = useMemo(
+    () => new Map(deployers.map((deployer) => [deployer.username, deployer])),
+    [deployers],
+  );
 
   const activeList = mode === 'traders' ? traders : deployerAsTraders;
   const top3 = activeList.slice(0, 3);
@@ -146,7 +134,11 @@ export function LeaderboardTable({
           {(['traders', 'deployers'] as const).map((m) => (
             <button
               key={m}
-              onClick={() => setMode(m)}
+              onClick={() => {
+                setLoading(true);
+                setMode(m);
+                setPage(0);
+              }}
               className="font-mono text-[10px] tracking-[1.5px] font-bold px-4 py-1.5 transition-all cut-sm"
               style={{
                 background: mode === m ? 'rgba(0,212,255,0.18)' : 'rgba(8,12,22,0.55)',
@@ -167,7 +159,11 @@ export function LeaderboardTable({
               {PERIODS.map((p) => (
                 <button
                   key={p.key}
-                  onClick={() => setPeriod(p.key)}
+                  onClick={() => {
+                    setLoading(true);
+                    setPeriod(p.key);
+                    setPage(0);
+                  }}
                   className="font-mono text-[10px] tracking-[1px] font-bold px-3 py-1 transition-all"
                   style={{
                     background: period === p.key ? 'rgba(0,212,255,0.15)' : 'transparent',
@@ -182,6 +178,15 @@ export function LeaderboardTable({
             </>
           )}
         </div>
+      </div>
+
+      <div className="mb-6 flex flex-wrap items-center gap-2 text-[10px] font-mono tracking-[1.5px] text-[var(--trench-text-muted)]">
+        <span className="cut-xs px-2.5 py-1" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
+          {mode === 'traders' ? 'REALIZED PNL RANKING' : 'TOTAL DEV PNL RANKING'}
+        </span>
+        <span className="cut-xs px-2.5 py-1" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
+          {mode === 'traders' ? '7D CUP QUALIFICATION' : 'MIGRATIONS + DEPLOY COUNT'}
+        </span>
       </div>
 
       {/* Loading */}
@@ -218,7 +223,20 @@ export function LeaderboardTable({
                 <div className="relative z-1 h-full flex flex-col justify-end p-4">
                   <div className="text-[8px] tracking-[3px] font-mono mb-1" style={{ color: '#FFD700' }}>1ST PLACE</div>
                   <div className="text-[14px] font-black text-white mb-0.5">@{top3[0].username}</div>
-                  <div className="text-[8px] text-[rgba(255,255,255,0.4)] mb-2">{Math.round(top3[0].winRate)}% WR · {top3[0].trades} {mode === 'traders' ? 'trades' : 'deploys'}</div>
+                  <div className="text-[8px] text-[rgba(255,255,255,0.4)] mb-2">
+                    {mode === 'traders'
+                      ? `${Math.round(top3[0].winRate)}% WR · ${top3[0].trades} trades`
+                      : (() => {
+                          const deployer = deployerByUsername.get(top3[0].username);
+                          if (!deployer) return `${top3[0].trades} deploys`;
+                          return `${deployer.deployCount} deploys · ${deployer.migratedCount} migrated`;
+                        })()}
+                  </div>
+                  {mode === 'deployers' && deployerByUsername.get(top3[0].username)?.bestToken && (
+                    <div className="mb-2 inline-flex items-center px-2 py-1 cut-xs text-[7px] font-mono tracking-[1.5px] text-white" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                      BEST: ${deployerByUsername.get(top3[0].username)?.bestToken}
+                    </div>
+                  )}
                   <div className="flex items-center gap-1.5">
                     <span className="text-[24px] font-black font-mono" style={{ color: top3[0].pnlSol >= 0 ? '#22c55e' : '#ef4444', textShadow: '0 0 16px rgba(34,197,94,0.3)' }}>{top3[0].pnlSol >= 0 ? '+' : ''}{Math.round(top3[0].pnlSol)}</span>
                     <Image src="/sol.png" alt="SOL" width={18} height={18} className="h-[18px] w-auto" />
@@ -258,7 +276,7 @@ export function LeaderboardTable({
               <span className="w-[22px]">#</span>
               <span className="w-[28px]" />
               <span className="flex-1 pl-2">{mode === 'traders' ? 'TRADER' : 'DEV'}</span>
-              <span className="w-[40px] text-right hidden sm:block">WR</span>
+              <span className="w-[52px] text-right hidden sm:block">{mode === 'traders' ? 'WR' : 'DEP'}</span>
               <span className="w-[80px] text-right">PNL</span>
             </div>
             {rest.map((t) => (
@@ -269,8 +287,19 @@ export function LeaderboardTable({
                 <div className="w-[28px] h-[28px] rounded-full overflow-hidden flex-shrink-0" style={{ border: '1.5px solid rgba(255,255,255,0.08)' }}>
                   <AvatarImage src={t.avatarUrl || `https://unavatar.io/twitter/${t.username}`} alt={t.displayName} width={28} height={28} className="w-full h-full object-cover" />
                 </div>
-                <span className="flex-1 min-w-0 pl-2 text-[12px] font-semibold text-white truncate">@{t.username}</span>
-                <span className="w-[40px] text-right font-mono text-[10px] text-[#555] hidden sm:block">{Math.round(t.winRate)}%</span>
+                <div className="flex-1 min-w-0 pl-2">
+                  <span className="block text-[12px] font-semibold text-white truncate">@{t.username}</span>
+                  {mode === 'deployers' && deployerByUsername.get(t.username)?.bestToken && (
+                    <span className="block text-[8px] font-mono text-[var(--trench-text-muted)] truncate">
+                      Best deploy: ${deployerByUsername.get(t.username)?.bestToken}
+                    </span>
+                  )}
+                </div>
+                <span className="w-[52px] text-right font-mono text-[10px] text-[#555] hidden sm:block">
+                  {mode === 'traders'
+                    ? `${Math.round(t.winRate)}%`
+                    : String(deployerByUsername.get(t.username)?.deployCount ?? t.trades)}
+                </span>
                 <div className="w-[80px] flex items-center justify-end gap-1">
                   <span className="font-mono text-[13px] font-black" style={{ color: t.pnlSol >= 0 ? '#22c55e' : '#ef4444' }}>{t.pnlSol >= 0 ? '+' : ''}{Math.round(t.pnlSol)}</span>
                   <Image src="/sol.png" alt="SOL" width={12} height={12} className="h-[12px] w-auto" />

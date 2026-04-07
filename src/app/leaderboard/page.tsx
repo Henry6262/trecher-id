@@ -69,10 +69,10 @@ export default function LeaderboardPage() {
               LEADERBOARD
             </div>
             <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">
-              Top <span className="text-[var(--trench-accent)]">Traders</span>
+              Top <span className="text-[var(--trench-accent)]">Traders & Devs</span>
             </h1>
             <p className="text-[12px] text-[var(--trench-text-muted)]">
-              Ranked by realized PnL. Updated every 4 hours from on-chain data.
+              Toggle between trader and deployer rankings. Updated from indexed on-chain data.
             </p>
           </div>
 

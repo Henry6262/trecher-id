@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { formatPnl, truncateAddress } from '@/lib/utils';
 import { Check, ChevronDown, Star } from 'lucide-react';
 import { DegenBadge } from './degen-badge';
@@ -26,7 +27,7 @@ function ShareButtons({ username, accent }: { username: string; accent: string }
         className="cut-xs flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-mono tracking-widest transition-all"
         style={{ background: 'rgba(0,212,255,0.04)', border: '1px solid rgba(0,212,255,0.1)', color: copied ? '#22c55e' : '#71717a' }}
       >
-        {copied ? '✓ COPIED' : '🔗 COPY'}
+        {copied ? 'LINK COPIED' : 'COPY LINK'}
       </button>
       <a
         href={`https://twitter.com/intent/tweet?text=${tweetText}`}
@@ -35,7 +36,7 @@ function ShareButtons({ username, accent }: { username: string; accent: string }
         className="cut-xs flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-mono tracking-widest transition-all"
         style={{ background: `${accent}14`, border: `1px solid ${accent}33`, color: accent }}
       >
-        📤 SHARE
+        SHARE CARD
       </a>
     </>
   );
@@ -55,18 +56,18 @@ interface ProfileHeaderProps {
   };
   wallets?: { address: string; verified: boolean; isMain?: boolean }[];
   followerCount?: number | null;
-  roi?: number;
   degenScore?: DegenScoreResult;
   isOwner?: boolean;
   accentColor?: string | null;
 }
 
-export function ProfileHeader({ avatarUrl, displayName, username, bio, verified, isClaimed, stats, wallets, followerCount, roi, degenScore, isOwner, accentColor }: ProfileHeaderProps) {
+export function ProfileHeader({ avatarUrl, displayName, username, bio, verified, isClaimed, stats, wallets, followerCount, degenScore, isOwner, accentColor }: ProfileHeaderProps) {
   const accent = accentColor || '#00D4FF';
   const [activeWallet, setActiveWallet] = useState(
     () => wallets?.findIndex(w => w.isMain) ?? 0
   );
   const [walletOpen, setWalletOpen] = useState(false);
+  const walletSelectorOffset = isClaimed ? '-top-1' : 'top-3';
 
   return (
     <div
@@ -85,21 +86,21 @@ export function ProfileHeader({ avatarUrl, displayName, username, bio, verified,
           }}
         >
           <span className="text-[var(--trench-text-muted)]">
-            👋 <span className="text-[var(--trench-text)]">@{username}</span>? This profile was created for you.
+            <span className="text-[var(--trench-text)]">@{username}</span>? This profile was created for you.
           </span>
-          <a
+          <Link
             href="/login"
             className="transition-colors tracking-widest text-[10px]"
             style={{ color: accent }}
           >
             CLAIM IT →
-          </a>
+          </Link>
         </div>
       )}
 
       {/* Wallet selector — top-right of card */}
       {wallets && wallets.length > 0 && (
-        <div className="absolute -top-1 right-4 z-10">
+        <div className={`absolute ${walletSelectorOffset} right-4 z-10`}>
           <button
             onClick={() => setWalletOpen(!walletOpen)}
             className="cut-xs flex items-center gap-1.5 text-[8px] font-mono text-[var(--trench-text-muted)] px-2 py-1 transition-all hover:text-[var(--trench-accent)]"
@@ -240,7 +241,7 @@ export function ProfileHeader({ avatarUrl, displayName, username, bio, verified,
       {/* Edit button — own profiles only */}
       {isOwner && (
         <div className="absolute bottom-4 right-4 z-10">
-          <a
+          <Link
             href="/dashboard"
             className="cut-xs flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-mono tracking-widest transition-all"
             style={{
@@ -249,8 +250,8 @@ export function ProfileHeader({ avatarUrl, displayName, username, bio, verified,
               color: accent,
             }}
           >
-            ✏ EDIT
-          </a>
+            EDIT PROFILE
+          </Link>
         </div>
       )}
     </div>

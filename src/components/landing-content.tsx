@@ -1,11 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Check, Globe, ChevronRight } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
 import { AvatarImage } from '@/components/avatar-image';
 import { CutButton } from '@/components/cut-button';
 import ShinyText from '@/components/shiny-text';
@@ -57,21 +56,40 @@ interface LandingContentProps {
 
 // ─── Preview Card with Calendar/Chart toggle ───────────────
 
-const CALENDAR_DATA = Array.from({ length: 56 }, (_, i) => {
-  const rand = Math.sin(i * 7.3 + 2.1) * 0.5 + 0.5; // deterministic pseudo-random
-  const trades = rand > 0.7 ? Math.floor(rand * 12) + 3 : rand > 0.3 ? Math.floor(rand * 5) + 1 : 0;
-  const pnl = trades > 0 ? Math.round((rand - 0.35) * 800) : 0;
-  const opacity = trades === 0 ? 0.05 : trades > 6 ? 0.8 : trades > 2 ? 0.4 : 0.15;
-  const daysAgo = 55 - i;
-  const date = new Date(Date.now() - daysAgo * 86400000);
-  const label = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  return { opacity, trades, pnl, label };
-});
+function buildPreviewCalendar(featured: TraderData) {
+  const parsedTrades = Number.parseInt(featured.trades.replace(/[^0-9]/g, ''), 10);
+  const tradeCount = Number.isFinite(parsedTrades) ? parsedTrades : 0;
+  const parsedWinRate = Number.parseFloat(featured.winRate.replace('%', ''));
+  const winRate = Number.isFinite(parsedWinRate) ? parsedWinRate : 50;
+  const seed = featured.username
+    .split('')
+    .reduce((sum, char, index) => sum + char.charCodeAt(0) * (index + 1), 0);
 
-function MiniCalendar() {
+  return Array.from({ length: 56 }, (_, i) => {
+    const wave = Math.sin((seed + i) * 0.73) * 0.5 + 0.5;
+    const burst = Math.cos((seed + i * 3) * 0.41) * 0.5 + 0.5;
+    const activity = Math.min(1, tradeCount / 120);
+    const weighted = wave * 0.65 + burst * 0.35;
+    const trades = weighted > 0.72
+      ? Math.max(1, Math.round(weighted * (8 + activity * 10)))
+      : weighted > 0.42
+        ? Math.max(1, Math.round(weighted * (3 + activity * 6)))
+        : 0;
+    const edge = (winRate - 50) / 50;
+    const pnl = trades > 0 ? Math.round(((weighted - 0.5) + edge * 0.35) * 700) : 0;
+    const opacity = trades === 0 ? 0.05 : trades > 6 ? 0.8 : trades > 2 ? 0.4 : 0.15;
+    const daysAgo = 55 - i;
+    const date = new Date(Date.now() - daysAgo * 86400000);
+    const label = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return { opacity, trades, pnl, label };
+  });
+}
+
+function MiniCalendar({ featured }: { featured: TraderData }) {
+  const calendarData = buildPreviewCalendar(featured);
   return (
     <div className="grid gap-[2px]" style={{ gridTemplateColumns: 'repeat(14, 1fr)', gridTemplateRows: 'repeat(4, 1fr)' }}>
-      {CALENDAR_DATA.map((cell, i) => (
+      {calendarData.map((cell, i) => (
         <div key={i} className="aspect-square rounded-[1.5px] relative group cursor-default" style={{ background: `rgba(34,197,94,${cell.opacity})`, minWidth: 6, minHeight: 6 }}>
           {cell.trades > 0 && (
             <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover:block z-50 pointer-events-none">
@@ -89,81 +107,8 @@ function MiniCalendar() {
   );
 }
 
-
-const MOCK_TRADES = [
-  { symbol: '$WIF', pnl: '+312%', buy: '2.4', sell: '9.9', img: 'https://dd.dexscreener.com/ds-data/tokens/solana/EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm.png' },
-  { symbol: '$BONK', pnl: '+89%', buy: '5.1', sell: '9.6', img: 'https://dd.dexscreener.com/ds-data/tokens/solana/DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263.png' },
-  { symbol: '$JUP', pnl: '+156%', buy: '3.0', sell: '7.7', img: 'https://dd.dexscreener.com/ds-data/tokens/solana/JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN.png' },
-];
-
-function TradeCard({ trade, onHover, onLeave, isHovered }: { trade: typeof MOCK_TRADES[0]; onHover: () => void; onLeave: () => void; isHovered: boolean }) {
-  return (
-    <div
-      className="relative flex-shrink-0 w-[90px] cursor-pointer"
-      onMouseEnter={onHover}
-      onMouseLeave={onLeave}
-    >
-      <div
-        className="p-2.5 flex flex-col items-center gap-1.5 transition-all duration-200"
-        style={{
-          background: isHovered ? 'rgba(0,212,255,0.06)' : 'rgba(255,255,255,0.02)',
-          border: isHovered ? '1px solid rgba(0,212,255,0.2)' : '1px solid rgba(255,255,255,0.05)',
-          clipPath: 'polygon(5px 0,100% 0,100% calc(100% - 5px),calc(100% - 5px) 100%,0 100%,0 5px)',
-        }}
-      >
-        <img src={trade.img} alt={trade.symbol} className="w-8 h-8 rounded-full" />
-        <span className="text-[10px] font-bold text-white">{trade.symbol}</span>
-        <span className="text-[11px] font-bold font-mono text-[#22c55e]">{trade.pnl}</span>
-      </div>
-
-      {/* Hover detail popup */}
-      <AnimatePresence>
-        {isHovered && (
-          <motion.div
-            initial={{ opacity: 0, y: 6, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 6, scale: 0.95 }}
-            transition={{ duration: 0.15, ease: 'easeOut' }}
-            className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 pointer-events-none"
-          >
-            <div
-              className="w-[160px] p-3 flex flex-col gap-2"
-              style={{
-                background: 'rgba(8,12,18,0.95)',
-                border: '1px solid rgba(0,212,255,0.2)',
-                backdropFilter: 'blur(16px)',
-                WebkitBackdropFilter: 'blur(16px)',
-                clipPath: 'polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px)',
-                boxShadow: '0 8px 32px rgba(0,0,0,0.6), 0 0 20px rgba(0,212,255,0.08)',
-              }}
-            >
-              <div className="flex items-center gap-2">
-                <img src={trade.img} alt="" className="w-7 h-7 rounded-full" />
-                <div>
-                  <div className="text-[11px] font-bold text-white">{trade.symbol}</div>
-                  <div className="text-[13px] font-black font-mono text-[#22c55e]">{trade.pnl}</div>
-                </div>
-              </div>
-              <div className="flex gap-1.5">
-                <div className="flex-1 flex justify-between text-[8px] px-2 py-1" style={{ background: 'rgba(255,255,255,0.03)', clipPath: 'polygon(3px 0,100% 0,100% calc(100% - 3px),calc(100% - 3px) 100%,0 100%,0 3px)' }}>
-                  <span className="text-[#22c55e] font-semibold">BUY</span>
-                  <span className="text-white font-semibold">{trade.buy} SOL</span>
-                </div>
-                <div className="flex-1 flex justify-between text-[8px] px-2 py-1" style={{ background: 'rgba(255,255,255,0.03)', clipPath: 'polygon(3px 0,100% 0,100% calc(100% - 3px),calc(100% - 3px) 100%,0 100%,0 3px)' }}>
-                  <span className="text-[#ef4444] font-semibold">SELL</span>
-                  <span className="text-[#22c55e] font-semibold">{trade.sell} SOL</span>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
-
 function PreviewCardInner({ featured }: { featured: TraderData }) {
-  const [hoveredTrade, setHoveredTrade] = useState<number | null>(null);
+  const featuredProfileLabel = `web3me.xyz/${featured.username}`;
 
   return (
     <div className="w-full h-full flex flex-col" style={{ transform: 'perspective(1000px) rotateY(-4deg) rotateX(2deg)' }}>
@@ -217,7 +162,7 @@ function PreviewCardInner({ featured }: { featured: TraderData }) {
           <div className="text-[7px] font-mono tracking-[2px] text-[var(--trench-text-muted)] mb-2">LINKS</div>
           <div className="flex items-center gap-2.5 px-3 py-2" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', clipPath: 'polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px)' }}>
             <Globe size={14} className="flex-shrink-0 text-[rgba(0,212,255,0.7)]" />
-            <span className="text-[11px] text-white font-medium flex-1">My Website</span>
+            <span className="text-[11px] text-white font-medium flex-1 truncate">{featuredProfileLabel}</span>
             <ChevronRight size={14} className="text-[rgba(255,255,255,0.2)] flex-shrink-0" />
           </div>
         </div>
@@ -225,23 +170,69 @@ function PreviewCardInner({ featured }: { featured: TraderData }) {
         {/* Divider */}
         <div className="mx-5" style={{ height: '1px', background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)' }} />
 
-        {/* Trades carousel — auto-scrolling with hover previews */}
+        {/* Trade history + latest verified trade */}
         <div className="py-3">
-          <div className="px-5 text-[7px] font-mono tracking-[2px] text-[var(--trench-text-muted)] mb-2">TRADES</div>
-          <div className="overflow-hidden">
+          <div className="px-5 text-[7px] font-mono tracking-[2px] text-[var(--trench-text-muted)] mb-2">TRADE HISTORY</div>
+          <div className="px-5">
+            {featured.recentToken && (
+              <div
+                className="mb-3 flex items-center gap-2.5 px-3 py-2"
+                style={{
+                  background: 'rgba(255,255,255,0.02)',
+                  border: '1px solid rgba(255,255,255,0.05)',
+                  clipPath: 'polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px)',
+                }}
+              >
+                <div
+                  className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full"
+                  style={{ background: 'rgba(0,212,255,0.1)', border: '1px solid rgba(0,212,255,0.18)' }}
+                >
+                  {featured.recentTokenImage ? (
+                    <div className="relative h-full w-full">
+                      <Image
+                        src={featured.recentTokenImage}
+                        alt={featured.recentToken}
+                        fill
+                        className="object-cover"
+                        unoptimized
+                      />
+                    </div>
+                  ) : (
+                    <span className="text-[10px] font-bold text-white">
+                      {featured.recentToken.replace('$', '').slice(0, 2)}
+                    </span>
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-[11px] font-bold text-white">{featured.recentToken}</div>
+                  {featured.recentPnl && (
+                    <div className="text-[10px] font-mono font-bold text-[#22c55e]">{featured.recentPnl}</div>
+                  )}
+                </div>
+                <div className="text-right">
+                  {featured.recentBuy && (
+                    <div className="text-[8px] font-mono text-[var(--trench-text-muted)]">
+                      BUY <span className="text-white">{featured.recentBuy}</span>
+                    </div>
+                  )}
+                  {featured.recentSell && (
+                    <div className="text-[8px] font-mono text-[var(--trench-text-muted)]">
+                      SELL <span className="text-[#22c55e]">{featured.recentSell}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             <div
-              className="flex gap-2 px-5"
-              style={{ animation: hoveredTrade !== null ? 'none' : 'preview-scroll 12s linear infinite' }}
+              className="px-3 py-3"
+              style={{
+                background: 'rgba(255,255,255,0.02)',
+                border: '1px solid rgba(255,255,255,0.05)',
+                clipPath: 'polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px)',
+              }}
             >
-              {[...MOCK_TRADES, ...MOCK_TRADES].map((t, i) => (
-                <TradeCard
-                  key={i}
-                  trade={t}
-                  isHovered={hoveredTrade === i}
-                  onHover={() => setHoveredTrade(i)}
-                  onLeave={() => setHoveredTrade(null)}
-                />
-              ))}
+              <MiniCalendar featured={featured} />
             </div>
           </div>
         </div>
@@ -269,6 +260,21 @@ export function LandingContent({ traders, featured, ticker, leaderboardData, ref
 
   const avatarUrls = traders.map((t) => normalizeImageUrl(t.avatarUrl) || `https://unavatar.io/twitter/${t.username}`);
   const domeImages = avatarUrls.map(src => ({ src, alt: '' }));
+  const rankedTraders = leaderboardData ?? [];
+  const cupStats = [
+    {
+      label: 'RANKED NOW',
+      value: rankedTraders.length > 0 ? String(rankedTraders.length) : '0',
+    },
+    {
+      label: 'TOP 32 CUT',
+      value: rankedTraders.length >= 32 ? 'LOCKED' : `${Math.max(0, 32 - rankedTraders.length)} LEFT`,
+    },
+    {
+      label: '7D LEADER',
+      value: rankedTraders[0] ? `${rankedTraders[0].pnlSol >= 0 ? '+' : ''}${Math.round(rankedTraders[0].pnlSol)} SOL` : 'TBD',
+    },
+  ];
 
   return (
     <div className="relative min-h-screen" style={{ background: '#050508' }}>
@@ -322,7 +328,14 @@ export function LandingContent({ traders, featured, ticker, leaderboardData, ref
               Your{' '}
               <span className="text-[var(--trench-accent)]">
                 <span className="relative inline-block" style={{ width: 90, verticalAlign: 'baseline' }}>
-                  <img src="/logo.png" alt="" className="!max-w-none absolute" style={{ width: 100, height: 'auto', top: '50%', left: -6, transform: 'translateY(-50%)', filter: 'drop-shadow(0 0 8px rgba(0,212,255,0.3))' }} />
+                  <Image
+                    src="/logo.png"
+                    alt=""
+                    width={100}
+                    height={28}
+                    className="!max-w-none absolute"
+                    style={{ width: 100, height: 'auto', top: '50%', left: -6, transform: 'translateY(-50%)', filter: 'drop-shadow(0 0 8px rgba(0,212,255,0.3))' }}
+                  />
                   <span style={{ visibility: 'hidden' }}>W</span>
                 </span>eb3
               </span>
@@ -381,8 +394,33 @@ export function LandingContent({ traders, featured, ticker, leaderboardData, ref
             <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight">
               The Trencher <span style={{ color: '#00D4FF' }}>Cup</span>
             </h2>
+            <p className="mx-auto mt-4 max-w-[560px] text-[13px] leading-relaxed text-[var(--trench-text-muted)]">
+              Top 32 traders by 7-day realized PnL enter the cup. The top two from each group advance into knockouts, and the champion takes the spotlight.
+            </p>
           </div>
+
+          <div className="mb-8 grid grid-cols-1 gap-2 sm:grid-cols-3">
+            {cupStats.map((stat) => (
+              <div
+                key={stat.label}
+                className="cut-sm px-4 py-3 text-center"
+                style={{ background: 'rgba(8,12,18,0.62)', border: '1px solid rgba(0,212,255,0.08)' }}
+              >
+                <div className="text-[8px] font-mono tracking-[2px] text-[var(--trench-text-muted)] mb-1">
+                  {stat.label}
+                </div>
+                <div className="text-[18px] font-black font-mono text-white">
+                  {stat.value}
+                </div>
+              </div>
+            ))}
+          </div>
+
           <LeaderboardTable initialPeriod="7d" initialTraders={leaderboardData} variant="bracket" />
+
+          <div className="mt-8 flex justify-center">
+            <CutButton href="/leaderboard" variant="secondary" size="md">Open Full Rankings</CutButton>
+          </div>
         </section>
 
         {/* Journey — merged How it works + Reward Pool */}
