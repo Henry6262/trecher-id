@@ -164,11 +164,11 @@ export function TournamentBracket({ traders }: { traders: RankedTrader[] }) {
               </div>
             </div>
 
-            <div className="flex flex-col gap-5 ml-auto max-w-[430px] w-full">
+            <div className="ml-auto flex w-full max-w-[460px] flex-col gap-4">
               {/* Champion card */}
               {champ ? (
                 <div
-                  className="w-full px-4 py-3"
+                  className="w-full px-5 py-4"
                   style={{
                     background: 'linear-gradient(135deg, rgba(8,12,18,0.92) 0%, rgba(7,10,18,0.74) 100%)',
                     border: '1px solid rgba(255,215,0,0.22)',
@@ -176,32 +176,47 @@ export function TournamentBracket({ traders }: { traders: RankedTrader[] }) {
                     clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)',
                   }}
                 >
-                  <div className="mb-2 text-[8px] font-mono tracking-[3px]" style={{ color: '#FFD700' }}>
+                  <div className="mb-3 text-[8px] font-mono tracking-[3px]" style={{ color: '#FFD700' }}>
                     TOURNAMENT CHAMPION
                   </div>
-                  <div className="flex items-center gap-3">
-                    <div className="h-11 w-11 rounded-full overflow-hidden flex-shrink-0" style={{ border: '2.5px solid rgba(255,215,0,0.65)', boxShadow: '0 0 18px rgba(255,215,0,0.16)' }}>
+                  <div className="flex items-center gap-4">
+                    <div className="h-12 w-12 rounded-full overflow-hidden flex-shrink-0" style={{ border: '2.5px solid rgba(255,215,0,0.65)', boxShadow: '0 0 18px rgba(255,215,0,0.16)' }}>
                       <AvatarImage
                         src={champ.avatarUrl || `https://unavatar.io/twitter/${champ.username}`}
                         alt={champ.username}
-                        width={44}
-                        height={44}
+                        width={48}
+                        height={48}
                         className="w-full h-full object-cover"
                       />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="truncate text-[14px] font-black text-white">@{champ.username}</div>
-                      <div className="text-[20px] font-mono font-black" style={{ color: '#62D26F', textShadow: '0 0 14px rgba(34,197,94,0.22)' }}>
+                      <div className="truncate text-[16px] font-black text-white">@{champ.username}</div>
+                      <div className="mt-1 text-[24px] font-mono font-black leading-none" style={{ color: '#62D26F', textShadow: '0 0 14px rgba(34,197,94,0.22)' }}>
                         {champ.pnlUsd >= 0 ? '+' : ''}${Math.abs(champ.pnlUsd) >= 1000 ? `${Math.round(champ.pnlUsd / 1000)}K` : Math.round(champ.pnlUsd)}
                       </div>
                     </div>
                     <div className="text-right flex-shrink-0">
-                      <div className="text-[28px] font-black font-mono leading-none" style={{ color: '#62D26F', textShadow: '0 0 18px rgba(34,197,94,0.26)' }}>
+                      <div className="text-[32px] font-black font-mono leading-none" style={{ color: '#62D26F', textShadow: '0 0 18px rgba(34,197,94,0.26)' }}>
                         69%
                       </div>
                       <div className="mt-1 text-[7px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">
                         OF ALL FEES
                       </div>
+                    </div>
+                  </div>
+                  <div className="mt-4 flex items-center justify-between gap-3 border-t border-white/8 pt-3">
+                    <div className="text-[10px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">
+                      WINNER TAKES FEATURED SPOTLIGHT
+                    </div>
+                    <div
+                      className="shrink-0 rounded-full px-3 py-1 text-[10px] font-mono tracking-[2px]"
+                      style={{
+                        color: '#FFD700',
+                        background: 'rgba(255,215,0,0.08)',
+                        border: '1px solid rgba(255,215,0,0.18)',
+                      }}
+                    >
+                      REALIZED 7D PNL
                     </div>
                   </div>
                 </div>
@@ -213,7 +228,7 @@ export function TournamentBracket({ traders }: { traders: RankedTrader[] }) {
               <div className="w-full">
                 <Link
                   href="/leaderboard"
-                  className="pointer-events-auto w-full inline-flex items-center justify-center px-9 py-4 text-[12px] font-bold tracking-[3px] text-black"
+                  className="pointer-events-auto inline-flex w-full items-center justify-center px-9 py-4 text-[12px] font-bold tracking-[3px] text-black"
                   style={{
                     background: '#59C8FF',
                     boxShadow: '0 0 24px rgba(0,212,255,0.24)',
@@ -222,6 +237,9 @@ export function TournamentBracket({ traders }: { traders: RankedTrader[] }) {
                 >
                   ENTER THE ARENA →
                 </Link>
+                <div className="mt-2 text-right text-[10px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">
+                  GROUP STAGE, KNOCKOUTS, FINAL
+                </div>
               </div>
             </div>
           </div>
