@@ -1,17 +1,19 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Check, Globe, ChevronRight } from 'lucide-react';
 import { AvatarImage } from '@/components/avatar-image';
 import { CutButton } from '@/components/cut-button';
+import { PublicNav } from '@/components/public-nav';
 import ShinyText from '@/components/shiny-text';
 import { LeaderboardTable } from '@/components/leaderboard-table';
 import { ActivityTicker } from '@/components/activity-ticker';
 import { JourneySection } from '@/components/journey-section';
 import { ReferralSection } from '@/components/referral-section';
+import { SectionRailNav } from '@/components/section-rail-nav';
 import { normalizeImageUrl } from '@/lib/images';
 import type { TickerItem } from '@/lib/types';
 
@@ -24,13 +26,20 @@ interface TraderData {
   name: string;
   avatarUrl: string | null;
   pnl: string;
+  pnlValue: number;
   winRate: string;
+  winRateValue: number;
   trades: string;
-  recentToken: string | null;
-  recentTokenImage: string | null;
-  recentPnl: string | null;
-  recentBuy: string | null;
-  recentSell: string | null;
+  tradeCount: number;
+  topTrades: {
+    id: string;
+    token: string;
+    tokenImage: string | null;
+    pnlPercent: string;
+    pnlPercentValue: number;
+    buy: string | null;
+    sell: string | null;
+  }[];
 }
 
 interface LeaderboardTrader {
@@ -47,20 +56,20 @@ interface LeaderboardTrader {
 
 interface LandingContentProps {
   traders: TraderData[];
-  featured: TraderData | null;
+  featuredProfiles: TraderData[];
   ticker: TickerItem[];
   leaderboardData?: LeaderboardTrader[];
   refCode?: string | null;
 }
 
+type CupView = 'bracket' | 'leaderboard';
+
 
 // ─── Preview Card with Calendar/Chart toggle ───────────────
 
 function buildPreviewCalendar(featured: TraderData) {
-  const parsedTrades = Number.parseInt(featured.trades.replace(/[^0-9]/g, ''), 10);
-  const tradeCount = Number.isFinite(parsedTrades) ? parsedTrades : 0;
-  const parsedWinRate = Number.parseFloat(featured.winRate.replace('%', ''));
-  const winRate = Number.isFinite(parsedWinRate) ? parsedWinRate : 50;
+  const tradeCount = featured.tradeCount;
+  const winRate = featured.winRateValue;
   const seed = featured.username
     .split('')
     .reduce((sum, char, index) => sum + char.charCodeAt(0) * (index + 1), 0);
@@ -88,9 +97,9 @@ function buildPreviewCalendar(featured: TraderData) {
 function MiniCalendar({ featured }: { featured: TraderData }) {
   const calendarData = buildPreviewCalendar(featured);
   return (
-    <div className="grid gap-[2px]" style={{ gridTemplateColumns: 'repeat(14, 1fr)', gridTemplateRows: 'repeat(4, 1fr)' }}>
+    <div className="grid gap-[1.5px]" style={{ gridTemplateColumns: 'repeat(14, 1fr)', gridTemplateRows: 'repeat(4, 1fr)' }}>
       {calendarData.map((cell, i) => (
-        <div key={i} className="aspect-square rounded-[1.5px] relative group cursor-default" style={{ background: `rgba(34,197,94,${cell.opacity})`, minWidth: 6, minHeight: 6 }}>
+        <div key={i} className="aspect-square rounded-[1px] relative group cursor-default" style={{ background: cell.pnl >= 0 ? `rgba(34,197,94,${cell.opacity})` : `rgba(239,68,68,${Math.max(0.08, cell.opacity)})`, minWidth: 4, minHeight: 4 }}>
           {cell.trades > 0 && (
             <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover:block z-50 pointer-events-none">
               <div className="px-2.5 py-1.5 whitespace-nowrap text-center" style={{ background: 'rgba(8,12,18,0.95)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 4, boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }}>
@@ -107,8 +116,15 @@ function MiniCalendar({ featured }: { featured: TraderData }) {
   );
 }
 
+function getValueTone(value: number) {
+  return value >= 0
+    ? { color: '#22c55e', shadow: '0 0 12px rgba(34,197,94,0.2)' }
+    : { color: '#ef4444', shadow: '0 0 12px rgba(239,68,68,0.18)' };
+}
+
 function PreviewCardInner({ featured }: { featured: TraderData }) {
   const featuredProfileLabel = `web3me.fun/${featured.username}`;
+  const pnlTone = getValueTone(featured.pnlValue);
 
   return (
     <div className="w-full h-full flex flex-col" style={{ transform: 'perspective(1000px) rotateY(-4deg) rotateX(2deg)' }}>
@@ -136,7 +152,7 @@ function PreviewCardInner({ featured }: { featured: TraderData }) {
             <div className="flex-1 min-w-0 pt-0.5">
               <span className="text-[15px] font-bold text-white leading-tight truncate block">{featured.name}</span>
               <div className="text-[11px] text-[var(--trench-text-muted)]">@{featured.username}</div>
-              <div className="text-[18px] font-black font-mono mt-1" style={{ color: '#22c55e', textShadow: '0 0 12px rgba(34,197,94,0.2)' }}>{featured.pnl}</div>
+              <div className="text-[18px] font-black font-mono mt-1" style={{ color: pnlTone.color, textShadow: pnlTone.shadow }}>{featured.pnl}</div>
             </div>
 
             {/* Metrics stacked vertically — absolute right */}
@@ -170,62 +186,62 @@ function PreviewCardInner({ featured }: { featured: TraderData }) {
         {/* Divider */}
         <div className="mx-5" style={{ height: '1px', background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)' }} />
 
-        {/* Trade history + latest verified trade */}
         <div className="py-3">
-          <div className="px-5 text-[7px] font-mono tracking-[2px] text-[var(--trench-text-muted)] mb-2">TRADE HISTORY</div>
+          <div className="px-5 text-[7px] font-mono tracking-[2px] text-[var(--trench-text-muted)] mb-2">TOP TRADES</div>
           <div className="px-5">
-            {featured.recentToken && (
-              <div
-                className="mb-3 flex items-center gap-2.5 px-3 py-2"
-                style={{
-                  background: 'rgba(255,255,255,0.02)',
-                  border: '1px solid rgba(255,255,255,0.05)',
-                  clipPath: 'polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px)',
-                }}
-              >
-                <div
-                  className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full"
-                  style={{ background: 'rgba(0,212,255,0.1)', border: '1px solid rgba(0,212,255,0.18)' }}
-                >
-                  {featured.recentTokenImage ? (
-                    <div className="relative h-full w-full">
-                      <Image
-                        src={featured.recentTokenImage}
-                        alt={featured.recentToken}
-                        fill
-                        className="object-cover"
-                        unoptimized
-                      />
+            <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2">
+              {featured.topTrades.map((trade) => {
+                const tradeTone = getValueTone(trade.pnlPercentValue);
+                return (
+                  <div
+                    key={trade.id}
+                    className="min-w-[210px] shrink-0 px-3 py-2.5"
+                    style={{
+                      background: 'rgba(255,255,255,0.02)',
+                      border: '1px solid rgba(255,255,255,0.05)',
+                      clipPath: 'polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px)',
+                    }}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div
+                        className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full"
+                        style={{ background: 'rgba(0,212,255,0.1)', border: '1px solid rgba(0,212,255,0.18)' }}
+                      >
+                        {trade.tokenImage ? (
+                          <div className="relative h-full w-full">
+                            <Image src={trade.tokenImage} alt={trade.token} fill className="object-cover" unoptimized />
+                          </div>
+                        ) : (
+                          <span className="text-[10px] font-bold text-white">{trade.token.replace('$', '').slice(0, 2)}</span>
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate text-[11px] font-bold text-white">{trade.token}</div>
+                        <div className="text-[10px] font-mono font-bold" style={{ color: tradeTone.color }}>{trade.pnlPercent}</div>
+                      </div>
                     </div>
-                  ) : (
-                    <span className="text-[10px] font-bold text-white">
-                      {featured.recentToken.replace('$', '').slice(0, 2)}
-                    </span>
-                  )}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="truncate text-[11px] font-bold text-white">{featured.recentToken}</div>
-                  {featured.recentPnl && (
-                    <div className="text-[10px] font-mono font-bold text-[#22c55e]">{featured.recentPnl}</div>
-                  )}
-                </div>
-                <div className="text-right">
-                  {featured.recentBuy && (
-                    <div className="text-[8px] font-mono text-[var(--trench-text-muted)]">
-                      BUY <span className="text-white">{featured.recentBuy}</span>
+                    <div className="mt-2 flex gap-2">
+                      {trade.buy && (
+                        <div className="flex-1 rounded-[3px] border border-white/5 bg-white/[0.02] px-2 py-1 text-[8px] font-mono text-[var(--trench-text-muted)]">
+                          BUY <span className="text-white">{trade.buy}</span>
+                        </div>
+                      )}
+                      {trade.sell && (
+                        <div className="flex-1 rounded-[3px] border border-white/5 bg-white/[0.02] px-2 py-1 text-[8px] font-mono text-[var(--trench-text-muted)]">
+                          SELL <span style={{ color: tradeTone.color }}>{trade.sell}</span>
+                        </div>
+                      )}
                     </div>
-                  )}
-                  {featured.recentSell && (
-                    <div className="text-[8px] font-mono text-[var(--trench-text-muted)]">
-                      SELL <span className="text-[#22c55e]">{featured.recentSell}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
 
+          <div className="px-5 mt-1 text-[7px] font-mono tracking-[2px] text-[var(--trench-text-muted)] mb-2">TRADE HISTORY</div>
+          <div className="px-5">
             <div
-              className="px-3 py-3"
+              className="px-3 py-2.5"
               style={{
                 background: 'rgba(255,255,255,0.02)',
                 border: '1px solid rgba(255,255,255,0.05)',
@@ -246,7 +262,58 @@ function PreviewCardInner({ featured }: { featured: TraderData }) {
   );
 }
 
-export function LandingContent({ traders, featured, ticker, leaderboardData, refCode }: LandingContentProps) {
+function PreviewCardCarousel({ profiles }: { profiles: TraderData[] }) {
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    if (profiles.length <= 1) return;
+    const interval = window.setInterval(() => {
+      setIndex((current) => (current + 1) % profiles.length);
+    }, 5200);
+
+    return () => window.clearInterval(interval);
+  }, [profiles.length]);
+
+  if (profiles.length === 0) return null;
+
+  return (
+    <div className="relative h-full w-full">
+      <div className="h-full w-full overflow-hidden">
+        <div
+          className="flex h-full transition-transform duration-500 ease-out"
+          style={{ width: `${profiles.length * 100}%`, transform: `translateX(-${index * (100 / profiles.length)}%)` }}
+        >
+          {profiles.map((profile) => (
+            <div key={profile.username} className="h-full" style={{ width: `${100 / profiles.length}%` }}>
+              <PreviewCardInner featured={profile} />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {profiles.length > 1 && (
+        <>
+          <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1.5">
+            {profiles.map((profile, profileIndex) => (
+              <div
+                key={profile.username}
+                className="h-1.5 rounded-full transition-all"
+                style={{
+                  width: profileIndex === index ? 18 : 8,
+                  background: profileIndex === index ? '#00D4FF' : 'rgba(255,255,255,0.24)',
+                }}
+              />
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+export function LandingContent({ traders, featuredProfiles, ticker, leaderboardData, refCode }: LandingContentProps) {
+  const [cupView, setCupView] = useState<CupView>('bracket');
+
   // Capture referral code from URL into localStorage + HttpOnly cookie
   useEffect(() => {
     if (!refCode) return;
@@ -260,24 +327,11 @@ export function LandingContent({ traders, featured, ticker, leaderboardData, ref
 
   const avatarUrls = traders.map((t) => normalizeImageUrl(t.avatarUrl) || `https://unavatar.io/twitter/${t.username}`);
   const domeImages = avatarUrls.map(src => ({ src, alt: '' }));
-  const rankedTraders = leaderboardData ?? [];
-  const cupStats = [
-    {
-      label: 'RANKED NOW',
-      value: rankedTraders.length > 0 ? String(rankedTraders.length) : '0',
-    },
-    {
-      label: 'TOP 32 CUT',
-      value: rankedTraders.length >= 32 ? 'LOCKED' : `${Math.max(0, 32 - rankedTraders.length)} LEFT`,
-    },
-    {
-      label: '7D LEADER',
-      value: rankedTraders[0] ? `${rankedTraders[0].pnlSol >= 0 ? '+' : ''}${Math.round(rankedTraders[0].pnlSol)} SOL` : 'TBD',
-    },
-  ];
-
   return (
     <div className="relative min-h-screen" style={{ background: '#050508' }}>
+      <PublicNav />
+      <SectionRailNav />
+
       <div className="fixed inset-0" style={{ zIndex: 0 }}>
         <Lightspeed
           primaryColor="#00D4FF"
@@ -295,29 +349,11 @@ export function LandingContent({ traders, featured, ticker, leaderboardData, ref
       </div>
 
       <div className="relative" style={{ zIndex: 2 }}>
-        {/* Nav — glassmorphic sticky bar */}
-        <nav
-          className="sticky top-0 z-10"
-          style={{
-            background: 'rgba(5,5,8,0.85)',
-            backdropFilter: 'blur(16px)',
-            WebkitBackdropFilter: 'blur(16px)',
-            borderBottom: '1px solid rgba(0,212,255,0.06)',
-          }}
-        >
-        <div className="mx-auto flex max-w-[900px] items-center justify-between px-6 py-5">
-          <Link href="/">
-            <Image src="/logo.png" alt="Web3Me" width={160} height={40} className="h-10 w-auto transition-opacity hover:opacity-80" priority />
-          </Link>
-          <CutButton href="/login" variant="secondary" size="sm">Sign in with X</CutButton>
-        </div>
-        </nav>
-
         {/* Activity Ticker */}
         <ActivityTicker items={ticker} />
 
         {/* Hero */}
-        <section className="mx-auto grid max-w-[900px] grid-cols-1 items-center gap-8 px-4 sm:px-6 pt-12 sm:pt-16 pb-10 sm:pb-12 lg:grid-cols-2">
+        <section id="hero" className="mx-auto grid max-w-[900px] scroll-mt-36 grid-cols-1 items-center gap-8 px-4 pt-12 pb-10 sm:px-6 sm:pt-16 sm:pb-12 lg:grid-cols-2">
           <div>
             <div className="cut-xs mb-6 inline-flex items-center gap-1.5 border border-[rgba(0,212,255,0.12)] bg-[rgba(0,212,255,0.08)] px-3 py-1 text-[10px] font-mono tracking-[2px] text-[var(--trench-accent)]">
               <Check size={10} strokeWidth={3} />
@@ -351,11 +387,11 @@ export function LandingContent({ traders, featured, ticker, leaderboardData, ref
           </div>
 
           {/* Preview card — shader-backed profile card */}
-          {featured && (
+          {featuredProfiles.length > 0 && (
             <div className="hidden sm:flex justify-center lg:justify-end">
               <ShaderCard
-                width={360}
-                height={380}
+                width={420}
+                height={480}
                 color="#00D4FF"
                 speed={0.6}
                 positionY={0.35}
@@ -370,19 +406,19 @@ export function LandingContent({ traders, featured, ticker, leaderboardData, ref
                 className="rounded-2xl shadow-[0_0_40px_rgba(0,212,255,0.12),0_8px_32px_rgba(0,0,0,0.5)] border border-[rgba(0,212,255,0.2)]"
                 borderRadius="16px"
               >
-                <PreviewCardInner featured={featured} />
+                <PreviewCardCarousel profiles={featuredProfiles} />
               </ShaderCard>
             </div>
           )}
         </section>
 
         {/* Divider */}
-        <div className="mx-auto max-w-[780px] px-6 sm:px-12 lg:px-16">
+        <div className="mx-auto max-w-[920px] px-6 sm:px-12 lg:px-16">
           <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.1), transparent)' }} />
         </div>
 
         {/* The Trencher Cup */}
-        <section className="mx-auto max-w-[780px] px-6 sm:px-12 lg:px-16 py-10 sm:py-16">
+        <section id="cup" className="relative mx-auto max-w-[920px] scroll-mt-36 px-6 py-10 sm:px-12 sm:py-16 lg:px-16">
           <div className="mb-8 text-center">
             <div className="mb-4 flex items-center justify-center gap-4">
               <div className="h-px flex-1 max-w-[120px]" style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(0,212,255,0.55) 55%, rgba(0,212,255,0.08) 100%)' }} />
@@ -395,55 +431,57 @@ export function LandingContent({ traders, featured, ticker, leaderboardData, ref
               The Trencher <span style={{ color: '#00D4FF' }}>Cup</span>
             </h2>
             <p className="mx-auto mt-4 max-w-[560px] text-[13px] leading-relaxed text-[var(--trench-text-muted)]">
-              Top 32 traders by 7-day realized PnL enter the cup. The top two from each group advance into knockouts, and the champion takes the spotlight.
+              Top 32 traders by 7-day realized PnL qualify for the cup.
             </p>
           </div>
 
-          <div className="mb-8 grid grid-cols-1 gap-2 sm:grid-cols-3">
-            {cupStats.map((stat) => (
-              <div
-                key={stat.label}
-                className="cut-sm px-4 py-3 text-center"
-                style={{ background: 'rgba(8,12,18,0.62)', border: '1px solid rgba(0,212,255,0.08)' }}
-              >
-                <div className="text-[8px] font-mono tracking-[2px] text-[var(--trench-text-muted)] mb-1">
-                  {stat.label}
-                </div>
-                <div className="text-[18px] font-black font-mono text-white">
-                  {stat.value}
-                </div>
-              </div>
-            ))}
+          <div className="relative z-30 mb-5 flex justify-end pointer-events-auto">
+            <CutButton
+              onClick={() =>
+                setCupView((current) =>
+                  current === 'bracket' ? 'leaderboard' : 'bracket',
+                )
+              }
+              variant="secondary"
+              size="sm"
+            >
+              {cupView === 'bracket' ? 'SHOW LEADERBOARD' : 'SHOW BRACKET'}
+            </CutButton>
           </div>
 
-          <LeaderboardTable initialPeriod="7d" initialTraders={leaderboardData} variant="bracket" />
-
-          <div className="mt-8 flex justify-center">
-            <CutButton href="/leaderboard" variant="secondary" size="md">Open Full Rankings</CutButton>
-          </div>
+          <LeaderboardTable
+            initialPeriod="7d"
+            initialTraders={leaderboardData}
+            variant={cupView === 'bracket' ? 'bracket' : 'full'}
+            availableModes={['traders']}
+          />
         </section>
 
         {/* Journey — merged How it works + Reward Pool */}
-        <JourneySection />
+        <div id="journey" className="scroll-mt-36">
+          <JourneySection />
+        </div>
 
         {/* Divider */}
-        <div className="mx-auto max-w-[780px] px-6 sm:px-12 lg:px-16">
+        <div className="mx-auto max-w-[920px] px-6 sm:px-12 lg:px-16">
           <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.1), transparent)' }} />
         </div>
 
         {/* Referral Section */}
-        <ReferralSection />
+        <div id="referrals" className="scroll-mt-36">
+          <ReferralSection />
+        </div>
 
         {/* Divider */}
-        <div className="mx-auto max-w-[780px] px-6 sm:px-12 lg:px-16">
+        <div className="mx-auto max-w-[920px] px-6 sm:px-12 lg:px-16">
           <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.1), transparent)' }} />
         </div>
 
         {/* Top Traders — gallery is the page ending */}
-        <section className="relative">
+        <section id="traders" className="relative scroll-mt-36">
           <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(180deg, transparent 0%, rgba(5,5,8,0.4) 40%, rgba(5,5,8,0.7) 100%)' }} />
 
-          <div className="mx-auto mb-6 max-w-[780px] px-6 sm:px-12 lg:px-16 relative text-center">
+          <div className="mx-auto mb-6 max-w-[920px] px-6 sm:px-12 lg:px-16 relative text-center">
             <div className="mb-4 flex items-center justify-center gap-4">
               <div className="h-px flex-1 max-w-[120px]" style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(0,212,255,0.55) 55%, rgba(0,212,255,0.08) 100%)' }} />
               <div className="text-[9px] font-mono tracking-[3px] uppercase" style={{ color: 'rgba(0,212,255,0.75)' }}>

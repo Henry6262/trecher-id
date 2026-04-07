@@ -48,18 +48,31 @@ export function LeaderboardTable({
   initialPeriod = '7d',
   initialTraders,
   variant = 'full',
+  availableModes,
 }: {
   initialPeriod?: string;
   initialTraders?: RankedTrader[];
   variant?: 'bracket' | 'full';
+  availableModes?: LeaderboardMode[];
 }) {
-  const [mode, setMode] = useState<LeaderboardMode>('traders');
+  const allowedModes: LeaderboardMode[] =
+    availableModes && availableModes.length > 0 ? availableModes : ['traders', 'deployers'];
+  const defaultMode = allowedModes[0] ?? 'traders';
+  const [mode, setMode] = useState<LeaderboardMode>(defaultMode);
   const [period, setPeriod] = useState(initialPeriod);
   const [traders, setTraders] = useState<RankedTrader[]>(initialTraders ?? []);
   const [deployers, setDeployers] = useState<RankedDeployer[]>([]);
   const [loading, setLoading] = useState(!initialTraders);
   const [page, setPage] = useState(0);
   const skippedInitialFetch = useRef(!!initialTraders);
+  const showModeSwitch = allowedModes.length > 1;
+
+  useEffect(() => {
+    if (!allowedModes.includes(mode)) {
+      setMode(defaultMode);
+      setPage(0);
+    }
+  }, [allowedModes, defaultMode, mode]);
 
   useEffect(() => {
     if (skippedInitialFetch.current && mode === 'traders' && period === initialPeriod) {
@@ -111,7 +124,7 @@ export function LeaderboardTable({
 
       return [
         { label: 'RANKED TRADERS', value: String(traders.length) },
-        { label: 'QUALIFYING CUT', value: traders.length >= 32 ? `#${Math.min(32, traders.length)}` : `${Math.max(0, 32 - traders.length)} LEFT` },
+        { label: 'CUP ENTRY', value: 'TOP 32' },
         { label: 'AVG WIN RATE', value: `${Math.round(averageWinRate)}%` },
       ];
     }
@@ -152,28 +165,32 @@ export function LeaderboardTable({
     <div>
       {/* Controls */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-        <div className="flex items-center gap-2">
-          {(['traders', 'deployers'] as const).map((m) => (
-            <button
-              key={m}
-              onClick={() => {
-                setLoading(true);
-                setMode(m);
-                setPage(0);
-              }}
-              className="font-mono text-[10px] tracking-[1.5px] font-bold px-4 py-1.5 transition-all cut-sm"
-              style={{
-                background: mode === m ? 'rgba(0,212,255,0.18)' : 'rgba(8,12,22,0.55)',
-                backdropFilter: 'blur(12px)',
-                WebkitBackdropFilter: 'blur(12px)',
-                border: mode === m ? '1px solid rgba(0,212,255,0.35)' : '1px solid rgba(255,255,255,0.07)',
-                color: mode === m ? '#00D4FF' : '#71717a',
-              }}
-            >
-              {m === 'traders' ? 'TRADERS' : 'DEVS'}
-            </button>
-          ))}
-        </div>
+        {showModeSwitch ? (
+          <div className="flex items-center gap-2">
+            {allowedModes.map((m) => (
+              <button
+                key={m}
+                onClick={() => {
+                  setLoading(true);
+                  setMode(m);
+                  setPage(0);
+                }}
+                className="font-mono text-[10px] tracking-[1.5px] font-bold px-4 py-1.5 transition-all cut-sm"
+                style={{
+                  background: mode === m ? 'rgba(0,212,255,0.18)' : 'rgba(8,12,22,0.55)',
+                  backdropFilter: 'blur(12px)',
+                  WebkitBackdropFilter: 'blur(12px)',
+                  border: mode === m ? '1px solid rgba(0,212,255,0.35)' : '1px solid rgba(255,255,255,0.07)',
+                  color: mode === m ? '#00D4FF' : '#71717a',
+                }}
+              >
+                {m === 'traders' ? 'TRADERS' : 'DEVS'}
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div />
+        )}
 
         <div className="flex items-center gap-3">
           {mode === 'traders' && (

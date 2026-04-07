@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getSessionUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { getWalletTransactions } from '@/lib/helius';
+import { getTokenMetadata, getWalletTransactions } from '@/lib/helius';
 import { getSolPrice } from '@/lib/sol-price';
+import { invalidatePublicProfileCache } from '@/lib/profile';
 
 const SOL_MINT = 'So11111111111111111111111111111111111111112';
 
@@ -88,15 +89,19 @@ export async function POST(req: Request) {
 
       if (txns.length > 0) {
         const swapMap = parseSwaps(txns, wallet.address);
+        const tokenMetadata = await getTokenMetadata(Array.from(swapMap.keys()));
         newTrades += swapMap.size;
 
         for (const [tokenMint, data] of swapMap) {
+          const meta = tokenMetadata.get(tokenMint);
           await prisma.walletTrade.upsert({
             where: { walletId_tokenMint: { walletId: wallet.id, tokenMint } },
             create: {
               walletId: wallet.id,
               tokenMint,
-              tokenSymbol: tokenMint.slice(0, 6),
+              tokenSymbol: meta?.symbol || tokenMint.slice(0, 6),
+              tokenName: meta?.name || null,
+              tokenImageUrl: meta?.image || null,
               buySol: data.buySol,
               sellSol: data.sellSol,
               pnlSol: data.sellSol - data.buySol,
@@ -105,6 +110,9 @@ export async function POST(req: Request) {
               lastTradeAt: new Date(data.lastAt * 1000),
             },
             update: {
+              tokenSymbol: meta?.symbol || tokenMint.slice(0, 6),
+              tokenName: meta?.name || null,
+              tokenImageUrl: meta?.image || null,
               buySol: { increment: data.buySol },
               sellSol: { increment: data.sellSol },
               pnlSol: { increment: data.sellSol - data.buySol },
@@ -155,6 +163,8 @@ export async function POST(req: Request) {
         data: { totalPnlUsd, winRate, totalTrades },
       });
     }
+
+    await invalidatePublicProfileCache(session.username);
 
     return NextResponse.json({ ok: true, walletsUpdated, newTrades });
   } catch (err) {

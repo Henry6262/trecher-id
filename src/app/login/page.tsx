@@ -3,7 +3,7 @@
 import { usePrivy } from '@privy-io/react-auth';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAuthStore } from '@/stores/auth';
 import { BackgroundLayer } from '@/components/background-layer';
 import { CutButton } from '@/components/cut-button';
@@ -19,6 +19,7 @@ export default function LoginPage() {
   const [testDisplayName, setTestDisplayName] = useState('Playwright User');
   const [creatingTestUser, setCreatingTestUser] = useState(false);
   const [testError, setTestError] = useState('');
+  const participatePromptedRef = useRef(false);
 
   // Backup: ensure ref_code cookie is set from localStorage if user lands here directly
   useEffect(() => {
@@ -51,6 +52,15 @@ export default function LoginPage() {
       }
     })();
   }, [ready, authenticated, getAccessToken, setUser, router]);
+
+  useEffect(() => {
+    if (TEST_AUTH_BYPASS) return;
+    if (!ready || authenticated || participatePromptedRef.current) return;
+    if (new URLSearchParams(window.location.search).get('participate') !== '1') return;
+
+    participatePromptedRef.current = true;
+    login();
+  }, [ready, authenticated, login]);
 
   async function createTestProfile() {
     setCreatingTestUser(true);

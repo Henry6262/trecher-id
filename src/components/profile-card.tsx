@@ -119,23 +119,10 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets, traderS
         borderColor={`${accent}26`}
         borderWidth={1}
       >
-        {/* Banner */}
-        {bannerUrl && (
-          <div className="relative w-full h-32 sm:h-44 overflow-hidden" style={{ clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)' }}>
-            <Image
-              src={bannerUrl}
-              alt=""
-              fill
-              className="object-cover"
-              unoptimized
-            />
-            <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(5,5,8,0.3) 0%, rgba(5,5,8,0.85) 100%)' }} />
-          </div>
-        )}
-
         {/* Hero — full width */}
         <ProfileHeader
           avatarUrl={user.avatarUrl}
+          bannerUrl={bannerUrl}
           displayName={user.displayName}
           username={user.username}
           bio={user.bio}

@@ -1,5 +1,5 @@
 import { ChevronRight, GraduationCap, MessageCircle, DollarSign, Globe, Gamepad2, Link2, Code2, Play, Tv, Camera, type LucideProps } from 'lucide-react';
-import type { FC } from 'react';
+import { createElement, type FC } from 'react';
 
 const ICONS: Record<string, FC<LucideProps>> = {
   graduation: GraduationCap,
@@ -46,10 +46,9 @@ interface LinkItemProps {
 }
 
 export function LinkItem({ title, url, icon }: LinkItemProps) {
-  const IconComponent = resolveIcon(icon);
-
   // Detect Twitch URLs for potential embed treatment
   const isTwitch = url.includes('twitch.tv/');
+  const iconColorClass = isTwitch ? 'text-[#9146FF]' : 'text-[var(--trench-accent)]';
 
   return (
     <a
@@ -59,7 +58,7 @@ export function LinkItem({ title, url, icon }: LinkItemProps) {
       className="flex items-center gap-3 px-[18px] py-3.5 cut-sm transition-all border border-[rgba(0,212,255,0.06)] hover:border-[rgba(0,212,255,0.2)] group"
       style={{ background: 'rgba(8,12,22,0.55)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}
     >
-      <IconComponent size={18} className={`flex-shrink-0 ${isTwitch ? 'text-[#9146FF]' : 'text-[var(--trench-accent)]'}`} />
+      {createElement(resolveIcon(icon), { size: 18, className: `flex-shrink-0 ${iconColorClass}` })}
       <span className="text-[13px] text-[var(--trench-text)] font-medium flex-1">{title}</span>
       <ChevronRight size={20} className="text-[var(--trench-text-muted)] flex-shrink-0 transition-colors group-hover:text-[var(--trench-accent)]" />
     </a>

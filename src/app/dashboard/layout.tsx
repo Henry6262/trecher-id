@@ -2,18 +2,47 @@
 
 import { usePrivy } from '@privy-io/react-auth';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { BackgroundLayer } from '@/components/background-layer';
+
+const TEST_AUTH_BYPASS = process.env.NEXT_PUBLIC_TEST_AUTH_BYPASS === '1';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { ready, authenticated } = usePrivy();
   const router = useRouter();
+  const [testSessionState, setTestSessionState] = useState<'loading' | 'authenticated' | 'anonymous'>(
+    TEST_AUTH_BYPASS ? 'loading' : 'anonymous',
+  );
 
   useEffect(() => {
-    if (ready && !authenticated) router.push('/login');
-  }, [ready, authenticated, router]);
+    if (!TEST_AUTH_BYPASS) return;
 
-  if (!ready || !authenticated) {
+    let active = true;
+    fetch('/api/profile', { cache: 'no-store' })
+      .then((response) => {
+        if (active) {
+          setTestSessionState(response.ok ? 'authenticated' : 'anonymous');
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setTestSessionState('anonymous');
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const authReady = TEST_AUTH_BYPASS ? testSessionState !== 'loading' : ready;
+  const isAuthenticated = TEST_AUTH_BYPASS ? testSessionState === 'authenticated' : authenticated;
+
+  useEffect(() => {
+    if (authReady && !isAuthenticated) router.push('/login');
+  }, [authReady, isAuthenticated, router]);
+
+  if (!authReady || !isAuthenticated) {
     return (
       <div className="min-h-screen relative flex items-center justify-center">
         <BackgroundLayer />

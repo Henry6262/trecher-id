@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSessionUser } from '@/lib/auth';
+import { invalidatePublicProfileCache } from '@/lib/profile';
 import { prisma } from '@/lib/prisma';
 
 export async function PATCH(req: Request) {
@@ -26,5 +27,6 @@ export async function PATCH(req: Request) {
     data: { isMain: true },
   });
 
+  await invalidatePublicProfileCache(session.username);
   return NextResponse.json(updated);
 }

@@ -2,8 +2,8 @@
 
 import { useMemo, useRef, useEffect, useState } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
 import { AvatarImage } from '@/components/avatar-image';
+import { ParticipateButton } from './participate-button';
 import { buildBracket } from './bracket-utils';
 import { GroupCard } from './group-card';
 import { MatchupCard } from './matchup-card';
@@ -17,8 +17,13 @@ const ROUND_LABELS: Record<string, string> = {
 };
 
 const BRACKET_H = 420;
-// Total horizontal distance the bracket needs to scroll
-const SCROLL_WIDTH = 2200;
+const SCROLL_EXTRA_TRAVEL = 180;
+const BRACKET_SCROLL_PORTION = 0.84;
+const GROUP_STAGE_WIDTH = 920;
+const ROUND_COLUMN_WIDTH = 180;
+const CONNECTOR_WIDTH = 40;
+const ROUND_SEPARATOR_WIDTH = 40;
+const FINAL_TRAILING_WIDTH = 240;
 
 function RoundColumn({ label, matchups, gap }: { label: string; matchups: Matchup[]; gap: string }) {
   return (
@@ -37,6 +42,8 @@ export function TournamentBracket({ traders }: { traders: RankedTrader[] }) {
   const outerRef = useRef<HTMLDivElement>(null);
   const stickyRef = useRef<HTMLDivElement>(null);
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [targetProgress, setTargetProgress] = useState(0);
+  const [visibleWidth, setVisibleWidth] = useState(780);
   const bracket = useMemo(
     () => (traders.length >= 32 ? buildBracket(traders) : null),
     [traders],
@@ -53,11 +60,37 @@ export function TournamentBracket({ traders }: { traders: RankedTrader[] }) {
       if (stickyTravel <= 0) return;
       // Progress starts when section top goes above viewport (rect.top goes negative)
       const progress = Math.min(1, Math.max(0, -rect.top / stickyTravel));
-      setScrollProgress(progress);
+      setTargetProgress(progress);
     }
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
     return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  useEffect(() => {
+    let frame = 0;
+
+    const animate = () => {
+      setScrollProgress((current) => {
+        const next = current + (targetProgress - current) * 0.075;
+        return Math.abs(next - targetProgress) < 0.001 ? targetProgress : next;
+      });
+      frame = window.requestAnimationFrame(animate);
+    };
+
+    frame = window.requestAnimationFrame(animate);
+    return () => window.cancelAnimationFrame(frame);
+  }, [targetProgress]);
+
+  useEffect(() => {
+    function measure() {
+      if (!stickyRef.current) return;
+      setVisibleWidth(stickyRef.current.clientWidth);
+    }
+
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
   }, []);
 
   if (!bracket) {
@@ -68,11 +101,6 @@ export function TournamentBracket({ traders }: { traders: RankedTrader[] }) {
       >
         <span className="text-[13px] text-[var(--trench-text)] font-mono">Not enough traders for bracket yet</span>
         <span className="text-[10px] text-[var(--trench-text-muted)]">Need 32 ranked traders. Currently at {traders.length}.</span>
-        <div className="flex flex-wrap items-center justify-center gap-2 text-[9px] font-mono tracking-[1.5px] text-[var(--trench-text-muted)]">
-          <span className="cut-xs px-2.5 py-1" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>TOP 32 QUALIFY</span>
-          <span className="cut-xs px-2.5 py-1" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>TOP 2 PER GROUP ADVANCE</span>
-          <span className="cut-xs px-2.5 py-1" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>CHAMPION TAKES 69%</span>
-        </div>
       </div>
     );
   }
@@ -80,12 +108,25 @@ export function TournamentBracket({ traders }: { traders: RankedTrader[] }) {
   const ROW_H = 72;
   const champ = bracket.champion;
 
-  // How far the bracket strip has translated (px)
-  const maxTranslate = SCROLL_WIDTH - 780; // 780 ≈ max visible container width
-  const translateX = -scrollProgress * maxTranslate;
+  const overlayWidth = Math.min(visibleWidth * 0.64, 820);
+  const bracketViewportWidth = Math.max(visibleWidth - overlayWidth + 48, visibleWidth * 0.42);
+  const stripWidth =
+    GROUP_STAGE_WIDTH +
+    ROUND_SEPARATOR_WIDTH +
+    ROUND_COLUMN_WIDTH +
+    CONNECTOR_WIDTH +
+    ROUND_COLUMN_WIDTH +
+    CONNECTOR_WIDTH +
+    ROUND_COLUMN_WIDTH +
+    FINAL_TRAILING_WIDTH;
+
+  // Scroll the bracket against the viewport space that remains once the cup overlay owns the right side.
+  const maxTranslate = Math.max(0, stripWidth - bracketViewportWidth);
+  const bracketProgress = Math.min(1, scrollProgress / BRACKET_SCROLL_PORTION);
+  const translateX = -bracketProgress * maxTranslate;
 
   // Overlay reveals as bracket scrolls toward the end
-  const overlayProgress = Math.min(1, Math.max(0, (scrollProgress - 0.5) / 0.5)); // kicks in at 50%
+  const overlayProgress = Math.min(1, Math.max(0, (scrollProgress - BRACKET_SCROLL_PORTION) / (1 - BRACKET_SCROLL_PORTION)));
   const overlaySlide = (1 - overlayProgress) * 100;
   const overlayOpacity = overlayProgress;
   const trophyScale = 0.7 + overlayProgress * 0.3;
@@ -93,15 +134,9 @@ export function TournamentBracket({ traders }: { traders: RankedTrader[] }) {
 
   return (
     <div>
-      <div className="mb-5 flex flex-wrap items-center justify-center gap-2 text-[9px] font-mono tracking-[1.5px] text-[var(--trench-text-muted)]">
-        <span className="cut-xs px-2.5 py-1" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>TOP 32 BY 7D PNL</span>
-        <span className="cut-xs px-2.5 py-1" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>TOP 2 FROM EACH GROUP ADVANCE</span>
-        <span className="cut-xs px-2.5 py-1" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>CHAMPION TAKES 69% OF FEES</span>
-      </div>
-
       {/* Outer container — tall enough to give vertical scroll room for horizontal travel */}
       {/* SCROLL_WIDTH of extra height converts to horizontal travel, plus bracket height */}
-      <div ref={outerRef} style={{ height: SCROLL_WIDTH }}>
+      <div ref={outerRef} style={{ height: `calc(100vh + ${SCROLL_EXTRA_TRAVEL}px)` }}>
         {/* Sticky wrapper — pins the bracket to viewport while scrolling */}
         <div
           ref={stickyRef}
@@ -118,7 +153,7 @@ export function TournamentBracket({ traders }: { traders: RankedTrader[] }) {
         <div
           className="absolute top-0 right-0 bottom-0 z-20 pointer-events-none"
           style={{
-            width: 'min(62vw, 760px)',
+            width: 'min(64vw, 820px)',
             transform: `translateX(${overlaySlide}%)`,
             opacity: overlayOpacity,
             transition: 'opacity 0.05s linear, transform 0.05s linear',
@@ -126,119 +161,132 @@ export function TournamentBracket({ traders }: { traders: RankedTrader[] }) {
         >
           <div
             className="absolute inset-0 pointer-events-none"
-            style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(5,5,8,0.45) 12%, rgba(5,5,8,0.88) 28%, #050508 52%)' }}
+            style={{ background: 'linear-gradient(90deg, rgba(5,5,8,0) 0%, rgba(5,5,8,0.62) 6%, rgba(5,5,8,0.92) 14%, #050508 24%)' }}
           />
 
-          <div className="relative z-10 flex h-full flex-col justify-between px-6 py-7 sm:px-8">
-            <div className="ml-auto w-full max-w-[620px]">
-              <div className="mb-3 text-center text-[11px] font-mono tracking-[6px] text-[var(--trench-text-muted)] sm:text-right">
-                SEASON 1
-              </div>
-
-              <div className="flex items-end justify-end gap-3 sm:gap-5">
-                <div className="min-w-0 flex-1 text-right">
-                  <h3
-                    className="text-[54px] sm:text-[68px] lg:text-[76px] font-black text-white leading-[0.82] tracking-[-0.05em]"
-                    style={{ textWrap: 'balance' }}
+          <div className="relative z-10 flex h-full flex-col px-6 py-6 sm:px-8 sm:py-7">
+            <div className="ml-auto flex w-full max-w-[760px] flex-col gap-5">
+              <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+                {champ ? (
+                  <div
+                    className="cut-sm relative w-full max-w-[250px] overflow-hidden px-4 py-4"
+                    style={{
+                      background: 'linear-gradient(180deg, rgba(8,12,18,0.92) 0%, rgba(8,12,18,0.75) 100%)',
+                      border: '1px solid rgba(255,215,0,0.18)',
+                      boxShadow: '0 0 24px rgba(255,215,0,0.08), inset 0 0 0 1px rgba(255,255,255,0.02)',
+                    }}
                   >
-                    The Trencher
-                  </h3>
-                  <h3
-                    className="text-[58px] sm:text-[76px] lg:text-[86px] font-black leading-[0.8] tracking-[-0.06em]"
-                    style={{ color: '#59C8FF', textShadow: '0 0 34px rgba(0,212,255,0.28), 0 0 68px rgba(0,212,255,0.1)' }}
-                  >
-                    Cup
-                  </h3>
-                </div>
-
-                <div
-                  className="relative h-[160px] w-[125px] sm:h-[215px] sm:w-[170px] lg:h-[255px] lg:w-[205px] flex-shrink-0"
-                  style={{
-                    filter: 'drop-shadow(0 0 30px rgba(0,212,255,0.35)) drop-shadow(0 0 60px rgba(0,212,255,0.15))',
-                    transform: `scale(${trophyScale}) rotate(${trophyRotate}deg)`,
-                    transformOrigin: 'bottom center',
-                  }}
-                >
-                  <Image src="/trencher-cup.png" alt="Trencher Cup" fill className="object-contain" priority />
-                </div>
-              </div>
-            </div>
-
-            <div className="ml-auto flex w-full max-w-[460px] flex-col gap-4">
-              {/* Champion card */}
-              {champ ? (
-                <div
-                  className="w-full px-5 py-4"
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(8,12,18,0.92) 0%, rgba(7,10,18,0.74) 100%)',
-                    border: '1px solid rgba(255,215,0,0.22)',
-                    boxShadow: '0 0 24px rgba(255,215,0,0.08)',
-                    clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)',
-                  }}
-                >
-                  <div className="mb-3 text-[8px] font-mono tracking-[3px]" style={{ color: '#FFD700' }}>
-                    TOURNAMENT CHAMPION
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <div className="h-12 w-12 rounded-full overflow-hidden flex-shrink-0" style={{ border: '2.5px solid rgba(255,215,0,0.65)', boxShadow: '0 0 18px rgba(255,215,0,0.16)' }}>
-                      <AvatarImage
-                        src={champ.avatarUrl || `https://unavatar.io/twitter/${champ.username}`}
-                        alt={champ.username}
-                        width={48}
-                        height={48}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="truncate text-[16px] font-black text-white">@{champ.username}</div>
-                      <div className="mt-1 text-[24px] font-mono font-black leading-none" style={{ color: '#62D26F', textShadow: '0 0 14px rgba(34,197,94,0.22)' }}>
-                        {champ.pnlUsd >= 0 ? '+' : ''}${Math.abs(champ.pnlUsd) >= 1000 ? `${Math.round(champ.pnlUsd / 1000)}K` : Math.round(champ.pnlUsd)}
+                    <div className="absolute inset-y-0 left-0 w-[3px]" style={{ background: 'linear-gradient(180deg, #FFD76A 0%, rgba(255,215,106,0.15) 100%)' }} />
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="h-12 w-12 overflow-hidden rounded-full"
+                        style={{ border: '2px solid rgba(255,215,0,0.65)', boxShadow: '0 0 16px rgba(255,215,0,0.14)' }}
+                      >
+                        <AvatarImage
+                          src={champ.avatarUrl || `https://unavatar.io/twitter/${champ.username}`}
+                          alt={champ.username}
+                          width={48}
+                          height={48}
+                          className="h-full w-full object-cover"
+                        />
                       </div>
-                    </div>
-                    <div className="text-right flex-shrink-0">
-                      <div className="text-[32px] font-black font-mono leading-none" style={{ color: '#62D26F', textShadow: '0 0 18px rgba(34,197,94,0.26)' }}>
-                        69%
+                      <div className="min-w-0 flex-1">
+                        <div className="mb-1 flex items-center gap-2">
+                          <div className="rounded-full border border-[rgba(255,215,0,0.18)] bg-[rgba(255,215,0,0.08)] px-2 py-1 text-[8px] font-mono tracking-[2px] text-[#FFD700]">
+                            CURRENT CHAMPION
+                          </div>
+                        </div>
+                        <div className="truncate text-[18px] font-black text-white">@{champ.username}</div>
+                        <div className="mt-1 text-[24px] font-mono font-black leading-none" style={{ color: '#7FE17B' }}>
+                          {champ.pnlUsd >= 0 ? '+' : ''}${Math.abs(champ.pnlUsd) >= 1000 ? `${Math.round(champ.pnlUsd / 1000)}K` : Math.round(champ.pnlUsd)}
+                        </div>
                       </div>
-                      <div className="mt-1 text-[7px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">
-                        OF ALL FEES
+                      <div className="text-right">
+                        <div className="text-[26px] font-black font-mono leading-none" style={{ color: '#7FE17B' }}>
+                          69%
+                        </div>
+                        <div className="mt-1 text-[8px] font-mono tracking-[2px] text-[rgba(255,255,255,0.45)]">
+                          OF FEES
+                        </div>
                       </div>
                     </div>
                   </div>
-                  <div className="mt-4 flex items-center justify-between gap-3 border-t border-white/8 pt-3">
-                    <div className="text-[10px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">
-                      WINNER TAKES FEATURED SPOTLIGHT
+                ) : (
+                  <div />
+                )}
+
+                <div className="flex flex-1 items-center justify-end gap-4 lg:min-w-0 lg:pl-4">
+                  <div className="text-right">
+                    <div className="text-[11px] font-mono tracking-[6px] text-[var(--trench-text-muted)]">SEASON 1</div>
+                    <div className="mt-2 text-[52px] font-black leading-[0.82] tracking-[-0.07em] text-white sm:text-[68px]">
+                      Trencher
                     </div>
                     <div
-                      className="shrink-0 rounded-full px-3 py-1 text-[10px] font-mono tracking-[2px]"
-                      style={{
-                        color: '#FFD700',
-                        background: 'rgba(255,215,0,0.08)',
-                        border: '1px solid rgba(255,215,0,0.18)',
-                      }}
+                      className="text-[52px] font-black leading-[0.82] tracking-[-0.07em] sm:text-[68px]"
+                      style={{ color: '#59C8FF', textShadow: '0 0 34px rgba(0,212,255,0.28), 0 0 68px rgba(0,212,255,0.1)' }}
                     >
-                      REALIZED 7D PNL
+                      Cup
                     </div>
                   </div>
+                  <div
+                    className="relative h-[150px] w-[118px] shrink-0 sm:h-[188px] sm:w-[148px]"
+                    style={{
+                      filter: 'drop-shadow(0 0 30px rgba(0,212,255,0.35)) drop-shadow(0 0 60px rgba(0,212,255,0.15))',
+                      transform: `scale(${trophyScale}) rotate(${trophyRotate}deg)`,
+                      transformOrigin: 'bottom center',
+                    }}
+                  >
+                    <Image src="/trencher-cup.png" alt="Trencher Cup" fill className="object-contain" priority />
+                  </div>
                 </div>
-              ) : (
-                <div />
-              )}
+              </div>
 
-              {/* CTA */}
-              <div className="w-full">
-                <Link
-                  href="/leaderboard"
-                  className="pointer-events-auto inline-flex w-full items-center justify-center px-9 py-4 text-[12px] font-bold tracking-[3px] text-black"
+              <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_200px]">
+                <div
+                  className="cut-sm grid gap-3 px-4 py-4 sm:grid-cols-3"
                   style={{
-                    background: '#59C8FF',
-                    boxShadow: '0 0 24px rgba(0,212,255,0.24)',
-                    clipPath: 'polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px)',
+                    background: 'linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.015) 100%)',
+                    border: '1px solid rgba(255,255,255,0.06)',
+                    boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.015)',
                   }}
                 >
-                  ENTER THE ARENA →
-                </Link>
-                <div className="mt-2 text-right text-[10px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">
-                  GROUP STAGE, KNOCKOUTS, FINAL
+                  {[
+                    { value: '32', label: 'TRADERS', note: 'QUALIFY BY 7D PNL', tone: '#ffffff' },
+                    { value: '4', label: 'GROUPS', note: 'TOP 2 ADVANCE', tone: '#59C8FF' },
+                    { value: '69%', label: 'CHAMPION', note: 'OF ALL FEES', tone: '#7FE17B' },
+                  ].map((item) => (
+                    <div
+                      key={item.label}
+                      className="cut-xs px-4 py-4"
+                      style={{
+                        background: 'linear-gradient(180deg, rgba(7,10,16,0.92) 0%, rgba(7,10,16,0.72) 100%)',
+                        border: '1px solid rgba(255,255,255,0.07)',
+                        boxShadow: '0 12px 28px rgba(0,0,0,0.18)',
+                      }}
+                    >
+                      <div className="text-[10px] font-mono tracking-[3px] text-[rgba(255,255,255,0.42)]">
+                        {item.label}
+                      </div>
+                      <div
+                        className="mt-2 text-[36px] font-black leading-none tracking-[-0.05em]"
+                        style={{ color: item.tone, textShadow: item.tone === '#ffffff' ? '0 0 18px rgba(255,255,255,0.08)' : `0 0 24px ${item.tone}22` }}
+                      >
+                        {item.value}
+                      </div>
+                      <div className="mt-3 text-[10px] font-mono tracking-[2px] text-[rgba(255,255,255,0.58)]">
+                        {item.note}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex flex-col justify-center gap-3">
+                  <div className="text-center text-[10px] font-mono tracking-[3px] text-[rgba(0,212,255,0.7)]">
+                    JOIN THE NEXT BRACKET
+                  </div>
+                  <ParticipateButton className="pointer-events-auto w-full justify-center" />
+                  <div className="text-center text-[10px] font-mono tracking-[2px] text-[rgba(255,255,255,0.42)]">
+                    SIGN IN. LINK WALLETS. CLIMB INTO THE CUP.
+                  </div>
                 </div>
               </div>
             </div>
@@ -249,13 +297,13 @@ export function TournamentBracket({ traders }: { traders: RankedTrader[] }) {
           <div
             className="flex items-stretch gap-0 will-change-transform"
             style={{
-              minWidth: SCROLL_WIDTH,
+              minWidth: stripWidth,
               minHeight: BRACKET_H,
               transform: `translateX(${translateX}px)`,
             }}
           >
           {/* Groups: 4-col grid = 2 rows */}
-          <div className="flex-shrink-0" style={{ width: 920 }}>
+          <div className="flex-shrink-0" style={{ width: GROUP_STAGE_WIDTH }}>
             <div className="text-[8px] font-mono tracking-[2px] text-[var(--trench-text-muted)] mb-3 text-center">
               {ROUND_LABELS.groups}
             </div>
@@ -266,7 +314,7 @@ export function TournamentBracket({ traders }: { traders: RankedTrader[] }) {
             </div>
           </div>
 
-          <div className="flex-shrink-0 flex items-center mx-3">
+          <div className="flex-shrink-0 flex items-center" style={{ width: ROUND_SEPARATOR_WIDTH }}>
             <div className="w-px h-3/4" style={{ background: 'rgba(0,212,255,0.1)' }} />
           </div>
 
@@ -282,7 +330,7 @@ export function TournamentBracket({ traders }: { traders: RankedTrader[] }) {
 
           <RoundColumn label={ROUND_LABELS.final} matchups={bracket.knockoutRounds.final} gap="0px" />
 
-          <div className="flex-shrink-0" style={{ width: 260 }} />
+          <div className="flex-shrink-0" style={{ width: FINAL_TRAILING_WIDTH }} />
           </div>
         </div>
       </div>

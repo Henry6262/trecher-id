@@ -57,6 +57,18 @@ export function CutButton({
   const inner = (
     <>
       <div aria-hidden className="absolute inset-0 pointer-events-none" style={{ background: v.border }} />
+      {variant !== 'ghost' && (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 overflow-hidden"
+          style={{ '--cut-button-rail-color': 'var(--trench-accent)' } as React.CSSProperties}
+        >
+          <span className="cut-button-rail cut-button-rail-top" />
+          <span className="cut-button-rail cut-button-rail-bottom" />
+          <span className="cut-button-rail cut-button-rail-left" />
+          <span className="cut-button-rail cut-button-rail-right" />
+        </div>
+      )}
       <div style={{ margin: 1, clipPath: clip, background: v.bg, padding: `${s.py} ${s.px}` }}>
         <span
           className={cn(

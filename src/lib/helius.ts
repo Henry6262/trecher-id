@@ -1,6 +1,9 @@
+import { redis } from './redis';
+
 const HELIUS_API_KEY = process.env.HELIUS_API_KEY;
 const HELIUS_BASE = 'https://api.helius.xyz/v0';
 const HELIUS_RPC = `https://mainnet.helius-rpc.com/?api-key=${HELIUS_API_KEY}`;
+const TOKEN_METADATA_TTL_SECONDS = 60 * 60 * 24;
 
 // ─── Token Metadata via Helius DAS ────────────────────────────
 
@@ -12,8 +15,63 @@ interface TokenMeta {
 
 const metadataCache = new Map<string, TokenMeta>();
 
+function getTokenMetadataCacheKey(mint: string): string {
+  return `token-meta:${mint}`;
+}
+
+async function hydrateTokenMetadataFromRedis(mints: string[]): Promise<string[]> {
+  if (mints.length === 0) return [];
+
+  try {
+    const cachedEntries = await redis.mget(mints.map(getTokenMetadataCacheKey));
+    const misses: string[] = [];
+
+    for (const [index, mint] of mints.entries()) {
+      const payload = cachedEntries[index];
+      if (!payload) {
+        misses.push(mint);
+        continue;
+      }
+
+      try {
+        metadataCache.set(mint, JSON.parse(payload) as TokenMeta);
+      } catch {
+        misses.push(mint);
+      }
+    }
+
+    return misses;
+  } catch {
+    return mints;
+  }
+}
+
+async function persistTokenMetadataToRedis(entries: [string, TokenMeta][]): Promise<void> {
+  if (entries.length === 0) return;
+
+  try {
+    const pipeline = redis.pipeline();
+    for (const [mint, metadata] of entries) {
+      pipeline.set(
+        getTokenMetadataCacheKey(mint),
+        JSON.stringify(metadata),
+        'EX',
+        TOKEN_METADATA_TTL_SECONDS,
+      );
+    }
+    await pipeline.exec();
+  } catch {
+    // Redis down — local cache still helps
+  }
+}
+
 export async function getTokenMetadata(mints: string[]): Promise<Map<string, TokenMeta>> {
-  const uncached = mints.filter(m => !metadataCache.has(m));
+  const uniqueMints = Array.from(new Set(mints.filter(Boolean)));
+  let uncached = uniqueMints.filter(m => !metadataCache.has(m));
+
+  if (uncached.length > 0) {
+    uncached = await hydrateTokenMetadataFromRedis(uncached);
+  }
 
   if (uncached.length > 0) {
     try {
@@ -31,28 +89,32 @@ export async function getTokenMetadata(mints: string[]): Promise<Map<string, Tok
       if (res.ok) {
         const data = await res.json();
         const assets = data.result || [];
+        const fetchedEntries: [string, TokenMeta][] = [];
         for (const asset of assets) {
           if (asset && asset.id) {
-            metadataCache.set(asset.id, {
+            const metadata = {
               symbol: asset.content?.metadata?.symbol || asset.id.slice(0, 6),
               name: asset.content?.metadata?.name || '',
               image: asset.content?.links?.image || asset.content?.files?.[0]?.uri || null,
-            });
+            };
+            metadataCache.set(asset.id, metadata);
+            fetchedEntries.push([asset.id, metadata]);
           }
         }
+        await persistTokenMetadataToRedis(fetchedEntries);
       }
     } catch {
       // Fallback silently
     }
   }
 
-  for (const m of mints) {
+  for (const m of uniqueMints) {
     if (!metadataCache.has(m)) {
       metadataCache.set(m, { symbol: m.slice(0, 6), name: '', image: null });
     }
   }
 
-  return metadataCache;
+  return new Map(uniqueMints.map((mint) => [mint, metadataCache.get(mint)!]));
 }
 
 // ─── Transaction Fetching ─────────────────────────────────────
@@ -113,13 +175,13 @@ export async function getWalletTransactions(
     const params = new URLSearchParams({ 'api-key': HELIUS_API_KEY, limit: '100' });
     if (before) params.set('before', before);
 
-    let res = await fetch(`${HELIUS_BASE}/addresses/${walletAddress}/transactions?${params}`);
-    // Retry once on 429 with backoff
-    if (res.status === 429) {
-      await new Promise(r => setTimeout(r, 3000));
+    let res: Response | undefined;
+    for (let attempt = 0; attempt < 3; attempt++) {
       res = await fetch(`${HELIUS_BASE}/addresses/${walletAddress}/transactions?${params}`);
+      if (res.status !== 429) break;
+      await new Promise(r => setTimeout(r, 3000 * (attempt + 1)));
     }
-    if (!res.ok) throw new Error(`Helius API error: ${res.status}`);
+    if (!res || !res.ok) throw new Error(`Helius API error: ${res?.status ?? 'no response'}`);
 
     const txns: HeliusTransaction[] = await res.json();
     if (txns.length === 0) break;

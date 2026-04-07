@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { GlassCard } from './glass-card';
 
 // ─── Types ───────────────────────────────────────────────────
@@ -136,11 +137,8 @@ export function ArenaSection() {
 
   // Bracket state — starts EMPTY, fills progressively
   const [qfResults, setQfResults] = useState<(ArenaTrader | null)[]>([null, null, null, null]); // winners
-  const [qfLosers, setQfLosers] = useState<(ArenaTrader | null)[]>([null, null, null, null]);
   const [sfPlayers, setSfPlayers] = useState<(ArenaTrader | null)[]>([null, null, null, null]);
   const [sfResults, setSfResults] = useState<(ArenaTrader | null)[]>([null, null]);
-  const [sfLosers, setSfLosers] = useState<(ArenaTrader | null)[]>([null, null]);
-  const [finalPlayers, setFinalPlayers] = useState<(ArenaTrader | null)[]>([null, null]);
   const [champion, setChampion] = useState<ArenaTrader | null>(null);
 
   // QF matchups (fixed from data)
@@ -189,7 +187,6 @@ export function ArenaSection() {
     if (idx < 4) {
       // QF result
       setQfResults(prev => { const n = [...prev]; n[idx] = currentWinner; return n; });
-      setQfLosers(prev => { const n = [...prev]; n[idx] = currentLoser; return n; });
       // Fill SF slot
       setSfPlayers(prev => {
         const n = [...prev];
@@ -203,8 +200,6 @@ export function ArenaSection() {
       // SF result
       const sfIdx = idx - 4;
       setSfResults(prev => { const n = [...prev]; n[sfIdx] = currentWinner; return n; });
-      setSfLosers(prev => { const n = [...prev]; n[sfIdx] = currentLoser; return n; });
-      setFinalPlayers(prev => { const n = [...prev]; n[sfIdx] = currentWinner; return n; });
     } else {
       // Final result
       setChampion(currentWinner);
@@ -275,15 +270,6 @@ export function ArenaSection() {
     if (!sfResults[sfIdx]) return 'neutral';
     if (phase === 'bracket' && matchIdx === 4 + sfIdx && currentWinner?.username === player.username) return 'latest';
     if (sfResults[sfIdx]?.username === player.username) return 'winner';
-    return 'loser';
-  }
-
-  function finalSlotState(playerIdx: 0 | 1): 'empty' | 'neutral' | 'winner' | 'loser' | 'latest' {
-    const player = finalPlayers[playerIdx];
-    if (!player) return 'empty';
-    if (!champion) return 'neutral';
-    if (phase === 'bracket' && matchIdx === 6 && currentWinner?.username === player.username) return 'latest';
-    if (champion.username === player.username) return 'winner';
     return 'loser';
   }
 
@@ -492,7 +478,7 @@ export function ArenaSection() {
 
         {/* CTA */}
         <div className="text-center mt-6">
-          <a href="/leaderboard" className="inline-block px-6 py-2.5 text-[10px] font-bold tracking-[2px] text-black cut-xs" style={{ background: '#00D4FF', textDecoration: 'none' }}>ENTER THE ARENA →</a>
+          <Link href="/leaderboard" className="inline-block px-6 py-2.5 text-[10px] font-bold tracking-[2px] text-black cut-xs" style={{ background: '#00D4FF', textDecoration: 'none' }}>ENTER THE ARENA →</Link>
         </div>
         </div>
         </GlassCard>

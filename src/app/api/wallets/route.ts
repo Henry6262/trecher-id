@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSessionUser } from '@/lib/auth';
+import { invalidatePublicProfileCache } from '@/lib/profile';
 import { prisma } from '@/lib/prisma';
 
 export async function GET() {
@@ -25,6 +26,7 @@ export async function POST(req: Request) {
     update: {},
     create: { userId: session.id, address, chain: 'solana', verified: true },
   });
+  await invalidatePublicProfileCache(session.username);
   return NextResponse.json(wallet, { status: 201 });
 }
 
@@ -36,5 +38,6 @@ export async function DELETE(req: Request) {
   if (!address) return NextResponse.json({ error: 'address required' }, { status: 400 });
 
   await prisma.wallet.deleteMany({ where: { userId: session.id, address } });
+  await invalidatePublicProfileCache(session.username);
   return NextResponse.json({ ok: true });
 }

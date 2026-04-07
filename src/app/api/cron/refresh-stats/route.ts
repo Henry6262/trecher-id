@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getWalletTransactions } from '@/lib/helius';
+import { getTokenMetadata, getWalletTransactions } from '@/lib/helius';
 import { getSolPrice } from '@/lib/sol-price';
 import { refreshTokenDeployments } from '@/lib/token-deployments';
 import { fetchFxTwitterProfile } from '@/lib/fxtwitter';
+import { invalidatePublicProfileCache } from '@/lib/profile';
 
 // CRON_SECRET env var must be set in Vercel dashboard for manual invocation.
 // Vercel's scheduler uses the x-vercel-cron header automatically (no secret needed).
@@ -118,15 +119,19 @@ export async function GET(req: Request) {
 
           if (txns.length > 0) {
             const swapMap = parseSwaps(txns, wallet.address);
+            const tokenMetadata = await getTokenMetadata(Array.from(swapMap.keys()));
 
             // Upsert WalletTrade records (accumulate over time)
             for (const [tokenMint, data] of swapMap) {
+              const meta = tokenMetadata.get(tokenMint);
               await prisma.walletTrade.upsert({
                 where: { walletId_tokenMint: { walletId: wallet.id, tokenMint } },
                 create: {
                   walletId: wallet.id,
                   tokenMint,
-                  tokenSymbol: tokenMint.slice(0, 6),
+                  tokenSymbol: meta?.symbol || tokenMint.slice(0, 6),
+                  tokenName: meta?.name || null,
+                  tokenImageUrl: meta?.image || null,
                   buySol: data.buySol,
                   sellSol: data.sellSol,
                   pnlSol: data.sellSol - data.buySol,
@@ -135,6 +140,9 @@ export async function GET(req: Request) {
                   lastTradeAt: new Date(data.lastAt * 1000),
                 },
                 update: {
+                  tokenSymbol: meta?.symbol || tokenMint.slice(0, 6),
+                  tokenName: meta?.name || null,
+                  tokenImageUrl: meta?.image || null,
                   buySol: { increment: data.buySol },
                   sellSol: { increment: data.sellSol },
                   pnlSol: { increment: data.sellSol - data.buySol },
@@ -215,6 +223,7 @@ export async function GET(req: Request) {
           } catch { /* non-fatal */ }
         }
 
+        await invalidatePublicProfileCache(user.username);
         processed++;
       } catch (err) {
         console.error(`[cron] Error processing user ${user.id}:`, err);

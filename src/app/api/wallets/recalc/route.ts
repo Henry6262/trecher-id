@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getWalletTransactions } from '@/lib/helius';
+import { getTokenMetadata, getWalletTransactions } from '@/lib/helius';
 import { getSolPrice } from '@/lib/sol-price';
+import { invalidatePublicProfileCache } from '@/lib/profile';
 
 export const maxDuration = 300;
 
@@ -90,7 +91,10 @@ export async function POST(req: Request) {
 
   const results: { wallet: string; before: number; after: number; trades: number }[] = [];
 
+  const errors: { wallet: string; error: string }[] = [];
+
   for (const wallet of wallets) {
+   try {
     const beforeTrades = await prisma.walletTrade.findMany({
       where: { walletId: wallet.id },
     });
@@ -108,13 +112,17 @@ export async function POST(req: Request) {
     });
 
     const swapMap = parseSwapsForRecalc(txns, wallet.address);
+    const tokenMetadata = await getTokenMetadata(Array.from(swapMap.keys()));
 
     for (const [tokenMint, data] of swapMap) {
+      const meta = tokenMetadata.get(tokenMint);
       await prisma.walletTrade.create({
         data: {
           walletId: wallet.id,
           tokenMint,
-          tokenSymbol: tokenMint.slice(0, 6),
+          tokenSymbol: meta?.symbol || tokenMint.slice(0, 6),
+          tokenName: meta?.name || null,
+          tokenImageUrl: meta?.image || null,
           buySol: data.buySol,
           sellSol: data.sellSol,
           pnlSol: data.sellSol - data.buySol,
@@ -175,12 +183,18 @@ export async function POST(req: Request) {
       trades: swapMap.size,
     });
 
+    await invalidatePublicProfileCache(wallet.user.username);
     await sleep(3000);
+   } catch (err) {
+    errors.push({ wallet: wallet.address, error: String(err) });
+    await sleep(3000);
+   }
   }
 
   return NextResponse.json({
     ok: true,
     walletsProcessed: results.length,
+    errors: errors.length > 0 ? errors : undefined,
     results,
     solPrice,
   });

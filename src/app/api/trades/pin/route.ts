@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSessionUser } from '@/lib/auth';
+import { invalidatePublicProfileCache } from '@/lib/profile';
 import { prisma } from '@/lib/prisma';
 
 export async function GET() {
@@ -50,6 +51,7 @@ export async function POST(req: Request) {
     },
   });
 
+  await invalidatePublicProfileCache(session.username);
   return NextResponse.json(pinned, { status: 201 });
 }
 
@@ -61,5 +63,6 @@ export async function DELETE(req: Request) {
   if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
 
   await prisma.pinnedTrade.deleteMany({ where: { id, userId: session.id } });
+  await invalidatePublicProfileCache(session.username);
   return NextResponse.json({ ok: true });
 }

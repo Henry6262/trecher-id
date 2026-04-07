@@ -15,27 +15,29 @@ export function GroupCard({ group }: { group: Group }) {
     >
       {/* Header */}
       <div
-        className="px-3 py-2"
+        className="flex items-center justify-between px-3 py-2"
         style={{ background: 'rgba(0,212,255,0.04)', borderBottom: '1px solid rgba(0,212,255,0.08)' }}
       >
         <span className="text-[9px] font-mono tracking-[2px] text-[#00D4FF]">
           GROUP {group.name}
+        </span>
+        <span className="text-[7px] font-mono tracking-[1.5px] text-[var(--trench-text-muted)]">
+          TOP 2 ADVANCE
         </span>
       </div>
 
       {/* Trader rows */}
       {group.traders.map((trader, i) => {
         const qualified = i < 2;
-        const statusLabel = qualified ? 'ADV' : 'OUT';
         return (
           <Link
             key={trader.username}
             href={`/${trader.username}`}
             className="flex items-center gap-2 px-3 transition-colors hover:bg-[rgba(0,212,255,0.03)]"
             style={{
-              height: 40,
-              opacity: qualified ? 1 : 0.45,
-              borderLeft: qualified ? '2px solid #00D4FF' : '2px solid transparent',
+              height: 44,
+              opacity: qualified ? 1 : 0.58,
+              borderLeft: qualified ? '3px solid #00D4FF' : '3px solid transparent',
               background: qualified ? 'rgba(0,212,255,0.04)' : 'transparent',
             }}
           >
@@ -61,23 +63,12 @@ export function GroupCard({ group }: { group: Group }) {
             {/* Username */}
             <div className="min-w-0 flex-1">
               <span className="block text-[10px] font-semibold text-white truncate">
+                {trader.displayName}
+              </span>
+              <span className="block text-[7px] font-mono tracking-[1.5px] text-[var(--trench-text-muted)] truncate">
                 @{trader.username}
               </span>
-              <span className="block text-[7px] font-mono tracking-[1.5px] text-[var(--trench-text-muted)]">
-                {qualified ? 'Top 2 advance' : 'Needs higher rank'}
-              </span>
             </div>
-
-            <span
-              className="text-[7px] font-mono tracking-[1.5px] px-1.5 py-0.5 cut-xs flex-shrink-0"
-              style={{
-                color: qualified ? '#00D4FF' : 'rgba(255,255,255,0.45)',
-                background: qualified ? 'rgba(0,212,255,0.08)' : 'rgba(255,255,255,0.04)',
-                border: qualified ? '1px solid rgba(0,212,255,0.16)' : '1px solid rgba(255,255,255,0.06)',
-              }}
-            >
-              {statusLabel}
-            </span>
 
             {/* PnL */}
             <span

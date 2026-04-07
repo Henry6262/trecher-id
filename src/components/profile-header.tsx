@@ -44,6 +44,7 @@ function ShareButtons({ username, accent }: { username: string; accent: string }
 
 interface ProfileHeaderProps {
   avatarUrl?: string | null;
+  bannerUrl?: string | null;
   displayName: string;
   username: string;
   bio?: string | null;
@@ -61,7 +62,21 @@ interface ProfileHeaderProps {
   accentColor?: string | null;
 }
 
-export function ProfileHeader({ avatarUrl, displayName, username, bio, verified, isClaimed, stats, wallets, followerCount, degenScore, isOwner, accentColor }: ProfileHeaderProps) {
+export function ProfileHeader({
+  avatarUrl,
+  bannerUrl,
+  displayName,
+  username,
+  bio,
+  verified,
+  isClaimed,
+  stats,
+  wallets,
+  followerCount,
+  degenScore,
+  isOwner,
+  accentColor,
+}: ProfileHeaderProps) {
   const accent = accentColor || '#00D4FF';
   const [activeWallet, setActiveWallet] = useState(
     () => wallets?.findIndex(w => w.isMain) ?? 0
@@ -71,18 +86,43 @@ export function ProfileHeader({ avatarUrl, displayName, username, bio, verified,
 
   return (
     <div
-      className="relative"
+      className="relative overflow-hidden"
       style={{
         padding: '20px 16px 20px',
       }}
     >
+      {bannerUrl && (
+        <div className="pointer-events-none absolute inset-0">
+          <Image
+            src={bannerUrl}
+            alt=""
+            fill
+            className="object-cover object-center opacity-45"
+            unoptimized
+          />
+          <div
+            className="absolute inset-0"
+            style={{
+              background: [
+                `radial-gradient(circle at 18% 22%, ${accent}1f 0%, transparent 34%)`,
+                'linear-gradient(90deg, rgba(5,5,8,0.38) 0%, rgba(5,5,8,0.6) 42%, rgba(5,5,8,0.82) 100%)',
+                'linear-gradient(180deg, rgba(5,5,8,0.12) 0%, rgba(5,5,8,0.62) 42%, rgba(5,5,8,0.94) 100%)',
+              ].join(', '),
+            }}
+          />
+        </div>
+      )}
+
+      <div className="relative z-10">
       {/* Claim banner — unclaimed profiles only */}
       {!isClaimed && (
         <div
           className="flex items-center justify-between px-7 py-3 text-xs font-mono"
           style={{
-            background: 'rgba(0,212,255,0.04)',
-            borderBottom: '1px solid rgba(0,212,255,0.08)',
+            background: bannerUrl ? 'rgba(8,12,18,0.72)' : 'rgba(0,212,255,0.04)',
+            borderBottom: bannerUrl ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,212,255,0.08)',
+            backdropFilter: bannerUrl ? 'blur(10px)' : undefined,
+            WebkitBackdropFilter: bannerUrl ? 'blur(10px)' : undefined,
           }}
         >
           <span className="text-[var(--trench-text-muted)]">
@@ -104,7 +144,12 @@ export function ProfileHeader({ avatarUrl, displayName, username, bio, verified,
           <button
             onClick={() => setWalletOpen(!walletOpen)}
             className="cut-xs flex items-center gap-1.5 text-[8px] font-mono text-[var(--trench-text-muted)] px-2 py-1 transition-all hover:text-[var(--trench-accent)]"
-            style={{ background: 'rgba(0,212,255,0.04)', border: '1px solid rgba(0,212,255,0.08)' }}
+            style={{
+              background: bannerUrl ? 'rgba(8,12,18,0.66)' : 'rgba(0,212,255,0.04)',
+              border: bannerUrl ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,212,255,0.08)',
+              backdropFilter: bannerUrl ? 'blur(10px)' : undefined,
+              WebkitBackdropFilter: bannerUrl ? 'blur(10px)' : undefined,
+            }}
           >
             {wallets[activeWallet]?.isMain && <Star size={7} className="text-[var(--trench-accent)] fill-[var(--trench-accent)]" />}
             <span className="w-[4px] h-[4px] rounded-full flex-shrink-0" style={{ background: wallets[activeWallet]?.verified ? '#22c55e' : '#71717a' }} />
@@ -115,7 +160,11 @@ export function ProfileHeader({ avatarUrl, displayName, username, bio, verified,
           {walletOpen && wallets.length > 1 && (
             <div
               className="absolute top-full right-0 mt-1 cut-sm z-50"
-              style={{ background: 'rgba(8,12,18,0.95)', border: '1px solid rgba(0,212,255,0.12)', minWidth: '180px' }}
+              style={{
+                background: 'rgba(8,12,18,0.95)',
+                border: '1px solid rgba(0,212,255,0.12)',
+                minWidth: '180px',
+              }}
             >
               {wallets.map((w, i) => (
                 <button
@@ -138,7 +187,7 @@ export function ProfileHeader({ avatarUrl, displayName, username, bio, verified,
       )}
 
       {/* Hero layout — avatar left, info right */}
-      <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-5">
+      <div className={`flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-5 ${bannerUrl ? 'pt-12 sm:pt-16' : ''}`}>
         {/* Avatar — left side, cut-corner branded */}
         <div className="relative flex-shrink-0">
           <div className="absolute inset-[-16px] pointer-events-none" style={{ background: `radial-gradient(circle, ${accent}14 0%, transparent 70%)` }} />
@@ -254,6 +303,7 @@ export function ProfileHeader({ avatarUrl, displayName, username, bio, verified,
           </Link>
         </div>
       )}
+      </div>
     </div>
   );
 }

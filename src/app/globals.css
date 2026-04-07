@@ -153,6 +153,51 @@ html.lenis body {
   border: 1px solid var(--trench-border);
 }
 
+/* ─── Animated cut-button rails ──────────────────────────── */
+.cut-button-rail {
+  position: absolute;
+  opacity: 0.95;
+  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--cut-button-rail-color, var(--trench-accent)) 55%, transparent));
+}
+
+.cut-button-rail-top,
+.cut-button-rail-bottom {
+  width: 42%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, var(--cut-button-rail-color, var(--trench-accent)) 22%, var(--cut-button-rail-color, var(--trench-accent)) 78%, transparent 100%);
+}
+
+.cut-button-rail-left,
+.cut-button-rail-right {
+  width: 1px;
+  height: 42%;
+  background: linear-gradient(180deg, transparent 0%, var(--cut-button-rail-color, var(--trench-accent)) 22%, var(--cut-button-rail-color, var(--trench-accent)) 78%, transparent 100%);
+}
+
+.cut-button-rail-top {
+  top: 0;
+  left: -42%;
+  animation: cutRailX 2.4s linear infinite;
+}
+
+.cut-button-rail-bottom {
+  bottom: 0;
+  right: -42%;
+  animation: cutRailXReverse 2.4s linear infinite;
+}
+
+.cut-button-rail-left {
+  left: 0;
+  top: -42%;
+  animation: cutRailY 2.4s linear infinite;
+}
+
+.cut-button-rail-right {
+  right: 0;
+  bottom: -42%;
+  animation: cutRailYReverse 2.4s linear infinite;
+}
+
 /* ─── Animated background ────────────────────────────────── */
 .bg-gradient-radial {
   background:
@@ -205,6 +250,26 @@ html.lenis body {
 @keyframes particleRise {
   0% { transform: translateY(0); }
   100% { transform: translateY(-150px); }
+}
+
+@keyframes cutRailX {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(240%); }
+}
+
+@keyframes cutRailXReverse {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-240%); }
+}
+
+@keyframes cutRailY {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(240%); }
+}
+
+@keyframes cutRailYReverse {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-240%); }
 }
 @keyframes winnerPulse {
   0%, 100% { box-shadow: inset 3px 0 0 #00D4FF, 0 0 8px rgba(0,212,255,0.1); }

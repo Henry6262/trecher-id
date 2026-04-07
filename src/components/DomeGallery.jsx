@@ -631,7 +631,15 @@ export default function DomeGallery({
                   onClick={onTileClick}
                   onPointerUp={onTilePointerUp}
                 >
-                  <img src={it.src} draggable={false} alt={it.alt} />
+                  <img
+                    src={it.src}
+                    draggable={false}
+                    alt={it.alt}
+                    onError={(event) => {
+                      if (event.currentTarget.src.endsWith('/avatar-fallback.svg')) return;
+                      event.currentTarget.src = '/avatar-fallback.svg';
+                    }}
+                  />
                 </div>
               </div>
             ))}
