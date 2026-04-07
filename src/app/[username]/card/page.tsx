@@ -60,7 +60,7 @@ export default async function ShareCardPage({ params }: Props) {
     { winRate, totalTrades, totalPnlUsd },
   );
 
-  const shareUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://web3me.xyz'}/${username}`;
+  const shareUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://web3me.fun'}/${username}`;
 
   return (
     <ShareCardClient

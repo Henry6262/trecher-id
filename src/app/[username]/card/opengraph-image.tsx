@@ -133,7 +133,6 @@ export default async function Image({
           <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
             {/* Avatar */}
             {user.avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={user.avatarUrl}
                 width={80}
@@ -338,7 +337,7 @@ export default async function Image({
             letterSpacing: 2,
           }}
         >
-          web3me.xyz
+          web3me.fun
         </div>
 
         {/* Bottom accent bar */}

@@ -108,7 +108,7 @@ function MiniCalendar({ featured }: { featured: TraderData }) {
 }
 
 function PreviewCardInner({ featured }: { featured: TraderData }) {
-  const featuredProfileLabel = `web3me.xyz/${featured.username}`;
+  const featuredProfileLabel = `web3me.fun/${featured.username}`;
 
   return (
     <div className="w-full h-full flex flex-col" style={{ transform: 'perspective(1000px) rotateY(-4deg) rotateX(2deg)' }}>

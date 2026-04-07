@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { GlassCard } from './glass-card';
 
 // ─── Steps ───────────────────────────────────────────────────
@@ -161,7 +162,6 @@ function ScreenCup() {
   const [bar1, setBar1] = useState(0);
   const [bar2, setBar2] = useState(0);
   useEffect(() => {
-    setBar1(0); setBar2(0);
     const t = setTimeout(() => { setBar1(78); setBar2(54); }, 300);
     return () => clearTimeout(t);
   }, []);
@@ -269,8 +269,15 @@ export function JourneySection() {
   return (
     <section className="max-w-[780px] mx-auto px-6 sm:px-12 lg:px-16 py-16">
       <div className="text-center mb-10">
-        <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight">Your <span className="text-[var(--trench-accent)]">journey</span></h2>
-        <p className="text-[12px] text-[var(--trench-text-muted)] mt-1">From sign-up to earning rewards</p>
+        <div className="mb-4 flex items-center justify-center gap-4">
+          <div className="h-px flex-1 max-w-[120px]" style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(0,212,255,0.55) 55%, rgba(0,212,255,0.08) 100%)' }} />
+          <div className="text-[9px] font-mono tracking-[3px] uppercase" style={{ color: 'rgba(0,212,255,0.75)' }}>
+            Progression
+          </div>
+          <div className="h-px flex-1 max-w-[120px]" style={{ background: 'linear-gradient(90deg, rgba(0,212,255,0.08) 0%, rgba(0,212,255,0.55) 45%, transparent 100%)' }} />
+        </div>
+        <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight">See It <span className="text-[var(--trench-accent)]">Live</span></h2>
+        <p className="text-[12px] text-[var(--trench-text-muted)] mt-1">From sign-up to profile, rankings, cup, and rewards</p>
       </div>
 
       <div className="flex flex-col lg:flex-row items-stretch lg:min-h-[420px] gap-6 lg:gap-0">
@@ -314,16 +321,26 @@ export function JourneySection() {
         {/* SEPARATOR — desktop only */}
         <div className="hidden lg:block w-px flex-shrink-0 mx-5" style={{ background: 'linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.06) 20%, rgba(255,255,255,0.06) 80%, transparent 100%)' }} />
 
-        {/* RIGHT: Glass card */}
+        {/* RIGHT: Glass card — fixed height to prevent layout shift */}
         <div className="flex-1 min-w-0">
           <GlassCard cut={12} bg="rgba(8,12,18,0.65)">
-            <div className="relative min-h-[420px]">
+            <div className="relative h-[480px] overflow-hidden" style={{ boxShadow: 'inset 0 2px 20px rgba(0,0,0,0.4), inset 0 -1px 12px rgba(0,0,0,0.3), inset 0 0 40px rgba(0,212,255,0.03)' }}>
               <div className="absolute top-0 left-0 right-0 h-[1px] z-10" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent)' }} />
-              <div className="absolute top-4 left-5 text-[8px] tracking-[3px] font-mono z-10" style={{ color: 'rgba(255,255,255,0.25)' }}>
+              <div
+                className="absolute top-4 left-5 z-10 inline-flex items-center gap-2 px-3 py-1.5 text-[8px] font-mono tracking-[3px]"
+                style={{
+                  color: '#00D4FF',
+                  background: 'linear-gradient(135deg, rgba(5,10,18,0.96) 0%, rgba(8,12,22,0.86) 100%)',
+                  border: '1px solid rgba(0,212,255,0.18)',
+                  boxShadow: '0 0 18px rgba(0,212,255,0.08)',
+                  clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)',
+                }}
+              >
+                <span className="h-1.5 w-1.5 rounded-full" style={{ background: '#00D4FF', boxShadow: '0 0 10px rgba(0,212,255,0.45)' }} />
                 STEP {active + 1} — {STEPS[active].label}
               </div>
               <div className="absolute top-0 right-0 w-[200px] h-[200px] pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.02) 0%, transparent 70%)' }} />
-              <div className="px-10 pt-14 pb-10 h-full min-h-[420px] flex items-center justify-center">
+              <div className="px-10 pt-14 pb-10 h-[480px] flex items-center justify-center">
                 <div key={active} className="w-full h-full animate-[screenIn_0.5s_ease-out]">
                   <ActiveScreen />
                 </div>
@@ -331,6 +348,23 @@ export function JourneySection() {
             </div>
           </GlassCard>
         </div>
+      </div>
+
+      <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+        <Link
+          href="/login"
+          className="inline-flex items-center justify-center px-6 py-2.5 text-[10px] font-bold tracking-[2px] text-black cut-xs"
+          style={{ background: '#00D4FF', textDecoration: 'none' }}
+        >
+          CLAIM YOUR HANDLE
+        </Link>
+        <Link
+          href="/leaderboard"
+          className="inline-flex items-center justify-center px-6 py-2.5 text-[10px] font-bold tracking-[2px] cut-xs"
+          style={{ background: 'rgba(8,12,18,0.65)', border: '1px solid rgba(0,212,255,0.12)', color: 'var(--trench-text)', textDecoration: 'none' }}
+        >
+          EXPLORE RANKINGS
+        </Link>
       </div>
 
       <style jsx global>{`
