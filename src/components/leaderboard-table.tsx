@@ -103,6 +103,28 @@ export function LeaderboardTable({
   const allRest = activeList.slice(3);
   const totalPages = Math.ceil(allRest.length / PAGE_SIZE);
   const rest = allRest.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE);
+  const summaryCards = useMemo(() => {
+    if (mode === 'traders') {
+      const averageWinRate = traders.length > 0
+        ? traders.reduce((sum, trader) => sum + trader.winRate, 0) / traders.length
+        : 0;
+
+      return [
+        { label: 'RANKED TRADERS', value: String(traders.length) },
+        { label: 'QUALIFYING CUT', value: traders.length >= 32 ? `#${Math.min(32, traders.length)}` : `${Math.max(0, 32 - traders.length)} LEFT` },
+        { label: 'AVG WIN RATE', value: `${Math.round(averageWinRate)}%` },
+      ];
+    }
+
+    const totalMigrations = deployers.reduce((sum, deployer) => sum + deployer.migratedCount, 0);
+    const totalDeploys = deployers.reduce((sum, deployer) => sum + deployer.deployCount, 0);
+
+    return [
+      { label: 'RANKED DEVS', value: String(deployers.length) },
+      { label: 'TOTAL DEPLOYS', value: String(totalDeploys) },
+      { label: 'MIGRATED TOKENS', value: String(totalMigrations) },
+    ];
+  }, [mode, traders, deployers]);
 
   // ─── Bracket-only mode (landing page) ───────────────────────
   if (variant === 'bracket') {
@@ -188,6 +210,25 @@ export function LeaderboardTable({
           {mode === 'traders' ? '7D CUP QUALIFICATION' : 'MIGRATIONS + DEPLOY COUNT'}
         </span>
       </div>
+
+      {!loading && activeList.length > 0 && (
+        <div className="mb-6 grid grid-cols-1 gap-2 sm:grid-cols-3">
+          {summaryCards.map((card) => (
+            <div
+              key={card.label}
+              className="cut-sm px-4 py-3"
+              style={{ background: 'rgba(8,12,22,0.48)', border: '1px solid rgba(0,212,255,0.08)' }}
+            >
+              <div className="text-[8px] font-mono tracking-[2px] text-[var(--trench-text-muted)] mb-1">
+                {card.label}
+              </div>
+              <div className="text-[18px] font-black font-mono text-white">
+                {card.value}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Loading */}
       {loading && (

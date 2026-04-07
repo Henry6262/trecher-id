@@ -1,7 +1,7 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
+import { AvatarImage } from '@/components/avatar-image';
 import { CutCorner } from '@/components/cut-corner';
 import type { Matchup, RankedTrader } from './bracket-utils';
 
@@ -55,19 +55,34 @@ function TraderRow({
           border: '1.5px solid rgba(0,212,255,0.15)',
         }}
       >
-        <Image
+        <AvatarImage
           src={trader.avatarUrl || `https://unavatar.io/twitter/${trader.username}`}
           alt={trader.displayName}
           width={avatarSize}
           height={avatarSize}
           className="w-full h-full object-cover"
-          unoptimized
         />
       </div>
 
       {/* Username */}
-      <span className="text-[9px] font-semibold text-white truncate min-w-0 flex-1">
-        @{trader.username}
+      <div className="min-w-0 flex-1">
+        <span className="block text-[9px] font-semibold text-white truncate">
+          @{trader.username}
+        </span>
+        <span className="block text-[7px] font-mono tracking-[1.5px] text-[var(--trench-text-muted)]">
+          {isWinner ? 'ADVANCES' : 'ELIMINATED'}
+        </span>
+      </div>
+
+      <span
+        className="text-[7px] font-mono tracking-[1.5px] px-1.5 py-0.5 cut-xs flex-shrink-0"
+        style={{
+          color: isWinner ? '#00D4FF' : 'rgba(255,255,255,0.45)',
+          background: isWinner ? 'rgba(0,212,255,0.08)' : 'rgba(255,255,255,0.04)',
+          border: isWinner ? '1px solid rgba(0,212,255,0.16)' : '1px solid rgba(255,255,255,0.06)',
+        }}
+      >
+        {isWinner ? 'WIN' : 'OUT'}
       </span>
 
       {/* PnL */}
