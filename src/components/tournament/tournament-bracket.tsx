@@ -118,7 +118,7 @@ export function TournamentBracket({ traders }: { traders: RankedTrader[] }) {
         <div
           className="absolute top-0 right-0 bottom-0 z-20 pointer-events-none"
           style={{
-            width: '56%',
+            width: 'min(62vw, 760px)',
             transform: `translateX(${overlaySlide}%)`,
             opacity: overlayOpacity,
             transition: 'opacity 0.05s linear, transform 0.05s linear',
@@ -130,30 +130,41 @@ export function TournamentBracket({ traders }: { traders: RankedTrader[] }) {
           />
 
           <div className="relative z-10 flex h-full flex-col justify-between px-6 py-7 sm:px-8">
-            <div className="ml-auto w-full max-w-[390px] text-center sm:text-right">
-              <div className="mb-2 text-[11px] font-mono tracking-[6px] text-[var(--trench-text-muted)]">SEASON 1</div>
-              <h3 className="text-[48px] sm:text-[60px] font-black text-white leading-[0.84] tracking-[-0.04em]">
-                The Trencher
-              </h3>
-              <h3
-                className="text-[52px] sm:text-[70px] font-black leading-[0.84] tracking-[-0.05em]"
-                style={{ color: '#59C8FF', textShadow: '0 0 34px rgba(0,212,255,0.28), 0 0 68px rgba(0,212,255,0.1)' }}
-              >
-                Cup
-              </h3>
+            <div className="ml-auto w-full max-w-[620px]">
+              <div className="mb-3 text-center text-[11px] font-mono tracking-[6px] text-[var(--trench-text-muted)] sm:text-right">
+                SEASON 1
+              </div>
+
+              <div className="flex items-end justify-end gap-3 sm:gap-5">
+                <div className="min-w-0 flex-1 text-right">
+                  <h3
+                    className="text-[54px] sm:text-[68px] lg:text-[76px] font-black text-white leading-[0.82] tracking-[-0.05em]"
+                    style={{ textWrap: 'balance' }}
+                  >
+                    The Trencher
+                  </h3>
+                  <h3
+                    className="text-[58px] sm:text-[76px] lg:text-[86px] font-black leading-[0.8] tracking-[-0.06em]"
+                    style={{ color: '#59C8FF', textShadow: '0 0 34px rgba(0,212,255,0.28), 0 0 68px rgba(0,212,255,0.1)' }}
+                  >
+                    Cup
+                  </h3>
+                </div>
+
+                <div
+                  className="relative h-[160px] w-[125px] sm:h-[215px] sm:w-[170px] lg:h-[255px] lg:w-[205px] flex-shrink-0"
+                  style={{
+                    filter: 'drop-shadow(0 0 30px rgba(0,212,255,0.35)) drop-shadow(0 0 60px rgba(0,212,255,0.15))',
+                    transform: `scale(${trophyScale}) rotate(${trophyRotate}deg)`,
+                    transformOrigin: 'bottom center',
+                  }}
+                >
+                  <Image src="/trencher-cup.png" alt="Trencher Cup" fill className="object-contain" priority />
+                </div>
+              </div>
             </div>
 
-            <div
-              className="relative ml-auto mr-2 h-[230px] w-[230px] sm:h-[270px] sm:w-[270px]"
-              style={{
-                filter: 'drop-shadow(0 0 30px rgba(0,212,255,0.35)) drop-shadow(0 0 60px rgba(0,212,255,0.15))',
-                transform: `scale(${trophyScale}) rotate(${trophyRotate}deg)`,
-              }}
-            >
-              <Image src="/trencher-cup.png" alt="Trencher Cup" fill className="object-contain" priority />
-            </div>
-
-            <div className="flex flex-col gap-5 ml-auto max-w-[390px] w-full">
+            <div className="flex flex-col gap-5 ml-auto max-w-[430px] w-full">
               {/* Champion card */}
               {champ ? (
                 <div
