@@ -17,13 +17,10 @@ const ROUND_LABELS: Record<string, string> = {
 };
 
 const BRACKET_H = 420;
-const SCROLL_EXTRA_TRAVEL = 180;
+const MIN_SCROLL_TRAVEL = 240;
 const BRACKET_SCROLL_PORTION = 0.84;
-const GROUP_STAGE_WIDTH = 920;
-const ROUND_COLUMN_WIDTH = 180;
-const CONNECTOR_WIDTH = 40;
-const ROUND_SEPARATOR_WIDTH = 40;
-const FINAL_TRAILING_WIDTH = 240;
+const ROUND_SEPARATOR_WIDTH = 28;
+const FINAL_TRAILING_WIDTH = 72;
 
 function RoundColumn({ label, matchups, gap }: { label: string; matchups: Matchup[]; gap: string }) {
   return (
@@ -41,9 +38,11 @@ function RoundColumn({ label, matchups, gap }: { label: string; matchups: Matchu
 export function TournamentBracket({ traders }: { traders: RankedTrader[] }) {
   const outerRef = useRef<HTMLDivElement>(null);
   const stickyRef = useRef<HTMLDivElement>(null);
+  const stripRef = useRef<HTMLDivElement>(null);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [targetProgress, setTargetProgress] = useState(0);
   const [visibleWidth, setVisibleWidth] = useState(780);
+  const [stripWidth, setStripWidth] = useState(0);
   const bracket = useMemo(
     () => (traders.length >= 32 ? buildBracket(traders) : null),
     [traders],
@@ -86,6 +85,7 @@ export function TournamentBracket({ traders }: { traders: RankedTrader[] }) {
     function measure() {
       if (!stickyRef.current) return;
       setVisibleWidth(stickyRef.current.clientWidth);
+      setStripWidth(stripRef.current?.scrollWidth ?? 0);
     }
 
     measure();
@@ -108,20 +108,13 @@ export function TournamentBracket({ traders }: { traders: RankedTrader[] }) {
   const ROW_H = 72;
   const champ = bracket.champion;
 
-  const overlayWidth = Math.min(visibleWidth * 0.64, 820);
-  const bracketViewportWidth = Math.max(visibleWidth - overlayWidth + 48, visibleWidth * 0.42);
-  const stripWidth =
-    GROUP_STAGE_WIDTH +
-    ROUND_SEPARATOR_WIDTH +
-    ROUND_COLUMN_WIDTH +
-    CONNECTOR_WIDTH +
-    ROUND_COLUMN_WIDTH +
-    CONNECTOR_WIDTH +
-    ROUND_COLUMN_WIDTH +
-    FINAL_TRAILING_WIDTH;
+  const overlayWidth = Math.min(visibleWidth * 0.56, 720);
+  const bracketViewportWidth = Math.max(visibleWidth - overlayWidth + 64, visibleWidth * 0.5);
+  const resolvedStripWidth = stripWidth || 1680;
 
   // Scroll the bracket against the viewport space that remains once the cup overlay owns the right side.
-  const maxTranslate = Math.max(0, stripWidth - bracketViewportWidth);
+  const maxTranslate = Math.max(0, resolvedStripWidth - bracketViewportWidth);
+  const scrollTravel = Math.max(MIN_SCROLL_TRAVEL, Math.round(maxTranslate * 0.72));
   const bracketProgress = Math.min(1, scrollProgress / BRACKET_SCROLL_PORTION);
   const translateX = -bracketProgress * maxTranslate;
 
@@ -135,8 +128,7 @@ export function TournamentBracket({ traders }: { traders: RankedTrader[] }) {
   return (
     <div>
       {/* Outer container — tall enough to give vertical scroll room for horizontal travel */}
-      {/* SCROLL_WIDTH of extra height converts to horizontal travel, plus bracket height */}
-      <div ref={outerRef} style={{ height: `calc(100vh + ${SCROLL_EXTRA_TRAVEL}px)` }}>
+      <div ref={outerRef} style={{ height: `calc(100vh + ${scrollTravel}px)` }}>
         {/* Sticky wrapper — pins the bracket to viewport while scrolling */}
         <div
           ref={stickyRef}
@@ -295,15 +287,16 @@ export function TournamentBracket({ traders }: { traders: RankedTrader[] }) {
 
           {/* Bracket strip — translates horizontally based on vertical scroll */}
           <div
+            ref={stripRef}
             className="flex items-stretch gap-0 will-change-transform"
             style={{
-              minWidth: stripWidth,
+              width: 'max-content',
               minHeight: BRACKET_H,
               transform: `translateX(${translateX}px)`,
             }}
           >
           {/* Groups: 4-col grid = 2 rows */}
-          <div className="flex-shrink-0" style={{ width: GROUP_STAGE_WIDTH }}>
+          <div className="flex-shrink-0" style={{ width: 920 }}>
             <div className="text-[8px] font-mono tracking-[2px] text-[var(--trench-text-muted)] mb-3 text-center">
               {ROUND_LABELS.groups}
             </div>

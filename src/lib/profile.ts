@@ -348,11 +348,14 @@ async function buildPublicProfileData(username: string): Promise<PublicProfileDa
 }
 
 function formatPnl(totalPnlUsd: number): string {
-  if (totalPnlUsd >= 1000) {
-    return `$${(totalPnlUsd / 1000).toFixed(1)}K`;
+  const prefix = totalPnlUsd >= 0 ? '+$' : '-$';
+  const abs = Math.abs(totalPnlUsd);
+
+  if (abs >= 1000) {
+    return `${prefix}${(abs / 1000).toFixed(1)}K`;
   }
 
-  return `$${totalPnlUsd.toFixed(0)}`;
+  return `${prefix}${abs.toFixed(0)}`;
 }
 
 export function buildProfileMetadata(profile: PublicProfileData): Metadata {

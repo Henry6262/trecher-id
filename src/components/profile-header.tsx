@@ -84,6 +84,53 @@ export function ProfileHeader({
   const [walletOpen, setWalletOpen] = useState(false);
   const walletSelectorOffset = isClaimed ? '-top-1' : 'top-3';
 
+  const renderWalletSelector = (className: string) => (
+    <div className={className}>
+      <button
+        onClick={() => setWalletOpen(!walletOpen)}
+        className="cut-xs flex items-center gap-1.5 text-[8px] font-mono text-[var(--trench-text-muted)] px-2 py-1 transition-all hover:text-[var(--trench-accent)]"
+        style={{
+          background: bannerUrl ? 'rgba(8,12,18,0.66)' : 'rgba(0,212,255,0.04)',
+          border: bannerUrl ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,212,255,0.08)',
+          backdropFilter: bannerUrl ? 'blur(10px)' : undefined,
+          WebkitBackdropFilter: bannerUrl ? 'blur(10px)' : undefined,
+        }}
+      >
+        {wallets?.[activeWallet]?.isMain && <Star size={7} className="text-[var(--trench-accent)] fill-[var(--trench-accent)]" />}
+        <span className="w-[4px] h-[4px] rounded-full flex-shrink-0" style={{ background: wallets?.[activeWallet]?.verified ? '#22c55e' : '#71717a' }} />
+        {truncateAddress(wallets?.[activeWallet]?.address || '')}
+        <ChevronDown size={9} className={`transition-transform ${walletOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      {walletOpen && wallets && wallets.length > 1 && (
+        <div
+          className="absolute top-full right-0 mt-1 cut-sm z-50"
+          style={{
+            background: 'rgba(8,12,18,0.95)',
+            border: '1px solid rgba(0,212,255,0.12)',
+            minWidth: '180px',
+          }}
+        >
+          {wallets.map((w, i) => (
+            <button
+              key={w.address}
+              onClick={() => { setActiveWallet(i); setWalletOpen(false); }}
+              className={`w-full flex items-center gap-2 px-3 py-2 text-[9px] font-mono transition-all ${
+                i === activeWallet ? 'text-[var(--trench-accent)]' : 'text-[var(--trench-text-muted)] hover:text-[var(--trench-text)]'
+              }`}
+              style={{ background: i === activeWallet ? 'rgba(0,212,255,0.06)' : 'transparent' }}
+            >
+              {w.isMain && <Star size={8} className="text-[var(--trench-accent)] fill-[var(--trench-accent)]" />}
+              <span className="w-[5px] h-[5px] rounded-full flex-shrink-0" style={{ background: w.verified ? '#22c55e' : '#71717a' }} />
+              {truncateAddress(w.address)}
+              {i === activeWallet && <Check size={10} className="ml-auto text-[var(--trench-accent)]" />}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div
       className="relative overflow-hidden"
@@ -117,7 +164,7 @@ export function ProfileHeader({
       {/* Claim banner — unclaimed profiles only */}
       {!isClaimed && (
         <div
-          className="flex items-center justify-between px-7 py-3 text-xs font-mono"
+          className="flex flex-col items-start gap-2 px-7 py-3 text-xs font-mono sm:flex-row sm:items-center sm:justify-between"
           style={{
             background: bannerUrl ? 'rgba(8,12,18,0.72)' : 'rgba(0,212,255,0.04)',
             borderBottom: bannerUrl ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,212,255,0.08)',
@@ -140,50 +187,10 @@ export function ProfileHeader({
 
       {/* Wallet selector — top-right of card */}
       {wallets && wallets.length > 0 && (
-        <div className={`absolute ${walletSelectorOffset} right-4 z-10`}>
-          <button
-            onClick={() => setWalletOpen(!walletOpen)}
-            className="cut-xs flex items-center gap-1.5 text-[8px] font-mono text-[var(--trench-text-muted)] px-2 py-1 transition-all hover:text-[var(--trench-accent)]"
-            style={{
-              background: bannerUrl ? 'rgba(8,12,18,0.66)' : 'rgba(0,212,255,0.04)',
-              border: bannerUrl ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,212,255,0.08)',
-              backdropFilter: bannerUrl ? 'blur(10px)' : undefined,
-              WebkitBackdropFilter: bannerUrl ? 'blur(10px)' : undefined,
-            }}
-          >
-            {wallets[activeWallet]?.isMain && <Star size={7} className="text-[var(--trench-accent)] fill-[var(--trench-accent)]" />}
-            <span className="w-[4px] h-[4px] rounded-full flex-shrink-0" style={{ background: wallets[activeWallet]?.verified ? '#22c55e' : '#71717a' }} />
-            {truncateAddress(wallets[activeWallet]?.address || '')}
-            <ChevronDown size={9} className={`transition-transform ${walletOpen ? 'rotate-180' : ''}`} />
-          </button>
-
-          {walletOpen && wallets.length > 1 && (
-            <div
-              className="absolute top-full right-0 mt-1 cut-sm z-50"
-              style={{
-                background: 'rgba(8,12,18,0.95)',
-                border: '1px solid rgba(0,212,255,0.12)',
-                minWidth: '180px',
-              }}
-            >
-              {wallets.map((w, i) => (
-                <button
-                  key={w.address}
-                  onClick={() => { setActiveWallet(i); setWalletOpen(false); }}
-                  className={`w-full flex items-center gap-2 px-3 py-2 text-[9px] font-mono transition-all ${
-                    i === activeWallet ? 'text-[var(--trench-accent)]' : 'text-[var(--trench-text-muted)] hover:text-[var(--trench-text)]'
-                  }`}
-                  style={{ background: i === activeWallet ? 'rgba(0,212,255,0.06)' : 'transparent' }}
-                >
-                  {w.isMain && <Star size={8} className="text-[var(--trench-accent)] fill-[var(--trench-accent)]" />}
-                  <span className="w-[5px] h-[5px] rounded-full flex-shrink-0" style={{ background: w.verified ? '#22c55e' : '#71717a' }} />
-                  {truncateAddress(w.address)}
-                  {i === activeWallet && <Check size={10} className="ml-auto text-[var(--trench-accent)]" />}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+        <>
+          {renderWalletSelector('relative z-10 mb-4 flex justify-end sm:hidden')}
+          {renderWalletSelector(`hidden sm:absolute sm:right-4 sm:z-10 ${walletSelectorOffset} sm:flex sm:justify-end`)}
+        </>
       )}
 
       {/* Hero layout — avatar left, info right */}

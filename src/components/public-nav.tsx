@@ -271,6 +271,10 @@ export function PublicNav() {
           opacity: 0;
         }
 
+        .web3me-nav-shell.hidden:not(.expanded) .web3me-nav-stack {
+          pointer-events: none;
+        }
+
         .web3me-nav-stack {
           display: flex;
           flex-direction: column;
