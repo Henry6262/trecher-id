@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { ArrowUpRight, BookOpen, ExternalLink, Globe2, Lock, Sparkles } from 'lucide-react';
+import { ArrowUpRight, BarChart3, ExternalLink, Globe2, LayoutDashboard, Lock } from 'lucide-react';
 
 type NavCard = {
   label: string;
@@ -30,50 +30,52 @@ function XIcon({ className }: { className?: string }) {
 }
 
 const X_URL = 'https://x.com/web3me';
-const DOCS_URL = 'https://github.com/Henry6262/trecher-id/tree/main/gitbook';
-
 const NAV_CARDS: NavCard[] = [
   {
-    label: 'X',
-    description: 'Follow launch updates, product drops, ranking posts, and account announcements from the main Web3Me feed.',
-    href: X_URL,
+    label: 'Home',
+    description: 'Start from the main landing surface and move through the product from one clear public entry point.',
+    href: '/',
     accent: '#00D4FF',
-    eyebrow: 'Social',
+    eyebrow: 'Landing',
     featured: true,
+    links: [
+      { label: 'Main Surface', href: '/', icon: Globe2 },
+      { label: 'Cup Section', href: '/#cup', icon: ArrowUpRight },
+    ],
+  },
+  {
+    label: 'Leaderboard',
+    description: 'Browse the live trader and dev rankings, then drop into the Trencher Cup block from the same page.',
+    href: '/leaderboard',
+    accent: '#6ee7ff',
+    eyebrow: 'Rankings',
+    links: [
+      { label: 'Trader + Dev', href: '/leaderboard', icon: BarChart3 },
+      { label: 'Cup Bracket', href: '/leaderboard#trencher-cup', icon: ArrowUpRight },
+    ],
+  },
+  {
+    label: 'Dashboard',
+    description: 'Open the authenticated workspace for wallet linking, sync health, profile setup, and the private operating surface.',
+    href: '/dashboard',
+    accent: '#33ddff',
+    eyebrow: 'Workspace',
+    links: [
+      { label: 'Overview', href: '/dashboard', icon: LayoutDashboard },
+      { label: 'Wallets', href: '/dashboard?panel=wallets', icon: ArrowUpRight },
+      { label: 'Trades', href: '/dashboard?panel=trades', icon: ArrowUpRight },
+    ],
+  },
+  {
+    label: 'X',
+    description: 'Follow launch updates, ranking posts, product drops, and account announcements from the main Web3Me feed.',
+    href: X_URL,
+    accent: '#7fdcff',
+    eyebrow: 'Social',
     external: true,
     links: [
       { label: '@web3me', href: X_URL, icon: XIcon, external: true },
     ],
-  },
-  {
-    label: 'Docs',
-    description: 'Open the GitBook source for product overview, quick start, FAQ, and profile system documentation.',
-    href: DOCS_URL,
-    accent: '#6ee7ff',
-    eyebrow: 'GitBook',
-    external: true,
-    links: [
-      { label: 'Open GitBook', href: DOCS_URL, icon: BookOpen, external: true },
-    ],
-  },
-  {
-    label: 'Website',
-    description: 'Jump out to the live site root in a clean tab if you want the public surface without the expanded menu open.',
-    href: 'https://web3me.fun',
-    accent: '#33ddff',
-    eyebrow: 'Primary',
-    external: true,
-    links: [
-      { label: 'web3me.fun', href: 'https://web3me.fun', icon: Globe2, external: true },
-    ],
-  },
-  {
-    label: 'Dexscreener',
-    description: 'The token market surface will slot in here as soon as the token is live and the pair is public.',
-    accent: '#7c8aa0',
-    eyebrow: 'Market',
-    comingSoon: true,
-    links: [{ label: 'Coming Soon', icon: Lock, disabled: true }],
   },
 ];
 
@@ -93,28 +95,26 @@ export function PublicNav() {
   const router = useRouter();
   const pathname = usePathname();
   const [isExpanded, setIsExpanded] = useState(false);
-  const [isNavVisible, setIsNavVisible] = useState(false);
+  const [hasScrolledPastHero, setHasScrolledPastHero] = useState(pathname !== '/');
   const [pendingSectionId, setPendingSectionId] = useState<string | null>(null);
 
   useEffect(() => {
-    setIsExpanded(false);
-  }, [pathname]);
-
-  useEffect(() => {
     if (pathname !== '/') {
-      setIsNavVisible(true);
       return;
     }
 
     const handleScroll = () => {
       const heroHeight = window.innerHeight;
       const scrollY = window.scrollY;
-      setIsNavVisible(scrollY > heroHeight * 0.8);
+      setHasScrolledPastHero(scrollY > heroHeight * 0.8);
     };
 
-    handleScroll();
+    const frameId = window.requestAnimationFrame(handleScroll);
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.cancelAnimationFrame(frameId);
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, [pathname]);
 
   useEffect(() => {
@@ -172,6 +172,7 @@ export function PublicNav() {
 
   const accentStyle = (accent: string): CSSProperties =>
     ({ ['--accent' as string]: accent }) as CSSProperties;
+  const isNavVisible = pathname !== '/' || hasScrolledPastHero;
 
   const navigateToHref = (href: string) => {
     const [rawPath, rawHash] = href.split('#');
@@ -434,6 +435,7 @@ export function PublicNav() {
           opacity: 0;
           transform: scale(0.4) rotate(-180deg);
           pointer-events: none;
+          cursor: pointer;
           transition:
             opacity 0.25s ease-out,
             transform 0.25s ease-out;

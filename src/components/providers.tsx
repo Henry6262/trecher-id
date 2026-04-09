@@ -1,6 +1,8 @@
 'use client';
 
 import { PrivyProvider } from '@privy-io/react-auth';
+import { Suspense } from 'react';
+import { PrivySessionBridge } from '@/components/privy-session-bridge';
 
 const PRIVY_APP_ID = process.env.NEXT_PUBLIC_PRIVY_APP_ID || 'placeholder';
 
@@ -26,6 +28,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
         },
       }}
     >
+      <Suspense fallback={null}>
+        <PrivySessionBridge />
+      </Suspense>
       {children}
     </PrivyProvider>
   );

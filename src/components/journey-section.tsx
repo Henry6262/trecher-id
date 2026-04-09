@@ -352,11 +352,11 @@ export function JourneySection() {
 
       <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
         <Link
-          href="/login"
+          href="/dashboard"
           className="inline-flex items-center justify-center px-6 py-2.5 text-[10px] font-bold tracking-[2px] text-black cut-xs"
           style={{ background: '#00D4FF', textDecoration: 'none' }}
         >
-          CLAIM YOUR HANDLE
+          OPEN DASHBOARD
         </Link>
         <Link
           href="/leaderboard"

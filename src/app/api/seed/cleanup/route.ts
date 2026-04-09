@@ -21,6 +21,7 @@ export async function POST(req: Request) {
     // Delete all related data (cascade should handle most, but be explicit)
     await prisma.pinnedTrade.deleteMany({ where: { userId: user.id } });
     await prisma.walletTrade.deleteMany({ where: { wallet: { userId: user.id } } });
+    await prisma.walletTradeEvent.deleteMany({ where: { wallet: { userId: user.id } } });
     await prisma.userRanking.deleteMany({ where: { userId: user.id } });
     await prisma.tokenDeployment.deleteMany({ where: { userId: user.id } });
     await prisma.link.deleteMany({ where: { userId: user.id } });

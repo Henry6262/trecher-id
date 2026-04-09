@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Check, Globe, ChevronRight } from 'lucide-react';
+import { Check, Globe, ChevronRight, ExternalLink } from 'lucide-react';
 import { AvatarImage } from '@/components/avatar-image';
 import { CutButton } from '@/components/cut-button';
 import { PublicNav } from '@/components/public-nav';
@@ -14,7 +14,7 @@ import { ActivityTicker } from '@/components/activity-ticker';
 import { JourneySection } from '@/components/journey-section';
 import { ReferralSection } from '@/components/referral-section';
 import { SectionRailNav } from '@/components/section-rail-nav';
-import { normalizeImageUrl } from '@/lib/images';
+import { getPublicAvatarUrl } from '@/lib/images';
 import type { TickerItem } from '@/lib/types';
 
 const Lightspeed = dynamic(() => import('@/components/lightspeed'), { ssr: false });
@@ -34,6 +34,7 @@ interface TraderData {
   topTrades: {
     id: string;
     token: string;
+    tokenMint: string | null;
     tokenImage: string | null;
     pnlPercent: string;
     pnlPercentValue: number;
@@ -123,7 +124,8 @@ function getValueTone(value: number) {
 }
 
 function PreviewCardInner({ featured }: { featured: TraderData }) {
-  const featuredProfileLabel = `web3me.fun/${featured.username}`;
+  const featuredProfileLabel = 'web3me.fun/leaderboard';
+  const profileHref = '/leaderboard';
   const pnlTone = getValueTone(featured.pnlValue);
 
   return (
@@ -136,7 +138,7 @@ function PreviewCardInner({ featured }: { featured: TraderData }) {
             <div className="relative flex-shrink-0">
               <div className="overflow-hidden" style={{ width: 56, height: 56, clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)', border: '2px solid rgba(0,212,255,0.35)', boxShadow: '0 0 20px rgba(0,212,255,0.15)' }}>
                 <AvatarImage
-                  src={featured.avatarUrl || `https://unavatar.io/twitter/${featured.username}`}
+                  src={getPublicAvatarUrl(featured.username, featured.avatarUrl)}
                   alt={featured.name}
                   width={56}
                   height={56}
@@ -176,11 +178,15 @@ function PreviewCardInner({ featured }: { featured: TraderData }) {
         {/* Link — single */}
         <div className="px-5 py-3">
           <div className="text-[7px] font-mono tracking-[2px] text-[var(--trench-text-muted)] mb-2">LINKS</div>
-          <div className="flex items-center gap-2.5 px-3 py-2" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', clipPath: 'polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px)' }}>
+          <Link
+            href={profileHref}
+            className="group flex items-center gap-2.5 px-3 py-2 transition-colors"
+            style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', clipPath: 'polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px)' }}
+          >
             <Globe size={14} className="flex-shrink-0 text-[rgba(0,212,255,0.7)]" />
-            <span className="text-[11px] text-white font-medium flex-1 truncate">{featuredProfileLabel}</span>
-            <ChevronRight size={14} className="text-[rgba(255,255,255,0.2)] flex-shrink-0" />
-          </div>
+            <span className="text-[11px] text-white font-medium flex-1 truncate transition-colors group-hover:text-[var(--trench-accent)]">{featuredProfileLabel}</span>
+            <ChevronRight size={14} className="text-[rgba(255,255,255,0.2)] flex-shrink-0 transition-colors group-hover:text-[var(--trench-accent)]" />
+          </Link>
         </div>
 
         {/* Divider */}
@@ -192,14 +198,20 @@ function PreviewCardInner({ featured }: { featured: TraderData }) {
             <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2">
               {featured.topTrades.map((trade) => {
                 const tradeTone = getValueTone(trade.pnlPercentValue);
+                const tradeHref = trade.tokenMint ? `https://dexscreener.com/solana/${trade.tokenMint}` : profileHref;
+                const opensExternally = !!trade.tokenMint;
                 return (
-                  <div
+                  <a
                     key={trade.id}
-                    className="min-w-[210px] shrink-0 px-3 py-2.5"
+                    href={tradeHref}
+                    target={opensExternally ? '_blank' : undefined}
+                    rel={opensExternally ? 'noopener noreferrer' : undefined}
+                    className="group min-w-[210px] shrink-0 px-3 py-2.5 transition-colors"
                     style={{
                       background: 'rgba(255,255,255,0.02)',
                       border: '1px solid rgba(255,255,255,0.05)',
                       clipPath: 'polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px)',
+                      textDecoration: 'none',
                     }}
                   >
                     <div className="flex items-center gap-2.5">
@@ -216,8 +228,11 @@ function PreviewCardInner({ featured }: { featured: TraderData }) {
                         )}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <div className="truncate text-[11px] font-bold text-white">{trade.token}</div>
-                        <div className="text-[10px] font-mono font-bold" style={{ color: tradeTone.color }}>{trade.pnlPercent}</div>
+                        <div className="truncate text-[11px] font-bold text-white transition-colors group-hover:text-[var(--trench-accent)]">{trade.token}</div>
+                        <div className="flex items-center gap-1.5 text-[10px] font-mono font-bold" style={{ color: tradeTone.color }}>
+                          <span>{trade.pnlPercent}</span>
+                          <ExternalLink size={10} className="text-[rgba(255,255,255,0.28)] opacity-0 transition-opacity group-hover:opacity-100" />
+                        </div>
                       </div>
                     </div>
                     <div className="mt-2 flex gap-2">
@@ -232,7 +247,7 @@ function PreviewCardInner({ featured }: { featured: TraderData }) {
                         </div>
                       )}
                     </div>
-                  </div>
+                  </a>
                 );
               })}
             </div>
@@ -325,7 +340,7 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
     }).catch(() => {});
   }, [refCode]);
 
-  const avatarUrls = traders.map((t) => normalizeImageUrl(t.avatarUrl) || `https://unavatar.io/twitter/${t.username}`);
+  const avatarUrls = traders.map((t) => getPublicAvatarUrl(t.username, t.avatarUrl));
   const domeImages = avatarUrls.map(src => ({ src, alt: '' }));
   return (
     <div className="relative min-h-screen" style={{ background: '#050508' }}>
@@ -379,11 +394,14 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
             </h1>
 
             <p className="mb-8 max-w-sm text-sm leading-relaxed text-[var(--trench-text-muted)]">
-              The shareable identity page for Solana traders. Custom links, verified on-chain trading performance, one URL.
+              The landing surface for Web3Me. Check the rankings, inspect the Trencher Cup, then jump into your dashboard to connect wallets and set up your trading identity.
             </p>
 
-            <CutButton href="/login" size="lg">Create Your Web3Me</CutButton>
-            <p className="mt-4 text-[9px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">FREE &middot; 30 SECONDS &middot; SIGN IN WITH X</p>
+            <div className="flex flex-wrap items-center gap-3">
+              <CutButton href="/dashboard" size="lg">Open Dashboard</CutButton>
+              <CutButton href="/leaderboard" size="lg" variant="secondary">See Leaderboard</CutButton>
+            </div>
+            <p className="mt-4 text-[9px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">LANDING &middot; LEADERBOARD &middot; DASHBOARD</p>
           </div>
 
           {/* Preview card — shader-backed profile card */}
@@ -496,8 +514,8 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
           <div className="h-[520px] w-full relative">
             {/* CTA centered on gallery */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 text-center px-10 py-8 cut-sm" style={{ background: 'rgba(5,5,8,0.6)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', boxShadow: '0 0 60px rgba(5,5,8,0.8), 0 0 120px rgba(5,5,8,0.4)' }}>
-              <p className="mb-3 text-[12px] text-[var(--trench-text-muted)]">Create yours today.</p>
-              <CutButton href="/login" size="lg">Create Your Web3Me</CutButton>
+              <p className="mb-3 text-[12px] text-[var(--trench-text-muted)]">Ready to wire in your own wallets?</p>
+              <CutButton href="/dashboard" size="lg">Open Dashboard</CutButton>
             </div>
 
             <DomeGallery

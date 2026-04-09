@@ -3,6 +3,7 @@
 import { useMemo, useRef, useEffect, useState } from 'react';
 import Image from 'next/image';
 import { AvatarImage } from '@/components/avatar-image';
+import { getPublicAvatarUrl } from '@/lib/images';
 import { ParticipateButton } from './participate-button';
 import { buildBracket } from './bracket-utils';
 import { GroupCard } from './group-card';
@@ -175,7 +176,7 @@ export function TournamentBracket({ traders }: { traders: RankedTrader[] }) {
                         style={{ border: '2px solid rgba(255,215,0,0.65)', boxShadow: '0 0 16px rgba(255,215,0,0.14)' }}
                       >
                         <AvatarImage
-                          src={champ.avatarUrl || `https://unavatar.io/twitter/${champ.username}`}
+                          src={getPublicAvatarUrl(champ.username, champ.avatarUrl)}
                           alt={champ.username}
                           width={48}
                           height={48}

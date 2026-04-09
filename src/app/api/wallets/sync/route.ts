@@ -4,52 +4,8 @@ import { prisma } from '@/lib/prisma';
 import { getTokenMetadata, getWalletTransactions } from '@/lib/helius';
 import { getSolPrice } from '@/lib/sol-price';
 import { invalidatePublicProfileCache } from '@/lib/profile';
-
-const SOL_MINT = 'So11111111111111111111111111111111111111112';
-
-function parseSwaps(
-  txns: Awaited<ReturnType<typeof getWalletTransactions>>['txns'],
-  walletAddress: string,
-) {
-  const tokenMap = new Map<string, {
-    buySol: number; sellSol: number; count: number;
-    firstAt: number; lastAt: number;
-  }>();
-
-  for (const tx of txns) {
-    if (tx.type !== 'SWAP') continue;
-
-    const tokenTransfers = tx.tokenTransfers || [];
-    const accountData = tx.accountData || [];
-
-    const nonSolToken = tokenTransfers.find((t: { mint: string }) => t.mint !== SOL_MINT);
-    if (!nonSolToken) continue;
-
-    const tokenMint = nonSolToken.mint;
-    const tokenReceived = nonSolToken.toUserAccount === walletAddress;
-    const tokenSent = nonSolToken.fromUserAccount === walletAddress;
-    if (!tokenReceived && !tokenSent) continue;
-
-    const walletAccount = accountData.find((a: { account: string }) => a.account === walletAddress);
-    const netSol = (walletAccount?.nativeBalanceChange ?? 0) / 1e9;
-
-    if (!tokenMap.has(tokenMint)) {
-      tokenMap.set(tokenMint, { buySol: 0, sellSol: 0, count: 0, firstAt: tx.timestamp, lastAt: tx.timestamp });
-    }
-    const entry = tokenMap.get(tokenMint)!;
-    entry.firstAt = Math.min(entry.firstAt, tx.timestamp);
-    entry.lastAt = Math.max(entry.lastAt, tx.timestamp);
-    entry.count++;
-
-    if (tokenReceived && netSol < -0.001) {
-      entry.buySol += Math.abs(netSol);
-    } else if (tokenSent && netSol > 0.001) {
-      entry.sellSol += netSol;
-    }
-  }
-
-  return tokenMap;
-}
+import { parseWalletTrades } from '@/lib/wallet-trade-parser';
+import { recordWalletSyncFailure, recordWalletSyncSuccess } from '@/lib/wallet-sync-health';
 
 export async function POST(req: Request) {
   try {
@@ -83,56 +39,137 @@ export async function POST(req: Request) {
     let newTrades = 0;
 
     for (const wallet of wallets) {
-      const { txns, newestSignature } = await getWalletTransactions(wallet.address, {
-        since: wallet.lastSignature,
-      });
+      try {
+        const attemptedAt = new Date();
+        const {
+          txns,
+          newestSignature,
+          oldestFetchedSignature,
+          pagesFetched,
+          previousCursorFound,
+          reachedHistoryEnd,
+          pageLimitReached,
+        } = await getWalletTransactions(wallet.address, {
+          since: wallet.lastSignature,
+        });
 
-      if (txns.length > 0) {
-        const swapMap = parseSwaps(txns, wallet.address);
-        const tokenMetadata = await getTokenMetadata(Array.from(swapMap.keys()));
-        newTrades += swapMap.size;
+        let tradeRows = 0;
+        let eventRows = 0;
+        let candidateTxCount = 0;
+        let oldestExactEventAt: Date | null = null;
 
-        for (const [tokenMint, data] of swapMap) {
-          const meta = tokenMetadata.get(tokenMint);
-          await prisma.walletTrade.upsert({
-            where: { walletId_tokenMint: { walletId: wallet.id, tokenMint } },
-            create: {
-              walletId: wallet.id,
-              tokenMint,
-              tokenSymbol: meta?.symbol || tokenMint.slice(0, 6),
-              tokenName: meta?.name || null,
-              tokenImageUrl: meta?.image || null,
-              buySol: data.buySol,
-              sellSol: data.sellSol,
-              pnlSol: data.sellSol - data.buySol,
-              tradeCount: data.count,
-              firstTradeAt: new Date(data.firstAt * 1000),
-              lastTradeAt: new Date(data.lastAt * 1000),
-            },
-            update: {
-              tokenSymbol: meta?.symbol || tokenMint.slice(0, 6),
-              tokenName: meta?.name || null,
-              tokenImageUrl: meta?.image || null,
-              buySol: { increment: data.buySol },
-              sellSol: { increment: data.sellSol },
-              pnlSol: { increment: data.sellSol - data.buySol },
-              tradeCount: { increment: data.count },
-              lastTradeAt: new Date(data.lastAt * 1000),
-              updatedAt: new Date(),
-            },
-          });
+        if (txns.length > 0) {
+          const parsed = parseWalletTrades(txns, wallet.address);
+          const tokenMetadata = await getTokenMetadata(Array.from(parsed.aggregates.keys()));
+          tradeRows = parsed.aggregates.size;
+          eventRows = parsed.events.length;
+          candidateTxCount = parsed.candidateTxCount;
+          oldestExactEventAt =
+            parsed.events.length > 0
+              ? parsed.events.reduce(
+                  (oldest, event) => {
+                    const eventAt = new Date(event.timestamp * 1000);
+                    return oldest == null || eventAt < oldest ? eventAt : oldest;
+                  },
+                  null as Date | null,
+                )
+              : null;
+          newTrades += parsed.aggregates.size;
+
+          for (const [tokenMint, data] of parsed.aggregates) {
+            const meta = tokenMetadata.get(tokenMint);
+            await prisma.walletTrade.upsert({
+              where: { walletId_tokenMint: { walletId: wallet.id, tokenMint } },
+              create: {
+                walletId: wallet.id,
+                tokenMint,
+                tokenSymbol: meta?.symbol || tokenMint.slice(0, 6),
+                tokenName: meta?.name || null,
+                tokenImageUrl: meta?.image || null,
+                buySol: data.buySol,
+                sellSol: data.sellSol,
+                pnlSol: data.sellSol - data.buySol,
+                tradeCount: data.count,
+                firstTradeAt: new Date(data.firstAt * 1000),
+                lastTradeAt: new Date(data.lastAt * 1000),
+              },
+              update: {
+                tokenSymbol: meta?.symbol || tokenMint.slice(0, 6),
+                tokenName: meta?.name || null,
+                tokenImageUrl: meta?.image || null,
+                buySol: { increment: data.buySol },
+                sellSol: { increment: data.sellSol },
+                pnlSol: { increment: data.sellSol - data.buySol },
+                tradeCount: { increment: data.count },
+                lastTradeAt: new Date(data.lastAt * 1000),
+                updatedAt: new Date(),
+              },
+            });
+          }
+
+          for (const event of parsed.events) {
+            const meta = tokenMetadata.get(event.tokenMint);
+            await prisma.walletTradeEvent.upsert({
+              where: {
+                walletId_signature_tokenMint_type: {
+                  walletId: wallet.id,
+                  signature: event.signature,
+                  tokenMint: event.tokenMint,
+                  type: event.type,
+                },
+              },
+              create: {
+                walletId: wallet.id,
+                signature: event.signature,
+                tokenMint: event.tokenMint,
+                tokenSymbol: meta?.symbol || event.tokenMint.slice(0, 6),
+                tokenName: meta?.name || null,
+                tokenImageUrl: meta?.image || null,
+                type: event.type,
+                amountSol: event.amountSol,
+                timestamp: new Date(event.timestamp * 1000),
+              },
+              update: {
+                tokenSymbol: meta?.symbol || event.tokenMint.slice(0, 6),
+                tokenName: meta?.name || null,
+                tokenImageUrl: meta?.image || null,
+                amountSol: event.amountSol,
+                timestamp: new Date(event.timestamp * 1000),
+              },
+            });
+          }
         }
 
-        await prisma.wallet.update({
-          where: { id: wallet.id },
-          data: {
-            lastSignature: newestSignature,
-            lastFetchedAt: new Date(),
-          },
+        await recordWalletSyncSuccess({
+          walletId: wallet.id,
+          syncMode: 'incremental',
+          attemptedAt,
+          successfulAt: new Date(),
+          newestSignature,
+          oldestFetchedSignature,
+          previousSignature: wallet.lastSignature,
+          txnsFetched: txns.length,
+          candidateTxCount,
+          tradeRows,
+          eventRows,
+          pagesFetched,
+          previousCursorFound,
+          reachedHistoryEnd,
+          pageLimitReached,
+          oldestExactEventAt,
         });
-      }
 
-      walletsUpdated++;
+        walletsUpdated++;
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Unknown wallet sync error';
+        await recordWalletSyncFailure({
+          walletId: wallet.id,
+          syncMode: 'incremental',
+          error: message,
+          previousSignature: wallet.lastSignature,
+        });
+        throw error;
+      }
     }
 
     // Fix 1: Batch trade query after loop to eliminate N+1

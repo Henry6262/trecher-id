@@ -1,7 +1,6 @@
 'use client';
-
-import Link from 'next/link';
 import { AvatarImage } from '@/components/avatar-image';
+import { getPublicAvatarUrl } from '@/lib/images';
 import type { Group } from './bracket-utils';
 
 export function GroupCard({ group }: { group: Group }) {
@@ -30,9 +29,8 @@ export function GroupCard({ group }: { group: Group }) {
       {group.traders.map((trader, i) => {
         const qualified = i < 2;
         return (
-          <Link
+          <div
             key={trader.username}
-            href={`/${trader.username}`}
             className="flex items-center gap-2 px-3 transition-colors hover:bg-[rgba(0,212,255,0.03)]"
             style={{
               height: 44,
@@ -52,7 +50,7 @@ export function GroupCard({ group }: { group: Group }) {
               style={{ border: '1.5px solid rgba(0,212,255,0.15)' }}
             >
               <AvatarImage
-                src={trader.avatarUrl || `https://unavatar.io/twitter/${trader.username}`}
+                src={getPublicAvatarUrl(trader.username, trader.avatarUrl)}
                 alt={trader.displayName}
                 width={24}
                 height={24}
@@ -79,7 +77,7 @@ export function GroupCard({ group }: { group: Group }) {
                 ? `${Math.round(trader.pnlUsd / 1000)}K`
                 : Math.round(trader.pnlUsd)}
             </span>
-          </Link>
+          </div>
         );
       })}
     </div>

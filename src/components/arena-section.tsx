@@ -4,6 +4,8 @@ import { useEffect, useState, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { GlassCard } from './glass-card';
+import { AvatarImage } from './avatar-image';
+import { getPublicAvatarUrl } from '@/lib/images';
 
 // ─── Types ───────────────────────────────────────────────────
 
@@ -31,13 +33,13 @@ const PHASE_DURATIONS: Record<Phase, number> = {
 function Avatar({ trader, size = 80 }: { trader: ArenaTrader; size?: number }) {
   return (
     <div className="rounded-full overflow-hidden flex-shrink-0" style={{ width: size, height: size, border: '2px solid rgba(255,255,255,0.1)' }}>
-      {trader.avatarUrl ? (
-        <Image src={trader.avatarUrl} alt={trader.username} width={size} height={size} className="w-full h-full object-cover" unoptimized />
-      ) : (
-        <div className="w-full h-full flex items-center justify-center font-black" style={{ background: 'linear-gradient(135deg, #333, #1a1a1a)', color: '#555', fontSize: size * 0.35 }}>
-          {trader.username.charAt(0).toUpperCase()}
-        </div>
-      )}
+      <AvatarImage
+        src={getPublicAvatarUrl(trader.username, trader.avatarUrl)}
+        alt={trader.username}
+        width={size}
+        height={size}
+        className="w-full h-full object-cover"
+      />
     </div>
   );
 }
@@ -74,13 +76,13 @@ function Slot({
       style={{ background: styles.bg, border: `1px solid ${styles.border}`, opacity: styles.opacity }}
     >
       <div className="w-5 h-5 rounded-full overflow-hidden flex-shrink-0" style={{ filter: styles.filter }}>
-        {trader.avatarUrl ? (
-          <Image src={trader.avatarUrl} alt={trader.username} width={20} height={20} className="w-full h-full object-cover" unoptimized />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-[7px] font-bold" style={{ background: '#222', color: '#666' }}>
-            {trader.username.charAt(0).toUpperCase()}
-          </div>
-        )}
+        <AvatarImage
+          src={getPublicAvatarUrl(trader.username, trader.avatarUrl)}
+          alt={trader.username}
+          width={20}
+          height={20}
+          className="w-full h-full object-cover"
+        />
       </div>
       <span className={`text-[9px] font-bold truncate flex-1 ${styles.strikethrough ? 'line-through' : ''}`} style={{ color: styles.nameColor }}>
         @{trader.username}
@@ -441,13 +443,13 @@ export function ArenaSection() {
                   {champion ? (
                     <div className="relative animate-[winnerPop_0.5s_ease-out_forwards]">
                       <div className="w-[60px] h-[60px] rounded-full mx-auto overflow-hidden" style={{ border: '3px solid #00D4FF', boxShadow: '0 0 30px rgba(0,212,255,0.4)' }}>
-                        {champion.avatarUrl ? (
-                          <Image src={champion.avatarUrl} alt="" width={60} height={60} className="w-full h-full object-cover" unoptimized />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-[20px] font-black" style={{ background: 'linear-gradient(135deg, #00D4FF, #33DDFF)', color: '#000' }}>
-                            {champion.username.charAt(0).toUpperCase()}
-                          </div>
-                        )}
+                        <AvatarImage
+                          src={getPublicAvatarUrl(champion.username, champion.avatarUrl)}
+                          alt={champion.username}
+                          width={60}
+                          height={60}
+                          className="w-full h-full object-cover"
+                        />
                       </div>
                       {/* Name — absolute below */}
                       <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[9px] font-black whitespace-nowrap" style={{ color: '#00D4FF' }}>@{champion.username}</div>

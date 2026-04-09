@@ -11,7 +11,7 @@ interface ParticipateButtonProps {
 
 export function ParticipateButton({ className, size = 'lg' }: ParticipateButtonProps) {
   const router = useRouter();
-  const { ready, authenticated } = usePrivy();
+  const { ready, authenticated, login } = usePrivy();
 
   function handleClick() {
     if (ready && authenticated) {
@@ -19,7 +19,12 @@ export function ParticipateButton({ className, size = 'lg' }: ParticipateButtonP
       return;
     }
 
-    router.push('/login?participate=1');
+    if (ready) {
+      login();
+      return;
+    }
+
+    router.push('/?auth=1&participate=1&next=%2Fdashboard');
   }
 
   return (

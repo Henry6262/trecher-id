@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { Check, Globe } from 'lucide-react';
 import { AvatarImage } from '@/components/avatar-image';
-import { normalizeImageUrl } from '@/lib/images';
+import { getPublicAvatarUrl, normalizeImageUrl } from '@/lib/images';
 
 interface HeroProfileData {
   username: string;
@@ -104,7 +104,7 @@ function Identity({ featured }: { featured: HeroProfileData }) {
     <div className="flex items-start gap-4">
       <div className="relative h-16 w-16 overflow-hidden rounded-[18px]" style={{ border: '2px solid rgba(0,212,255,0.35)', boxShadow: '0 0 24px rgba(0,212,255,0.18)' }}>
         <AvatarImage
-          src={featured.avatarUrl || `https://unavatar.io/twitter/${featured.username}`}
+          src={getPublicAvatarUrl(featured.username, featured.avatarUrl)}
           alt={featured.name}
           width={64}
           height={64}

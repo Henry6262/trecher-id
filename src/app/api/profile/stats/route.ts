@@ -15,5 +15,11 @@ export async function GET(req: Request) {
   const ranking = await prisma.userRanking.findUnique({ where: { userId_period: { userId: user.id, period } } });
   if (!ranking) return NextResponse.json(null);
 
-  return NextResponse.json({ pnlUsd: ranking.pnlUsd, winRate: ranking.winRate, trades: ranking.trades, period });
+  return NextResponse.json({
+    pnlUsd: ranking.pnlUsd,
+    winRate: ranking.winRate,
+    trades: ranking.trades,
+    rank: ranking.rank,
+    period,
+  });
 }

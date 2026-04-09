@@ -63,8 +63,8 @@ const SECTIONS: Section[] = [
   },
   {
     id: 'login',
-    label: 'Create Yours',
-    href: '/login',
+    label: 'Dashboard',
+    href: '/dashboard',
     icon: (
       <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -112,7 +112,7 @@ export function SectionRailNav(): ReactNode {
 
   const navigateToSection = (section: Section): void => {
     if (section.href) {
-      window.location.href = section.href;
+      window.location.assign(section.href);
       return;
     }
 
@@ -123,7 +123,7 @@ export function SectionRailNav(): ReactNode {
   };
 
   return (
-    <div className="fixed top-4 right-3 z-50 md:top-5 md:right-4 lg:top-7 lg:right-5">
+    <div className="fixed top-4 right-3 z-30 md:top-5 md:right-4 lg:top-7 lg:right-5">
           <div
             className="absolute left-1/2 bottom-full h-[200vh] w-[3px] -translate-x-1/2"
             style={{

@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { LandingContent } from '@/components/landing-content';
 import { formatPnl } from '@/lib/utils';
 import { cached } from '@/lib/redis';
+import { resolveAvatarRows } from '@/lib/avatar-resolution';
 import type { TickerItem } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
@@ -21,6 +22,7 @@ export default async function LandingPage({ searchParams }: { searchParams: Prom
     topTrades: {
       id: string;
       token: string;
+      tokenMint: string | null;
       tokenImage: string | null;
       pnlPercent: string;
       pnlPercentValue: number;
@@ -50,14 +52,27 @@ export default async function LandingPage({ searchParams }: { searchParams: Prom
   });
 
   // Fetch leaderboard server-side for instant render
-  const rankings = await prisma.userRanking.findMany({
-    where: { period: '7d' },
-    orderBy: { pnlUsd: 'desc' },
+  const rankedRows = await prisma.userRanking.findMany({
+    where: { period: '7d', trades: { gt: 0 }, rank: { not: null } },
+    orderBy: { rank: 'asc' },
     take: 50,
     include: { user: { select: { username: true, displayName: true, avatarUrl: true, isClaimed: true } } },
   });
-  leaderboardData = rankings.map((r, i) => ({
-    rank: i + 1,
+  const rankings = rankedRows.length > 0
+    ? rankedRows
+    : await prisma.userRanking.findMany({
+        where: { period: '7d', trades: { gt: 0 } },
+        orderBy: [
+          { pnlUsd: 'desc' },
+          { winRate: 'desc' },
+          { trades: 'desc' },
+          { userId: 'asc' },
+        ],
+        take: 50,
+        include: { user: { select: { username: true, displayName: true, avatarUrl: true, isClaimed: true } } },
+      });
+  leaderboardData = await resolveAvatarRows(rankings.map((r, i) => ({
+    rank: r.rank ?? (i + 1),
     username: r.user.username,
     displayName: r.user.displayName,
     avatarUrl: r.user.avatarUrl,
@@ -66,7 +81,7 @@ export default async function LandingPage({ searchParams }: { searchParams: Prom
     pnlSol: r.pnlSol,
     winRate: r.winRate,
     trades: r.trades,
-  }));
+  })));
 
   const rankedUsernames = leaderboardData.slice(0, 15).map((r) => r.username);
   const users = rankedUsernames.length > 0
@@ -94,7 +109,8 @@ export default async function LandingPage({ searchParams }: { searchParams: Prom
       })
     : [];
 
-  const userByUsername = new Map(users.map((user) => [user.username, user]));
+  const usersWithResolvedAvatars = await resolveAvatarRows(users);
+  const userByUsername = new Map(usersWithResolvedAvatars.map((user) => [user.username, user]));
   const tradeImageByUserAndMint = new Map(
     tokenImageRows.map((row) => [`${row.wallet.user.username}:${row.tokenMint}`, row.tokenImageUrl]),
   );
@@ -127,6 +143,7 @@ export default async function LandingPage({ searchParams }: { searchParams: Prom
           return {
             id: trade.id,
             token: trade.tokenSymbol,
+            tokenMint: trade.tokenMint,
             tokenImage: resolvedTokenImage,
             pnlPercent: `${trade.totalPnlPercent >= 0 ? '+' : ''}${trade.totalPnlPercent.toFixed(0)}%`,
             pnlPercentValue: trade.totalPnlPercent,

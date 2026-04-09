@@ -1,35 +1,41 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { getPublicProfileData } from '@/lib/profile';
+
+interface PnlHistoryResponse {
+  source: 'exact_helius' | 'derived_aggregates' | 'unavailable';
+  series: { time: string; value: number }[];
+}
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const username = searchParams.get('username');
   if (!username) return NextResponse.json({ error: 'username required' }, { status: 400 });
 
-  const user = await prisma.user.findUnique({
-    where: { username },
-    select: { id: true, wallets: { select: { id: true } } },
-  });
-  if (!user) return NextResponse.json({ error: 'not found' }, { status: 404 });
+  const profile = await getPublicProfileData(username);
+  if (!profile) return NextResponse.json({ error: 'not found' }, { status: 404 });
 
-  const walletIds = user.wallets.map(w => w.id);
-  if (walletIds.length === 0) return NextResponse.json([]);
-
-  // Get all WalletTrade records and bucket by day (lastTradeAt)
-  const trades = await prisma.walletTrade.findMany({
-    where: { walletId: { in: walletIds } },
-    select: { pnlSol: true, lastTradeAt: true },
-    orderBy: { lastTradeAt: 'asc' },
-  });
-
-  // Aggregate PnL by day
-  const dailyMap = new Map<string, number>();
-  for (const t of trades) {
-    const day = t.lastTradeAt.toISOString().slice(0, 10);
-    dailyMap.set(day, (dailyMap.get(day) ?? 0) + t.pnlSol);
+  if (profile.dataProvenance.eventSource !== 'exact_helius') {
+    return NextResponse.json(
+      {
+        source: profile.dataProvenance.eventSource,
+        series: [],
+      } satisfies PnlHistoryResponse,
+      {
+        headers: { 'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600' },
+      },
+    );
   }
 
-  // Build cumulative series
+  const dailyMap = new Map<string, number>();
+
+  for (const trade of profile.allTrades) {
+    for (const txn of trade.transactions) {
+      const day = new Date(txn.timestamp * 1000).toISOString().slice(0, 10);
+      const signedAmount = txn.type === 'BUY' ? -txn.amountSol : txn.amountSol;
+      dailyMap.set(day, (dailyMap.get(day) ?? 0) + signedAmount);
+    }
+  }
+
   let cumulative = 0;
   const series = Array.from(dailyMap.entries())
     .sort(([a], [b]) => a.localeCompare(b))
@@ -38,7 +44,12 @@ export async function GET(req: Request) {
       return { time, value: Math.round(cumulative * 100) / 100 };
     });
 
-  return NextResponse.json(series, {
+  const response: PnlHistoryResponse = {
+    source: profile.dataProvenance.eventSource,
+    series,
+  };
+
+  return NextResponse.json(response, {
     headers: { 'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600' },
   });
 }

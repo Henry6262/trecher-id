@@ -11,7 +11,7 @@ export function BackgroundLayer() {
         primaryColor="#00D4FF"
         secondaryColor="#0066AA"
         tertiaryColor="#00A3CC"
-        speed={0.7}
+        speed={0.4}
         streakCount={140}
         stretchFactor={0.045}
         intensity={1.1}

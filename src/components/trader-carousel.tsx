@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { useRef, useEffect } from 'react';
 import { Check } from 'lucide-react';
 import { BorderGlow } from './border-glow';
+import { AvatarImage } from './avatar-image';
+import { getPublicAvatarUrl } from '@/lib/images';
 
 interface Trader {
   readonly username: string;
@@ -74,7 +76,7 @@ export function TraderCarousel({ traders }: TraderCarouselProps) {
             fillOpacity={0.2}
           >
             <Link
-              href={`/${t.username}`}
+              href="/leaderboard"
               className="block relative group"
               style={{ clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)' }}
             >
@@ -86,8 +88,8 @@ export function TraderCarousel({ traders }: TraderCarouselProps) {
                     className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0"
                     style={{ border: '2px solid rgba(0,212,255,0.25)', boxShadow: '0 0 16px rgba(0,212,255,0.15)' }}
                   >
-                    <Image
-                      src={t.avatarUrl || `https://unavatar.io/twitter/${t.username}`}
+                    <AvatarImage
+                      src={getPublicAvatarUrl(t.username, t.avatarUrl)}
                       alt={t.name}
                       width={48}
                       height={48}

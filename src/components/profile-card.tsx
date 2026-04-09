@@ -30,6 +30,20 @@ interface ProfileCardProps {
     winRate: number;
     totalTrades: number;
   };
+  leaderboard: {
+    rank: number | null;
+    period: '7d';
+    updatedAt: string | null;
+  };
+  dataProvenance: {
+    indexedWallets: number;
+    verifiedWallets: number;
+    tradedWallets: number;
+    lastComputedAt: string | null;
+    eventSource: 'exact_helius' | 'derived_aggregates' | 'unavailable';
+    eventWalletCoverage: number;
+    eventLookbackDays: number | null;
+  };
   links: { id: string; title: string; url: string; icon?: string | null }[];
   pinnedTrades: {
     id: string;
@@ -42,17 +56,31 @@ interface ProfileCardProps {
     transactions: { type: 'BUY' | 'SELL'; mcap: number; amountSol: number }[];
   }[];
   wallets: { address: string; verified: boolean; isMain?: boolean }[];
-  traderStats?: TraderStats;
+  traderStats?: TraderStats | null;
   deployments?: DeploymentData[];
   allTrades?: TokenTrade[];
-  degenScore?: DegenScoreResult;
+  degenScore?: DegenScoreResult | null;
   followerCount?: number | null;
   isOwner?: boolean;
   accentColor?: string | null;
   bannerUrl?: string | null;
 }
 
-export function ProfileCard({ user, stats, links, pinnedTrades, wallets, traderStats, deployments, allTrades, degenScore, followerCount, isOwner, accentColor, bannerUrl }: ProfileCardProps) {
+function formatLastComputedAt(value: string | null): string {
+  if (!value) return 'Awaiting sync';
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'Awaiting sync';
+
+  return date.toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+}
+
+export function ProfileCard({ user, stats, leaderboard, dataProvenance, links, pinnedTrades, wallets, traderStats, deployments, allTrades, degenScore, followerCount, isOwner, accentColor, bannerUrl }: ProfileCardProps) {
   const hasWallets = wallets.length > 0;
   const achievements = traderStats && degenScore
     ? computeAchievements(stats, traderStats, degenScore)
@@ -62,7 +90,8 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets, traderS
   const calendarWeeks = allTrades && allTrades.length > 0
     ? buildTradeCalendar(allTrades)
     : [];
-  const showTradeSection = calendarWeeks.length > 0 || !!traderStats || pinnedTrades.length > 0;
+  const showBehavioralAnalytics = dataProvenance.eventSource === 'exact_helius' && !!traderStats && calendarWeeks.length > 0;
+  const showTradeSection = showBehavioralAnalytics || pinnedTrades.length > 0;
   const showPortfolioSection = true;
   const showDeploymentsSection = !!(deployments && deployments.length > 0);
   const notableTrades = traderStats
@@ -126,9 +155,10 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets, traderS
           displayName={user.displayName}
           username={user.username}
           bio={user.bio}
-          verified={hasWallets}
+          verified={dataProvenance.verifiedWallets > 0}
           isClaimed={user.isClaimed}
           stats={stats}
+          leaderboard={leaderboard}
           wallets={wallets}
           followerCount={followerCount}
           degenScore={degenScore}
@@ -157,11 +187,63 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets, traderS
             <div className="mb-5" style={{ height: '1px', background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.08), transparent)' }} />
           )}
 
+          {hasWallets && (
+            <div
+              className="mb-5 cut-sm px-3.5 py-3"
+              style={{
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px solid rgba(0,212,255,0.08)',
+              }}
+            >
+              <div className="mb-2 flex items-center gap-2 text-[8px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">
+                DATA INTEGRITY
+                <div className="flex-1 h-px" style={{ background: 'rgba(0,212,255,0.08)' }} />
+              </div>
+              <div className="space-y-1.5 text-[10px] leading-relaxed text-[var(--trench-text-muted)]">
+                <p>
+                  <span className="text-[var(--trench-text)]">Verified aggregates:</span>{' '}
+                  total PnL, win rate, trade count, and wallet coverage are computed from indexed wallet data.
+                </p>
+                {dataProvenance.eventSource === 'exact_helius' && (
+                  <p>
+                    <span className="text-[var(--trench-text)]">Exact event views:</span>{' '}
+                    calendar, PnL history, ROI, streak, hold time, and notable-trade insights come from recent indexed Helius swap events.
+                  </p>
+                )}
+                {dataProvenance.eventSource === 'derived_aggregates' && (
+                  <p>
+                    <span className="text-[var(--trench-text)]">Behavioral analytics hidden:</span>{' '}
+                    event-level views are withheld until exact swap-event coverage is complete for the wallets that actually traded.
+                  </p>
+                )}
+                {dataProvenance.eventSource === 'unavailable' && (
+                  <p>
+                    <span className="text-[var(--trench-text)]">No event analytics yet:</span>{' '}
+                    this profile does not currently have exact event-level trade history to power calendars, streaks, or hold-time metrics.
+                  </p>
+                )}
+              </div>
+              <div className="mt-2 flex flex-wrap gap-2 text-[8px] font-mono tracking-[1.5px] text-[var(--trench-text-muted)]">
+                <span>{dataProvenance.indexedWallets} INDEXED WALLETS</span>
+                <span>{dataProvenance.verifiedWallets} VERIFIED</span>
+                {dataProvenance.tradedWallets > 0 && (
+                  <span>
+                    EVENT COVERAGE {dataProvenance.eventWalletCoverage}/{dataProvenance.tradedWallets} TRADED WALLETS
+                  </span>
+                )}
+                {dataProvenance.eventSource === 'exact_helius' && dataProvenance.eventLookbackDays != null && (
+                  <span>LOOKBACK {dataProvenance.eventLookbackDays}D</span>
+                )}
+                <span>LAST SYNC {formatLastComputedAt(dataProvenance.lastComputedAt).toUpperCase()}</span>
+              </div>
+            </div>
+          )}
+
           {/* Trade calendar */}
-          {calendarWeeks.length > 0 && <TradeCalendar weeks={calendarWeeks} />}
+          {showBehavioralAnalytics && <TradeCalendar weeks={calendarWeeks} />}
 
           {/* Advanced stats */}
-          {traderStats && (
+          {showBehavioralAnalytics && traderStats && (
             <div className="mb-5">
               <div className="text-[7px] font-mono tracking-[2px] text-[var(--trench-text-muted)] mb-2">
                 STATS
@@ -171,7 +253,7 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets, traderS
           )}
 
           {/* Top win / top loss */}
-          {notableTrades.length > 0 && (
+          {showBehavioralAnalytics && notableTrades.length > 0 && (
             <div className="mb-5">
               <div className="flex items-center gap-2 text-[9px] text-[var(--trench-text-muted)] tracking-[2px] mb-3">
                 NOTABLE TRADES
@@ -221,10 +303,10 @@ export function ProfileCard({ user, stats, links, pinnedTrades, wallets, traderS
           )}
 
           {/* Achievements */}
-          {achievements.length > 0 && <TrophyCase achievements={achievements} />}
+          {showBehavioralAnalytics && achievements.length > 0 && <TrophyCase achievements={achievements} />}
 
           {/* PnL history chart */}
-          <PnlChart username={user.username} />
+          {showBehavioralAnalytics && <PnlChart username={user.username} />}
 
           {/* Pinned trades */}
           {pinnedTrades.length > 0 && <TradeCarousel trades={pinnedTrades} />}

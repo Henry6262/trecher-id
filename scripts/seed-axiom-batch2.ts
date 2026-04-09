@@ -5,6 +5,7 @@
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import pg from 'pg';
+import { getPreferredTwitterHandle } from '../src/lib/axiom-twitter-handles';
 
 const url = process.env.DATABASE_URL;
 if (!url) throw new Error('DATABASE_URL is not set');
@@ -63,13 +64,15 @@ async function main() {
     const pnlSol = Math.round(t.pnlUsd / SOL_PRICE);
     const totalTrades = t.wins + t.losses;
     const winRate = totalTrades > 0 ? (t.wins / totalTrades) * 100 : 0;
+    const twitterHandle =
+      getPreferredTwitterHandle({ username: t.username, walletAddress: t.wallet }) ?? t.username;
 
     const user = await prisma.user.upsert({
       where: { username: t.username },
       update: { displayName: t.name },
       create: {
         username: t.username, displayName: t.name, bio: 'Solana trader',
-        avatarUrl: `https://unavatar.io/twitter/${t.username}`,
+        avatarUrl: `https://unavatar.io/x/${twitterHandle}`,
         twitterId: `precreated_${t.username}`, privyUserId: `precreated_${t.username}`,
       },
     });
@@ -86,7 +89,14 @@ async function main() {
     await prisma.link.upsert({
       where: { id: `${user.id}_twitter` },
       update: {},
-      create: { id: `${user.id}_twitter`, userId: user.id, title: `@${t.username}`, url: `https://x.com/${t.username}`, icon: 'x', order: 0 },
+      create: {
+        id: `${user.id}_twitter`,
+        userId: user.id,
+        title: `@${twitterHandle}`,
+        url: `https://x.com/${twitterHandle}`,
+        icon: 'x',
+        order: 0,
+      },
     });
 
     for (const period of PERIODS) {

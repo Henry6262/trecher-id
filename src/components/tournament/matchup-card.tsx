@@ -1,8 +1,7 @@
 'use client';
-
-import Link from 'next/link';
 import { AvatarImage } from '@/components/avatar-image';
 import { CutCorner } from '@/components/cut-corner';
+import { getPublicAvatarUrl } from '@/lib/images';
 import type { Matchup, RankedTrader } from './bracket-utils';
 
 function TraderRow({
@@ -34,8 +33,7 @@ function TraderRow({
   }
 
   return (
-    <Link
-      href={`/${trader.username}`}
+    <div
       className="flex items-center gap-2 px-2.5 py-2 transition-colors hover:bg-[rgba(0,212,255,0.03)]"
       style={{
         opacity: isWinner ? 1 : 0.4,
@@ -56,7 +54,7 @@ function TraderRow({
         }}
       >
         <AvatarImage
-          src={trader.avatarUrl || `https://unavatar.io/twitter/${trader.username}`}
+          src={getPublicAvatarUrl(trader.username, trader.avatarUrl)}
           alt={trader.displayName}
           width={avatarSize}
           height={avatarSize}
@@ -97,7 +95,7 @@ function TraderRow({
           ? `${Math.round(trader.pnlUsd / 1000)}K`
           : Math.round(trader.pnlUsd)}
       </span>
-    </Link>
+    </div>
   );
 }
 

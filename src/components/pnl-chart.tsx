@@ -8,16 +8,26 @@ interface PnlDataPoint {
   value: number;
 }
 
+interface PnlHistoryResponse {
+  source: 'exact_helius' | 'derived_aggregates' | 'unavailable';
+  series: PnlDataPoint[];
+}
+
 export function PnlChart({ username }: { username: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const [data, setData] = useState<PnlDataPoint[] | null>(null);
+  const [source, setSource] = useState<PnlHistoryResponse['source']>('unavailable');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch(`/api/profile/pnl-history?username=${username}`)
       .then(r => r.json())
-      .then((d: PnlDataPoint[]) => { setData(d); setLoading(false); })
+      .then((payload: PnlHistoryResponse) => {
+        setData(payload.series);
+        setSource(payload.source);
+        setLoading(false);
+      })
       .catch(() => setLoading(false));
   }, [username]);
 
@@ -96,10 +106,23 @@ export function PnlChart({ username }: { username: string }) {
       <div className="flex items-center gap-2 text-[9px] text-[var(--trench-text-muted)] tracking-[2px] mb-3">
         PNL HISTORY
         <div className="flex-1 h-px" style={{ background: 'rgba(0,212,255,0.08)' }} />
+        <span className="font-mono text-[8px] text-[var(--trench-text-muted)]">
+          {source === 'exact_helius' ? 'EXACT' : source === 'derived_aggregates' ? 'DERIVED' : 'UNAVAILABLE'}
+        </span>
         <span className="font-mono text-[8px]">
           {data[data.length - 1].value >= 0 ? '+' : ''}{Math.round(data[data.length - 1].value)} SOL
         </span>
       </div>
+      {source === 'exact_helius' && (
+        <p className="mb-2 text-[9px] text-[var(--trench-text-muted)]">
+          Built from recent indexed Helius swap events.
+        </p>
+      )}
+      {source === 'derived_aggregates' && (
+        <p className="mb-2 text-[9px] text-[var(--trench-text-muted)]">
+          Reconstructed from indexed wallet aggregates because exact event history was unavailable.
+        </p>
+      )}
       <div
         ref={containerRef}
         className="cut-sm overflow-hidden border"

@@ -6,6 +6,8 @@ import { prisma } from './prisma';
 import { computeTraderStats } from './trade-stats';
 import { computeDegenScore } from './degen-score';
 import { cachedWithStale, invalidateCache } from './redis';
+import { getExactPublicTrades } from './public-trades';
+import { resolveAvatarUrl } from './avatar-resolution';
 
 const PROFILE_CACHE_VERSION = 'v2';
 const PROFILE_CACHE_FRESH_TTL_SECONDS = 120;
@@ -18,9 +20,12 @@ interface ProfileWalletRow {
   totalPnlUsd: number | null;
   winRate: number | null;
   totalTrades: number | null;
+  statsUpdatedAt: Date | null;
+  lastFetchedAt: Date | null;
 }
 
 interface WalletTradeRow {
+  walletId: string;
   tokenMint: string;
   tokenSymbol: string;
   tokenName: string | null;
@@ -48,6 +53,20 @@ export interface PublicProfileData {
     totalPnlUsd: number;
     winRate: number;
     totalTrades: number;
+  };
+  leaderboard: {
+    rank: number | null;
+    period: '7d';
+    updatedAt: string | null;
+  };
+  dataProvenance: {
+    indexedWallets: number;
+    verifiedWallets: number;
+    tradedWallets: number;
+    lastComputedAt: string | null;
+    eventSource: 'exact_helius' | 'derived_aggregates' | 'unavailable';
+    eventWalletCoverage: number;
+    eventLookbackDays: number | null;
   };
   links: {
     id: string;
@@ -85,8 +104,8 @@ export interface PublicProfileData {
     deployedAt: string;
   }[];
   allTrades: TokenTrade[];
-  traderStats: TraderStats;
-  degenScore: DegenScoreResult;
+  traderStats: TraderStats | null;
+  degenScore: DegenScoreResult | null;
 }
 
 function getProfileCacheKey(username: string): string {
@@ -95,23 +114,50 @@ function getProfileCacheKey(username: string): string {
 
 function buildStats(wallets: ProfileWalletRow[]) {
   let totalPnlUsd = 0;
-  let totalWinRate = 0;
-  let winRateCount = 0;
   let totalTrades = 0;
+  let weightedWins = 0;
 
   for (const wallet of wallets) {
     totalPnlUsd += wallet.totalPnlUsd ?? 0;
-    totalTrades += wallet.totalTrades ?? 0;
-    if (wallet.winRate != null) {
-      totalWinRate += wallet.winRate;
-      winRateCount++;
+    const walletTrades = wallet.totalTrades ?? 0;
+    totalTrades += walletTrades;
+    if (wallet.winRate != null && walletTrades > 0) {
+      weightedWins += (wallet.winRate / 100) * walletTrades;
     }
   }
 
   return {
     totalPnlUsd,
-    winRate: winRateCount > 0 ? totalWinRate / winRateCount : 0,
+    winRate: totalTrades > 0 ? (weightedWins / totalTrades) * 100 : 0,
     totalTrades,
+  };
+}
+
+function buildDataProvenance(
+  wallets: ProfileWalletRow[],
+  tradedWallets: number,
+  eventSource: PublicProfileData['dataProvenance']['eventSource'],
+  eventWalletCoverage: number,
+  eventLookbackDays: number | null,
+) {
+  const indexedWallets = wallets.length;
+  const verifiedWallets = wallets.filter((wallet) => wallet.verified).length;
+  const timestamps = wallets
+    .flatMap((wallet) => [wallet.statsUpdatedAt, wallet.lastFetchedAt])
+    .filter((value): value is Date => value instanceof Date);
+
+  const lastComputedAt = timestamps.length > 0
+    ? new Date(Math.max(...timestamps.map((value) => value.getTime()))).toISOString()
+    : null;
+
+  return {
+    indexedWallets,
+    verifiedWallets,
+    tradedWallets,
+    lastComputedAt,
+    eventSource,
+    eventWalletCoverage,
+    eventLookbackDays,
   };
 }
 
@@ -229,6 +275,8 @@ async function buildPublicProfileData(username: string): Promise<PublicProfileDa
           totalPnlUsd: true,
           winRate: true,
           totalTrades: true,
+          statsUpdatedAt: true,
+          lastFetchedAt: true,
         },
         orderBy: { linkedAt: 'asc' },
       },
@@ -262,6 +310,14 @@ async function buildPublicProfileData(username: string): Promise<PublicProfileDa
         },
         orderBy: { deployedAt: 'desc' },
       },
+      rankings: {
+        where: { period: '7d' },
+        select: {
+          rank: true,
+          updatedAt: true,
+        },
+        take: 1,
+      },
     },
   });
 
@@ -272,6 +328,7 @@ async function buildPublicProfileData(username: string): Promise<PublicProfileDa
     ? await prisma.walletTrade.findMany({
         where: { walletId: { in: walletIds } },
         select: {
+          walletId: true,
           tokenMint: true,
           tokenSymbol: true,
           tokenName: true,
@@ -287,26 +344,60 @@ async function buildPublicProfileData(username: string): Promise<PublicProfileDa
       })
     : [];
 
-  const stats = buildStats(user.wallets);
-  const allTrades = walletTrades
+  const exactTradeResolution = await getExactPublicTrades(user.wallets.map((wallet) => wallet.address));
+  const derivedTrades = walletTrades
     .map(walletTradeToTokenTrade)
     .filter((trade): trade is TokenTrade => trade !== null)
     .sort((a, b) => b.totalPnlSol - a.totalPnlSol);
-  const traderStats = computeTraderStats(allTrades);
-  const degenScore = computeDegenScore(traderStats, stats);
+  const tradedWalletCount = new Set(walletTrades.map((trade) => trade.walletId)).size;
+  const hasCompleteExactCoverage =
+    tradedWalletCount > 0
+    && exactTradeResolution.trades.length > 0
+    && exactTradeResolution.exactWalletCoverage >= tradedWalletCount;
+
+  const allTrades = hasCompleteExactCoverage ? exactTradeResolution.trades : [];
+
+  const eventSource: PublicProfileData['dataProvenance']['eventSource'] =
+    hasCompleteExactCoverage
+      ? 'exact_helius'
+      : derivedTrades.length > 0
+        ? 'derived_aggregates'
+        : 'unavailable';
+
+  const stats = buildStats(user.wallets);
+  const leaderboard = user.rankings[0] ?? null;
+  const dataProvenance = buildDataProvenance(
+    user.wallets,
+    tradedWalletCount,
+    eventSource,
+    exactTradeResolution.exactWalletCoverage,
+    eventSource === 'exact_helius' ? exactTradeResolution.lookbackDays : null,
+  );
+  const traderStats = eventSource === 'exact_helius' ? computeTraderStats(allTrades) : null;
+  const degenScore = traderStats ? computeDegenScore(traderStats, stats) : null;
+  const resolvedAvatarUrl = await resolveAvatarUrl({
+    username: user.username,
+    avatarUrl: user.avatarUrl,
+  });
 
   return {
     user: {
       username: user.username,
       displayName: user.displayName,
       bio: user.bio,
-      avatarUrl: user.avatarUrl,
+      avatarUrl: resolvedAvatarUrl,
       isClaimed: user.isClaimed,
     },
     accentColor: user.accentColor,
     bannerUrl: user.bannerUrl,
     followerCount: user.followerCount,
     stats,
+    leaderboard: {
+      rank: leaderboard?.rank ?? null,
+      period: '7d',
+      updatedAt: leaderboard?.updatedAt?.toISOString() ?? null,
+    },
+    dataProvenance,
     links: user.links,
     wallets: user.wallets.map((wallet) => ({
       address: wallet.address,

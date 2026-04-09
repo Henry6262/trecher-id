@@ -1,6 +1,7 @@
 import { ImageResponse } from 'next/og';
 import { prisma } from '@/lib/prisma';
 import { formatPnl } from '@/lib/utils';
+import { getPublicAvatarUrl } from '@/lib/images';
 
 export const runtime = 'nodejs';
 export const alt = 'Trench ID Share Card';
@@ -91,9 +92,7 @@ export default async function Image({
   const BG = '#050508';
   const TEXT = '#e4e4e7';
   const MUTED = '#71717a';
-
-  // Avatar: use URL if available, otherwise cyan circle with initial
-  const initial = (user.displayName ?? user.username).charAt(0).toUpperCase();
+  const avatarUrl = getPublicAvatarUrl(user.username, user.avatarUrl);
 
   return new ImageResponse(
     (
@@ -132,37 +131,17 @@ export default async function Image({
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
             {/* Avatar */}
-            {user.avatarUrl ? (
-              <img
-                src={user.avatarUrl}
-                width={80}
-                height={80}
-                style={{
-                  borderRadius: '50%',
-                  border: `2px solid rgba(0,212,255,0.3)`,
-                  objectFit: 'cover',
-                }}
-                alt=""
-              />
-            ) : (
-              <div
-                style={{
-                  width: 80,
-                  height: 80,
-                  borderRadius: '50%',
-                  background: CYAN,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: 32,
-                  fontWeight: 700,
-                  color: '#000',
-                  border: `2px solid rgba(0,212,255,0.3)`,
-                }}
-              >
-                {initial}
-              </div>
-            )}
+            <img
+              src={avatarUrl}
+              width={80}
+              height={80}
+              style={{
+                borderRadius: '50%',
+                border: `2px solid rgba(0,212,255,0.3)`,
+                objectFit: 'cover',
+              }}
+              alt={user.displayName ?? user.username}
+            />
 
             {/* Username + display name */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>

@@ -10,9 +10,35 @@ export async function GET() {
 
   const user = await prisma.user.findUnique({
     where: { id: session.id },
-    select: { id: true, username: true, displayName: true, bio: true, avatarUrl: true, accentColor: true, bannerUrl: true },
+    select: {
+      id: true,
+      username: true,
+      displayName: true,
+      bio: true,
+      avatarUrl: true,
+      accentColor: true,
+      bannerUrl: true,
+      rankings: {
+        where: { period: '7d' },
+        select: {
+          rank: true,
+          updatedAt: true,
+        },
+        take: 1,
+      },
+    },
   });
-  return NextResponse.json(user);
+  return NextResponse.json(user ? {
+    id: user.id,
+    username: user.username,
+    displayName: user.displayName,
+    bio: user.bio,
+    avatarUrl: user.avatarUrl,
+    accentColor: user.accentColor,
+    bannerUrl: user.bannerUrl,
+    leaderboardRank: user.rankings[0]?.rank ?? null,
+    leaderboardUpdatedAt: user.rankings[0]?.updatedAt?.toISOString() ?? null,
+  } : null);
 }
 
 export async function PATCH(req: Request) {
@@ -28,8 +54,34 @@ export async function PATCH(req: Request) {
   const user = await prisma.user.update({
     where: { id: session.id },
     data: result.updates,
-    select: { id: true, username: true, displayName: true, bio: true, avatarUrl: true, accentColor: true, bannerUrl: true },
+    select: {
+      id: true,
+      username: true,
+      displayName: true,
+      bio: true,
+      avatarUrl: true,
+      accentColor: true,
+      bannerUrl: true,
+      rankings: {
+        where: { period: '7d' },
+        select: {
+          rank: true,
+          updatedAt: true,
+        },
+        take: 1,
+      },
+    },
   });
   await invalidatePublicProfileCache(user.username);
-  return NextResponse.json(user);
+  return NextResponse.json({
+    id: user.id,
+    username: user.username,
+    displayName: user.displayName,
+    bio: user.bio,
+    avatarUrl: user.avatarUrl,
+    accentColor: user.accentColor,
+    bannerUrl: user.bannerUrl,
+    leaderboardRank: user.rankings[0]?.rank ?? null,
+    leaderboardUpdatedAt: user.rankings[0]?.updatedAt?.toISOString() ?? null,
+  });
 }

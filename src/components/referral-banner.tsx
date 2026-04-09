@@ -77,7 +77,7 @@ export function ReferralBanner() {
   // Variant A: Has referrals, progressing
   if (hasReferrals) {
     return (
-      <Link href="/dashboard/referrals" className="block">
+      <Link href="/dashboard?panel=referrals" className="block">
         <GlassCard className="p-5 relative overflow-hidden" cut={12}>
           <div
             className="absolute -top-10 -right-10 w-[200px] h-[200px] rounded-full pointer-events-none"
@@ -140,7 +140,7 @@ export function ReferralBanner() {
             </p>
           </div>
         </div>
-        <CutButton href="/dashboard/referrals" size="sm">Get Link</CutButton>
+        <CutButton href="/dashboard?panel=referrals" size="sm">Get Link</CutButton>
       </div>
     </GlassCard>
   );

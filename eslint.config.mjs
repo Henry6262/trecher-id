@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Local worktree mirror used during parallel app work.
+    ".worktrees/**",
+    "test-results/**",
   ]),
 ]);
 

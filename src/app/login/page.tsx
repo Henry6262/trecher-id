@@ -4,17 +4,15 @@ import { usePrivy } from '@privy-io/react-auth';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
-import { useAuthStore } from '@/stores/auth';
-import { BackgroundLayer } from '@/components/background-layer';
 import { CutButton } from '@/components/cut-button';
+import { SynapticBackgroundLayer } from '@/components/synaptic-background-layer';
 import { Input } from '@/components/ui/input';
 
 const TEST_AUTH_BYPASS = process.env.NEXT_PUBLIC_TEST_AUTH_BYPASS === '1';
 
 export default function LoginPage() {
-  const { ready, authenticated, login, getAccessToken } = usePrivy();
+  const { ready, authenticated, login } = usePrivy();
   const router = useRouter();
-  const setUser = useAuthStore((s) => s.setUser);
   const [testUsername, setTestUsername] = useState('playwright_user');
   const [testDisplayName, setTestDisplayName] = useState('Playwright User');
   const [creatingTestUser, setCreatingTestUser] = useState(false);
@@ -37,21 +35,8 @@ export default function LoginPage() {
   useEffect(() => {
     if (TEST_AUTH_BYPASS) return;
     if (!ready || !authenticated) return;
-    (async () => {
-      const token = await getAccessToken();
-      if (!token) return;
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        const { user } = await res.json();
-        setUser(user);
-        localStorage.removeItem('web3me_ref');
-        router.push('/dashboard');
-      }
-    })();
-  }, [ready, authenticated, getAccessToken, setUser, router]);
+    router.push('/dashboard');
+  }, [ready, authenticated, router]);
 
   useEffect(() => {
     if (TEST_AUTH_BYPASS) return;
@@ -79,8 +64,7 @@ export default function LoginPage() {
         return;
       }
 
-      const { user } = await res.json();
-      setUser(user);
+      await res.json();
       router.push('/dashboard');
     } finally {
       setCreatingTestUser(false);
@@ -90,7 +74,7 @@ export default function LoginPage() {
   if (TEST_AUTH_BYPASS) {
     return (
       <div className="min-h-screen relative flex items-center justify-center">
-        <BackgroundLayer />
+        <SynapticBackgroundLayer />
         <div className="relative z-10 w-full max-w-md space-y-6 px-6 text-center">
           <Image
             src="/logo.png"
@@ -135,7 +119,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen relative flex items-center justify-center">
-      <BackgroundLayer />
+      <SynapticBackgroundLayer />
       <div className="relative z-10 text-center space-y-6">
         <Image
           src="/logo.png"

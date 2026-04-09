@@ -1,14 +1,20 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { CutCorner } from '@/components/cut-corner';
 import { CutButton } from '@/components/cut-button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { GlassCard } from '@/components/glass-card';
-import { ExternalLink, CheckCircle2, Circle } from 'lucide-react';
-import { ReferralBanner } from '@/components/referral-banner';
+import { AvatarImage } from '@/components/avatar-image';
+import { WalletsPanel } from '@/components/dashboard/wallets-panel';
+import { TradesPanel } from '@/components/dashboard/trades-panel';
+import { ReferralsPanel } from '@/components/dashboard/referrals-panel';
+import { getPublicAvatarUrl } from '@/lib/images';
+import { CheckCircle2, Circle } from 'lucide-react';
 
 interface Profile {
   id: string;
@@ -18,6 +24,8 @@ interface Profile {
   avatarUrl: string | null;
   accentColor: string | null;
   bannerUrl: string | null;
+  leaderboardRank: number | null;
+  leaderboardUpdatedAt: string | null;
 }
 
 interface LinkItem {
@@ -41,7 +49,22 @@ const ICON_OPTIONS = [
   { key: 'globe', label: '🌐 Website' },
 ] as const;
 
+type DashboardPanel = 'overview' | 'wallets' | 'trades' | 'referrals';
+
+function resolveDashboardPanel(value: string | null): DashboardPanel {
+  if (value === 'wallets' || value === 'trades' || value === 'referrals') {
+    return value;
+  }
+  return 'overview';
+}
+
+function getDashboardHref(panel: DashboardPanel) {
+  return panel === 'overview' ? '/dashboard' : `/dashboard?panel=${panel}`;
+}
+
 export default function DashboardPage() {
+  const searchParams = useSearchParams();
+  const activePanel = resolveDashboardPanel(searchParams.get('panel'));
   const [profile, setProfile] = useState<Profile | null>(null);
   const [displayName, setDisplayName] = useState('');
   const [bio, setBio] = useState('');
@@ -146,6 +169,13 @@ export default function DashboardPage() {
     }
   }
 
+  const panels: { key: DashboardPanel; label: string }[] = [
+    { key: 'overview', label: 'PROFILE' },
+    { key: 'wallets', label: 'WALLETS' },
+    { key: 'trades', label: 'TRADES' },
+    { key: 'referrals', label: 'REFERRALS' },
+  ];
+
   return (
     <div className="space-y-8">
       {/* Header nav */}
@@ -154,58 +184,81 @@ export default function DashboardPage() {
           DASHBOARD
         </h1>
         <div className="flex items-center gap-3 text-xs font-mono">
-          <Link href="/dashboard/trades" className="text-[var(--trench-text-muted)] hover:text-[var(--trench-text)] transition-colors">
-            TRADES
-          </Link>
-          <Link href="/dashboard/wallets" className="text-[var(--trench-text-muted)] hover:text-[var(--trench-text)] transition-colors">
-            WALLETS
-          </Link>
-          <Link href="/dashboard/referrals" className="text-[var(--trench-text-muted)] hover:text-[var(--trench-text)] transition-colors">
-            REFERRALS
-          </Link>
-          {profile?.username && (
+          {profile?.leaderboardRank != null && (
             <Link
-              href={`/${profile.username}`}
+              href="/leaderboard"
               className="text-[var(--trench-accent)] hover:opacity-80 transition-opacity"
             >
-              VIEW PROFILE ↗
+              7D RANK #{profile.leaderboardRank}
             </Link>
           )}
+          <span className="text-[var(--trench-text-muted)]">PRIVATE BUILD</span>
         </div>
       </div>
 
+      <div className="flex flex-wrap gap-2">
+        {panels.map((panel) => (
+          <CutButton
+            key={panel.key}
+            href={getDashboardHref(panel.key)}
+            size="sm"
+            variant={activePanel === panel.key ? 'primary' : 'secondary'}
+          >
+            {panel.label}
+          </CutButton>
+        ))}
+      </div>
+
+      {activePanel === 'overview' && (
+        <>
       {/* Profile Preview */}
       {profile && (
         <GlassCard className="p-5 overflow-hidden" cut={12}>
           {bannerUrl && (
-            <div className="w-full h-12 overflow-hidden mb-3 -mt-5 -mx-5" style={{ width: 'calc(100% + 40px)' }}>
-              <img src={bannerUrl} alt="" className="w-full h-full object-cover opacity-50" />
+            <div className="relative w-full h-12 overflow-hidden mb-3 -mt-5 -mx-5" style={{ width: 'calc(100% + 40px)' }}>
+              <Image src={bannerUrl} alt="" fill className="object-cover opacity-50" unoptimized />
             </div>
           )}
           <div className="flex items-center gap-3">
-            {profile.avatarUrl ? (
-              <img src={profile.avatarUrl} alt="" className="w-10 h-10 rounded-full object-cover" />
-            ) : (
-              <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold text-black" style={{ background: accentColor }}>
-                {(profile.displayName ?? profile.username).charAt(0).toUpperCase()}
-              </div>
-            )}
+            <AvatarImage
+              src={getPublicAvatarUrl(profile.username, profile.avatarUrl)}
+              alt={profile.displayName ?? profile.username}
+              width={40}
+              height={40}
+              className="w-10 h-10 rounded-full object-cover"
+            />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <p className="text-sm font-mono font-bold text-[var(--trench-text)] truncate">{profile.displayName ?? profile.username}</p>
                 <div className="w-3 h-3 rounded-full shrink-0" style={{ background: accentColor }} />
+                {profile.leaderboardRank != null && (
+                  <span
+                    className="cut-xs px-2 py-0.5 text-[8px] font-mono tracking-[1.5px]"
+                    style={{ color: accentColor, background: `${accentColor}14`, border: `1px solid ${accentColor}26` }}
+                  >
+                    7D #{profile.leaderboardRank}
+                  </span>
+                )}
               </div>
               <p className="text-xs font-mono text-[var(--trench-text-muted)]">@{profile.username}</p>
+              {profile.leaderboardUpdatedAt && (
+                <p className="mt-1 text-[9px] font-mono text-[var(--trench-text-muted)]">
+                  LOCKED FROM {new Date(profile.leaderboardUpdatedAt).toLocaleString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit',
+                  }).toUpperCase()}
+                </p>
+              )}
             </div>
-            <a
-              href={`/${profile.username}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1 text-[10px] font-mono tracking-widest transition-colors shrink-0"
+            <Link
+              href="/leaderboard"
+              className="text-[10px] font-mono tracking-widest transition-colors shrink-0"
               style={{ color: accentColor }}
             >
-              VIEW <ExternalLink size={10} />
-            </a>
+              LEADERBOARD →
+            </Link>
           </div>
         </GlassCard>
       )}
@@ -216,10 +269,9 @@ export default function DashboardPage() {
         <div className="space-y-2.5">
           {[
             { label: 'Sign in with X', done: true, href: null },
-            { label: 'Link a wallet', done: walletCount > 0, href: '/dashboard/wallets' },
+            { label: 'Link a wallet', done: walletCount > 0, href: '/dashboard?panel=wallets' },
             { label: 'Add a link', done: linkCount > 0, href: '/dashboard' },
-            { label: 'Pin a trade', done: pinnedCount > 0, href: '/dashboard/trades' },
-            { label: 'Share your referral link', done: false, href: '/dashboard/referrals' },
+            { label: 'Pin a trade', done: pinnedCount > 0, href: '/dashboard?panel=trades' },
           ].map(step => (
             <div key={step.label} className="flex items-center gap-2.5">
               {step.done
@@ -236,9 +288,6 @@ export default function DashboardPage() {
           ))}
         </div>
       </GlassCard>
-
-      {/* Referral Banner */}
-      <ReferralBanner />
 
       {/* Customize */}
       <GlassCard className="p-5 space-y-4" cut={12}>
@@ -401,6 +450,12 @@ export default function DashboardPage() {
           </div>
         </div>
       </CutCorner>
+        </>
+      )}
+
+      {activePanel === 'wallets' && <WalletsPanel embedded />}
+      {activePanel === 'trades' && <TradesPanel embedded />}
+      {activePanel === 'referrals' && <ReferralsPanel embedded />}
     </div>
   );
 }

@@ -73,7 +73,7 @@ async function main() {
     const totalTrades = kol.wins + kol.losses;
     const winRate = totalTrades > 0 ? (kol.wins / totalTrades) * 100 : 0;
     const pnlUsd = kol.pnlSol * SOL_PRICE;
-    const avatarUrl = `https://unavatar.io/twitter/${kol.twitter}`;
+    const avatarUrl = `https://unavatar.io/x/${kol.twitter}`;
 
     // Upsert user
     const user = await prisma.user.upsert({

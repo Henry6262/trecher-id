@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { resolveAvatarRows } from '@/lib/avatar-resolution';
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -45,7 +46,7 @@ export async function GET(req: Request) {
   // Sort by total dev PnL descending
   ranked.sort((a, b) => b.totalDevPnlSol - a.totalDevPnlSol);
 
-  const data = ranked.map((r, i) => ({ ...r, rank: offset + i + 1 }));
+  const data = await resolveAvatarRows(ranked.map((r, i) => ({ ...r, rank: offset + i + 1 })));
 
   return NextResponse.json(data);
 }

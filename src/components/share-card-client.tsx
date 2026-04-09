@@ -9,6 +9,8 @@ import { CutCorner } from './cut-corner';
 import { DegenBadge } from './degen-badge';
 import { formatPnl } from '@/lib/utils';
 import type { DegenScoreResult } from '@/lib/degen-score';
+import { AvatarImage } from './avatar-image';
+import { getPublicAvatarUrl } from '@/lib/images';
 
 interface PinnedTradePill {
   tokenSymbol: string;
@@ -35,6 +37,7 @@ export function ShareCardClient({ user, stats, degenScore, pinnedTrades, shareUr
   const [copied, setCopied] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
+  const resolvedAvatarUrl = getPublicAvatarUrl(user.username, user.avatarUrl);
 
   function handleCopy() {
     navigator.clipboard.writeText(shareUrl).then(() => {
@@ -161,20 +164,13 @@ export function ShareCardClient({ user, stats, degenScore, pinnedTrades, shareUr
                   overflow: 'hidden',
                 }}
               >
-                {user.avatarUrl ? (
-                  <Image
-                    src={user.avatarUrl}
-                    alt={user.displayName}
-                    width={110}
-                    height={110}
-                    className="w-full h-full object-cover"
-                    unoptimized
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-[40px] font-bold text-black" style={{ background: 'var(--trench-accent)' }}>
-                    {user.displayName.charAt(0).toUpperCase()}
-                  </div>
-                )}
+                <AvatarImage
+                  src={resolvedAvatarUrl}
+                  alt={user.displayName}
+                  width={110}
+                  height={110}
+                  className="w-full h-full object-cover"
+                />
               </div>
             </div>
 

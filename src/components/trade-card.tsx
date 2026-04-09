@@ -21,6 +21,8 @@ interface TradeCardProps {
 export function TradeCard({ tokenMint, tokenSymbol, tokenName, tokenImage, totalPnlPercent, totalPnlSol, transactions }: TradeCardProps) {
   const isWin = totalPnlPercent >= 0;
   const dexUrl = tokenMint ? `https://dexscreener.com/solana/${tokenMint}` : null;
+  const buyTx = transactions.find((tx) => tx.type === 'BUY');
+  const sellTx = transactions.find((tx) => tx.type === 'SELL');
 
   const Wrapper = dexUrl ? 'a' : 'div';
   const wrapperProps = dexUrl ? { href: dexUrl, target: '_blank', rel: 'noopener noreferrer' } : {};
@@ -46,7 +48,7 @@ export function TradeCard({ tokenMint, tokenSymbol, tokenName, tokenImage, total
         )}
       </div>
 
-      <div className="flex-1 min-w-0">
+      <div className="min-w-0 flex-1">
         {/* Token name + PnL */}
         <div className="flex items-baseline justify-between mb-0.5">
           <span className="text-sm font-bold text-[var(--trench-text)] truncate group-hover:text-[var(--trench-accent)] transition-colors">${tokenSymbol}</span>
@@ -69,20 +71,29 @@ export function TradeCard({ tokenMint, tokenSymbol, tokenName, tokenImage, total
             </span></>
           )}
         </div>
+      </div>
 
-        {/* Transactions */}
-        <div className="flex flex-col gap-1">
-          {transactions.slice(0, 4).map((tx, i) => (
-            <div key={i} className="flex justify-between items-center text-[9px] px-1.5 py-1 bg-[rgba(255,255,255,0.02)] cut-xs">
-              <span className={`font-semibold tracking-wide ${tx.type === 'BUY' ? 'text-[var(--trench-green)]' : 'text-[var(--trench-red)]'}`}>
-                {tx.type}
-              </span>
-              <span className={`font-semibold font-mono ${tx.type === 'SELL' && isWin ? 'text-[var(--trench-green)]' : 'text-[var(--trench-text)]'}`}>
-                {Math.round(tx.amountSol)} SOL
+      <div className="w-[96px] flex-shrink-0 flex flex-col gap-1.5">
+        {[
+          { label: 'BUY', tx: buyTx, valueColor: 'text-[var(--trench-text)]', labelColor: 'text-[var(--trench-green)]' },
+          { label: 'SELL', tx: sellTx, valueColor: sellTx && isWin ? 'text-[var(--trench-green)]' : 'text-[var(--trench-text)]', labelColor: 'text-[var(--trench-red)]' },
+        ].map((item) => (
+          <div
+            key={item.label}
+            className="cut-xs px-2 py-1.5"
+            style={{ background: 'rgba(255,255,255,0.02)' }}
+          >
+            <div className="flex items-center justify-between gap-2 text-[8px]">
+              <span className={`font-semibold tracking-wide ${item.labelColor}`}>{item.label}</span>
+              <span className={`flex items-center gap-1 font-semibold font-mono ${item.valueColor}`}>
+                {item.tx ? Math.round(item.tx.amountSol) : '—'}
+                {item.tx && (
+                  <Image src="/sol.png" alt="SOL" width={10} height={10} className="h-[10px] w-[10px]" />
+                )}
               </span>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
     </Wrapper>
   );

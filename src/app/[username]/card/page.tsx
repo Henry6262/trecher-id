@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { prisma } from '@/lib/prisma';
 import { computeDegenScore } from '@/lib/degen-score';
 import { ShareCardClient } from '@/components/share-card-client';
+import { resolveAvatarUrl } from '@/lib/avatar-resolution';
 
 interface Props {
   params: Promise<{ username: string }>;
@@ -61,10 +62,14 @@ export default async function ShareCardPage({ params }: Props) {
   );
 
   const shareUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://web3me.fun'}/${username}`;
+  const resolvedAvatarUrl = await resolveAvatarUrl({
+    username: user.username,
+    avatarUrl: user.avatarUrl,
+  });
 
   return (
     <ShareCardClient
-      user={{ username: user.username, displayName: user.displayName, avatarUrl: user.avatarUrl }}
+      user={{ username: user.username, displayName: user.displayName, avatarUrl: resolvedAvatarUrl }}
       stats={stats}
       degenScore={degenScore}
       pinnedTrades={user.pinnedTrades.map((t) => ({

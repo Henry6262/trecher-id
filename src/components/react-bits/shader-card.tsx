@@ -145,6 +145,7 @@ const ShaderCard: React.FC<ShaderCardProps> = ({
     renderer.domElement.style.width = "100%";
     renderer.domElement.style.height = "100%";
     renderer.domElement.style.display = "block";
+    renderer.domElement.style.pointerEvents = "none";
 
     container.appendChild(renderer.domElement);
 

@@ -62,9 +62,9 @@ export function ReferralSection() {
 
       {/* CTA */}
       <div className="text-center">
-        <CutButton href="/login" size="lg">Start Inviting</CutButton>
+        <CutButton href="/dashboard" size="lg">Open Dashboard</CutButton>
         <p className="mt-3 text-[9px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">
-          SIGN UP &middot; GET YOUR LINK &middot; START EARNING
+          OPEN DASHBOARD &middot; GET YOUR LINK &middot; START EARNING
         </p>
       </div>
     </section>

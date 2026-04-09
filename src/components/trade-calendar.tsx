@@ -1,3 +1,6 @@
+'use client';
+
+import { useState } from 'react';
 import type { CalendarWeek } from '@/lib/trade-calendar';
 import { getDayColor, getMonthLabel } from '@/lib/trade-calendar';
 
@@ -8,7 +11,17 @@ interface TradeCalendarProps {
   weeks: CalendarWeek[];
 }
 
+interface CalendarTooltip {
+  date: string;
+  pnlSol: number;
+  tradeCount: number;
+  x: number;
+  y: number;
+}
+
 export function TradeCalendar({ weeks }: TradeCalendarProps) {
+  const [tooltip, setTooltip] = useState<CalendarTooltip | null>(null);
+
   if (weeks.length === 0) return null;
 
   // Compute month labels: show label above the first column of each new month
@@ -25,7 +38,7 @@ export function TradeCalendar({ weeks }: TradeCalendarProps) {
   });
 
   return (
-    <div className="mb-5">
+    <div className="mb-5 relative z-20">
       <div className="flex items-center gap-2 mb-3">
         <div className="text-[9px] tracking-[2px] text-[var(--trench-text-muted)]">
           TRADE HISTORY
@@ -57,13 +70,19 @@ export function TradeCalendar({ weeks }: TradeCalendarProps) {
               {week.days.map((day, di) => (
                 <div
                   key={di}
-                  title={
-                    day && day.tradeCount > 0
-                      ? `${day.date} · ${day.pnlSol >= 0 ? '+' : ''}${Math.round(day.pnlSol)} SOL · ${day.tradeCount} tx`
-                      : day
-                      ? day.date
-                      : undefined
-                  }
+                  onMouseEnter={(event) => {
+                    if (!day || day.tradeCount <= 0) return;
+
+                    const rect = event.currentTarget.getBoundingClientRect();
+                    setTooltip({
+                      date: day.date,
+                      pnlSol: day.pnlSol,
+                      tradeCount: day.tradeCount,
+                      x: rect.left + rect.width / 2,
+                      y: rect.top,
+                    });
+                  }}
+                  onMouseLeave={() => setTooltip(null)}
                   style={{
                     width: '10px',
                     height: '10px',
@@ -77,6 +96,40 @@ export function TradeCalendar({ weeks }: TradeCalendarProps) {
           ))}
         </div>
       </div>
+
+      {tooltip && (
+        <div
+          className="pointer-events-none fixed z-[120] -translate-x-1/2"
+          style={{ left: tooltip.x, top: tooltip.y - 10 }}
+        >
+          <div
+            className="px-2.5 py-1.5 whitespace-nowrap text-center"
+            style={{
+              background: 'rgba(8,12,18,0.95)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              borderRadius: 4,
+              boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+              transform: 'translateY(-100%)',
+            }}
+          >
+            <div className="text-[8px] font-mono text-[#888] mb-0.5">{tooltip.date}</div>
+            <div className="text-[9px] font-mono font-bold" style={{ color: tooltip.pnlSol >= 0 ? '#22c55e' : '#ef4444' }}>
+              {tooltip.pnlSol >= 0 ? '+' : ''}
+              {Math.round(tooltip.pnlSol)} SOL
+            </div>
+            <div className="text-[8px] font-mono text-[#666]">{tooltip.tradeCount} tx</div>
+          </div>
+          <div
+            className="mx-auto h-0 w-0"
+            style={{
+              borderLeft: '4px solid transparent',
+              borderRight: '4px solid transparent',
+              borderTop: '4px solid rgba(255,255,255,0.1)',
+              marginTop: -1,
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 }

@@ -1,12 +1,14 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { formatPnl, truncateAddress } from '@/lib/utils';
 import { Check, ChevronDown, Star } from 'lucide-react';
 import { DegenBadge } from './degen-badge';
 import type { DegenScoreResult } from '@/lib/degen-score';
 import { useState } from 'react';
+import { AvatarImage } from './avatar-image';
+import { getPublicAvatarUrl } from '@/lib/images';
+import Image from 'next/image';
 
 function ShareButtons({ username, accent }: { username: string; accent: string }) {
   const [copied, setCopied] = useState(false);
@@ -55,9 +57,14 @@ interface ProfileHeaderProps {
     winRate: number;
     totalTrades: number;
   };
+  leaderboard?: {
+    rank: number | null;
+    period: '7d';
+    updatedAt: string | null;
+  };
   wallets?: { address: string; verified: boolean; isMain?: boolean }[];
   followerCount?: number | null;
-  degenScore?: DegenScoreResult;
+  degenScore?: DegenScoreResult | null;
   isOwner?: boolean;
   accentColor?: string | null;
 }
@@ -71,6 +78,7 @@ export function ProfileHeader({
   verified,
   isClaimed,
   stats,
+  leaderboard,
   wallets,
   followerCount,
   degenScore,
@@ -78,6 +86,7 @@ export function ProfileHeader({
   accentColor,
 }: ProfileHeaderProps) {
   const accent = accentColor || '#00D4FF';
+  const resolvedAvatarUrl = getPublicAvatarUrl(username, avatarUrl);
   const [activeWallet, setActiveWallet] = useState(
     () => wallets?.findIndex(w => w.isMain) ?? 0
   );
@@ -176,7 +185,7 @@ export function ProfileHeader({
             <span className="text-[var(--trench-text)]">@{username}</span>? This profile was created for you.
           </span>
           <Link
-            href="/login"
+            href="/dashboard"
             className="transition-colors tracking-widest text-[10px]"
             style={{ color: accent }}
           >
@@ -213,13 +222,14 @@ export function ProfileHeader({
                 background: '#0a0a0f',
               }}
             >
-              {avatarUrl ? (
-                <Image src={avatarUrl} alt={displayName} width={110} height={110} className="w-full h-full object-cover" unoptimized />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-[40px] font-bold text-black" style={{ background: 'var(--trench-accent)' }}>
-                  {displayName.charAt(0).toUpperCase()}
-                </div>
-              )}
+              <AvatarImage
+                src={resolvedAvatarUrl}
+                alt={displayName}
+                width={110}
+                height={110}
+                className="w-full h-full object-cover"
+                priority
+              />
             </div>
           </div>
         </div>
@@ -250,6 +260,14 @@ export function ProfileHeader({
                   </span>
                 )}
                 <span className="cut-xs text-[7px] tracking-[1px] px-2 py-0.5 font-semibold" style={{ color: accent, background: `${accent}14`, border: `1px solid ${accent}1f` }}>SOLANA TRADER</span>
+                {leaderboard?.rank != null && (
+                  <span
+                    className="cut-xs text-[7px] tracking-[1px] px-2 py-0.5 font-mono"
+                    style={{ color: accent, background: `${accent}14`, border: `1px solid ${accent}33` }}
+                  >
+                    7D RANK #{leaderboard.rank}
+                  </span>
+                )}
                 {followerCount != null && followerCount > 0 && (
                   <span className="cut-xs text-[7px] tracking-[1px] px-2 py-0.5 font-mono" style={{ color: '#71717a', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
                     {followerCount >= 1000 ? `${Math.round(followerCount / 1000)}K` : followerCount} FOLLOWERS
@@ -283,6 +301,11 @@ export function ProfileHeader({
                   {formatPnl(stats.totalPnlUsd)}
                 </div>
                 <div className="text-[7px] tracking-[2px] text-[var(--trench-text-muted)] mt-1">PnL</div>
+                {leaderboard?.rank != null && (
+                  <div className="mt-2 text-[8px] font-mono tracking-[1.5px]" style={{ color: accent }}>
+                    LOCKED 7D #{leaderboard.rank}
+                  </div>
+                )}
               </div>
             )}
           </div>

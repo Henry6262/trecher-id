@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useMemo, useRef } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
 import { AvatarImage } from '@/components/avatar-image';
 import { GlassCard } from '@/components/glass-card';
+import { getPublicAvatarUrl } from '@/lib/images';
 import { TournamentBracket } from './tournament/tournament-bracket';
 
 const PERIODS = [
@@ -55,10 +55,12 @@ export function LeaderboardTable({
   variant?: 'bracket' | 'full';
   availableModes?: LeaderboardMode[];
 }) {
-  const allowedModes: LeaderboardMode[] =
-    availableModes && availableModes.length > 0 ? availableModes : ['traders', 'deployers'];
+  const allowedModes = useMemo<LeaderboardMode[]>(
+    () => (availableModes && availableModes.length > 0 ? availableModes : ['traders', 'deployers']),
+    [availableModes],
+  );
   const defaultMode = allowedModes[0] ?? 'traders';
-  const [mode, setMode] = useState<LeaderboardMode>(defaultMode);
+  const [selectedMode, setSelectedMode] = useState<LeaderboardMode>(defaultMode);
   const [period, setPeriod] = useState(initialPeriod);
   const [traders, setTraders] = useState<RankedTrader[]>(initialTraders ?? []);
   const [deployers, setDeployers] = useState<RankedDeployer[]>([]);
@@ -66,13 +68,7 @@ export function LeaderboardTable({
   const [page, setPage] = useState(0);
   const skippedInitialFetch = useRef(!!initialTraders);
   const showModeSwitch = allowedModes.length > 1;
-
-  useEffect(() => {
-    if (!allowedModes.includes(mode)) {
-      setMode(defaultMode);
-      setPage(0);
-    }
-  }, [allowedModes, defaultMode, mode]);
+  const mode = allowedModes.includes(selectedMode) ? selectedMode : defaultMode;
 
   useEffect(() => {
     if (skippedInitialFetch.current && mode === 'traders' && period === initialPeriod) {
@@ -172,7 +168,7 @@ export function LeaderboardTable({
                 key={m}
                 onClick={() => {
                   setLoading(true);
-                  setMode(m);
+                  setSelectedMode(m);
                   setPage(0);
                 }}
                 className="font-mono text-[10px] tracking-[1.5px] font-bold px-4 py-1.5 transition-all cut-sm"
@@ -224,7 +220,7 @@ export function LeaderboardTable({
           {mode === 'traders' ? 'REALIZED PNL RANKING' : 'TOTAL DEV PNL RANKING'}
         </span>
         <span className="cut-xs px-2.5 py-1" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
-          {mode === 'traders' ? '7D CUP QUALIFICATION' : 'MIGRATIONS + DEPLOY COUNT'}
+          {mode === 'traders' ? 'INDEXED WALLET AGGREGATES' : 'MIGRATIONS + DEPLOY COUNT'}
         </span>
       </div>
 
@@ -270,9 +266,9 @@ export function LeaderboardTable({
           {/* LEFT — Top 3 */}
           <div className="w-full lg:w-[280px] flex-shrink-0 flex flex-col gap-2">
             {top3[0] && (
-              <Link href={`/${top3[0].username}`} className="block flex-[1.2] relative overflow-hidden cut-sm group" style={{ minHeight: '120px' }}>
+              <div className="block flex-[1.2] relative overflow-hidden cut-sm group" style={{ minHeight: '120px' }}>
                 <div className="absolute inset-0 transition-transform duration-500 group-hover:scale-105" style={{
-                  backgroundImage: `url(${top3[0].avatarUrl || `https://unavatar.io/twitter/${top3[0].username}`})`,
+                  backgroundImage: `url(${getPublicAvatarUrl(top3[0].username, top3[0].avatarUrl)})`,
                   backgroundSize: 'cover', backgroundPosition: 'center 20%',
                   filter: 'brightness(0.55) saturate(1.2)',
                 }} />
@@ -300,13 +296,13 @@ export function LeaderboardTable({
                     <Image src="/sol.png" alt="SOL" width={18} height={18} className="h-[18px] w-auto" />
                   </div>
                 </div>
-              </Link>
+              </div>
             )}
             <div className="flex gap-2 flex-1">
               {[top3[1], top3[2]].map((t, idx) => t && (
-                <Link key={t.username} href={`/${t.username}`} className="block flex-1 relative overflow-hidden cut-sm group" style={{ minHeight: '100px' }}>
+                <div key={t.username} className="block flex-1 relative overflow-hidden cut-sm group" style={{ minHeight: '100px' }}>
                   <div className="absolute inset-0 transition-transform duration-500 group-hover:scale-105" style={{
-                    backgroundImage: `url(${t.avatarUrl || `https://unavatar.io/twitter/${t.username}`})`,
+                    backgroundImage: `url(${getPublicAvatarUrl(t.username, t.avatarUrl)})`,
                     backgroundSize: 'cover', backgroundPosition: 'center 20%',
                     filter: 'brightness(0.5) saturate(1.1)',
                   }} />
@@ -320,7 +316,7 @@ export function LeaderboardTable({
                       <Image src="/sol.png" alt="SOL" width={13} height={13} className="h-[13px] w-auto" />
                     </div>
                   </div>
-                </Link>
+                </div>
               ))}
             </div>
           </div>
@@ -338,12 +334,12 @@ export function LeaderboardTable({
               <span className="w-[80px] text-right">PNL</span>
             </div>
             {rest.map((t) => (
-              <Link key={t.username} href={`/${t.username}`}
+              <div key={t.username}
                 className="flex items-center px-3 py-2.5 transition-colors hover:bg-[rgba(0,212,255,0.03)]"
                 style={{ borderBottom: '1px solid rgba(255,255,255,0.02)', textDecoration: 'none' }}>
                 <span className="w-[22px] font-mono text-[11px] font-bold text-[#444]">{t.rank}</span>
                 <div className="w-[28px] h-[28px] rounded-full overflow-hidden flex-shrink-0" style={{ border: '1.5px solid rgba(255,255,255,0.08)' }}>
-                  <AvatarImage src={t.avatarUrl || `https://unavatar.io/twitter/${t.username}`} alt={t.displayName} width={28} height={28} className="w-full h-full object-cover" />
+                  <AvatarImage src={getPublicAvatarUrl(t.username, t.avatarUrl)} alt={t.displayName} width={28} height={28} className="w-full h-full object-cover" />
                 </div>
                 <div className="flex-1 min-w-0 pl-2">
                   <span className="block text-[12px] font-semibold text-white truncate">@{t.username}</span>
@@ -362,7 +358,7 @@ export function LeaderboardTable({
                   <span className="font-mono text-[13px] font-black" style={{ color: t.pnlSol >= 0 ? '#22c55e' : '#ef4444' }}>{t.pnlSol >= 0 ? '+' : ''}{Math.round(t.pnlSol)}</span>
                   <Image src="/sol.png" alt="SOL" width={12} height={12} className="h-[12px] w-auto" />
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         </div>

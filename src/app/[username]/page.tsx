@@ -1,9 +1,9 @@
 import { notFound } from 'next/navigation';
 import { getSessionUser } from '@/lib/auth';
 import { ProfileCard } from '@/components/profile-card';
-import { BackgroundLayer } from '@/components/background-layer';
 import type { Metadata } from 'next';
 import { buildProfileMetadata, getPublicProfileData } from '@/lib/profile';
+import { SynapticBackgroundLayer } from '@/components/synaptic-background-layer';
 
 interface Props {
   params: Promise<{ username: string }>;
@@ -26,7 +26,7 @@ export default async function ProfilePage({ params }: Props) {
 
   return (
     <div className="min-h-screen relative" style={{ background: 'transparent' }}>
-      <BackgroundLayer />
+      <SynapticBackgroundLayer />
       <div className="relative py-10 px-4" style={{ zIndex: 1 }}>
         <ProfileCard
           user={profile.user}
@@ -34,6 +34,8 @@ export default async function ProfilePage({ params }: Props) {
           bannerUrl={profile.bannerUrl}
           followerCount={profile.followerCount}
           stats={profile.stats}
+          leaderboard={profile.leaderboard}
+          dataProvenance={profile.dataProvenance}
           links={profile.links}
           pinnedTrades={profile.pinnedTrades}
           traderStats={profile.traderStats}

@@ -7,8 +7,8 @@ import { AvatarImage } from '@/components/avatar-image';
 import { ParticipateButton } from './participate-button';
 
 const champ = {
-  username: 'beaver_axiom',
-  avatarUrl: 'https://unavatar.io/twitter/beaver_axiom',
+  username: 'beaverd',
+  avatarUrl: 'https://pbs.twimg.com/profile_images/1998629858390261760/BwGRReaY_400x400.jpg',
   pnl: '+$1K',
   stat: '69%',
 };

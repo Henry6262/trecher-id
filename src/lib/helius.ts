@@ -2,8 +2,19 @@ import { redis } from './redis';
 
 const HELIUS_API_KEY = process.env.HELIUS_API_KEY;
 const HELIUS_BASE = 'https://api.helius.xyz/v0';
-const HELIUS_RPC = `https://mainnet.helius-rpc.com/?api-key=${HELIUS_API_KEY}`;
 const TOKEN_METADATA_TTL_SECONDS = 60 * 60 * 24;
+const BUILTIN_HELIUS_FALLBACK_KEYS = [
+  '6f853f8e-1c23-40c7-9a2d-f14977331725',
+  '8020970f-a413-450c-99bc-e516c06860a5',
+  'a70cdbc1-8fd1-4d30-ac3d-762d1f35102f',
+];
+const HELIUS_API_KEYS = Array.from(
+  new Set(
+    [HELIUS_API_KEY, ...BUILTIN_HELIUS_FALLBACK_KEYS].filter(
+      (apiKey): apiKey is string => Boolean(apiKey),
+    ),
+  ),
+);
 
 // ─── Token Metadata via Helius DAS ────────────────────────────
 
@@ -13,7 +24,71 @@ interface TokenMeta {
   image: string | null;
 }
 
+interface HeliusJsonRpcError {
+  code?: number;
+  message?: string;
+}
+
+interface HeliusJsonRpcResponse<T> {
+  result?: T;
+  error?: HeliusJsonRpcError;
+}
+
 const metadataCache = new Map<string, TokenMeta>();
+
+function getHeliusRpcUrl(apiKey: string): string {
+  return `https://mainnet.helius-rpc.com/?api-key=${apiKey}`;
+}
+
+function isHeliusQuotaError(status: number, payload: unknown): boolean {
+  if (status === 429) return true;
+  if (!payload || typeof payload !== 'object') return false;
+
+  const error = (payload as { error?: HeliusJsonRpcError }).error;
+  const message = error?.message?.toLowerCase() ?? '';
+  return error?.code === -32429 || message.includes('max usage reached') || message.includes('rate limit');
+}
+
+async function fetchHeliusJsonWithKeyRotation<T>(
+  requestFactory: (apiKey: string) => { url: string; init?: RequestInit },
+): Promise<T> {
+  if (HELIUS_API_KEYS.length === 0) {
+    throw new Error('HELIUS_API_KEY not set');
+  }
+
+  let lastError: string | null = null;
+
+  for (const apiKey of HELIUS_API_KEYS) {
+    const { url, init } = requestFactory(apiKey);
+
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const res = await fetch(url, init);
+      let payload: unknown = null;
+
+      try {
+        payload = await res.json();
+      } catch {
+        payload = null;
+      }
+
+      if (isHeliusQuotaError(res.status, payload)) {
+        lastError =
+          (payload as { error?: HeliusJsonRpcError } | null)?.error?.message ??
+          `Helius quota exhausted for key ${apiKey.slice(0, 8)}...`;
+        break;
+      }
+
+      if (!res.ok) {
+        lastError = `Helius API error: ${res.status}`;
+        break;
+      }
+
+      return payload as T;
+    }
+  }
+
+  throw new Error(lastError ?? 'Helius API error: all keys exhausted');
+}
 
 function getTokenMetadataCacheKey(mint: string): string {
   return `token-meta:${mint}`;
@@ -75,34 +150,43 @@ export async function getTokenMetadata(mints: string[]): Promise<Map<string, Tok
 
   if (uncached.length > 0) {
     try {
-      const res = await fetch(HELIUS_RPC, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          jsonrpc: '2.0',
-          id: 'web3me',
-          method: 'getAssetBatch',
-          params: { ids: uncached },
+      const data = await fetchHeliusJsonWithKeyRotation<HeliusJsonRpcResponse<unknown[]>>(
+        (apiKey) => ({
+          url: getHeliusRpcUrl(apiKey),
+          init: {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              jsonrpc: '2.0',
+              id: 'web3me',
+              method: 'getAssetBatch',
+              params: { ids: uncached },
+            }),
+          },
         }),
-      });
+      );
 
-      if (res.ok) {
-        const data = await res.json();
-        const assets = data.result || [];
-        const fetchedEntries: [string, TokenMeta][] = [];
-        for (const asset of assets) {
-          if (asset && asset.id) {
-            const metadata = {
-              symbol: asset.content?.metadata?.symbol || asset.id.slice(0, 6),
-              name: asset.content?.metadata?.name || '',
-              image: asset.content?.links?.image || asset.content?.files?.[0]?.uri || null,
-            };
-            metadataCache.set(asset.id, metadata);
-            fetchedEntries.push([asset.id, metadata]);
-          }
+      const assets = data.result || [];
+      const fetchedEntries: [string, TokenMeta][] = [];
+      for (const asset of assets) {
+        if (asset && typeof asset === 'object' && 'id' in asset) {
+          const assetId = String(asset.id);
+          const metadata = {
+            symbol:
+              (asset as { content?: { metadata?: { symbol?: string } } }).content?.metadata?.symbol ||
+              assetId.slice(0, 6),
+            name: (asset as { content?: { metadata?: { name?: string } } }).content?.metadata?.name || '',
+            image:
+              (asset as { content?: { links?: { image?: string | null }; files?: Array<{ uri?: string | null }> } })
+                .content?.links?.image ||
+              (asset as { content?: { files?: Array<{ uri?: string | null }> } }).content?.files?.[0]?.uri ||
+              null,
+          };
+          metadataCache.set(assetId, metadata);
+          fetchedEntries.push([assetId, metadata]);
         }
-        await persistTokenMetadataToRedis(fetchedEntries);
       }
+      await persistTokenMetadataToRedis(fetchedEntries);
     } catch {
       // Fallback silently
     }
@@ -153,6 +237,11 @@ const SOL_MINT = 'So11111111111111111111111111111111111111112';
 export interface FetchResult {
   txns: HeliusTransaction[];
   newestSignature: string | null; // store this as the next cursor
+  oldestFetchedSignature: string | null;
+  pagesFetched: number;
+  previousCursorFound: boolean | null;
+  reachedHistoryEnd: boolean;
+  pageLimitReached: boolean;
 }
 
 /**
@@ -165,31 +254,37 @@ export async function getWalletTransactions(
   walletAddress: string,
   opts: { since?: string | null; maxPages?: number } = {},
 ): Promise<FetchResult> {
-  if (!HELIUS_API_KEY) throw new Error('HELIUS_API_KEY not set');
+  if (HELIUS_API_KEYS.length === 0) throw new Error('HELIUS_API_KEY not set');
 
   const maxPages = opts.maxPages ?? (opts.since ? 5 : 20); // 20 pages first run (2000 txns), 5 pages incremental
   const allTxns: HeliusTransaction[] = [];
   let before: string | undefined;
+  let pagesFetched = 0;
+  let previousCursorFound = opts.since ? false : null;
+  let reachedHistoryEnd = false;
+  let pageLimitReached = false;
 
   for (let page = 0; page < maxPages; page++) {
-    const params = new URLSearchParams({ 'api-key': HELIUS_API_KEY, limit: '100' });
-    if (before) params.set('before', before);
+    const txns = await fetchHeliusJsonWithKeyRotation<HeliusTransaction[]>((apiKey) => {
+      const params = new URLSearchParams({ 'api-key': apiKey, limit: '100' });
+      if (before) params.set('before', before);
+      return {
+        url: `${HELIUS_BASE}/addresses/${walletAddress}/transactions?${params}`,
+      };
+    });
 
-    let res: Response | undefined;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      res = await fetch(`${HELIUS_BASE}/addresses/${walletAddress}/transactions?${params}`);
-      if (res.status !== 429) break;
-      await new Promise(r => setTimeout(r, 3000 * (attempt + 1)));
+    if (txns.length === 0) {
+      reachedHistoryEnd = true;
+      break;
     }
-    if (!res || !res.ok) throw new Error(`Helius API error: ${res?.status ?? 'no response'}`);
 
-    const txns: HeliusTransaction[] = await res.json();
-    if (txns.length === 0) break;
+    pagesFetched += 1;
 
     // Incremental mode: stop when we hit the last-seen signature
     if (opts.since) {
       const cutoffIdx = txns.findIndex(t => t.signature === opts.since);
       if (cutoffIdx !== -1) {
+        previousCursorFound = true;
         allTxns.push(...txns.slice(0, cutoffIdx));
         break;
       }
@@ -197,11 +292,24 @@ export async function getWalletTransactions(
 
     allTxns.push(...txns);
     before = txns[txns.length - 1].signature;
+    if (txns.length < 100) {
+      reachedHistoryEnd = true;
+      break;
+    }
+
+    if (page === maxPages - 1) {
+      pageLimitReached = true;
+    }
   }
 
   return {
     txns: allTxns,
     newestSignature: allTxns.length > 0 ? allTxns[0].signature : (opts.since ?? null),
+    oldestFetchedSignature: allTxns.length > 0 ? allTxns[allTxns.length - 1].signature : null,
+    pagesFetched,
+    previousCursorFound,
+    reachedHistoryEnd,
+    pageLimitReached,
   };
 }
 

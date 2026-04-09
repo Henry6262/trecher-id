@@ -10,6 +10,29 @@ export async function GET() {
   const wallets = await prisma.wallet.findMany({
     where: { userId: session.id },
     orderBy: { linkedAt: 'asc' },
+    select: {
+      id: true,
+      address: true,
+      chain: true,
+      verified: true,
+      linkedAt: true,
+      totalPnlUsd: true,
+      winRate: true,
+      totalTrades: true,
+      lastSuccessfulSyncAt: true,
+      lastSyncStatus: true,
+      lastSyncError: true,
+      lastSyncTxnsFetched: true,
+      lastSyncTradeRows: true,
+      lastSyncEventRows: true,
+      syncWarningCode: true,
+      lastContinuityStatus: true,
+      lastContinuityIssue: true,
+      historyCoverageStatus: true,
+      historyCoverageIssue: true,
+      historyCoverageUpdatedAt: true,
+      oldestExactEventAt: true,
+    },
   });
   return NextResponse.json(wallets);
 }

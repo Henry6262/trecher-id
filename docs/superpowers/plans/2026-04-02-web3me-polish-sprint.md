@@ -4,7 +4,7 @@
 Ship 5 features that make Web3Me production-ready for real KOLs: claim flow, claimed badge, share card OG image, Vercel cron, and dashboard wallet UX.
 
 ## Context
-- Repo: `/Users/henry/Documents/Gazillion-dollars/Ponzinomics/use-case-apps/web3me/`
+- Repo: `/Users/henry/Documents/Gazillion-dollars/Ponzinomics/use-case-apps/trecher-id/`
 - Branch: `feature/web3me-next` (worktree at `.worktrees/web3me-features/`)
 - Framework: Next.js 16 App Router, Prisma 7, ioredis, Privy auth, Tailwind CSS v4
 - Design: cut-corner glassmorphism, cyan `#00D4FF` accent, dark `#050508` bg

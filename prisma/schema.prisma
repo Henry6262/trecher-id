@@ -64,11 +64,61 @@ model Wallet {
   isMain         Boolean   @default(false)
   lastSignature  String?   // Helius pagination cursor — only fetch txns newer than this
   lastFetchedAt  DateTime? // When we last fetched transactions
+  lastSyncAttemptAt DateTime?
+  lastSuccessfulSyncAt DateTime?
+  lastSyncStatus String?
+  lastSyncError String?
+  lastSyncTxnsFetched Int?
+  lastSyncTradeRows Int?
+  lastSyncEventRows Int?
+  syncWarningCode String?
+  lastContinuityStatus String?
+  lastContinuityIssue String?
+  historyCoverageStatus String?
+  historyCoverageIssue String?
+  historyCoverageUpdatedAt DateTime?
+  oldestExactEventAt DateTime?
 
   trades WalletTrade[]
+  tradeEvents WalletTradeEvent[]
+  syncAudits WalletSyncAudit[]
 
   @@unique([userId, address])
   @@index([userId])
+}
+
+model WalletSyncAudit {
+  id                  String   @id @default(cuid())
+  walletId            String
+  wallet              Wallet   @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  syncMode            String
+  status              String
+  attemptedAt         DateTime
+  completedAt         DateTime?
+  previousSignature   String?
+  newestSignature     String?
+  oldestFetchedSignature String?
+  txnsFetched         Int      @default(0)
+  tradeRows           Int      @default(0)
+  eventRows           Int      @default(0)
+  pagesFetched        Int      @default(0)
+  previousCursorFound Boolean?
+  reachedHistoryEnd   Boolean?
+  pageLimitReached    Boolean?
+  continuityStatus    String?
+  continuityIssue     String?
+  historyCoverageStatus String?
+  historyCoverageIssue String?
+  oldestExactEventAt  DateTime?
+  warningCode         String?
+  error               String?
+  createdAt           DateTime @default(now())
+
+  @@index([walletId, attemptedAt])
+  @@index([walletId, createdAt])
+  @@index([status])
+  @@index([continuityStatus])
+  @@index([historyCoverageStatus])
 }
 
 // Stores accumulated per-token trade PnL — grows each cron run
@@ -94,6 +144,25 @@ model WalletTrade {
   @@index([pnlSol])
 }
 
+model WalletTradeEvent {
+  id         String   @id @default(cuid())
+  walletId   String
+  wallet     Wallet   @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  signature  String
+  tokenMint  String
+  tokenSymbol String
+  tokenName  String?
+  tokenImageUrl String?
+  type       String
+  amountSol  Float
+  timestamp  DateTime
+  createdAt  DateTime @default(now())
+
+  @@unique([walletId, signature, tokenMint, type])
+  @@index([walletId, timestamp])
+  @@index([walletId, tokenMint, timestamp])
+}
+
 model PinnedTrade {
   id              String   @id @default(cuid())
   userId          String
@@ -117,6 +186,7 @@ model UserRanking {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   period    String
+  rank      Int?
   pnlUsd    Float
   pnlSol    Float
   winRate   Float
@@ -125,6 +195,7 @@ model UserRanking {
 
   @@unique([userId, period])
   @@index([period, pnlUsd])
+  @@index([period, rank])
 }
 
 model TokenDeployment {
