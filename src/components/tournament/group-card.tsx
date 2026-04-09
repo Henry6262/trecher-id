@@ -1,4 +1,6 @@
 'use client';
+
+import Link from 'next/link';
 import { AvatarImage } from '@/components/avatar-image';
 import { getPublicAvatarUrl } from '@/lib/images';
 import type { Group } from './bracket-utils';
@@ -29,8 +31,9 @@ export function GroupCard({ group }: { group: Group }) {
       {group.traders.map((trader, i) => {
         const qualified = i < 2;
         return (
-          <div
+          <Link
             key={trader.username}
+            href={`/${trader.username}`}
             className="flex items-center gap-2 px-3 transition-colors hover:bg-[rgba(0,212,255,0.03)]"
             style={{
               height: 44,
@@ -77,7 +80,7 @@ export function GroupCard({ group }: { group: Group }) {
                 ? `${Math.round(trader.pnlUsd / 1000)}K`
                 : Math.round(trader.pnlUsd)}
             </span>
-          </div>
+          </Link>
         );
       })}
     </div>

@@ -252,13 +252,15 @@ export default function DashboardPage() {
                 </p>
               )}
             </div>
-            <Link
-              href="/leaderboard"
-              className="text-[10px] font-mono tracking-widest transition-colors shrink-0"
-              style={{ color: accentColor }}
-            >
-              LEADERBOARD →
-            </Link>
+            {profile?.username && (
+              <Link
+                href={`/${profile.username}`}
+                className="text-[10px] font-mono tracking-widest transition-colors shrink-0"
+                style={{ color: accentColor }}
+              >
+                VIEW PROFILE →
+              </Link>
+            )}
           </div>
         </GlassCard>
       )}

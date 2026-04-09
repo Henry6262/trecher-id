@@ -32,7 +32,6 @@ export default async function ShareCardPage({ params }: Props) {
   });
   if (!user) notFound();
 
-  // Aggregate stats from DB wallets (same pattern as profile page)
   let totalPnlUsd = 0;
   let totalWinRate = 0;
   let winRateCount = 0;
@@ -40,12 +39,14 @@ export default async function ShareCardPage({ params }: Props) {
   for (const w of user.wallets) {
     totalPnlUsd += w.totalPnlUsd ?? 0;
     totalTrades += w.totalTrades ?? 0;
-    if (w.winRate != null) { totalWinRate += w.winRate; winRateCount++; }
+    if (w.winRate != null) {
+      totalWinRate += w.winRate;
+      winRateCount++;
+    }
   }
   const winRate = winRateCount > 0 ? totalWinRate / winRateCount : 0;
   const stats = { totalPnlUsd, winRate, totalTrades };
 
-  // Compute Degen Score from DB-only stats (no Helius fetch needed for the card)
   const degenScore = computeDegenScore(
     {
       roi: 0,

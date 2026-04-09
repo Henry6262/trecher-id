@@ -11,7 +11,7 @@ export function TraderSearch() {
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
     const username = query.trim().replace('@', '');
-    if (username) router.push(`/leaderboard?search=${encodeURIComponent(username)}`);
+    if (username) router.push(`/${username}`);
   }
 
   return (

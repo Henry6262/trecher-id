@@ -1,4 +1,6 @@
 'use client';
+
+import Link from 'next/link';
 import { AvatarImage } from '@/components/avatar-image';
 import { CutCorner } from '@/components/cut-corner';
 import { getPublicAvatarUrl } from '@/lib/images';
@@ -33,7 +35,8 @@ function TraderRow({
   }
 
   return (
-    <div
+    <Link
+      href={`/${trader.username}`}
       className="flex items-center gap-2 px-2.5 py-2 transition-colors hover:bg-[rgba(0,212,255,0.03)]"
       style={{
         opacity: isWinner ? 1 : 0.4,
@@ -95,7 +98,7 @@ function TraderRow({
           ? `${Math.round(trader.pnlUsd / 1000)}K`
           : Math.round(trader.pnlUsd)}
       </span>
-    </div>
+    </Link>
   );
 }
 

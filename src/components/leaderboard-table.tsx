@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { AvatarImage } from '@/components/avatar-image';
 import { GlassCard } from '@/components/glass-card';
 import { getPublicAvatarUrl } from '@/lib/images';
@@ -266,7 +267,7 @@ export function LeaderboardTable({
           {/* LEFT — Top 3 */}
           <div className="w-full lg:w-[280px] flex-shrink-0 flex flex-col gap-2">
             {top3[0] && (
-              <div className="block flex-[1.2] relative overflow-hidden cut-sm group" style={{ minHeight: '120px' }}>
+              <Link href={`/${top3[0].username}`} className="block flex-[1.2] relative overflow-hidden cut-sm group" style={{ minHeight: '120px' }}>
                 <div className="absolute inset-0 transition-transform duration-500 group-hover:scale-105" style={{
                   backgroundImage: `url(${getPublicAvatarUrl(top3[0].username, top3[0].avatarUrl)})`,
                   backgroundSize: 'cover', backgroundPosition: 'center 20%',
@@ -296,11 +297,11 @@ export function LeaderboardTable({
                     <Image src="/sol.png" alt="SOL" width={18} height={18} className="h-[18px] w-auto" />
                   </div>
                 </div>
-              </div>
+              </Link>
             )}
             <div className="flex gap-2 flex-1">
               {[top3[1], top3[2]].map((t, idx) => t && (
-                <div key={t.username} className="block flex-1 relative overflow-hidden cut-sm group" style={{ minHeight: '100px' }}>
+                <Link key={t.username} href={`/${t.username}`} className="block flex-1 relative overflow-hidden cut-sm group" style={{ minHeight: '100px' }}>
                   <div className="absolute inset-0 transition-transform duration-500 group-hover:scale-105" style={{
                     backgroundImage: `url(${getPublicAvatarUrl(t.username, t.avatarUrl)})`,
                     backgroundSize: 'cover', backgroundPosition: 'center 20%',
@@ -316,7 +317,7 @@ export function LeaderboardTable({
                       <Image src="/sol.png" alt="SOL" width={13} height={13} className="h-[13px] w-auto" />
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           </div>
@@ -334,7 +335,7 @@ export function LeaderboardTable({
               <span className="w-[80px] text-right">PNL</span>
             </div>
             {rest.map((t) => (
-              <div key={t.username}
+              <Link key={t.username} href={`/${t.username}`}
                 className="flex items-center px-3 py-2.5 transition-colors hover:bg-[rgba(0,212,255,0.03)]"
                 style={{ borderBottom: '1px solid rgba(255,255,255,0.02)', textDecoration: 'none' }}>
                 <span className="w-[22px] font-mono text-[11px] font-bold text-[#444]">{t.rank}</span>
@@ -358,7 +359,7 @@ export function LeaderboardTable({
                   <span className="font-mono text-[13px] font-black" style={{ color: t.pnlSol >= 0 ? '#22c55e' : '#ef4444' }}>{t.pnlSol >= 0 ? '+' : ''}{Math.round(t.pnlSol)}</span>
                   <Image src="/sol.png" alt="SOL" width={12} height={12} className="h-[12px] w-auto" />
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>

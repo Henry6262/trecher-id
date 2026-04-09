@@ -124,8 +124,8 @@ function getValueTone(value: number) {
 }
 
 function PreviewCardInner({ featured }: { featured: TraderData }) {
-  const featuredProfileLabel = 'web3me.fun/leaderboard';
-  const profileHref = '/leaderboard';
+  const featuredProfileLabel = `web3me.fun/${featured.username}`;
+  const profileHref = `/${featured.username}`;
   const pnlTone = getValueTone(featured.pnlValue);
 
   return (

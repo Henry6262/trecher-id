@@ -1,5 +1,5 @@
-import { CupHeroVariants } from '@/components/tournament/cup-hero-variants';
+import { redirect } from 'next/navigation';
 
 export default function CupVariantsPreviewPage() {
-  return <CupHeroVariants />;
+  redirect('/');
 }

@@ -76,7 +76,7 @@ export function TraderCarousel({ traders }: TraderCarouselProps) {
             fillOpacity={0.2}
           >
             <Link
-              href="/leaderboard"
+              href={`/${t.username}`}
               className="block relative group"
               style={{ clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)' }}
             >
