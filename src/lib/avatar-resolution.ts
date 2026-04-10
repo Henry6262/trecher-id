@@ -2,12 +2,16 @@ import { fetchFxTwitterProfile } from '@/lib/fxtwitter';
 import { cached } from '@/lib/redis';
 import { getPublicAvatarUrl, normalizeImageUrl } from '@/lib/images';
 
+function isWeakAvatarUrl(url: string | null): boolean {
+  return !!url && url.includes('unavatar.io/');
+}
+
 export async function resolveAvatarUrl(input: {
   username: string;
   avatarUrl?: string | null;
 }): Promise<string> {
   const normalized = normalizeImageUrl(input.avatarUrl);
-  if (normalized) {
+  if (normalized && !isWeakAvatarUrl(normalized)) {
     return normalized;
   }
 
@@ -15,7 +19,16 @@ export async function resolveAvatarUrl(input: {
     fetchFxTwitterProfile(input.username),
   );
 
-  return getPublicAvatarUrl(input.username, profile.avatarUrl);
+  const enrichedAvatar = normalizeImageUrl(profile.avatarUrl);
+  if (enrichedAvatar) {
+    return enrichedAvatar;
+  }
+
+  if (normalized && !isWeakAvatarUrl(normalized)) {
+    return normalized;
+  }
+
+  return getPublicAvatarUrl(input.username, null);
 }
 
 export async function resolveAvatarRows<T extends { username: string; avatarUrl: string | null }>(

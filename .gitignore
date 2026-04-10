@@ -48,3 +48,5 @@ pnpm-lock.yaml
 .env.vercel
 .env.vercel-prod
 test-results/
+.aider.chat.history.md
+.aider.input.history

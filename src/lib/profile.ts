@@ -462,11 +462,13 @@ export function buildProfileMetadata(profile: PublicProfileData): Metadata {
       type: 'profile',
       url: `/${profile.user.username}`,
       siteName: 'Web3Me',
+      images: [profile.user.avatarUrl || 'https://web3me.fun/placeholder-avatar.png'], // Use resolved avatar URL
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
+      images: [profile.user.avatarUrl || 'https://web3me.fun/placeholder-avatar.png'], // Use resolved avatar URL
     },
   };
 }

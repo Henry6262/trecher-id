@@ -1,6 +1,8 @@
 import { ImageResponse } from 'next/og';
 import { prisma } from '@/lib/prisma';
 import { computeDegenScore } from '@/lib/degen-score';
+import { resolveAvatarUrl } from '@/lib/avatar-resolution';
+import { formatPnl } from '@/lib/utils';
 
 export const runtime = 'nodejs';
 export const alt = 'Web3Me Profile';
@@ -72,9 +74,12 @@ export default async function Image({ params }: { params: Promise<{ username: st
     { roi: 0, avgTradeSize: 0, bestTrade: null, worstTrade: null, winStreak: 0, avgHoldTime: '0m', consistency: 0, totalBuySol: 0, totalSellSol: 0 },
     { winRate, totalTrades, totalPnlUsd: totalPnl },
   );
-
-  const pnlStr =
-    totalPnl >= 1000 ? `+$${(totalPnl / 1000).toFixed(1)}K` : `+$${totalPnl.toFixed(0)}`;
+  const avatarUrl = await resolveAvatarUrl({
+    username: user.username,
+    avatarUrl: user.avatarUrl,
+  });
+  const pnlStr = formatPnl(totalPnl);
+  const pnlColor = totalPnl >= 0 ? '#22c55e' : '#ef4444';
 
   return new ImageResponse(
     (
@@ -101,23 +106,20 @@ export default async function Image({ params }: { params: Promise<{ username: st
         />
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 24, marginBottom: 40 }}>
-          <div
+          <img
+            src={avatarUrl}
+            width={100}
+            height={100}
+            alt={user.displayName ?? user.username}
             style={{
               width: 100,
               height: 100,
               borderRadius: '50%',
-              background: '#00D4FF',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: 40,
-              fontWeight: 700,
-              color: '#000',
+              objectFit: 'cover',
               border: '3px solid rgba(0,212,255,0.3)',
+              background: '#0b1118',
             }}
-          >
-            {user.displayName.charAt(0).toUpperCase()}
-          </div>
+          />
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <div style={{ fontSize: 36, fontWeight: 700, color: '#e4e4e7' }}>@{user.username}</div>
             {user.bio && (
@@ -128,7 +130,7 @@ export default async function Image({ params }: { params: Promise<{ username: st
 
         <div style={{ display: 'flex', gap: 60, marginBottom: 40 }}>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <div style={{ fontSize: 42, fontWeight: 700, color: '#22c55e' }}>{pnlStr}</div>
+            <div style={{ fontSize: 42, fontWeight: 700, color: pnlColor }}>{pnlStr}</div>
             <div style={{ fontSize: 14, color: '#71717a', letterSpacing: 2 }}>TOTAL PnL</div>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column' }}>

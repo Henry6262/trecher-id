@@ -157,7 +157,7 @@ export function TournamentBracket({ traders }: { traders: RankedTrader[] }) {
             style={{ background: 'linear-gradient(90deg, rgba(5,5,8,0) 0%, rgba(5,5,8,0.62) 6%, rgba(5,5,8,0.92) 14%, #050508 24%)' }}
           />
 
-          <div className="relative z-10 flex h-full flex-col px-6 py-6 sm:px-8 sm:py-7">
+          <div className="relative z-10 flex h-full flex-col px-6 py-6 sm:px-8 sm:py-7 pointer-events-none">
             <div className="ml-auto flex w-full max-w-[760px] flex-col gap-5">
               <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
                 {champ ? (
@@ -236,7 +236,7 @@ export function TournamentBracket({ traders }: { traders: RankedTrader[] }) {
 
               <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_200px]">
                 <div
-                  className="cut-sm grid gap-3 px-4 py-4 sm:grid-cols-3"
+                  className="cut-sm grid gap-2 px-3 py-3 sm:grid-cols-3"
                   style={{
                     background: 'linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.015) 100%)',
                     border: '1px solid rgba(255,255,255,0.06)',
@@ -250,7 +250,7 @@ export function TournamentBracket({ traders }: { traders: RankedTrader[] }) {
                   ].map((item) => (
                     <div
                       key={item.label}
-                      className="cut-xs px-4 py-4"
+                      className="cut-xs px-3 py-3"
                       style={{
                         background: 'linear-gradient(180deg, rgba(7,10,16,0.92) 0%, rgba(7,10,16,0.72) 100%)',
                         border: '1px solid rgba(255,255,255,0.07)',
@@ -266,7 +266,7 @@ export function TournamentBracket({ traders }: { traders: RankedTrader[] }) {
                       >
                         {item.value}
                       </div>
-                      <div className="mt-3 text-[10px] font-mono tracking-[2px] text-[rgba(255,255,255,0.58)]">
+                      <div className="mt-2 text-[9px] font-mono tracking-[1px] text-[rgba(255,255,255,0.58)] whitespace-nowrap">
                         {item.note}
                       </div>
                     </div>

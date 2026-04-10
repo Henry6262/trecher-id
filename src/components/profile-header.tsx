@@ -12,15 +12,16 @@ import Image from 'next/image';
 
 function ShareButtons({ username, accent }: { username: string; accent: string }) {
   const [copied, setCopied] = useState(false);
+  const origin = typeof window !== 'undefined' ? window.location.origin : '';
+  const profileUrl = `${origin}/${username}`;
 
   function copyLink() {
-    navigator.clipboard.writeText(window.location.href).catch(() => {});
+    navigator.clipboard.writeText(profileUrl).catch(() => {});
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
 
-  const cardUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/${username}/card`;
-  const tweetText = encodeURIComponent(`Check out @${username}'s trading profile on Web3Me 👀\n${cardUrl}`);
+  const tweetText = encodeURIComponent(`See @${username}'s verified trading profile on Web3Me.\n${profileUrl}`);
 
   return (
     <>
@@ -29,16 +30,23 @@ function ShareButtons({ username, accent }: { username: string; accent: string }
         className="cut-xs flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-mono tracking-widest transition-all"
         style={{ background: 'rgba(0,212,255,0.04)', border: '1px solid rgba(0,212,255,0.1)', color: copied ? '#22c55e' : '#71717a' }}
       >
-        {copied ? 'LINK COPIED' : 'COPY LINK'}
+        {copied ? 'PROFILE COPIED' : 'COPY PROFILE'}
       </button>
+      <Link
+        href={`/${username}/card`}
+        className="cut-xs flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-mono tracking-widest transition-all"
+        style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: '#a1a1aa' }}
+      >
+        OPEN CARD
+      </Link>
       <a
-        href={`https://twitter.com/intent/tweet?text=${tweetText}`}
+        href={`https://x.com/intent/tweet?text=${tweetText}`}
         target="_blank"
         rel="noopener noreferrer"
         className="cut-xs flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-mono tracking-widest transition-all"
         style={{ background: `${accent}14`, border: `1px solid ${accent}33`, color: accent }}
       >
-        SHARE CARD
+        SHARE ON X
       </a>
     </>
   );

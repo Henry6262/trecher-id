@@ -63,7 +63,7 @@ function buildItems(pool, seg) {
 
   const totalSlots = coords.length;
   if (pool.length === 0) {
-    return coords.map(c => ({ ...c, src: '', alt: '' }));
+    return coords.map(c => ({ ...c, src: '', alt: '', title: '', subtitle: '', metric: '', href: '' }));
   }
   if (pool.length > totalSlots) {
     console.warn(
@@ -73,9 +73,16 @@ function buildItems(pool, seg) {
 
   const normalizedImages = pool.map(image => {
     if (typeof image === 'string') {
-      return { src: image, alt: '' };
+      return { src: image, alt: '', title: '', subtitle: '', metric: '', href: '' };
     }
-    return { src: image.src || '', alt: image.alt || '' };
+    return {
+      src: image.src || '',
+      alt: image.alt || '',
+      title: image.title || '',
+      subtitle: image.subtitle || '',
+      metric: image.metric || '',
+      href: image.href || ''
+    };
   });
 
   const usedImages = Array.from({ length: totalSlots }, (_, i) => normalizedImages[i % normalizedImages.length]);
@@ -96,7 +103,11 @@ function buildItems(pool, seg) {
   return coords.map((c, i) => ({
     ...c,
     src: usedImages[i].src,
-    alt: usedImages[i].alt
+    alt: usedImages[i].alt,
+    title: usedImages[i].title,
+    subtitle: usedImages[i].subtitle,
+    metric: usedImages[i].metric,
+    href: usedImages[i].href
   }));
 }
 
@@ -612,6 +623,7 @@ export default function DomeGallery({
                 key={`${it.x},${it.y},${i}`}
                 className="item"
                 data-src={it.src}
+                data-href={it.href}
                 data-offset-x={it.x}
                 data-offset-y={it.y}
                 data-size-x={it.sizeX}
@@ -640,6 +652,13 @@ export default function DomeGallery({
                       event.currentTarget.src = '/avatar-fallback.svg';
                     }}
                   />
+                  {(it.title || it.metric) && (
+                    <div className="item__meta">
+                      {it.title && <div className="item__meta-title">{it.title}</div>}
+                      {it.subtitle && <div className="item__meta-subtitle">{it.subtitle}</div>}
+                      {it.metric && <div className="item__meta-metric">{it.metric}</div>}
+                    </div>
+                  )}
                 </div>
               </div>
             ))}

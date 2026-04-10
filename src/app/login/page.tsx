@@ -34,8 +34,17 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (TEST_AUTH_BYPASS) return;
-    if (!ready || !authenticated) return;
-    router.push('/dashboard');
+    if (!ready) return;
+
+    if (authenticated) {
+      router.replace('/dashboard');
+      return;
+    }
+
+    const nextParams = new URLSearchParams(window.location.search);
+    nextParams.set('auth', '1');
+    const search = nextParams.toString();
+    router.replace(search ? `/?${search}` : '/?auth=1');
   }, [ready, authenticated, router]);
 
   useEffect(() => {
@@ -120,18 +129,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen relative flex items-center justify-center">
       <SynapticBackgroundLayer />
-      <div className="relative z-10 text-center space-y-6">
-        <Image
-          src="/logo.png"
-          alt="Web3Me"
-          width={224}
-          height={56}
-          className="h-14 w-auto mx-auto"
-          priority
-        />
-        <p className="text-sm text-[var(--trench-text-muted)]">Your Web3 bio link. Backed by on-chain proof.</p>
-        <CutButton onClick={login} size="lg">Sign in with X</CutButton>
-      </div>
+      <div className="relative z-10 text-[var(--trench-text-muted)] text-sm font-mono">Redirecting...</div>
     </div>
   );
 }

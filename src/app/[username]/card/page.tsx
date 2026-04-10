@@ -11,11 +11,38 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { username } = await params;
+  const title = `@${username} — Web3Me Card`;
+  const description = `Shareable Web3Me card for @${username}.`;
+  const cardPath = `/${username}/card`;
+  const ogImagePath = `${cardPath}/opengraph-image`;
+
   return {
-    title: `@${username} — Web3Me Card`,
+    title,
+    description,
+    alternates: {
+      canonical: cardPath,
+    },
     robots: { index: false, follow: false },
     openGraph: {
-      images: [`/${username}/opengraph-image`],
+      title,
+      description,
+      type: 'profile',
+      url: cardPath,
+      siteName: 'Web3Me',
+      images: [
+        {
+          url: ogImagePath,
+          width: 1200,
+          height: 630,
+          alt: `${title} share image`,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [ogImagePath],
     },
   };
 }

@@ -14,6 +14,7 @@ import { ActivityTicker } from '@/components/activity-ticker';
 import { JourneySection } from '@/components/journey-section';
 import { ReferralSection } from '@/components/referral-section';
 import { SectionRailNav } from '@/components/section-rail-nav';
+import { GlassCard } from '@/components/glass-card';
 import { getPublicAvatarUrl } from '@/lib/images';
 import type { TickerItem } from '@/lib/types';
 
@@ -216,7 +217,7 @@ function PreviewCardInner({ featured }: { featured: TraderData }) {
                   >
                     <div className="flex items-center gap-2.5">
                       <div
-                        className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full"
+                        className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full flex-shrink-0"
                         style={{ background: 'rgba(0,212,255,0.1)', border: '1px solid rgba(0,212,255,0.18)' }}
                       >
                         {trade.tokenImage ? (
@@ -234,18 +235,18 @@ function PreviewCardInner({ featured }: { featured: TraderData }) {
                           <ExternalLink size={10} className="text-[rgba(255,255,255,0.28)] opacity-0 transition-opacity group-hover:opacity-100" />
                         </div>
                       </div>
-                    </div>
-                    <div className="mt-2 flex gap-2">
-                      {trade.buy && (
-                        <div className="flex-1 rounded-[3px] border border-white/5 bg-white/[0.02] px-2 py-1 text-[8px] font-mono text-[var(--trench-text-muted)]">
-                          BUY <span className="text-white">{trade.buy}</span>
-                        </div>
-                      )}
-                      {trade.sell && (
-                        <div className="flex-1 rounded-[3px] border border-white/5 bg-white/[0.02] px-2 py-1 text-[8px] font-mono text-[var(--trench-text-muted)]">
-                          SELL <span style={{ color: tradeTone.color }}>{trade.sell}</span>
-                        </div>
-                      )}
+                      <div className="flex flex-col gap-1 flex-shrink-0 ml-auto">
+                        {trade.buy && (
+                          <div className="rounded-[3px] border border-white/5 bg-white/[0.02] px-2 py-1 text-[8px] font-mono text-[var(--trench-text-muted)] whitespace-nowrap">
+                            BUY <span className="text-white">{trade.buy}</span>
+                          </div>
+                        )}
+                        {trade.sell && (
+                          <div className="rounded-[3px] border border-white/5 bg-white/[0.02] px-2 py-1 text-[8px] font-mono text-[var(--trench-text-muted)] whitespace-nowrap">
+                            SELL <span style={{ color: tradeTone.color }}>{trade.sell}</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </a>
                 );
@@ -340,26 +341,31 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
     }).catch(() => {});
   }, [refCode]);
 
-  const avatarUrls = traders.map((t) => getPublicAvatarUrl(t.username, t.avatarUrl));
-  const domeImages = avatarUrls.map(src => ({ src, alt: '' }));
+  const domeImages = traders.map((trader) => ({
+    src: getPublicAvatarUrl(trader.username, trader.avatarUrl),
+    alt: `${trader.name} profile image`,
+    title: `@${trader.username}`,
+    subtitle: trader.name,
+    metric: trader.pnl,
+  }));
   return (
     <div className="relative min-h-screen" style={{ background: '#050508' }}>
       <PublicNav />
       <SectionRailNav />
 
-      <div className="fixed inset-0" style={{ zIndex: 0 }}>
+      <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }}>
         <Lightspeed
           primaryColor="#00D4FF"
           secondaryColor="#0066AA"
           tertiaryColor="#00A3CC"
-          speed={0.7}
+          speed={0.38}
           streakCount={140}
           stretchFactor={0.045}
           intensity={1.1}
           fadePower={2.0}
           opacity={1.0}
           quality="medium"
-          interactionEnabled={true}
+          interactionEnabled={false}
         />
       </div>
 
@@ -399,7 +405,6 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
 
             <div className="flex flex-wrap items-center gap-3">
               <CutButton href="/dashboard" size="lg">Open Dashboard</CutButton>
-              <CutButton href="/leaderboard" size="lg" variant="secondary">See Leaderboard</CutButton>
             </div>
             <p className="mt-4 text-[9px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">LANDING &middot; LEADERBOARD &middot; DASHBOARD</p>
           </div>
@@ -513,9 +518,16 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
 
           <div className="h-[520px] w-full relative">
             {/* CTA centered on gallery */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 text-center px-10 py-8 cut-sm" style={{ background: 'rgba(5,5,8,0.6)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', boxShadow: '0 0 60px rgba(5,5,8,0.8), 0 0 120px rgba(5,5,8,0.4)' }}>
-              <p className="mb-3 text-[12px] text-[var(--trench-text-muted)]">Ready to wire in your own wallets?</p>
-              <CutButton href="/dashboard" size="lg">Open Dashboard</CutButton>
+            <div className="absolute top-1/2 left-1/2 z-20 w-[min(92vw,340px)] -translate-x-1/2 -translate-y-1/2 px-3 pointer-events-none">
+              <GlassCard className="p-6 text-center pointer-events-none" cut={12}>
+                <p className="text-[9px] font-mono tracking-[2px] text-[var(--trench-accent)]">JOIN THE BOARD</p>
+                <p className="mt-3 text-sm leading-relaxed text-[var(--trench-text-muted)]">
+                  Ready to wire in your wallets, shape your page, and start climbing the public ranks?
+                </p>
+                <div className="mt-5 flex justify-center pointer-events-auto">
+                  <CutButton href="/dashboard" size="lg">Open Dashboard</CutButton>
+                </div>
+              </GlassCard>
             </div>
 
             <DomeGallery

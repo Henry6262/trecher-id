@@ -1,11 +1,24 @@
 import { prisma } from '@/lib/prisma';
 import { LandingContent } from '@/components/landing-content';
+import { hasStrongAvatarUrl } from '@/lib/images';
 import { formatPnl } from '@/lib/utils';
 import { cached } from '@/lib/redis';
 import { resolveAvatarRows } from '@/lib/avatar-resolution';
 import type { TickerItem } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
+
+function isSyntheticLandingUser(username: string) {
+  return username === 'dev-bot' || username.startsWith('dev_') || username.startsWith('dev-');
+}
+
+function pickLandingGalleryUsernames(
+  rankings: { username: string; avatarUrl: string | null }[],
+) {
+  const primary = rankings.filter((entry) => !isSyntheticLandingUser(entry.username) && hasStrongAvatarUrl(entry.avatarUrl));
+  const secondary = rankings.filter((entry) => !primary.some((picked) => picked.username === entry.username));
+  return [...primary, ...secondary].map((entry) => entry.username);
+}
 
 export default async function LandingPage({ searchParams }: { searchParams: Promise<{ ref?: string }> }) {
   const { ref: refCode } = await searchParams;
@@ -55,7 +68,6 @@ export default async function LandingPage({ searchParams }: { searchParams: Prom
   const rankedRows = await prisma.userRanking.findMany({
     where: { period: '7d', trades: { gt: 0 }, rank: { not: null } },
     orderBy: { rank: 'asc' },
-    take: 50,
     include: { user: { select: { username: true, displayName: true, avatarUrl: true, isClaimed: true } } },
   });
   const rankings = rankedRows.length > 0
@@ -68,7 +80,6 @@ export default async function LandingPage({ searchParams }: { searchParams: Prom
           { trades: 'desc' },
           { userId: 'asc' },
         ],
-        take: 50,
         include: { user: { select: { username: true, displayName: true, avatarUrl: true, isClaimed: true } } },
       });
   leaderboardData = await resolveAvatarRows(rankings.map((r, i) => ({
@@ -83,7 +94,7 @@ export default async function LandingPage({ searchParams }: { searchParams: Prom
     trades: r.trades,
   })));
 
-  const rankedUsernames = leaderboardData.slice(0, 15).map((r) => r.username);
+  const rankedUsernames = pickLandingGalleryUsernames(leaderboardData);
   const users = rankedUsernames.length > 0
     ? await prisma.user.findMany({
         where: { username: { in: rankedUsernames } },
