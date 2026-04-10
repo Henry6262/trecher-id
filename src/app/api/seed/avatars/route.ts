@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { chromium } from 'playwright';
 import { prisma } from '@/lib/prisma';
+import { fetchFxTwitterProfile } from '@/lib/fxtwitter';
 
 export async function POST(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -8,9 +8,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const browser = await chromium.launch();
-  const page = await browser.newPage();
-  const results: { handle: string; avatar: string | null; error?: string }[] = [];
+  const results: { handle: string; avatar: string | null; error?: string; success?: boolean }[] = [];
 
   try {
     // Get all users from database
@@ -23,23 +21,18 @@ export async function POST(req: Request) {
       if (!user.username) continue;
 
       try {
-        await page.goto(`https://x.com/${user.username}`, { waitUntil: 'networkidle', timeout: 8000 });
+        // Use fxtwitter API (no auth required, no blocking)
+        const profile = await fetchFxTwitterProfile(user.username);
 
-        // Extract avatar from profile image
-        const avatarUrl = await page.locator('img[alt*="avatar"]').first().getAttribute('src');
-
-        if (avatarUrl) {
-          // Clean up Twitter image URL (remove query params)
-          const cleanUrl = avatarUrl.split('?')[0];
-
+        if (profile.avatarUrl) {
           await prisma.user.update({
             where: { id: user.id },
-            data: { avatarUrl: cleanUrl },
+            data: { avatarUrl: profile.avatarUrl },
           });
 
-          results.push({ handle: user.username, avatar: cleanUrl });
+          results.push({ handle: user.username, avatar: profile.avatarUrl, success: true });
         } else {
-          results.push({ handle: user.username, avatar: null, error: 'Avatar not found' });
+          results.push({ handle: user.username, avatar: null, error: 'No avatar on fxtwitter' });
         }
       } catch (error) {
         results.push({
@@ -49,11 +42,11 @@ export async function POST(req: Request) {
         });
       }
     }
-  } finally {
-    await browser.close();
+  } catch (error) {
+    console.error('Avatar seed error:', error);
   }
 
-  const successful = results.filter(r => r.avatar).length;
+  const successful = results.filter(r => r.success).length;
   return NextResponse.json({
     total: results.length,
     successful,

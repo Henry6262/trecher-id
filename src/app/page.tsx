@@ -9,7 +9,13 @@ import type { TickerItem } from '@/lib/types';
 export const dynamic = 'force-dynamic';
 
 function isSyntheticLandingUser(username: string) {
-  return username === 'dev-bot' || username.startsWith('dev_') || username.startsWith('dev-');
+  return (
+    username === 'dev-bot' ||
+    username.startsWith('dev_') ||
+    username.startsWith('dev-') ||
+    username.includes('_axiom') ||
+    username.includes('_trader')
+  );
 }
 
 function pickLandingGalleryUsernames(
@@ -95,9 +101,16 @@ export default async function LandingPage({ searchParams }: { searchParams: Prom
   })));
 
   const rankedUsernames = pickLandingGalleryUsernames(leaderboardData);
-  const users = rankedUsernames.length > 0
+  
+  // Filter for traders with positive PnL and real activity for hero section
+  const heroUsernames = rankedUsernames.filter(username => {
+    const ranking = leaderboardData.find(r => r.username === username);
+    return ranking && ranking.pnlUsd > 0 && ranking.trades >= 10;
+  });
+  
+  const users = heroUsernames.length > 0
     ? await prisma.user.findMany({
-        where: { username: { in: rankedUsernames } },
+        where: { username: { in: heroUsernames } },
         include: {
           wallets: true,
           pinnedTrades: { orderBy: [{ totalPnlPercent: 'desc' }, { totalPnlSol: 'desc' }], take: 3 },
@@ -170,8 +183,17 @@ export default async function LandingPage({ searchParams }: { searchParams: Prom
     console.error('[landing] SSR error:', err);
   }
 
-  const featuredProfiles = traders.filter((trader) => trader.pnlValue > 0).slice(0, 3);
-  const fallbackProfiles = featuredProfiles.length > 0 ? featuredProfiles : traders.slice(0, 3);
+  const featuredProfiles = traders.filter((trader) => 
+    trader.pnlValue > 0 && !isSyntheticLandingUser(trader.username)
+  ).slice(0, 3);
+  
+  // Fallback: if no positive PnL traders, show highest win rate with minimum trades
+  const fallbackProfiles = featuredProfiles.length >= 3 
+    ? featuredProfiles 
+    : traders
+        .filter(t => !isSyntheticLandingUser(t.username) && t.tradeCount >= 20)
+        .sort((a, b) => b.winRateValue - a.winRateValue)
+        .slice(0, 3);
 
   return <LandingContent traders={traders} featuredProfiles={fallbackProfiles} ticker={ticker} leaderboardData={leaderboardData} refCode={refCode} />;
 }
