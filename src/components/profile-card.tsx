@@ -88,10 +88,11 @@ export function ProfileCard({ user, stats, leaderboard, dataProvenance, links, p
     : [];
 
   // Build calendar from on-chain trade data if available
-  const calendarWeeks = allTrades && allTrades.length > 0
+  // Only show trade history if user has wallets linked AND has exact helius data
+  const calendarWeeks = hasWallets && allTrades && allTrades.length > 0
     ? buildTradeCalendar(allTrades)
     : [];
-  const showBehavioralAnalytics = dataProvenance.eventSource === 'exact_helius' && !!traderStats && calendarWeeks.length > 0;
+  const showBehavioralAnalytics = hasWallets && dataProvenance.eventSource === 'exact_helius' && !!traderStats && calendarWeeks.length > 0;
   const showTradeSection = showBehavioralAnalytics || pinnedTrades.length > 0;
   const showPortfolioSection = true;
   const showDeploymentsSection = !!(deployments && deployments.length > 0);

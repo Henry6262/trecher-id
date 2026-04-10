@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import type { CalendarWeek } from '@/lib/trade-calendar';
 import { getDayColor, getMonthLabel } from '@/lib/trade-calendar';
 
@@ -97,9 +98,9 @@ export function TradeCalendar({ weeks }: TradeCalendarProps) {
         </div>
       </div>
 
-      {tooltip && (
+      {tooltip && typeof document !== 'undefined' && createPortal(
         <div
-          className="pointer-events-none fixed z-[120] -translate-x-1/2"
+          className="pointer-events-none fixed z-[150] -translate-x-1/2"
           style={{ left: tooltip.x, top: tooltip.y - 10 }}
         >
           <div
@@ -108,16 +109,17 @@ export function TradeCalendar({ weeks }: TradeCalendarProps) {
               background: 'rgba(8,12,18,0.95)',
               border: '1px solid rgba(255,255,255,0.1)',
               borderRadius: 4,
-              boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.6)',
               transform: 'translateY(-100%)',
+              backdropFilter: 'blur(4px)',
             }}
           >
-            <div className="text-[8px] font-mono text-[#888] mb-0.5">{tooltip.date}</div>
+            <div className="text-[8px] font-mono text-[#999] mb-0.5">{tooltip.date}</div>
             <div className="text-[9px] font-mono font-bold" style={{ color: tooltip.pnlSol >= 0 ? '#22c55e' : '#ef4444' }}>
               {tooltip.pnlSol >= 0 ? '+' : ''}
               {Math.round(tooltip.pnlSol)} SOL
             </div>
-            <div className="text-[8px] font-mono text-[#666]">{tooltip.tradeCount} tx</div>
+            <div className="text-[8px] font-mono text-[#888]">{tooltip.tradeCount} tx</div>
           </div>
           <div
             className="mx-auto h-0 w-0"
@@ -128,7 +130,8 @@ export function TradeCalendar({ weeks }: TradeCalendarProps) {
               marginTop: -1,
             }}
           />
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
