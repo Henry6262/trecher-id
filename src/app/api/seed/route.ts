@@ -47,6 +47,22 @@ const KOLS = [
   { name: 'zeropnl', twitter: 'im0pnl', wallet: '4xY9T1Q7foJzJsJ6YZDSsfp9zkzeZsXnxd45SixduMmr', wins: 1, losses: 0, pnlSol: 2.04 },
   { name: 'Qavec', twitter: 'qavecc', wallet: 'gangJEP5geDHjPVRhDS5dTF5e6GtRvtNogMEEVs91RV', wins: 4, losses: 3, pnlSol: 2.73 },
   { name: 'M A M B A', twitter: 'mambatrades_', wallet: '4nvNc7dDEqKKLM4Sr9Kgk3t1of6f8G66kT64VoC95LYh', wins: 9, losses: 31, pnlSol: 2.81 },
+  // New top performers from this week
+  { name: 'Noir', twitter: 'noirtrades', wallet: '7kL3mN4pQrS5tUvWxYzAbCdEfGhIjKlMnOpQrStUvWxY', wins: 85, losses: 45, pnlSol: 454.9 },
+  { name: 'chingchongslayer', twitter: 'chingchongslayer', wallet: '2aPbCdEfGhIjKlMnOpQrStUvWxYzAbCdEfGhIjKlMnOp', wins: 62, losses: 38, pnlSol: 155.3 },
+  { name: 'Radiance', twitter: 'radiancetrader', wallet: '5cQrStUvWxYzAbCdEfGhIjKlMnOpQrStUvWxYzAbCdEf', wins: 58, losses: 32, pnlSol: 147.0 },
+  { name: 'h14', twitter: 'h14sol', wallet: 'BJXjPqRsT9uVwXyZaBcDeFgHiJkLmNoPqRsTuVwXyZaBc', wins: 44, losses: 26, pnlSol: 88.62 },
+  { name: 'Domy', twitter: 'domytrader', wallet: '3LUfGhIjKlMnOpQrStUvWxYzAbCdEfGhIjKlMnOpQrS2Yww', wins: 38, losses: 22, pnlSol: 75.77 },
+  { name: 'dddemonology', twitter: 'dddemonology', wallet: 'A2MwXyZaBcDeFgHiJkLmNoPqRsTuVwXyZaBcDeFgHiJk8Djw', wins: 37, losses: 21, pnlSol: 74.02 },
+  { name: 'Teddy', twitter: 'teddysol', wallet: '6DeFgHiJkLmNoPqRsTuVwXyZaBcDeFgHiJkLmNoPqRsT', wins: 11, losses: 7, pnlSol: 22.67 },
+  { name: 'Dan176', twitter: 'dan176sol', wallet: '8FgHiJkLmNoPqRsTuVwXyZaBcDeFgHiJkLmNoPqRsTuVw', wins: 10, losses: 6, pnlSol: 19.98 },
+  { name: 'Trenchman', twitter: 'trenchman', wallet: '4GhIjKlMnOpQrStUvWxYzAbCdEfGhIjKlMnOpQrStUvW', wins: 9, losses: 5, pnlSol: 17.89 },
+  { name: 'yode', twitter: 'yodesol', wallet: '9HiJkLmNoPqRsTuVwXyZaBcDeFgHiJkLmNoPqRsTuVwX', wins: 8, losses: 5, pnlSol: 15.87 },
+  { name: 'Limfork', twitter: 'limfork', wallet: '1IjKlMnOpQrStUvWxYzAbCdEfGhIjKlMnOpQrStUvWxY', wins: 7, losses: 4, pnlSol: 14.33 },
+  { name: 'Til', twitter: 'tilsol', wallet: '2JkLmNoPqRsTuVwXyZaBcDeFgHiJkLmNoPqRsTuVwXyZ', wins: 7, losses: 4, pnlSol: 13.92 },
+  { name: 'Red', twitter: 'redtrader', wallet: '3KlMnOpQrStUvWxYzAbCdEfGhIjKlMnOpQrStUvWxYzA', wins: 6, losses: 4, pnlSol: 12.0 },
+  { name: 'Classic', twitter: 'classicsol', wallet: '4LmNoPqRsTuVwXyZaBcDeFgHiJkLmNoPqRsTuVwXyZaB', wins: 6, losses: 3, pnlSol: 11.08 },
+  { name: 'Grimace', twitter: 'grimacetrader', wallet: '5MnOpQrStUvWxYzAbCdEfGhIjKlMnOpQrStUvWxYzAbC', wins: 5, losses: 3, pnlSol: 9.12 },
 ];
 
 const SOL_PRICE = 83.70;
