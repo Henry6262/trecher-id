@@ -115,7 +115,7 @@ export function SectionRailNav(): ReactNode {
   };
 
   return (
-    <div className="fixed top-4 right-3 z-30 md:top-5 md:right-4 lg:top-7 lg:right-5">
+    <div className="fixed top-4 right-3 z-10 pointer-events-none md:top-5 md:right-4 lg:top-7 lg:right-5">
           <div
             className="absolute left-1/2 bottom-full h-[200vh] w-[3px] -translate-x-1/2"
             style={{
@@ -123,8 +123,8 @@ export function SectionRailNav(): ReactNode {
             }}
           />
 
-          <div className="relative p-2">
-            <div className="absolute inset-y-0 left-1/2 w-[3px] -translate-x-1/2 overflow-hidden rounded-full bg-gray-700/50">
+          <div className="relative p-2 pointer-events-auto">
+            <div className="absolute inset-y-0 left-1/2 w-[3px] -translate-x-1/2 overflow-hidden rounded-full bg-gray-700/50 pointer-events-none">
               <m.div
                 className="w-full"
                 style={{
@@ -155,7 +155,7 @@ export function SectionRailNav(): ReactNode {
                       onClick={() => navigateToSection(section)}
                       onMouseEnter={() => setHoveredIndex(index)}
                       onMouseLeave={() => setHoveredIndex(null)}
-                      className="group relative flex h-9 w-9 items-center justify-center"
+                      className="group relative flex h-9 w-9 items-center justify-center pointer-events-auto"
                       aria-label={`Go to ${section.tooltipTitle}`}
                     >
                       <div className={cn('absolute inset-0 bg-gray-900', getBorderRadius())} />
