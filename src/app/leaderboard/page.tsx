@@ -7,6 +7,17 @@ import { resolveAvatarRows } from '@/lib/avatar-resolution';
 
 export const dynamic = 'force-dynamic';
 
+const DEV_BOT_USERNAMES = new Set(['dev-bot']);
+const DEV_PREFIXES = ['dev_', 'dev-'];
+const DEV_PATTERNS = ['_axiom', '_trader'];
+
+function isDevAccount(username: string): boolean {
+  if (DEV_BOT_USERNAMES.has(username)) return true;
+  if (DEV_PREFIXES.some(prefix => username.startsWith(prefix))) return true;
+  if (DEV_PATTERNS.some(pattern => username.includes(pattern))) return true;
+  return false;
+}
+
 async function getInitialTraderRankings() {
   const rankedRows = await prisma.userRanking.findMany({
     where: { period: '7d', trades: { gt: 0 }, rank: { not: null } },
@@ -24,9 +35,12 @@ async function getInitialTraderRankings() {
     },
   });
 
+  // Filter out dev accounts
+  const filteredRanked = rankedRows.filter(r => !isDevAccount(r.user.username));
+
   const rankings =
-    rankedRows.length > 0
-      ? rankedRows
+    filteredRanked.length > 0
+      ? filteredRanked
       : await prisma.userRanking.findMany({
           where: { period: '7d', trades: { gt: 0 } },
           orderBy: [
@@ -46,7 +60,7 @@ async function getInitialTraderRankings() {
               },
             },
           },
-        });
+        }).then(rows => rows.filter(r => !isDevAccount(r.user.username)));
 
   return resolveAvatarRows(rankings.map((ranking, index) => ({
     rank: ranking.rank ?? index + 1,

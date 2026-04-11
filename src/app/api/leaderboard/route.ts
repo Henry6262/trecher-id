@@ -16,6 +16,11 @@ export async function GET(req: Request) {
   const offset = Math.max(parseInt(searchParams.get('offset') ?? '0', 10) || 0, 0);
 
   const data = await cached(`leaderboard:${period}:${offset}:${limit}`, 120, async () => {
+    // Filter out dev bots, dev accounts, and axiom seeded accounts from public view
+    const devBotUsernames = ['dev-bot'];
+    const devPrefixes = ['dev_', 'dev-'];
+    const devPatterns = ['_axiom', '_trader'];
+
     const rankedRows = await prisma.userRanking.findMany({
       where: { period, trades: { gt: 0 }, rank: { not: null } },
       orderBy: { rank: 'asc' },
@@ -33,8 +38,18 @@ export async function GET(req: Request) {
       },
     });
 
-    const rows = rankedRows.length > 0
-      ? rankedRows
+    // Filter out dev accounts client-side (Prisma doesn't support complex NOT OR well)
+    const isDevAccount = (username: string) => {
+      if (devBotUsernames.includes(username)) return true;
+      if (devPrefixes.some(prefix => username.startsWith(prefix))) return true;
+      if (devPatterns.some(pattern => username.includes(pattern))) return true;
+      return false;
+    };
+
+    const filteredRows = rankedRows.filter(r => !isDevAccount(r.user.username));
+
+    const rows = filteredRows.length > 0
+      ? filteredRows
       : await prisma.userRanking.findMany({
           where: { period, trades: { gt: 0 } },
           orderBy: [
@@ -55,7 +70,7 @@ export async function GET(req: Request) {
               },
             },
           },
-        });
+        }).then(rows => rows.filter(r => !isDevAccount(r.user.username)));
 
     return resolveAvatarRows(rows.map((r, i) => ({
       rank: r.rank ?? (offset + i + 1),
