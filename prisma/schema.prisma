@@ -34,6 +34,9 @@ model User {
   pinnedTrades     PinnedTrade[]
   rankings         UserRanking[]
   tokenDeployments TokenDeployment[]
+
+  // Cup tournament participation
+  cupParticipations CupParticipant[]
 }
 
 model Link {
@@ -232,4 +235,121 @@ model Referral {
   createdAt      DateTime  @default(now())
 
   @@index([referrerId, status])
+}
+
+// ──────────────────────────────────────────────────────────────
+// TRENCHER CUP TOURNAMENT SYSTEM
+// ──────────────────────────────────────────────────────────────
+
+model CupSeason {
+  id               String   @id @default(cuid())
+  name             String   // "Season 1"
+  slug             String   @unique // "season-1"
+  status           String   @default("draft") // draft, qualifying, groups, r16, qf, sf, final, completed
+  qualificationStart DateTime
+  qualificationEnd   DateTime
+  groupStart         DateTime
+  groupEnd           DateTime
+  r16Start           DateTime
+  r16End             DateTime
+  qfStart            DateTime
+  qfEnd              DateTime
+  sfStart            DateTime
+  sfEnd              DateTime
+  finalStart         DateTime
+  finalEnd           DateTime
+  prizePoolUsd       Float    @default(0)
+  prizePoolToken     String?  // e.g., "WEB3ME"
+  participantCount   Int      @default(0)
+  championUserId     String?  // stored as plain field, not FK relation
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  participants     CupParticipant[]
+  groups           CupGroup[]
+  matches          CupMatch[]
+  prizeDistributions CupPrizeDistribution[]
+}
+
+model CupParticipant {
+  id                  String    @id @default(cuid())
+  seasonId            String
+  season              CupSeason @relation(fields: [seasonId], references: [id])
+  userId              String
+  user                User      @relation(fields: [userId], references: [id])
+  seed                Int?      // 1-32, assigned at group stage draw
+  group               String?   // "A" through "H"
+  qualificationPnlUsd Float?
+  qualificationPnlSol Float?
+  qualificationTrades Int?
+  currentRound        String    @default("qualified") // qualified, group, r16, qf, sf, final, eliminated
+  eliminatedAt        DateTime?
+  eliminatedBy        String?
+  finalRank         Int?      // 1-32, set at end
+  prizeUsd            Float?
+  prizePaid           Boolean @default(false)
+  createdAt           DateTime @default(now())
+
+  @@unique([seasonId, userId])
+  @@index([seasonId])
+  @@index([userId])
+  @@index([seasonId, currentRound])
+}
+
+model CupGroup {
+  id           String    @id @default(cuid())
+  seasonId     String
+  season       CupSeason @relation(fields: [seasonId], references: [id])
+  name         String    // "A" through "H"
+  seed         Int       // 0-7 for ordering
+  // Participant IDs stored as array (simplified - no FK relations)
+  participantIds String[] // array of 4 participant IDs
+  createdAt    DateTime  @default(now())
+
+  @@unique([seasonId, name])
+  @@index([seasonId])
+}
+
+model CupMatch {
+  id              String    @id @default(cuid())
+  seasonId        String
+  season          CupSeason @relation(fields: [seasonId], references: [id])
+  round           String    // group, r16, qf, sf, final
+  matchNumber     Int       // 1-4 for groups, 1-8 for r16, 1-4 for qf, etc.
+  // Participant IDs (simplified - no FK relations to avoid complexity)
+  participant1Id  String?
+  participant2Id  String?
+  // Live PnL tracking during match window
+  participant1PnlUsd Float  @default(0)
+  participant2PnlUsd Float  @default(0)
+  participant1Trades Int    @default(0)
+  participant2Trades Int    @default(0)
+  // Result
+  winnerId        String?
+  // Time window
+  windowStart     DateTime
+  windowEnd       DateTime
+  status          String    @default("scheduled") // scheduled, live, completed
+  completedAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([seasonId, round])
+  @@index([seasonId, status])
+  @@index([windowEnd])
+}
+
+model CupPrizeDistribution {
+  id          String   @id @default(cuid())
+  seasonId    String
+  season      CupSeason @relation(fields: [seasonId], references: [id])
+  rank        Int      // 1-32
+  title       String   // "Champion", "Runner-up", etc.
+  prizeUsd    Float
+  percentage  Float    // % of total prize pool
+  paid        Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@unique([seasonId, rank])
+  @@index([seasonId])
 }

@@ -159,128 +159,85 @@ export function TournamentBracket({ traders }: { traders: RankedTrader[] }) {
 
           <div className="relative z-10 flex h-full flex-col px-6 py-6 sm:px-8 sm:py-7 pointer-events-none">
             <div className="ml-auto flex w-full max-w-[760px] flex-col gap-5">
-              <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-                {champ ? (
+              {/* Title row — centered */}
+              <div className="flex items-center justify-center gap-6">
+                <div className="text-right">
+                  <div className="text-[11px] font-mono tracking-[6px] text-[var(--trench-text-muted)]">SEASON 1</div>
+                  <div className="mt-2 text-[52px] font-black leading-[0.82] tracking-[-0.07em] text-white sm:text-[68px]">
+                    Trencher
+                  </div>
                   <div
-                    className="cut-sm relative w-full max-w-[250px] overflow-hidden px-4 py-4"
+                    className="text-[52px] font-black leading-[0.82] tracking-[-0.07em] sm:text-[68px]"
+                    style={{ color: '#59C8FF', textShadow: '0 0 34px rgba(0,212,255,0.28), 0 0 68px rgba(0,212,255,0.1)' }}
+                  >
+                    Cup
+                  </div>
+                </div>
+                {/* Bigger trophy */}
+                <div
+                  className="relative h-[200px] w-[158px] shrink-0 sm:h-[260px] sm:w-[206px]"
+                  style={{
+                    filter: 'drop-shadow(0 0 30px rgba(0,212,255,0.35)) drop-shadow(0 0 60px rgba(0,212,255,0.15))',
+                    transform: `scale(${trophyScale}) rotate(${trophyRotate}deg)`,
+                    transformOrigin: 'bottom center',
+                  }}
+                >
+                  <Image src="/trencher-cup.png" alt="Trencher Cup" fill className="object-contain" priority />
+                </div>
+              </div>
+
+              {/* Champion + 2 metrics row */}
+              <div className="flex items-center justify-center gap-6">
+                {/* Small champion card */}
+                {champ && (
+                  <div
+                    className="cut-sm flex items-center gap-2.5 px-3 py-2.5"
                     style={{
-                      background: 'linear-gradient(180deg, rgba(8,12,18,0.92) 0%, rgba(8,12,18,0.75) 100%)',
-                      border: '1px solid rgba(255,215,0,0.18)',
-                      boxShadow: '0 0 24px rgba(255,215,0,0.08), inset 0 0 0 1px rgba(255,255,255,0.02)',
+                      background: 'rgba(8,12,18,0.85)',
+                      border: '1px solid rgba(255,215,0,0.15)',
                     }}
                   >
-                    <div className="absolute inset-y-0 left-0 w-[3px]" style={{ background: 'linear-gradient(180deg, #FFD76A 0%, rgba(255,215,106,0.15) 100%)' }} />
-                    <div className="flex items-center gap-3">
-                      <div
-                        className="h-12 w-12 overflow-hidden rounded-full"
-                        style={{ border: '2px solid rgba(255,215,0,0.65)', boxShadow: '0 0 16px rgba(255,215,0,0.14)' }}
-                      >
-                        <AvatarImage
-                          src={getPublicAvatarUrl(champ.username, champ.avatarUrl)}
-                          alt={champ.username}
-                          width={48}
-                          height={48}
-                          className="h-full w-full object-cover"
-                        />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="mb-1 flex items-center gap-2">
-                          <div className="rounded-full border border-[rgba(255,215,0,0.18)] bg-[rgba(255,215,0,0.08)] px-2 py-1 text-[8px] font-mono tracking-[2px] text-[#FFD700]">
-                            CURRENT CHAMPION
-                          </div>
-                        </div>
-                        <div className="truncate text-[18px] font-black text-white">@{champ.username}</div>
-                        <div className="mt-1 text-[24px] font-mono font-black leading-none" style={{ color: '#7FE17B' }}>
-                          {champ.pnlUsd >= 0 ? '+' : ''}${Math.abs(champ.pnlUsd) >= 1000 ? `${Math.round(champ.pnlUsd / 1000)}K` : Math.round(champ.pnlUsd)}
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-[26px] font-black font-mono leading-none" style={{ color: '#7FE17B' }}>
-                          69%
-                        </div>
-                        <div className="mt-1 text-[8px] font-mono tracking-[2px] text-[rgba(255,255,255,0.45)]">
-                          OF FEES
-                        </div>
+                    <div
+                      className="h-8 w-8 overflow-hidden rounded-full flex-shrink-0"
+                      style={{ border: '1.5px solid rgba(255,215,0,0.5)' }}
+                    >
+                      <AvatarImage
+                        src={getPublicAvatarUrl(champ.username, champ.avatarUrl)}
+                        alt={champ.username}
+                        width={32}
+                        height={32}
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="truncate text-[12px] font-bold text-white">@{champ.username}</div>
+                      <div className="text-[11px] font-mono font-bold leading-none" style={{ color: '#7FE17B' }}>
+                        {champ.pnlUsd >= 0 ? '+' : ''}${Math.abs(champ.pnlUsd) >= 1000 ? `${Math.round(champ.pnlUsd / 1000)}K` : Math.round(champ.pnlUsd)}
                       </div>
                     </div>
                   </div>
-                ) : (
-                  <div />
                 )}
 
-                <div className="flex flex-1 items-center justify-end gap-4 lg:min-w-0 lg:pl-4">
-                  <div className="text-right">
-                    <div className="text-[11px] font-mono tracking-[6px] text-[var(--trench-text-muted)]">SEASON 1</div>
-                    <div className="mt-2 text-[52px] font-black leading-[0.82] tracking-[-0.07em] text-white sm:text-[68px]">
-                      Trencher
-                    </div>
-                    <div
-                      className="text-[52px] font-black leading-[0.82] tracking-[-0.07em] sm:text-[68px]"
-                      style={{ color: '#59C8FF', textShadow: '0 0 34px rgba(0,212,255,0.28), 0 0 68px rgba(0,212,255,0.1)' }}
-                    >
-                      Cup
-                    </div>
+                {/* 2 metrics — no containers, inline */}
+                <div className="flex items-center gap-5">
+                  <div className="text-center">
+                    <div className="text-[20px] font-black text-white leading-none">32</div>
+                    <div className="mt-1 text-[8px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">TRADERS</div>
                   </div>
-                  <div
-                    className="relative h-[150px] w-[118px] shrink-0 sm:h-[188px] sm:w-[148px]"
-                    style={{
-                      filter: 'drop-shadow(0 0 30px rgba(0,212,255,0.35)) drop-shadow(0 0 60px rgba(0,212,255,0.15))',
-                      transform: `scale(${trophyScale}) rotate(${trophyRotate}deg)`,
-                      transformOrigin: 'bottom center',
-                    }}
-                  >
-                    <Image src="/trencher-cup.png" alt="Trencher Cup" fill className="object-contain" priority />
+                  <div className="h-6 w-px" style={{ background: 'rgba(255,255,255,0.08)' }} />
+                  <div className="text-center">
+                    <div className="text-[20px] font-black leading-none" style={{ color: '#59C8FF' }}>4</div>
+                    <div className="mt-1 text-[8px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">GROUPS</div>
                   </div>
                 </div>
               </div>
 
-              <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_200px]">
-                <div
-                  className="cut-sm grid gap-2 px-3 py-3 sm:grid-cols-3"
-                  style={{
-                    background: 'linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.015) 100%)',
-                    border: '1px solid rgba(255,255,255,0.06)',
-                    boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.015)',
-                  }}
-                >
-                  {[
-                    { value: '32', label: 'TRADERS', note: 'QUALIFY BY 7D PNL', tone: '#ffffff' },
-                    { value: '4', label: 'GROUPS', note: 'TOP 2 ADVANCE', tone: '#59C8FF' },
-                    { value: '69%', label: 'CHAMPION', note: 'OF ALL FEES', tone: '#7FE17B' },
-                  ].map((item) => (
-                    <div
-                      key={item.label}
-                      className="cut-xs px-3 py-3"
-                      style={{
-                        background: 'linear-gradient(180deg, rgba(7,10,16,0.92) 0%, rgba(7,10,16,0.72) 100%)',
-                        border: '1px solid rgba(255,255,255,0.07)',
-                        boxShadow: '0 12px 28px rgba(0,0,0,0.18)',
-                      }}
-                    >
-                      <div className="text-[10px] font-mono tracking-[3px] text-[rgba(255,255,255,0.42)]">
-                        {item.label}
-                      </div>
-                      <div
-                        className="mt-2 text-[36px] font-black leading-none tracking-[-0.05em]"
-                        style={{ color: item.tone, textShadow: item.tone === '#ffffff' ? '0 0 18px rgba(255,255,255,0.08)' : `0 0 24px ${item.tone}22` }}
-                      >
-                        {item.value}
-                      </div>
-                      <div className="mt-2 text-[9px] font-mono tracking-[1px] text-[rgba(255,255,255,0.58)] whitespace-nowrap">
-                        {item.note}
-                      </div>
-                    </div>
-                  ))}
+              {/* CTA */}
+              <div className="flex flex-col items-center gap-2">
+                <div className="text-center text-[9px] font-mono tracking-[3px] text-[rgba(0,212,255,0.7)]">
+                  JOIN THE NEXT BRACKET
                 </div>
-                <div className="flex flex-col justify-center gap-3">
-                  <div className="text-center text-[10px] font-mono tracking-[3px] text-[rgba(0,212,255,0.7)]">
-                    JOIN THE NEXT BRACKET
-                  </div>
-                  <ParticipateButton className="pointer-events-auto w-full justify-center" />
-                  <div className="text-center text-[10px] font-mono tracking-[2px] text-[rgba(255,255,255,0.42)]">
-                    SIGN IN. LINK WALLETS. CLIMB INTO THE CUP.
-                  </div>
-                </div>
+                <ParticipateButton className="pointer-events-auto" />
               </div>
             </div>
           </div>
