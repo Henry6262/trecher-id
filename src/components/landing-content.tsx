@@ -154,13 +154,13 @@ function CupCountdown({ label, endDate }: { label: string; endDate: Date }) {
     const update = () => {
       const diff = endDate.getTime() - Date.now();
       if (diff <= 0) {
-        setTimeLeft('LIVE NOW');
+        setTimeLeft('LIVE');
         return;
       }
       const days = Math.floor(diff / (1000 * 60 * 60 * 24));
       const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      if (days > 0) setTimeLeft(`${days}d ${hours}h ${mins}m`);
+      if (days > 0) setTimeLeft(`${days}d ${hours}h`);
       else if (hours > 0) setTimeLeft(`${hours}h ${mins}m`);
       else setTimeLeft(`${mins}m`);
     };
@@ -171,12 +171,12 @@ function CupCountdown({ label, endDate }: { label: string; endDate: Date }) {
 
   return (
     <div className="text-center">
-      <div className="text-[9px] font-mono tracking-[2px] text-[var(--trench-text-muted)] mb-1">{label}</div>
+      <div className="text-[8px] font-mono tracking-[2px] text-[var(--trench-text-muted)] mb-1">{label}</div>
       <div
-        className="text-[18px] font-mono font-black leading-none"
-        style={{ color: timeLeft === 'LIVE NOW' ? '#22c55e' : '#00D4FF' }}
+        className="text-[16px] sm:text-[18px] font-mono font-black leading-none"
+        style={{ color: timeLeft === 'LIVE' ? '#22c55e' : '#00D4FF' }}
       >
-        {timeLeft}
+        {timeLeft || '—'}
       </div>
     </div>
   );
@@ -446,6 +446,48 @@ function PreviewCardCarousel({ profiles }: { profiles: TraderData[] }) {
 export function LandingContent({ traders, featuredProfiles, ticker, leaderboardData, refCode }: LandingContentProps) {
   const [cupView, setCupView] = useState<CupView>('bracket');
   const [showInfoModal, setShowInfoModal] = useState(false);
+  const [cupSchedule, setCupSchedule] = useState<{
+    qualifyEnd: Date;
+    groupsEnd: Date;
+    r16End: Date;
+    qfSfEnd: Date;
+    finalEnd: Date;
+  } | null>(null);
+
+  // Fetch cup schedule from API
+  useEffect(() => {
+    fetch('/api/cup/schedule')
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.season) {
+          setCupSchedule({
+            qualifyEnd: new Date(data.season.phases.qualify.end),
+            groupsEnd: new Date(data.season.phases.groups.end),
+            r16End: new Date(data.season.phases.r16.end),
+            qfSfEnd: new Date(data.season.phases.sf.end),
+            finalEnd: new Date(data.season.phases.final.end),
+          });
+        } else if (data.fallback) {
+          setCupSchedule({
+            qualifyEnd: new Date(data.fallback.qualify.end),
+            groupsEnd: new Date(data.fallback.groups.end),
+            r16End: new Date(data.fallback.r16.end),
+            qfSfEnd: new Date(data.fallback.sf.end),
+            finalEnd: new Date(data.fallback.final.end),
+          });
+        }
+      })
+      .catch(() => {
+        // Hard fallback
+        setCupSchedule({
+          qualifyEnd: new Date('2026-05-29T00:00:00Z'),
+          groupsEnd: new Date('2026-06-03T00:00:00Z'),
+          r16End: new Date('2026-06-07T00:00:00Z'),
+          qfSfEnd: new Date('2026-06-17T00:00:00Z'),
+          finalEnd: new Date('2026-06-23T00:00:00Z'),
+        });
+      });
+  }, []);
 
   // Capture referral code from URL into localStorage + HttpOnly cookie
   useEffect(() => {
@@ -619,11 +661,11 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
 
           {/* Countdown Timers */}
           <div className="mb-8 grid grid-cols-2 sm:grid-cols-5 gap-4">
-            <CupCountdown label="QUALIFY" endDate={new Date('2026-05-11T00:00:00Z')} />
-            <CupCountdown label="GROUPS" endDate={new Date('2026-05-18T00:00:00Z')} />
-            <CupCountdown label="R16" endDate={new Date('2026-05-25T00:00:00Z')} />
-            <CupCountdown label="QF → SF" endDate={new Date('2026-06-01T00:00:00Z')} />
-            <CupCountdown label="FINAL" endDate={new Date('2026-06-08T00:00:00Z')} />
+            <CupCountdown label="QUALIFY" endDate={cupSchedule?.qualifyEnd || new Date('2026-05-29T00:00:00Z')} />
+            <CupCountdown label="GROUPS" endDate={cupSchedule?.groupsEnd || new Date('2026-06-03T00:00:00Z')} />
+            <CupCountdown label="R16" endDate={cupSchedule?.r16End || new Date('2026-06-07T00:00:00Z')} />
+            <CupCountdown label="QF → SF" endDate={cupSchedule?.qfSfEnd || new Date('2026-06-17T00:00:00Z')} />
+            <CupCountdown label="FINAL" endDate={cupSchedule?.finalEnd || new Date('2026-06-23T00:00:00Z')} />
           </div>
 
           {/* Bracket / Toggle */}
