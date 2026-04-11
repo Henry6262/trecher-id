@@ -344,9 +344,10 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
   const domeImages = traders.map((trader) => ({
     src: getPublicAvatarUrl(trader.username, trader.avatarUrl),
     alt: `${trader.name} profile image`,
-    title: `@${trader.username}`,
-    subtitle: trader.name,
-    metric: trader.pnl,
+    title: trader.name,
+    subtitle: '',
+    metric: '',
+    href: `/${trader.username}`,
   }));
   return (
     <div className="relative min-h-screen" style={{ background: '#050508' }}>
@@ -445,7 +446,7 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
           <div className="mb-8 text-center">
             <div className="mb-4 flex items-center justify-center gap-4">
               <div className="h-px flex-1 max-w-[120px]" style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(0,212,255,0.55) 55%, rgba(0,212,255,0.08) 100%)' }} />
-              <div className="text-[9px] font-mono tracking-[3px] uppercase" style={{ color: 'rgba(0,212,255,0.75)' }}>
+              <div className="text-[11px] font-mono tracking-[3px] uppercase" style={{ color: 'rgba(0,212,255,0.75)' }}>
                 Tournament
               </div>
               <div className="h-px flex-1 max-w-[120px]" style={{ background: 'linear-gradient(90deg, rgba(0,212,255,0.08) 0%, rgba(0,212,255,0.55) 45%, transparent 100%)' }} />
@@ -453,7 +454,7 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
             <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight">
               The Trencher <span style={{ color: '#00D4FF' }}>Cup</span>
             </h2>
-            <p className="mx-auto mt-4 max-w-[560px] text-[13px] leading-relaxed text-[var(--trench-text-muted)]">
+            <p className="mx-auto mt-4 max-w-[560px] text-[15px] leading-relaxed text-[var(--trench-text-muted)]">
               Top 32 traders by 7-day realized PnL qualify for the cup.
             </p>
           </div>
@@ -504,32 +505,7 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
         <section id="traders" className="relative scroll-mt-36">
           <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(180deg, transparent 0%, rgba(5,5,8,0.4) 40%, rgba(5,5,8,0.7) 100%)' }} />
 
-          <div className="mx-auto mb-6 max-w-[920px] px-6 sm:px-12 lg:px-16 relative text-center">
-            <div className="mb-4 flex items-center justify-center gap-4">
-              <div className="h-px flex-1 max-w-[120px]" style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(0,212,255,0.55) 55%, rgba(0,212,255,0.08) 100%)' }} />
-              <div className="text-[9px] font-mono tracking-[3px] uppercase" style={{ color: 'rgba(0,212,255,0.75)' }}>
-                Community
-              </div>
-              <div className="h-px flex-1 max-w-[120px]" style={{ background: 'linear-gradient(90deg, rgba(0,212,255,0.08) 0%, rgba(0,212,255,0.55) 45%, transparent 100%)' }} />
-            </div>
-            <h2 className="mb-1 text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight">Top <span className="text-[var(--trench-accent)]">Traders</span></h2>
-            <p className="text-[13px] text-[var(--trench-text-muted)]">Already on Web3Me. Are you?</p>
-          </div>
-
           <div className="h-[520px] w-full relative">
-            {/* CTA centered on gallery */}
-            <div className="absolute top-1/2 left-1/2 z-20 w-[min(92vw,340px)] -translate-x-1/2 -translate-y-1/2 px-3 pointer-events-none">
-              <GlassCard className="p-6 text-center pointer-events-none" cut={12}>
-                <p className="text-[9px] font-mono tracking-[2px] text-[var(--trench-accent)]">JOIN THE BOARD</p>
-                <p className="mt-3 text-sm leading-relaxed text-[var(--trench-text-muted)]">
-                  Ready to wire in your wallets, shape your page, and start climbing the public ranks?
-                </p>
-                <div className="mt-5 flex justify-center pointer-events-auto">
-                  <CutButton href="/dashboard" size="lg">Open Dashboard</CutButton>
-                </div>
-              </GlassCard>
-            </div>
-
             <DomeGallery
               images={domeImages}
               fit={0.8}

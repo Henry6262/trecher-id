@@ -216,7 +216,7 @@ export function LeaderboardTable({
         </div>
       </div>
 
-      <div className="mb-6 flex flex-wrap items-center gap-2 text-[10px] font-mono tracking-[1.5px] text-[var(--trench-text-muted)]">
+      <div className="mb-6 flex flex-wrap items-center gap-2 text-[11px] font-mono tracking-[1.5px] text-[var(--trench-text-muted)]">
         <span className="cut-xs px-2.5 py-1" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
           {mode === 'traders' ? 'REALIZED PNL RANKING' : 'TOTAL DEV PNL RANKING'}
         </span>
@@ -233,10 +233,10 @@ export function LeaderboardTable({
               className="cut-sm px-4 py-3"
               style={{ background: 'rgba(8,12,22,0.48)', border: '1px solid rgba(0,212,255,0.08)' }}
             >
-              <div className="text-[8px] font-mono tracking-[2px] text-[var(--trench-text-muted)] mb-1">
+              <div className="text-[10px] font-mono tracking-[2px] text-[var(--trench-text-muted)] mb-1">
                 {card.label}
               </div>
-              <div className="text-[18px] font-black font-mono text-white">
+              <div className="text-[20px] font-black font-mono text-white">
                 {card.value}
               </div>
             </div>
@@ -247,7 +247,7 @@ export function LeaderboardTable({
       {/* Loading */}
       {loading && (
         <div className="flex items-center justify-center py-20">
-          <span className="text-[11px] font-mono text-[var(--trench-text-muted)] animate-pulse">Loading rankings...</span>
+          <span className="text-[13px] font-mono text-[var(--trench-text-muted)] animate-pulse">Loading rankings...</span>
         </div>
       )}
 
@@ -255,8 +255,8 @@ export function LeaderboardTable({
       {!loading && activeList.length === 0 && (
         <GlassCard cut={10} glow={false}>
           <div className="flex flex-col items-center justify-center py-16 gap-2">
-            <span className="text-[13px] text-[var(--trench-text-muted)]">No rankings yet</span>
-            <span className="text-[10px] text-[var(--trench-text-muted)]">Rankings refresh every 4 hours</span>
+            <span className="text-[15px] text-[var(--trench-text-muted)]">No rankings yet</span>
+            <span className="text-[12px] text-[var(--trench-text-muted)]">Rankings refresh every 4 hours</span>
           </div>
         </GlassCard>
       )}
