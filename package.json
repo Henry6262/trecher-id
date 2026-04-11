@@ -11,7 +11,10 @@
     "typecheck": "tsc -p tsconfig.typecheck.json --noEmit",
     "seed": "prisma db seed",
     "test:e2e": "NEXT_PUBLIC_TEST_AUTH_BYPASS=1 TEST_AUTH_ENABLED=1 npm run build && playwright test",
-    "test:e2e:install": "playwright install chromium"
+    "test:e2e:install": "playwright install chromium",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
@@ -58,12 +61,15 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitest/coverage-v8": "^4.1.4",
     "eslint": "^9",
     "eslint-config-next": "16.2.1",
+    "jsdom": "^29.0.2",
     "playwright": "^1.59.1",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.4"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
