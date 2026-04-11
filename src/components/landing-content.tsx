@@ -16,6 +16,7 @@ import { ReferralSection } from '@/components/referral-section';
 import { SectionRailNav } from '@/components/section-rail-nav';
 import { GlassCard } from '@/components/glass-card';
 import { CupRegistrationButton } from '@/components/cup-registration-button';
+import { LiveMatchTracker } from '@/components/live-match-tracker';
 import { getPublicAvatarUrl } from '@/lib/images';
 import type { TickerItem } from '@/lib/types';
 
@@ -673,6 +674,9 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
           <div className="mb-6 cut-sm px-4 py-3" style={{ background: 'rgba(8,12,18,0.6)', border: '1px solid rgba(0,212,255,0.08)' }}>
             <CupRegistrationButton />
           </div>
+
+          {/* Live Match Tracker (only shows during active tournament) */}
+          <LiveMatchTracker />
 
           {/* Bracket / Toggle */}
           <div className="relative z-30 mb-5 flex justify-end pointer-events-auto">

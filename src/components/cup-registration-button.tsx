@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { CutButton } from '@/components/cut-button';
 import { Check, AlertCircle, Trophy } from 'lucide-react';
+import { ShareCardGenerator } from '@/components/share-card';
 
 interface RegistrationStatus {
   registered: boolean;

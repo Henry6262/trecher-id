@@ -12,6 +12,7 @@
 import { prisma } from '@/lib/prisma';
 import { getWalletTransactions } from '@/lib/helius';
 import { getSolPrice } from '@/lib/sol-price';
+import { sendTournamentNotification, type TournamentEvent } from '@/lib/cup-notifications';
 
 // ──────────────────────────────────────────────────────────────
 // SEASON MANAGEMENT
@@ -673,6 +674,24 @@ export async function advanceRound(seasonId: string, nextRound: CupStatus) {
     where: { id: seasonId },
     data: { status: nextRound },
   });
+
+  // Send notification for round transition
+  const notificationEvent: Record<string, TournamentEvent> = {
+    groups: 'groups_start',
+    r16: 'r16_start',
+    qf: 'qf_start',
+    sf: 'sf_start',
+    final: 'final_start',
+    completed: 'champion_crowned',
+  };
+
+  if (notificationEvent[nextRound]) {
+    // Fire and forget — don't block on notification
+    sendTournamentNotification({
+      event: notificationEvent[nextRound],
+      seasonName: season.name,
+    }).catch(() => {});
+  }
 
   // Create next round matches
   let nextMatches: unknown = null;
