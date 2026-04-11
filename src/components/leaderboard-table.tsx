@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { AvatarImage } from '@/components/avatar-image';
 import { GlassCard } from '@/components/glass-card';
 import { getPublicAvatarUrl } from '@/lib/images';
+import { ChampionCrown } from '@/components/champion-badge';
 import { TournamentBracket } from './tournament/tournament-bracket';
 
 const PERIODS = [
@@ -21,6 +22,7 @@ interface RankedTrader {
   displayName: string;
   avatarUrl: string | null;
   isClaimed?: boolean;
+  isCupChampion?: boolean;
   pnlUsd: number;
   pnlSol: number;
   winRate: number;
@@ -98,6 +100,7 @@ export function LeaderboardTable({
     displayName: d.displayName,
     avatarUrl: d.avatarUrl,
     isClaimed: d.isClaimed,
+    isCupChampion: false,
     pnlUsd: d.totalDevPnlUsd,
     pnlSol: d.totalDevPnlSol,
     winRate: d.deployCount > 0 ? (d.migratedCount / d.deployCount) * 100 : 0,
@@ -343,7 +346,9 @@ export function LeaderboardTable({
                   <AvatarImage src={getPublicAvatarUrl(t.username, t.avatarUrl)} alt={t.displayName} width={28} height={28} className="w-full h-full object-cover" />
                 </div>
                 <div className="flex-1 min-w-0 pl-2">
-                  <span className="block text-[12px] font-semibold text-white truncate">@{t.username}</span>
+                  <span className="block text-[12px] font-semibold text-white truncate">
+                    {t.isCupChampion && <ChampionCrown size={12} />}@{t.username}
+                  </span>
                   {mode === 'deployers' && deployerByUsername.get(t.username)?.bestToken && (
                     <span className="block text-[8px] font-mono text-[var(--trench-text-muted)] truncate">
                       Best deploy: ${deployerByUsername.get(t.username)?.bestToken}

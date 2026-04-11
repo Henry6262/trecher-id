@@ -19,6 +19,7 @@ model User {
   accentColor String?  // hex color like "#FF6B00", null = default cyan #00D4FF
   bannerUrl      String?  // URL to banner image
   followerCount  Int?     // Twitter follower count from fxtwitter
+  cupChampionSeasons Int[] @default([]) // seasons won as champion
   createdAt      DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
