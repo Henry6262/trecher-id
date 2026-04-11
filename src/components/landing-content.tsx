@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Check, Globe, ChevronRight, ExternalLink } from 'lucide-react';
+import { Check, Globe, ChevronRight, ExternalLink, Info, X } from 'lucide-react';
 import { AvatarImage } from '@/components/avatar-image';
 import { CutButton } from '@/components/cut-button';
 import { PublicNav } from '@/components/public-nav';
@@ -65,6 +65,122 @@ interface LandingContentProps {
 }
 
 type CupView = 'bracket' | 'leaderboard';
+
+function CupInfoModal({ onClose }: { onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+      <div
+        className="relative max-w-lg w-full max-h-[85vh] overflow-y-auto"
+        style={{
+          background: 'rgba(8,12,18,0.95)',
+          border: '1px solid rgba(0,212,255,0.15)',
+          clipPath: 'polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px)',
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button onClick={onClose} className="absolute top-4 right-4 text-[var(--trench-text-muted)] hover:text-white transition-colors">
+          <X size={18} />
+        </button>
+        <div className="p-6">
+          <h3 className="text-xl font-black text-white mb-1">The Trencher Cup</h3>
+          <p className="text-[12px] text-[var(--trench-text-muted)] mb-6">Season 1 — Live Trading Tournament</p>
+
+          <div className="space-y-5">
+            <div>
+              <h4 className="text-[11px] font-mono tracking-[2px] text-[var(--trench-accent)] mb-2">HOW IT WORKS</h4>
+              <p className="text-[13px] leading-relaxed text-[var(--trench-text)]">
+                Top 32 traders by 7-day realized PnL qualify. They're split into 8 groups of 4. Top 2 from each group advance to knockout rounds (R16 → QF → SF → Final). Winner takes the crown and the biggest prize.
+              </p>
+            </div>
+
+            <div>
+              <h4 className="text-[11px] font-mono tracking-[2px] text-[var(--trench-accent)] mb-2">QUALIFICATION</h4>
+              <ul className="text-[12px] leading-relaxed text-[var(--trench-text)] space-y-1">
+                <li>• Link your Solana wallet via Privy</li>
+                <li>• Trade on-chain — Helius tracks every swap</li>
+                <li>• Top 32 by realized PnL in the qualification window qualify</li>
+                <li>• Must have ≥ 10 trades to be eligible</li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="text-[11px] font-mono tracking-[2px] text-[var(--trench-accent)] mb-2">TOURNAMENT STRUCTURE</h4>
+              <ul className="text-[12px] leading-relaxed text-[var(--trench-text)] space-y-1">
+                <li>• <span className="text-white font-semibold">Group Stage:</span> 8 groups × 4 traders, top 2 advance</li>
+                <li>• <span className="text-white font-semibold">Round of 16:</span> Head-to-head, 8 winners</li>
+                <li>• <span className="text-white font-semibold">Quarter-Finals:</span> 4 winners advance</li>
+                <li>• <span className="text-white font-semibold">Semi-Finals:</span> 2 winners advance</li>
+                <li>• <span className="text-white font-semibold">Final:</span> 1 champion crowned</li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="text-[11px] font-mono tracking-[2px] text-[var(--trench-accent)] mb-2">SCORING</h4>
+              <ul className="text-[12px] leading-relaxed text-[var(--trench-text)] space-y-1">
+                <li>• <span className="text-white font-semibold">Primary:</span> Higher realized PnL during the match window wins</li>
+                <li>• <span className="text-white font-semibold">Tiebreaker 1:</span> More trades during the window</li>
+                <li>• <span className="text-white font-semibold">Tiebreaker 2:</span> Higher seed (lower rank)</li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="text-[11px] font-mono tracking-[2px] text-[var(--trench-accent)] mb-2">PRIZE POOL</h4>
+              <ul className="text-[12px] leading-relaxed text-[var(--trench-text)] space-y-1">
+                <li>• 🥇 Champion: 40% of pool</li>
+                <li>• 🥈 Runner-up: 25%</li>
+                <li>• 🥉 Semi-finalists: 10% each</li>
+                <li>• Quarter-finalists: 3.75% each</li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="text-[11px] font-mono tracking-[2px] text-[var(--trench-accent)] mb-2">DATA SOURCES</h4>
+              <p className="text-[12px] leading-relaxed text-[var(--trench-text)]">
+                All PnL is calculated from real on-chain Solana transactions fetched via Helius API. No fake data, no paper trading — only verified swaps count.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CupCountdown({ label, endDate }: { label: string; endDate: Date }) {
+  const [timeLeft, setTimeLeft] = useState('');
+
+  useEffect(() => {
+    const update = () => {
+      const diff = endDate.getTime() - Date.now();
+      if (diff <= 0) {
+        setTimeLeft('LIVE NOW');
+        return;
+      }
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      if (days > 0) setTimeLeft(`${days}d ${hours}h ${mins}m`);
+      else if (hours > 0) setTimeLeft(`${hours}h ${mins}m`);
+      else setTimeLeft(`${mins}m`);
+    };
+    update();
+    const interval = setInterval(update, 30000);
+    return () => clearInterval(interval);
+  }, [endDate]);
+
+  return (
+    <div className="text-center">
+      <div className="text-[9px] font-mono tracking-[2px] text-[var(--trench-text-muted)] mb-1">{label}</div>
+      <div
+        className="text-[18px] font-mono font-black leading-none"
+        style={{ color: timeLeft === 'LIVE NOW' ? '#22c55e' : '#00D4FF' }}
+      >
+        {timeLeft}
+      </div>
+    </div>
+  );
+}
 
 
 // ─── Preview Card with Calendar/Chart toggle ───────────────
@@ -329,6 +445,7 @@ function PreviewCardCarousel({ profiles }: { profiles: TraderData[] }) {
 
 export function LandingContent({ traders, featuredProfiles, ticker, leaderboardData, refCode }: LandingContentProps) {
   const [cupView, setCupView] = useState<CupView>('bracket');
+  const [showInfoModal, setShowInfoModal] = useState(false);
 
   // Capture referral code from URL into localStorage + HttpOnly cookie
   useEffect(() => {
@@ -441,6 +558,37 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
           <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.1), transparent)' }} />
         </div>
 
+        {/* Leaderboard Section */}
+        <section id="leaderboard" className="relative mx-auto max-w-[920px] scroll-mt-36 px-6 py-10 sm:px-12 sm:py-16 lg:px-16">
+          <div className="mb-8 text-center">
+            <div className="mb-4 flex items-center justify-center gap-4">
+              <div className="h-px flex-1 max-w-[120px]" style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(0,212,255,0.55) 55%, rgba(0,212,255,0.08) 100%)' }} />
+              <div className="text-[11px] font-mono tracking-[3px] uppercase" style={{ color: 'rgba(0,212,255,0.75)' }}>
+                Rankings
+              </div>
+              <div className="h-px flex-1 max-w-[120px]" style={{ background: 'linear-gradient(90deg, rgba(0,212,255,0.08) 0%, rgba(0,212,255,0.55) 45%, transparent 100%)' }} />
+            </div>
+            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight">
+              Top <span style={{ color: '#00D4FF' }}>Traders</span>
+            </h2>
+            <p className="mx-auto mt-4 max-w-[560px] text-[15px] leading-relaxed text-[var(--trench-text-muted)]">
+              Realized PnL from verified on-chain Solana trades. Updated hourly via Helius.
+            </p>
+          </div>
+
+          <LeaderboardTable
+            initialPeriod="7d"
+            initialTraders={leaderboardData}
+            variant="full"
+            availableModes={['traders']}
+          />
+        </section>
+
+        {/* Divider */}
+        <div className="mx-auto max-w-[920px] px-6 sm:px-12 lg:px-16">
+          <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.1), transparent)' }} />
+        </div>
+
         {/* The Trencher Cup */}
         <section id="cup" className="relative mx-auto max-w-[920px] scroll-mt-36 px-6 py-10 sm:px-12 sm:py-16 lg:px-16">
           <div className="mb-8 text-center">
@@ -451,14 +599,34 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
               </div>
               <div className="h-px flex-1 max-w-[120px]" style={{ background: 'linear-gradient(90deg, rgba(0,212,255,0.08) 0%, rgba(0,212,255,0.55) 45%, transparent 100%)' }} />
             </div>
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight">
-              The Trencher <span style={{ color: '#00D4FF' }}>Cup</span>
-            </h2>
+            <div className="flex items-center justify-center gap-3">
+              <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight">
+                The Trencher <span style={{ color: '#00D4FF' }}>Cup</span>
+              </h2>
+              <button
+                onClick={() => setShowInfoModal(true)}
+                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-[rgba(0,212,255,0.08)] transition-colors"
+                style={{ border: '1px solid rgba(0,212,255,0.15)' }}
+                aria-label="Tournament info"
+              >
+                <Info size={16} style={{ color: 'rgba(0,212,255,0.75)' }} />
+              </button>
+            </div>
             <p className="mx-auto mt-4 max-w-[560px] text-[15px] leading-relaxed text-[var(--trench-text-muted)]">
-              Top 32 traders by 7-day realized PnL qualify for the cup.
+              Top 32 traders by 7-day realized PnL qualify for the cup. Groups → Knockout → Champion.
             </p>
           </div>
 
+          {/* Countdown Timers */}
+          <div className="mb-8 grid grid-cols-2 sm:grid-cols-5 gap-4">
+            <CupCountdown label="QUALIFY" endDate={new Date('2026-05-11T00:00:00Z')} />
+            <CupCountdown label="GROUPS" endDate={new Date('2026-05-18T00:00:00Z')} />
+            <CupCountdown label="R16" endDate={new Date('2026-05-25T00:00:00Z')} />
+            <CupCountdown label="QF → SF" endDate={new Date('2026-06-01T00:00:00Z')} />
+            <CupCountdown label="FINAL" endDate={new Date('2026-06-08T00:00:00Z')} />
+          </div>
+
+          {/* Bracket / Toggle */}
           <div className="relative z-30 mb-5 flex justify-end pointer-events-auto">
             <CutButton
               onClick={() =>
@@ -469,7 +637,7 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
               variant="secondary"
               size="sm"
             >
-              {cupView === 'bracket' ? 'SHOW LEADERBOARD' : 'SHOW BRACKET'}
+              {cupView === 'bracket' ? 'SHOW TABLE' : 'SHOW BRACKET'}
             </CutButton>
           </div>
 
@@ -480,6 +648,9 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
             availableModes={['traders']}
           />
         </section>
+
+        {/* Info Modal */}
+        {showInfoModal && <CupInfoModal onClose={() => setShowInfoModal(false)} />}
 
         {/* Journey — merged How it works + Reward Pool */}
         <div id="journey" className="scroll-mt-36">
