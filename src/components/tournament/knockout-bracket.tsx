@@ -21,8 +21,8 @@ function RoundColumn({
   gap: string;
 }) {
   return (
-    <div className="flex flex-col flex-shrink-0" style={{ width: 180 }}>
-      <div className="text-[8px] font-mono tracking-[2px] text-[var(--trench-text-muted)] mb-3 text-center">
+    <div className="flex flex-col flex-shrink-0" style={{ width: 220 }}>
+      <div className="text-[10px] font-mono tracking-[2px] text-[var(--trench-text-muted)] mb-4 text-center">
         {label}
       </div>
       <div className="flex flex-col justify-around flex-1" style={{ gap }}>
@@ -36,7 +36,7 @@ function RoundColumn({
 
 export function KnockoutBracket({ rounds }: { rounds: BracketData['knockoutRounds'] }) {
   // Row height and gap for connector calculations
-  const ROW_H = 72; // approx height of a matchup card
+  const ROW_H = 96; // approx height of a matchup card
 
   return (
     <div className="overflow-x-auto">

@@ -17,16 +17,16 @@ const ROUND_LABELS: Record<string, string> = {
   final: 'FINAL',
 };
 
-const BRACKET_H = 420;
-const MIN_SCROLL_TRAVEL = 240;
+const BRACKET_H = 560;
+const MIN_SCROLL_TRAVEL = 280;
 const BRACKET_SCROLL_PORTION = 0.84;
-const ROUND_SEPARATOR_WIDTH = 28;
-const FINAL_TRAILING_WIDTH = 72;
+const ROUND_SEPARATOR_WIDTH = 36;
+const FINAL_TRAILING_WIDTH = 88;
 
 function RoundColumn({ label, matchups, gap }: { label: string; matchups: Matchup[]; gap: string }) {
   return (
-    <div className="flex flex-col flex-shrink-0" style={{ width: 180 }}>
-      <div className="text-[8px] font-mono tracking-[2px] text-[var(--trench-text-muted)] mb-3 text-center">{label}</div>
+    <div className="flex flex-col flex-shrink-0" style={{ width: 220 }}>
+      <div className="text-[10px] font-mono tracking-[2px] text-[var(--trench-text-muted)] mb-4 text-center">{label}</div>
       <div className="flex flex-col justify-around flex-1" style={{ gap }}>
         {matchups.map((m) => (
           <MatchupCard key={m.id} matchup={m} compact={matchups.length > 4} />
@@ -106,7 +106,7 @@ export function TournamentBracket({ traders }: { traders: RankedTrader[] }) {
     );
   }
 
-  const ROW_H = 72;
+  const ROW_H = 96;
   const champ = bracket.champion;
 
   const overlayWidth = Math.min(visibleWidth * 0.56, 720);
@@ -297,8 +297,8 @@ export function TournamentBracket({ traders }: { traders: RankedTrader[] }) {
             }}
           >
           {/* Groups: 4-col grid = 2 rows */}
-          <div className="flex-shrink-0" style={{ width: 920 }}>
-            <div className="text-[8px] font-mono tracking-[2px] text-[var(--trench-text-muted)] mb-3 text-center">
+          <div className="flex-shrink-0" style={{ width: 1100 }}>
+            <div className="text-[10px] font-mono tracking-[2px] text-[var(--trench-text-muted)] mb-4 text-center">
               {ROUND_LABELS.groups}
             </div>
             <div className="grid grid-cols-4 gap-2">

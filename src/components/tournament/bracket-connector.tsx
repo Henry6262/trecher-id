@@ -13,7 +13,7 @@ export function BracketConnector({
 }) {
   const pairs = matchups / 2;
   const totalHeight = matchups * rowHeight + (matchups - 1) * gap;
-  const width = 40;
+  const width = 52;
 
   const paths: string[] = [];
 
@@ -50,7 +50,7 @@ export function BracketConnector({
           d={d}
           fill="none"
           stroke="rgba(0,212,255,0.25)"
-          strokeWidth={1.5}
+          strokeWidth={2}
         />
       ))}
     </svg>

@@ -15,11 +15,11 @@ function TraderRow({
   isWinner: boolean;
   compact?: boolean;
 }) {
-  const avatarSize = compact ? 20 : 28;
+  const avatarSize = compact ? 24 : 36;
 
   if (!trader) {
     return (
-      <div className="flex items-center gap-2 px-2.5 py-2" style={{ opacity: 0.3 }}>
+      <div className="flex items-center gap-2.5 px-3 py-2.5" style={{ opacity: 0.3 }}>
         <div
           className="rounded-full flex-shrink-0"
           style={{
@@ -29,7 +29,7 @@ function TraderRow({
             border: '1.5px solid rgba(255,255,255,0.08)',
           }}
         />
-        <span className="text-[9px] font-mono text-[var(--trench-text-muted)]">TBD</span>
+        <span className="text-[11px] font-mono text-[var(--trench-text-muted)]">TBD</span>
       </div>
     );
   }
@@ -37,7 +37,7 @@ function TraderRow({
   return (
     <Link
       href={`/${trader.username}`}
-      className="flex items-center gap-2 px-2.5 py-2 transition-colors hover:bg-[rgba(0,212,255,0.03)]"
+      className="flex items-center gap-2.5 px-3 py-2.5 transition-colors hover:bg-[rgba(0,212,255,0.03)]"
       style={{
         opacity: isWinner ? 1 : 0.4,
         background: isWinner
@@ -67,16 +67,16 @@ function TraderRow({
 
       {/* Username */}
       <div className="min-w-0 flex-1">
-        <span className="block text-[9px] font-semibold text-white truncate">
+        <span className="block text-[11px] font-semibold text-white truncate">
           @{trader.username}
         </span>
-        <span className="block text-[7px] font-mono tracking-[1.5px] text-[var(--trench-text-muted)]">
+        <span className="block text-[8px] font-mono tracking-[1.5px] text-[var(--trench-text-muted)]">
           {isWinner ? 'ADVANCES' : 'ELIMINATED'}
         </span>
       </div>
 
       <span
-        className="text-[7px] font-mono tracking-[1.5px] px-1.5 py-0.5 cut-xs flex-shrink-0"
+        className="text-[8px] font-mono tracking-[1.5px] px-2 py-0.5 cut-xs flex-shrink-0"
         style={{
           color: isWinner ? '#00D4FF' : 'rgba(255,255,255,0.45)',
           background: isWinner ? 'rgba(0,212,255,0.08)' : 'rgba(255,255,255,0.04)',
@@ -88,7 +88,7 @@ function TraderRow({
 
       {/* PnL */}
       <span
-        className="text-[9px] font-mono font-bold flex-shrink-0"
+        className="text-[11px] font-mono font-bold flex-shrink-0"
         style={{
           color: trader.pnlUsd >= 0 ? 'var(--trench-green)' : 'var(--trench-red)',
           textDecoration: isWinner ? 'none' : 'line-through',
