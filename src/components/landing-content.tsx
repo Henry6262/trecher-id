@@ -536,24 +536,24 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
         <ActivityTicker items={ticker} />
 
         {/* Hero */}
-        <section id="hero" className="mx-auto grid max-w-[900px] scroll-mt-36 grid-cols-1 items-center gap-8 px-4 pt-12 pb-10 sm:px-6 sm:pt-16 sm:pb-12 lg:grid-cols-2">
+        <section id="hero" className="mx-auto grid max-w-[1000px] scroll-mt-36 grid-cols-1 md:grid-cols-2 items-center gap-6 sm:gap-8 px-4 pt-10 pb-8 sm:pt-14 sm:pb-10 sm:px-6 lg:pt-16 lg:pb-12">
           <div>
-            <div className="cut-xs mb-6 inline-flex items-center gap-1.5 border border-[rgba(0,212,255,0.12)] bg-[rgba(0,212,255,0.08)] px-3 py-1 text-[10px] font-mono tracking-[2px] text-[var(--trench-accent)]">
-              <Check size={10} strokeWidth={3} />
+            <div className="cut-xs mb-4 sm:mb-6 inline-flex items-center gap-1.5 border border-[rgba(0,212,255,0.12)] bg-[rgba(0,212,255,0.08)] px-2.5 py-1 sm:px-3 text-[8px] sm:text-[10px] font-mono tracking-[2px] text-[var(--trench-accent)]">
+              <Check size={8} strokeWidth={3} className="sm:w-[10px] sm:h-[10px]" />
               <ShinyText text="ON-CHAIN VERIFIED" speed={3} />
             </div>
 
-            <h1 className="mb-4 text-4xl leading-[1] font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
+            <h1 className="mb-3 sm:mb-4 text-3xl sm:text-4xl md:text-5xl lg:text-6xl leading-[1] font-bold tracking-tight text-white">
               Your{' '}
               <span className="text-[var(--trench-accent)]">
-                <span className="relative inline-block" style={{ width: 90, verticalAlign: 'baseline' }}>
+                <span className="relative inline-block" style={{ width: '0.35em', verticalAlign: 'baseline' }}>
                   <Image
                     src="/logo.png"
                     alt=""
                     width={100}
                     height={28}
                     className="!max-w-none absolute"
-                    style={{ width: 100, height: 'auto', top: '50%', left: -6, transform: 'translateY(-50%)', filter: 'drop-shadow(0 0 8px rgba(0,212,255,0.3))' }}
+                    style={{ width: '2.5em', height: 'auto', top: '50%', left: -4, transform: 'translateY(-50%)', filter: 'drop-shadow(0 0 8px rgba(0,212,255,0.3))' }}
                   />
                   <span style={{ visibility: 'hidden' }}>W</span>
                 </span>eb3
@@ -561,19 +561,19 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
               <br />Bio Link
             </h1>
 
-            <p className="mb-8 max-w-sm text-sm leading-relaxed text-[var(--trench-text-muted)]">
+            <p className="mb-6 sm:mb-8 max-w-sm text-[13px] sm:text-sm leading-relaxed text-[var(--trench-text-muted)]">
               The landing surface for Web3Me. Check the rankings, inspect the Trencher Cup, then jump into your dashboard to connect wallets and set up your trading identity.
             </p>
 
             <div className="flex flex-wrap items-center gap-3">
               <CutButton href="/dashboard" size="lg">Open Dashboard</CutButton>
             </div>
-            <p className="mt-4 text-[9px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">LANDING &middot; LEADERBOARD &middot; DASHBOARD</p>
+            <p className="mt-3 sm:mt-4 text-[7px] sm:text-[9px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">LANDING &middot; LEADERBOARD &middot; DASHBOARD</p>
           </div>
 
-          {/* Preview card — shader-backed profile card */}
+          {/* Preview card — shader-backed profile card — only shows in 2-col mode */}
           {featuredProfiles.length > 0 && (
-            <div className="hidden sm:flex justify-center lg:justify-end">
+            <div className="hidden md:flex justify-center md:justify-end">
               <ShaderCard
                 width={420}
                 height={480}

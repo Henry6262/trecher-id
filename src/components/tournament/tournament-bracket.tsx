@@ -265,22 +265,7 @@ export function TournamentBracket({ traders }: { traders: RankedTrader[] }) {
             </div>
           </div>
 
-          <div className="flex-shrink-0 flex items-center" style={{ width: ROUND_SEPARATOR_WIDTH }}>
-            <div className="w-px h-3/4" style={{ background: 'rgba(0,212,255,0.1)' }} />
-          </div>
-
-          <RoundColumn label="QUARTER-FINALS" matchups={bracket.knockoutRounds.qf} gap="12px" />
-          <div className="flex items-center flex-shrink-0">
-            <BracketConnector matchups={4} rowHeight={ROW_H} gap={12} delay={0} />
-          </div>
-
-          <RoundColumn label={ROUND_LABELS.sf} matchups={bracket.knockoutRounds.sf} gap="48px" />
-          <div className="flex items-center flex-shrink-0">
-            <BracketConnector matchups={2} rowHeight={ROW_H} gap={48} delay={0.3} />
-          </div>
-
-          <RoundColumn label={ROUND_LABELS.final} matchups={bracket.knockoutRounds.final} gap="0px" />
-
+          {/* Trailing space for scroll feel */}
           <div className="flex-shrink-0" style={{ width: FINAL_TRAILING_WIDTH }} />
           </div>
         </div>
