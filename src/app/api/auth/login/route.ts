@@ -5,6 +5,8 @@ import { prisma } from '@/lib/prisma';
 import { redis } from '@/lib/redis';
 import { SignJWT } from 'jose';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client';
+import { Ponzinomics } from '@ponzinomics/sdk';
+import { PONZINOMICS_COOKIE_NAME, PONZINOMICS_REFRESH_COOKIE_NAME } from '@/lib/ponzinomics';
 
 export async function POST(req: NextRequest) {
   // Fix 3: JWT_SECRET guard — fail fast at request time, not silently at signing
@@ -162,6 +164,28 @@ export async function POST(req: NextRequest) {
 
   await invalidatePublicProfileCache(user!.username);
 
+  // ── PONZINOMICS INTEGRATION: Exchange Privy token for Ponzinomics session ──
+  let ponzAccessToken: string | null = null;
+  let ponzRefreshToken: string | null = null;
+
+  if (process.env.PONZINOMICS_API_KEY && process.env.PONZINOMICS_PROJECT_ID) {
+    try {
+      const sdk = new Ponzinomics({
+        apiKey: process.env.PONZINOMICS_API_KEY,
+        projectId: process.env.PONZINOMICS_PROJECT_ID,
+        baseUrl: process.env.PONZINOMICS_BASE_URL || 'https://api.sypher.io',
+      });
+
+      const authResponse = await sdk.auth!.login({ privyToken: token });
+      ponzAccessToken = authResponse.accessToken;
+      ponzRefreshToken = authResponse.refreshToken ?? null;
+    } catch (err) {
+      // Ponzinomics auth is non-critical — log but don't block login
+      console.warn('[auth/login] Ponzinomics login failed, falling back to local JWT:', err);
+    }
+  }
+
+  // ── LOCAL JWT (legacy, kept for backward compatibility) ──
   const jwt = await new SignJWT({ sub: user!.id, username: user!.username })
     .setProtectedHeader({ alg: 'HS256' })
     .setExpirationTime('7d')
@@ -176,6 +200,7 @@ export async function POST(req: NextRequest) {
     },
   });
 
+  // Set local JWT cookie (legacy)
   response.cookies.set('session', jwt, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
@@ -183,6 +208,27 @@ export async function POST(req: NextRequest) {
     maxAge: 60 * 60 * 24 * 7,
     path: '/',
   });
+
+  // Set Ponzinomics access token cookie (new auth)
+  if (ponzAccessToken) {
+    response.cookies.set(PONZINOMICS_COOKIE_NAME, ponzAccessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      path: '/',
+    });
+
+    if (ponzRefreshToken) {
+      response.cookies.set(PONZINOMICS_REFRESH_COOKIE_NAME, ponzRefreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 30, // 30 days
+        path: '/',
+      });
+    }
+  }
 
   // Clear referral cookie after processing
   if (refCode) {
