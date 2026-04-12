@@ -6,6 +6,20 @@ Trencher Cup is a live, time-bound trading tournament built on top of the Web3Me
 
 **Production URL:** https://trecher-id.vercel.app
 
+## SEASON 1 — LIVE NOW
+
+| Phase | Dates | Duration |
+|-------|-------|----------|
+| **Qualification** | Apr 13 – May 10, 2026 | 4 weeks |
+| **Group Stage** | May 13 – 15, 2026 | 48 hours |
+| **Round of 16** | May 17 – 19, 2026 | 48 hours |
+| **Quarter-Finals** | May 21 – 23, 2026 | 48 hours |
+| **Semi-Finals** | May 25 – 27, 2026 | 48 hours |
+| **Final** | May 29 – Jun 1, 2026 | 72 hours |
+
+**Prize Pool:** $10,000 WEB3ME tokens
+**Status:** Qualifying (opens April 13)
+
 ## ARCHITECTURE
 
 ```
@@ -13,16 +27,17 @@ Trencher Cup is a live, time-bound trading tournament built on top of the Web3Me
 │                        WEB3ME PLATFORM                        │
 ├──────────────────────────────────────────────────────────────┤
 │  Frontend (Next.js 16)    │  Database (Railway PostgreSQL)    │
-│  - Landing page           │  - Users (98+ seeded)            │
-│  - Leaderboard            │  - Wallets (116 linked)          │
-│  - Profile pages          │  - WalletTrade (23,937 records)  │
-│  - Dashboard              │  - WalletTradeEvent (63,640)     │
-│  - Trencher Cup bracket   │  - UserRanking (485 records)     │
-├───────────────────────────┤  - CupSeason (new)               │
-│  Auth: Privy + Twitter    │  - CupParticipant (new)          │
-│  Data: Helius API         │  - CupGroup (new)                │
-│  Cache: Redis (Railway)   │  - CupMatch (new)                │
-│  Deploy: Vercel           │  - CupPrizeDistribution (new)    │
+│  - Landing page           │  - Users (117 seeded)             │
+│  - Leaderboard            │  - Wallets (116 linked)           │
+│  - Profile pages          │  - WalletTrade (23,937 records)   │
+│  - Dashboard              │  - WalletTradeEvent (63,640)      │
+│  - Trencher Cup bracket   │  - UserRanking (485 records)      │
+│  - Live match tracker     │  - CupSeason (Season 1 active)    │
+├───────────────────────────┤  - CupParticipant                 │
+│  Auth: Privy + Twitter    │  - CupGroup                       │
+│  Data: Helius API         │  - CupMatch                       │
+│  Cache: Redis (Railway)   │  - CupPrizeDistribution           │
+│  Deploy: Vercel           │                                   │
 └───────────────────────────┴──────────────────────────────────┘
 ```
 
@@ -31,7 +46,7 @@ Trencher Cup is a live, time-bound trading tournament built on top of the Web3Me
 ### Existing Tables
 | Table | Purpose |
 |-------|---------|
-| `User` | Trader profiles (username, displayName, Twitter, Privy auth) |
+| `User` | Trader profiles (username, displayName, Twitter, Privy auth, cupChampionSeasons) |
 | `Wallet` | Linked Solana wallets with aggregated stats |
 | `WalletTrade` | Per-token PnL aggregates (source of truth for rankings) |
 | `WalletTradeEvent` | Individual on-chain swap events from Helius |
@@ -42,7 +57,7 @@ Trencher Cup is a live, time-bound trading tournament built on top of the Web3Me
 | `Link` | Social/outbound links |
 | `WalletSyncAudit` | Audit trail for wallet sync operations |
 
-### New Cup Tournament Tables
+### Cup Tournament Tables
 | Table | Purpose | Key Fields |
 |-------|---------|-----------|
 | `CupSeason` | Tournament seasons with time windows | status, prizePoolUsd, championUserId, all round start/end dates |
@@ -81,28 +96,30 @@ draft → qualifying → groups → r16 → qf → sf → final → completed
 3. Tiebreaker 2: Higher seed (lower rank number)
 ```
 
-## DATA FLOW
+## LIVE PnL TRACKER (NO CRON DEPENDENCY)
 
-### Qualification
-1. Traders link wallets via Privy auth
-2. Helius cron fetches on-chain transactions hourly
-3. Trades parsed into WalletTrade + WalletTradeEvent records
-4. UserRanking materialized views computed per period
-5. Top 32 by realized PnL in qualification window qualify
+During active matches, the system polls Helius directly every 30 seconds:
 
-### Tournament Execution
-1. **Qualification Window** (4 weeks) — traders accumulate real on-chain PnL
-2. **Group Stage** (48 hours) — 8 groups compete, top 2 advance
-3. **Round of 16** (48 hours) — head-to-head, 8 winners advance
-4. **Quarter-Finals** (48 hours) — 4 winners advance
-5. **Semi-Finals** (48 hours) — 2 winners advance
-6. **Final** (72 hours) — champion crowned
+```
+Frontend polls /api/cup/live-matches every 30s
+  → Server queries Helius for each participant's wallets
+  → Parses recent transactions for PnL in match window
+  → Returns live battle data: trader1 +$X vs trader2 +$Y
+  → Shows leader indicator, margin, recent transaction count
+  → Auto-hides when no matches are active
+```
 
-### Live PnL During Matches
-- System queries Helius for each trader's wallets during match window
-- Calculates realized PnL ONLY for trades within the match time window
-- Updates CupMatch records live (participant1PnlUsd, participant2PnlUsd)
-- Frontend can poll every 60s for live PnL battle display
+**This is the game changer.** No cron jobs needed during the tournament. Real-time Helius polling drives everything.
+
+## API ROUTES
+
+| Route | Method | Purpose |
+|-------|--------|---------|
+| `GET /api/leaderboard` | GET | Ranked traders by period |
+| `GET /api/cup/schedule` | GET | Season dates from DB (fallback: env vars) |
+| `GET /api/cup/register` | GET | Check registration status + eligibility |
+| `POST /api/cup/register` | POST | Register for Season 1 |
+| `GET /api/cup/live-matches` | GET | Real-time match PnL from Helius |
 
 ## FRONTEND COMPONENTS
 
@@ -119,13 +136,52 @@ draft → qualifying → groups → r16 → qf → sf → final → completed
 | `cup-hero-variants.tsx` | Hero/header design variants |
 | `participate-button.tsx` | CTA routing to Privy login or dashboard |
 
-### Current UI Layout (Updated)
-- **Trophy overlay:** Centered layout with bigger cup image (200px/260px)
-- **Champion card:** Smaller (32px avatar, 12px name, inline)
-- **Metrics:** Only 2 (TRADERS + GROUPS), no containers, inline text
-- **CTA:** Participate button centered below metrics
+### Cup Landing Page Components
+| File | Purpose |
+|------|---------|
+| `cup-registration-button.tsx` | Eligibility check + register button |
+| `live-match-tracker.tsx` | Live PnL battle display (auto-shows during tournament) |
+| `champion-badge.tsx` | Champion crown + badge for winners |
+| `share-card.tsx` | Social sharing (copy + share buttons) |
 
-## TESTING
+## DATA FLOW
+
+### Qualification
+1. Traders link wallets via Privy auth
+2. Helius cron fetches on-chain transactions hourly
+3. Trades parsed into WalletTrade + WalletTradeEvent records
+4. UserRanking materialized views computed per period
+5. Top 32 by realized PnL in qualification window qualify
+
+### Tournament Execution (Auto-Driven)
+1. **Qualification Window** (4 weeks) — traders accumulate real on-chain PnL
+2. **Group Stage** (48 hours) — 8 groups compete, top 2 advance
+3. **Round of 16** (48 hours) — head-to-head, 8 winners advance
+4. **Quarter-Finals** (48 hours) — 4 winners advance
+5. **Semi-Finals** (48 hours) — 2 winners advance
+6. **Final** (72 hours) — champion crowned
+
+### Live PnL During Matches
+- System queries Helius for each trader's wallets during match window
+- Calculates realized PnL ONLY for trades within the match time window
+- Updates CupMatch records live (participant1PnlUsd, participant2PnlUsd)
+- Frontend polls every 30s for live PnL battle display
+
+### Slack Notifications
+- Fires on round transitions: groups_start, r16_start, qf_start, sf_start, final_start, champion_crowned
+- Integrated into `advanceRound()` function
+- Uses `SLACK_WEBHOOK_URL` env var (set in Vercel dashboard)
+
+## LANDING PAGE STRUCTURE
+
+1. **Hero** — Featured traders (top 3 positive PnL), shader card carousel
+2. **Leaderboard** — Full table view (separate section)
+3. **Trencher Cup** — Countdown timers, registration, live matches, bracket
+4. **Journey** — How it works + reward pool
+5. **Referrals** — Referral program
+6. **Gallery** — Dome gallery of trader avatars
+
+## TESTS
 
 ### E2E Test Suite (`tests/cup-engine.test.ts`)
 ```
@@ -158,15 +214,48 @@ npm run test:coverage # With coverage
 - **Database:** Railway PostgreSQL (hopper.proxy.rlwy.net:10087)
 - **Redis:** Railway Redis (crossover.proxy.rlwy.net:34102)
 
-### Current Data Stats
+### Current Data Stats (Cleaned)
 ```
-Users: 117 (98 seeded + 19 devprint deployers)
-Wallets: 116 (97 original + 19 devprint)
+Users: 117 (real seeded accounts from Axiom + devprint)
+Wallets: 116 (real Solana addresses)
 Trade Events: 63,640 (real Helius on-chain data)
 Aggregated Trades: 23,937
 User Rankings: 485
-Twitter Avatars: 19 direct + 59 via unavatar proxy
+Cup Seasons: 1 (Season 1, qualifying)
+Cup Participants: 0 (awaiting real registrations)
+Test Data: DELETED (0 test users remain)
 ```
+
+### Top 5 Traders (Real Data)
+| # | Trader | PnL | Trades |
+|---|--------|-----|--------|
+| 1 | deployer_02 | +$134,925 | 712 |
+| 2 | jackduval | +$24,308 | 98 |
+| 3 | deployer_16 | +$15,760 | 84 |
+| 4 | deployer_10 | +$14,471 | 864 |
+| 5 | BulgarianDegen | +$6,421 | 290 |
+
+## PRIZE DISTRIBUTION
+
+| Rank | Title | % of Pool | Amount |
+|------|-------|-----------|--------|
+| 1 | Champion | 40% | $4,000 |
+| 2 | Runner-up | 25% | $2,500 |
+| 3-4 | Semi-finalists | 10% each | $1,000 each |
+| 5-8 | Quarter-finalists | 3.75% each | $375 each |
+
+## REGISTRATION FLOW
+
+1. User signs in via Privy (Twitter/X auth)
+2. Frontend calls `GET /api/cup/register`
+3. API checks:
+   - Signed in? → Yes
+   - Has linked wallets? → Yes
+   - >= 10 trades in qualification window? → Checks
+   - Season in 'qualifying' status? → Yes
+4. If eligible → shows "Register for Season 1" button
+5. User clicks → `POST /api/cup/register` → creates CupParticipant record
+6. If not eligible → shows progress: "X / 10 trades"
 
 ## ENVIRONMENT
 
@@ -185,37 +274,22 @@ PRIVY_APP_SECRET    → Privy app secret
 ```
 CRON_WALLET_CONCURRENCY   → Parallel wallet sync (default: 2)
 CRON_USER_CONCURRENCY     → Parallel user processing (default: 4)
-SLACK_WEBHOOK_URL         → Slack notifications for cron
+SLACK_WEBHOOK_URL         → Slack notifications for cup events
 ```
 
 ## KEY DECISIONS
 
+### Why No Cron Dependency for Live Matches?
+Cron jobs are unreliable during critical tournament phases. The live match tracker polls Helius directly every 30s, so the tournament runs independently. Cron still runs hourly for general wallet sync, but the tournament doesn't depend on it.
+
 ### Why Simplified Relations?
-CupGroup and CupMatch store participant IDs as plain strings/arrays instead of FK relations to CupParticipant. This avoids Prisma relation complexity with multiple back-references and makes the schema simpler to maintain. Trade-off: manual joins needed in queries.
+CupGroup and CupMatch store participant IDs as plain strings/arrays instead of FK relations to CupParticipant. This avoids Prisma relation complexity with multiple back-references. Trade-off: manual joins needed in queries.
 
 ### Why Fallback SOL Price?
 CoinGecko API rate limits (429 errors) during tests and high-traffic periods. Fallback to $150 SOL price ensures the system doesn't break when price API is unavailable.
 
 ### Why Pre-seeded Users?
-The 98 user accounts were pre-created with real Solana wallet addresses from the Axiom leaderboard. This allows the tournament to have real on-chain data from day one, rather than waiting for organic user signups. The Privy auth is pre-created for these accounts.
-
-## FUTURE WORK
-
-### Token Launch Integration
-- When $WEB3ME token launches, it becomes the prize pool source
-- Token deployments tracked via TokenDeployment table
-- Deployer leaderboard separate from trader leaderboard
-
-### Real User Onboarding
-- 5 real Privy auth users already signed up
-- Need to expand to full user base for Season 1
-- Each real user replaces a pre-seeded account naturally
-
-### Anti-Manipulation
-- Wash trading detection (self-swaps, round-trips)
-- Minimum 1 SOL volume per trade
-- Known honeypot/scam token exclusion
-- Admin review + flag system
+The 117 user accounts were pre-created with real Solana wallet addresses from the Axiom leaderboard and devprint. This allows the tournament to have real on-chain data from day one, rather than waiting for organic user signups.
 
 ## REFERENCES
 
