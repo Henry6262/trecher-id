@@ -8,7 +8,7 @@
  * Or:  npx tsx scripts/scrape-axiom.ts
  */
 
-import { chromium, type Browser, type Page } from 'playwright';
+import { chromium } from 'playwright';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -80,6 +80,19 @@ interface TraderData {
   winRate: number;
 }
 
+interface ApiCapture {
+  url: string;
+  data: unknown;
+}
+
+interface DomTraderCandidate {
+  name: string;
+  wallet: string;
+  pnlText: string;
+  html?: string;
+  source?: string;
+}
+
 async function scrapeAxiomPulse(): Promise<TraderData[]> {
   console.log('Launching Chrome with your profile (for Axiom auth)...');
 
@@ -119,7 +132,7 @@ async function scrapeAxiomPulse(): Promise<TraderData[]> {
 
     // Try to extract data from the page via network interception + DOM scraping
     // Axiom loads trader data via API calls — intercept them
-    const apiData: any[] = [];
+    const apiData: ApiCapture[] = [];
 
     page.on('response', async (response) => {
       const url = response.url();
@@ -139,8 +152,8 @@ async function scrapeAxiomPulse(): Promise<TraderData[]> {
     }
 
     // Scrape trader rows from the DOM
-    const domTraders = await page.evaluate(() => {
-      const results: any[] = [];
+    const domTraders = await page.evaluate<DomTraderCandidate[]>(() => {
+      const results: DomTraderCandidate[] = [];
 
       // Look for trader cards/rows — Axiom uses various selectors
       // Try common patterns for leaderboard tables

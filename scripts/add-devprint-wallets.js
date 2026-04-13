@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 // Add devprint top deployer wallets to trecher-id
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
@@ -43,8 +44,6 @@ async function main() {
       skipped++;
       continue;
     }
-    
-    const username = d.rank > 0 ? d.username : d.username;
     
     // Create user
     const user = await prisma.user.create({

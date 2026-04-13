@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { AvatarImage } from '@/components/avatar-image';
 import { getPublicAvatarUrl } from '@/lib/images';
-import { Trophy, TrendingUp, TrendingDown, Zap } from 'lucide-react';
+import { TrendingUp, TrendingDown, Zap } from 'lucide-react';
 
 interface ParticipantPnl {
   id: string;
@@ -72,8 +72,10 @@ export function LiveMatchTracker() {
     );
   }
 
-  if (!data || data.matches.length === 0) {
-    return null; // No active matches, don't show anything
+  // Only show during active tournament rounds — not during qualifying
+  const LIVE_STATUSES = ['groups', 'r16', 'qf', 'sf', 'final'];
+  if (!data || data.matches.length === 0 || !LIVE_STATUSES.includes(data.season?.status)) {
+    return null;
   }
 
   return (

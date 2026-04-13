@@ -52,6 +52,52 @@ function heliusRpc(key: string) { return `https://mainnet.helius-rpc.com/?api-ke
 const SOL_MINT = 'So11111111111111111111111111111111111111112';
 const PUMP_FUN_PROGRAM = '6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P';
 
+interface HeliusTokenTransfer {
+  mint: string;
+  toUserAccount?: string | null;
+  fromUserAccount?: string | null;
+}
+
+interface HeliusNativeTransfer {
+  amount: number;
+  fromUserAccount?: string | null;
+  toUserAccount?: string | null;
+}
+
+interface HeliusAccountData {
+  account?: string | null;
+  nativeBalanceChange?: number | null;
+}
+
+interface HeliusTransaction {
+  signature?: string | null;
+  type?: string | null;
+  timestamp: number;
+  description?: string | null;
+  source?: string | null;
+  tokenTransfers?: HeliusTokenTransfer[] | null;
+  nativeTransfers?: HeliusNativeTransfer[] | null;
+  accountData?: HeliusAccountData[] | null;
+}
+
+interface HeliusAsset {
+  id?: string;
+  content?: {
+    metadata?: {
+      symbol?: string | null;
+      name?: string | null;
+    } | null;
+    links?: {
+      image?: string | null;
+    } | null;
+    files?: Array<{ uri?: string | null }> | null;
+  } | null;
+}
+
+interface HeliusAssetBatchResponse {
+  result?: HeliusAsset[] | null;
+}
+
 function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -73,7 +119,7 @@ async function fetchWithRetry(url: string, opts?: RequestInit, retries = 5): Pro
 }
 
 async function getWalletTransactions(walletAddress: string, apiKey: string, maxPages = 30) {
-  const allTxns: any[] = [];
+  const allTxns: HeliusTransaction[] = [];
   let before: string | undefined;
 
   for (let page = 0; page < maxPages; page++) {
@@ -83,7 +129,7 @@ async function getWalletTransactions(walletAddress: string, apiKey: string, maxP
     const res = await fetchWithRetry(url);
     if (!res.ok) break;
 
-    const txns = await res.json();
+    const txns = await res.json() as HeliusTransaction[];
     if (!Array.isArray(txns) || txns.length === 0) break;
 
     allTxns.push(...txns);
@@ -99,7 +145,7 @@ async function getWalletTransactions(walletAddress: string, apiKey: string, maxP
 
 // ─── Swap parsing ───────────────────────────────────────────
 
-function parseSwaps(txns: any[], walletAddress: string) {
+function parseSwaps(txns: HeliusTransaction[], walletAddress: string) {
   const tokenMap = new Map<string, {
     buySol: number; sellSol: number; count: number;
     firstAt: number; lastAt: number;
@@ -108,15 +154,15 @@ function parseSwaps(txns: any[], walletAddress: string) {
   for (const tx of txns) {
     if (tx.type !== 'SWAP' && tx.type !== 'TRANSFER' && tx.type !== 'UNKNOWN') continue;
 
-    const tokenTransfers = tx.tokenTransfers || [];
-    const nativeTransfers = tx.nativeTransfers || [];
-    const accountData = tx.accountData || [];
+    const tokenTransfers = tx.tokenTransfers ?? [];
+    const nativeTransfers = tx.nativeTransfers ?? [];
+    const accountData = tx.accountData ?? [];
 
-    const nonSolTokens = tokenTransfers.filter((t: any) => t.mint !== SOL_MINT);
+    const nonSolTokens = tokenTransfers.filter((t) => t.mint !== SOL_MINT);
     if (nonSolTokens.length === 0) continue;
 
     if (tx.type !== 'SWAP') {
-      const hasNativeFlow = nativeTransfers.some((n: any) => n.fromUserAccount === walletAddress || n.toUserAccount === walletAddress);
+      const hasNativeFlow = nativeTransfers.some((n) => n.fromUserAccount === walletAddress || n.toUserAccount === walletAddress);
       if (!hasNativeFlow) continue;
     }
 
@@ -129,7 +175,7 @@ function parseSwaps(txns: any[], walletAddress: string) {
     }
     const netSol = solReceived - solSpent;
     const effectiveNetSol = (solSpent === 0 && solReceived === 0)
-      ? (accountData.find((a: any) => a.account === walletAddress)?.nativeBalanceChange ?? 0) / 1e9
+      ? (accountData.find((a) => a.account === walletAddress)?.nativeBalanceChange ?? 0) / 1e9
       : netSol;
 
     for (const token of nonSolTokens) {
@@ -178,7 +224,7 @@ async function getTokenMetadata(mints: string[], apiKey: string): Promise<Map<st
     });
 
     if (res.ok) {
-      const data = await res.json();
+      const data = await res.json() as HeliusAssetBatchResponse;
       for (const asset of data.result || []) {
         if (asset?.id) {
           map.set(asset.id, {
@@ -189,7 +235,7 @@ async function getTokenMetadata(mints: string[], apiKey: string): Promise<Map<st
         }
       }
     }
-  } catch (e) {
+  } catch {
     console.log('    ⚠️ Token metadata fetch failed, using mint prefixes');
   }
 
@@ -198,7 +244,7 @@ async function getTokenMetadata(mints: string[], apiKey: string): Promise<Map<st
 
 // ─── Deployment detection ───────────────────────────────────
 
-function detectDeployments(txns: any[], walletAddress: string) {
+function detectDeployments(txns: HeliusTransaction[], walletAddress: string) {
   const deployMints: { mint: string; timestamp: number; platform: string }[] = [];
 
   for (const tx of txns) {
@@ -216,9 +262,9 @@ function detectDeployments(txns: any[], walletAddress: string) {
 
     const isCreateAction = desc.includes('create') || desc.includes('launch') || desc.includes('deploy') || desc.includes('initialized');
     if (isCreateAction && tx.tokenTransfers?.length > 0) {
-      const isFeePayer = tx.nativeTransfers?.some((nt: any) => nt.fromUserAccount === walletAddress && nt.amount > 0) ?? false;
+      const isFeePayer = tx.nativeTransfers?.some((nt) => nt.fromUserAccount === walletAddress && nt.amount > 0) ?? false;
       if (isFeePayer) {
-        const nonSol = tx.tokenTransfers.find((t: any) => t.mint !== SOL_MINT);
+        const nonSol = tx.tokenTransfers?.find((t) => t.mint !== SOL_MINT);
         if (nonSol) {
           deployMints.push({ mint: nonSol.mint, timestamp: tx.timestamp, platform: isPumpFun ? 'pump.fun' : 'raydium' });
         }

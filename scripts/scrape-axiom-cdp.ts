@@ -9,6 +9,18 @@ import * as path from 'path';
 const TEMP_PROFILE = '/tmp/brave-axiom-scrape';
 const OUTPUT = path.join(__dirname, 'axiom-kols.json');
 
+interface ApiCapture {
+  url: string;
+  data: unknown;
+}
+
+interface ScrapedWalletReference {
+  wallet: string;
+  text: string;
+  context: string;
+  source: 'link' | 'text';
+}
+
 async function main() {
   console.log('Launching Chromium with copied Chrome profile...');
 
@@ -62,7 +74,7 @@ async function main() {
     }
 
     // Now try to scrape — intercept API calls
-    const apiResponses: any[] = [];
+    const apiResponses: ApiCapture[] = [];
     page.on('response', async (response) => {
       const u = response.url();
       if (u.includes('axiom.trade') && u.includes('api')) {
@@ -113,8 +125,8 @@ async function main() {
 
     // Now scrape everything we can from the DOM
     console.log('\nScraping DOM...');
-    const scraped = await page.evaluate(() => {
-      const results: any[] = [];
+    const scraped = await page.evaluate<ScrapedWalletReference[]>(() => {
+      const results: ScrapedWalletReference[] = [];
 
       // Method 1: Find all links that look like wallet addresses
       document.querySelectorAll('a').forEach(a => {
@@ -134,14 +146,14 @@ async function main() {
 
       // Method 2: Find any text that looks like a Solana address
       const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
-      let node;
-      while (node = walker.nextNode()) {
+      let node: Node | null;
+      while ((node = walker.nextNode())) {
         const text = node.textContent || '';
         const addrMatch = text.match(/[1-9A-HJ-NP-Za-km-z]{32,44}/g);
         if (addrMatch) {
           for (const addr of addrMatch) {
             if (addr.length >= 32 && addr.length <= 44) {
-              const parent = (node as any).parentElement;
+              const parent = node.parentElement;
               const grandparent = parent?.closest('tr, [class*="row"], [class*="card"]') || parent?.parentElement;
               results.push({
                 wallet: addr,
@@ -160,7 +172,7 @@ async function main() {
     console.log(`DOM scrape found ${scraped.length} wallet references`);
 
     // Deduplicate by wallet
-    const walletMap = new Map<string, any>();
+    const walletMap = new Map<string, ScrapedWalletReference>();
     for (const item of scraped) {
       if (!walletMap.has(item.wallet)) {
         walletMap.set(item.wallet, item);

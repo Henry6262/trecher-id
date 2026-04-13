@@ -14,8 +14,6 @@ import { ActivityTicker } from '@/components/activity-ticker';
 import { JourneySection } from '@/components/journey-section';
 import { ReferralSection } from '@/components/referral-section';
 import { SectionRailNav } from '@/components/section-rail-nav';
-import { GlassCard } from '@/components/glass-card';
-import { CupRegistrationButton } from '@/components/cup-registration-button';
 import { LiveMatchTracker } from '@/components/live-match-tracker';
 import { getPublicAvatarUrl } from '@/lib/images';
 import type { TickerItem } from '@/lib/types';
@@ -92,7 +90,7 @@ function CupInfoModal({ onClose }: { onClose: () => void }) {
             <div>
               <h4 className="text-[11px] font-mono tracking-[2px] text-[var(--trench-accent)] mb-2">HOW IT WORKS</h4>
               <p className="text-[13px] leading-relaxed text-[var(--trench-text)]">
-                Top 32 traders by 7-day realized PnL qualify. They're split into 8 groups of 4. Top 2 from each group advance to knockout rounds (R16 → QF → SF → Final). Winner takes the crown and the biggest prize.
+                Top 32 traders by 7-day realized PnL qualify. They&apos;re split into 8 groups of 4. Top 2 from each group advance to knockout rounds (R16 → QF → SF → Final). Winner takes the crown and the biggest prize.
               </p>
             </div>
 
@@ -670,13 +668,9 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
             <CupCountdown label="FINAL" endDate={cupSchedule?.finalEnd || new Date('2026-06-23T00:00:00Z')} />
           </div>
 
-          {/* Registration Status */}
-          <div className="mb-6 cut-sm px-4 py-3" style={{ background: 'rgba(8,12,18,0.6)', border: '1px solid rgba(0,212,255,0.08)' }}>
-            <CupRegistrationButton />
-          </div>
-
           {/* Live Match Tracker (only shows during active tournament) */}
-          <LiveMatchTracker />
+          {/* Disabled during qualifying — uncomment when tournament rounds start */}
+          {/* <LiveMatchTracker /> */}
 
           {/* Bracket / Toggle */}
           <div className="relative z-30 mb-5 flex justify-end pointer-events-auto">
