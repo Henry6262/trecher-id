@@ -120,7 +120,7 @@ async function fetchWithRetry(url: string, opts?: RequestInit, retries = 5): Pro
 
 async function getWalletTransactions(walletAddress: string, apiKey: string, maxPages = 30) {
   const allTxns: HeliusTransaction[] = [];
-  let before: string | undefined;
+  let before: string | null | undefined;
 
   for (let page = 0; page < maxPages; page++) {
     let url = `${HELIUS_BASE}/addresses/${walletAddress}/transactions?api-key=${apiKey}&limit=100`;
@@ -252,7 +252,7 @@ function detectDeployments(txns: HeliusTransaction[], walletAddress: string) {
     const source = (tx.source || '').toLowerCase();
     const isPumpFun = desc.includes('pump') || source.includes('pump') || desc.includes(PUMP_FUN_PROGRAM);
 
-    if (tx.type === 'CREATE' && tx.tokenTransfers?.length > 0) {
+    if (tx.type === 'CREATE' && tx.tokenTransfers && tx.tokenTransfers.length > 0) {
       const mint = tx.tokenTransfers[0].mint;
       if (mint) {
         deployMints.push({ mint, timestamp: tx.timestamp, platform: isPumpFun ? 'pump.fun' : 'unknown' });
@@ -261,7 +261,7 @@ function detectDeployments(txns: HeliusTransaction[], walletAddress: string) {
     }
 
     const isCreateAction = desc.includes('create') || desc.includes('launch') || desc.includes('deploy') || desc.includes('initialized');
-    if (isCreateAction && tx.tokenTransfers?.length > 0) {
+    if (isCreateAction && tx.tokenTransfers && tx.tokenTransfers.length > 0) {
       const isFeePayer = tx.nativeTransfers?.some((nt) => nt.fromUserAccount === walletAddress && nt.amount > 0) ?? false;
       if (isFeePayer) {
         const nonSol = tx.tokenTransfers?.find((t) => t.mint !== SOL_MINT);

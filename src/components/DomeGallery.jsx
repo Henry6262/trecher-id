@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 'use client';
 
 import { useEffect, useMemo, useRef, useCallback } from 'react';
@@ -133,8 +134,8 @@ export default function DomeGallery({
   dragDampening = 2,
   openedImageWidth = '250px',
   openedImageHeight = '350px',
-  imageBorderRadius = '30px',
-  openedImageBorderRadius = '30px',
+  imageBorderRadius = '0',
+  openedImageBorderRadius = '0',
   grayscale = true
 }) {
   const rootRef = useRef(null);

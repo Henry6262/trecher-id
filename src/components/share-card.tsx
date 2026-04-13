@@ -14,7 +14,7 @@ interface ShareCardProps {
   group?: string;
 }
 
-export function ShareCardGenerator({ username, displayName, type, seasonName, rank, pnlUsd, trades, group }: ShareCardProps) {
+export function ShareCardGenerator({ username, type, seasonName, rank, pnlUsd, trades, group }: ShareCardProps) {
   const [copied, setCopied] = useState(false);
 
   const messages = {

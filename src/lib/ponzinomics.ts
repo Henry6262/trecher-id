@@ -6,7 +6,7 @@
  * should import from this file.
  */
 
-import { Ponzinomics, AuthClient } from '@ponzinomics/sdk';
+import { Ponzinomics } from '@ponzinomics/sdk';
 
 // SDK Configuration
 const PONZINOMICS_API_KEY = process.env.PONZINOMICS_API_KEY;

@@ -14,7 +14,6 @@ import { ActivityTicker } from '@/components/activity-ticker';
 import { JourneySection } from '@/components/journey-section';
 import { ReferralSection } from '@/components/referral-section';
 import { SectionRailNav } from '@/components/section-rail-nav';
-import { LiveMatchTracker } from '@/components/live-match-tracker';
 import { getPublicAvatarUrl } from '@/lib/images';
 import type { TickerItem } from '@/lib/types';
 

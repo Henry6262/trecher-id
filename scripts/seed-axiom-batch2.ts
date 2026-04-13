@@ -34,11 +34,6 @@ const BATCH2 = [
 const PERIODS = ['1d', '3d', '7d', 'all'] as const;
 const PERIOD_SCALE: Record<string, number> = { '1d': 0.015, '3d': 0.07, '7d': 0.22, 'all': 1.0 };
 
-// Existing wallets to check dupes
-const EXISTING_CHECK = [
-  'AVAZvHLR2PcWpDf8BXY4rVxNHYRBytycHkcB5z5QNXYm', // KOLScan Prime — already in DB
-];
-
 async function main() {
   // Check DB for dupes
   const existingWallets = await prisma.wallet.findMany({ select: { address: true } });

@@ -10,7 +10,6 @@
  */
 
 import { prisma } from '@/lib/prisma';
-import { getWalletTransactions } from '@/lib/helius';
 import { getSolPrice } from '@/lib/sol-price';
 import { sendTournamentNotification, type TournamentEvent } from '@/lib/cup-notifications';
 

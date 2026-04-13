@@ -31,7 +31,6 @@ const REMEDIATION_CONCURRENCY = Math.max(1, Number(process.env.CRON_REMEDIATION_
 const REMEDIATION_MAX_PAGES = Math.max(5, Number(process.env.CRON_REMEDIATION_MAX_PAGES ?? 20));
 const ENRICHMENT_STALE_MS = 24 * 60 * 60 * 1000;
 
-type TxnResult = Awaited<ReturnType<typeof getWalletTransactions>>;
 type WalletJob = {
   id: string;
   address: string;

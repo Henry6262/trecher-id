@@ -42,7 +42,7 @@ export function BracketConnector({
       width={width}
       height={totalHeight}
       className="flex-shrink-0"
-      style={{ minWidth: width }}
+      style={{ minWidth: width, animationDelay: `${delay}ms` }}
     >
       {paths.map((d, i) => (
         <path

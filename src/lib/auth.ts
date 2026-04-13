@@ -1,6 +1,6 @@
 import { jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
-import { createAuthClient, PONZINOMICS_COOKIE_NAME, PONZINOMICS_REFRESH_COOKIE_NAME } from '@/lib/ponzinomics';
+import { createAuthClient, PONZINOMICS_COOKIE_NAME } from '@/lib/ponzinomics';
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET!);
 

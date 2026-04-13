@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
  * Live match PnL tracker — polls Helius for real-time match data.
  * No cron dependency — runs on-demand during active tournament phases.
  */
-export async function GET(req: Request) {
+export async function GET() {
   try {
     // Get current active season
     const season = await prisma.cupSeason.findFirst({
@@ -57,8 +57,6 @@ export async function GET(req: Request) {
         if (match.participant1Id) {
           result.participant1 = await getParticipantLivePnl(
             match.participant1Id,
-            match.windowStart,
-            match.windowEnd,
           );
         }
 
@@ -66,8 +64,6 @@ export async function GET(req: Request) {
         if (match.participant2Id) {
           result.participant2 = await getParticipantLivePnl(
             match.participant2Id,
-            match.windowStart,
-            match.windowEnd,
           );
         }
 
@@ -113,8 +109,6 @@ export async function GET(req: Request) {
  */
 async function getParticipantLivePnl(
   participantId: string,
-  windowStart: Date,
-  windowEnd: Date,
 ) {
   try {
     // Get participant's wallets
@@ -155,7 +149,7 @@ async function getParticipantLivePnl(
           recentTxns += txns.length;
 
           // Calculate PnL for trades within window
-          for (const [_, trade] of parsed.aggregates) {
+          for (const trade of parsed.aggregates.values()) {
             const pnl = trade.sellSol - trade.buySol;
             totalPnlSol += pnl;
             totalTrades += trade.count;

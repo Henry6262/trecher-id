@@ -11,9 +11,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-const HELIUS_API_KEY = process.env.HELIUS_API_KEY || '6f853f8e-1c23-40c7-9a2d-f14977331725';
-const HELIUS_BASE = 'https://api.helius.xyz/v0';
-
 // ─── Existing wallets from seed.ts — SKIP these ───
 const EXISTING_WALLETS = new Set([
   'CyaE1VxvBrahnPWkqm5VsdCvyS2QmNht2UFrKJHga54o',
@@ -156,7 +153,8 @@ function extractSolanaAddress(text: string | null): string | null {
 
 // Skip Helius validation — free tier is too rate-limited.
 // The sync/recalc process will validate wallets after seeding.
-async function validateWallet(_address: string): Promise<{ valid: boolean; txCount: number }> {
+async function validateWallet(address: string): Promise<{ valid: boolean; txCount: number }> {
+  void address;
   return { valid: true, txCount: 1 };
 }
 

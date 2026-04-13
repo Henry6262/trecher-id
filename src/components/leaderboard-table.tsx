@@ -277,7 +277,7 @@ export function LeaderboardTable({
           {/* LEFT — Top 3 */}
           <div className="w-full lg:w-[280px] flex-shrink-0 flex flex-col gap-2">
             {top3[0] && (
-              <Link href={`/${top3[0].username}`} className="block flex-[1.2] relative overflow-hidden cut-sm group" style={{ minHeight: '120px' }}>
+              <Link href={`/${top3[0].username}`} className="block flex-[1.2] relative overflow-hidden cut-sm group" style={{ minHeight: '120px', background: 'rgba(8,12,22,0.35)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid rgba(255,215,0,0.15)' }}>
                 <div className="absolute inset-0 transition-transform duration-500 group-hover:scale-105" style={{
                   backgroundImage: `url(${getPublicAvatarUrl(top3[0].username, top3[0].avatarUrl)})`,
                   backgroundSize: 'cover', backgroundPosition: 'center 20%',
@@ -318,7 +318,7 @@ export function LeaderboardTable({
             )}
             <div className="flex gap-2 flex-1">
               {[top3[1], top3[2]].map((t, idx) => t && (
-                <Link key={t.username} href={`/${t.username}`} className="block flex-1 relative overflow-hidden cut-sm group" style={{ minHeight: '100px' }}>
+                <Link key={t.username} href={`/${t.username}`} className="block flex-1 relative overflow-hidden cut-sm group" style={{ minHeight: '100px', background: 'rgba(8,12,22,0.35)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: `1px solid ${idx === 0 ? 'rgba(192,192,192,0.12)' : 'rgba(205,127,50,0.12)'}` }}>
                   <div className="absolute inset-0 transition-transform duration-500 group-hover:scale-105" style={{
                     backgroundImage: `url(${getPublicAvatarUrl(t.username, t.avatarUrl)})`,
                     backgroundSize: 'cover', backgroundPosition: 'center 20%',
@@ -350,7 +350,7 @@ export function LeaderboardTable({
 
           {/* RIGHT — List #4+ */}
           <div className="flex-1 min-w-0 flex flex-col">
-            <div className="flex items-center px-3 py-2 text-[7px] font-mono tracking-[2px] text-[#333]" style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+            <div className="flex items-center px-3 py-2 text-[7px] font-mono tracking-[2px] text-[#333]" style={{ background: 'rgba(8,12,22,0.35)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
               <span className="w-[22px]">#</span>
               <span className="w-[28px]" />
               <span className="flex-1 pl-2">{mode === 'traders' ? 'TRADER' : 'DEV'}</span>
@@ -360,7 +360,7 @@ export function LeaderboardTable({
             {rest.map((t) => (
               <Link key={t.username} href={`/${t.username}`}
                 className="flex items-center px-3 py-2.5 transition-colors hover:bg-[rgba(0,212,255,0.03)]"
-                style={{ borderBottom: '1px solid rgba(255,255,255,0.02)', textDecoration: 'none' }}>
+                style={{ background: 'rgba(8,12,22,0.25)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', borderBottom: '1px solid rgba(255,255,255,0.02)', textDecoration: 'none' }}>
                 <span className="w-[22px] font-mono text-[11px] font-bold text-[#444]">{t.rank}</span>
                 <div className="w-[28px] h-[28px] rounded-full overflow-hidden flex-shrink-0" style={{ border: '1.5px solid rgba(255,255,255,0.08)' }}>
                   <AvatarImage src={getPublicAvatarUrl(t.username, t.avatarUrl)} alt={t.displayName} width={28} height={28} className="w-full h-full object-cover" />

@@ -4,7 +4,7 @@ import { getSessionUser } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(req: Request) {
+export async function GET() {
   try {
     const session = await getSessionUser();
     if (!session) {
@@ -100,7 +100,7 @@ export async function GET(req: Request) {
   }
 }
 
-export async function POST(req: Request) {
+export async function POST() {
   try {
     const session = await getSessionUser();
     if (!session) {
