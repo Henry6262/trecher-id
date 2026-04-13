@@ -35,6 +35,7 @@ model User {
   pinnedTrades     PinnedTrade[]
   rankings         UserRanking[]
   tokenDeployments TokenDeployment[]
+  deployerSnapshot DeployerSnapshot?
 
   // Cup tournament participation
   cupParticipations CupParticipant[]
@@ -223,6 +224,27 @@ model TokenDeployment {
 
   @@index([userId])
   @@index([walletAddress])
+}
+
+model DeployerSnapshot {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  walletAddress    String   @unique
+  source           String   @default("dune")
+  sourceQueryId    Int?
+  totalDeployed    Int
+  totalMigrated    Int
+  graduationRate   Float    @default(0)
+  tokens7d         Int      @default(0)
+  tokens30d        Int      @default(0)
+  validationStatus String   @default("valid")
+  validationReason String?
+  syncedAt         DateTime @default(now())
+  rawPayload       Json?
+
+  @@index([totalMigrated, tokens7d, totalDeployed])
+  @@index([validationStatus, syncedAt])
 }
 
 model Referral {

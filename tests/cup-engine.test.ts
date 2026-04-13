@@ -12,10 +12,13 @@
  * 8. Edge cases and error handling
  */
 
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { loadEnvConfig } from '@next/env';
+import { describe, it, expect, afterAll } from 'vitest';
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import pg from 'pg';
+import fs from 'fs';
+import path from 'path';
 import {
   createSeason,
   getSeason,
@@ -25,7 +28,6 @@ import {
   drawGroups,
   createKnockoutRound,
   getParticipantPnlInWindow,
-  refreshLiveMatches,
   advanceRound,
   setupPrizeDistribution,
   type CreateSeasonInput,
@@ -35,9 +37,33 @@ import {
 // TEST DATABASE SETUP
 // ──────────────────────────────────────────────────────────────
 
+loadEnvConfig(process.cwd(), true);
+
+function getDatabaseUrl() {
+  if (process.env.DATABASE_URL) return process.env.DATABASE_URL;
+
+  for (const filename of ['.env.local', '.env']) {
+    const filePath = path.join(process.cwd(), filename);
+    if (!fs.existsSync(filePath)) continue;
+
+    const content = fs.readFileSync(filePath, 'utf8');
+    const match = content.match(/^DATABASE_URL="?([^\n"]+)"?\s*$/m);
+    if (match?.[1]) {
+      return match[1].trim();
+    }
+  }
+
+  return undefined;
+}
+
+const testDatabaseUrl = getDatabaseUrl();
+if (!testDatabaseUrl) {
+  throw new Error('DATABASE_URL is not set for tests');
+}
+
 const prisma = new PrismaClient({
   adapter: new PrismaPg(new pg.Pool({
-    connectionString: process.env.DATABASE_URL,
+    connectionString: testDatabaseUrl,
   })),
 });
 
@@ -236,7 +262,7 @@ describe('Qualification Engine', () => {
     const endDate = now;
 
     // Create 40 test users with wallets and trades
-    const testUsers = await Promise.all(
+    await Promise.all(
       Array.from({ length: 40 }, async (_, i) => {
         const user = await createTestUser(`qualifier_${i}`, `Qualifier ${i}`);
         const wallet = await createTestWallet(user.id, `0xTestWallet_${i}_${Date.now()}`);
@@ -381,7 +407,7 @@ describe('Season Population', () => {
     CLEANUP_SEASON.push(season.id);
 
     // Create exactly 32 users with wallets and trades
-    const testUsers = await Promise.all(
+    await Promise.all(
       Array.from({ length: 32 }, async (_, i) => {
         const user = await createTestUser(`pop_${i}`, `Pop ${i}`);
         const wallet = await createTestWallet(user.id, `0xPopWallet_${i}_${Date.now()}`);
@@ -743,7 +769,7 @@ describe('Round Advancement', () => {
 
     expect(result.season.status).toBe('r16');
     expect(result.nextMatches).toBeDefined();
-    expect((result.nextMatches as any[]).length).toBe(8);
+    expect(result.nextMatches).toHaveLength(8);
   });
 });
 

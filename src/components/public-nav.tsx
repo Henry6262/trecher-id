@@ -281,7 +281,7 @@ export function PublicNav() {
           flex-direction: column;
           align-items: center;
           gap: 10px;
-          pointer-events: auto;
+          pointer-events: none;
         }
 
         .web3me-nav-combo {
@@ -290,6 +290,7 @@ export function PublicNav() {
           align-items: center;
           justify-content: center;
           min-height: 80px;
+          pointer-events: auto;
         }
 
         .web3me-nav-pill {

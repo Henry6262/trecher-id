@@ -47,11 +47,13 @@ interface ReferralSummary {
 const ICON_OPTIONS = [
   { key: 'default', label: '🔗 Link' },
   { key: 'twitter', label: '🐦 Twitter' },
+  { key: 'bluesky', label: '🦋 Bluesky' },
   { key: 'twitch', label: '📺 Twitch' },
   { key: 'discord', label: '💬 Discord' },
   { key: 'telegram', label: '💬 Telegram' },
   { key: 'youtube', label: '▶️ YouTube' },
   { key: 'instagram', label: '📸 Instagram' },
+  { key: 'tiktok', label: '🎵 TikTok' },
   { key: 'github', label: '💻 GitHub' },
   { key: 'game', label: '🎮 Gaming' },
   { key: 'globe', label: '🌐 Website' },

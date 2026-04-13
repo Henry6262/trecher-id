@@ -28,6 +28,7 @@ export function GroupCard({ group }: { group: Group }) {
       </div>
 
       {/* Trader rows */}
+      <div className="relative z-10">
       {group.traders.map((trader, i) => {
         const qualified = i < 2;
         return (
@@ -83,6 +84,7 @@ export function GroupCard({ group }: { group: Group }) {
           </Link>
         );
       })}
+      </div>
     </div>
   );
 }

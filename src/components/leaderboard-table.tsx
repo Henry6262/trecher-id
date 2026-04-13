@@ -35,12 +35,19 @@ interface RankedDeployer {
   displayName: string;
   avatarUrl: string | null;
   isClaimed?: boolean;
+  walletAddress?: string | null;
   totalDevPnlSol: number;
   totalDevPnlUsd: number;
   deployCount: number;
   migratedCount: number;
+  graduationRate: number;
+  tokens7d: number;
+  tokens30d: number;
   bestToken: string | null;
   bestTokenPnl: number;
+  validationStatus?: string;
+  validationReason?: string | null;
+  syncedAt?: string | null;
 }
 
 type LeaderboardMode = 'traders' | 'deployers';
@@ -102,8 +109,8 @@ export function LeaderboardTable({
     isClaimed: d.isClaimed,
     isCupChampion: false,
     pnlUsd: d.totalDevPnlUsd,
-    pnlSol: d.totalDevPnlSol,
-    winRate: d.deployCount > 0 ? (d.migratedCount / d.deployCount) * 100 : 0,
+    pnlSol: d.migratedCount,
+    winRate: d.graduationRate,
     trades: d.deployCount,
   })), [deployers]);
   const deployerByUsername = useMemo(
@@ -221,10 +228,10 @@ export function LeaderboardTable({
 
       <div className="mb-6 flex flex-wrap items-center gap-2 text-[11px] font-mono tracking-[1.5px] text-[var(--trench-text-muted)]">
         <span className="cut-xs px-2.5 py-1" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
-          {mode === 'traders' ? 'REALIZED PNL RANKING' : 'TOTAL DEV PNL RANKING'}
+          {mode === 'traders' ? 'REALIZED PNL RANKING' : 'DUNE DEPLOYER RANKING'}
         </span>
         <span className="cut-xs px-2.5 py-1" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
-          {mode === 'traders' ? 'INDEXED WALLET AGGREGATES' : 'MIGRATIONS + DEPLOY COUNT'}
+          {mode === 'traders' ? 'INDEXED WALLET AGGREGATES' : 'VALIDATED SNAPSHOT + LOCAL ENRICHMENT'}
         </span>
       </div>
 
@@ -295,10 +302,17 @@ export function LeaderboardTable({
                       BEST: ${deployerByUsername.get(top3[0].username)?.bestToken}
                     </div>
                   )}
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[24px] font-black font-mono" style={{ color: top3[0].pnlSol >= 0 ? '#22c55e' : '#ef4444', textShadow: '0 0 16px rgba(34,197,94,0.3)' }}>{top3[0].pnlSol >= 0 ? '+' : ''}{Math.round(top3[0].pnlSol)}</span>
-                    <Image src="/sol.png" alt="SOL" width={18} height={18} className="h-[18px] w-auto" />
-                  </div>
+                  {mode === 'traders' ? (
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[24px] font-black font-mono" style={{ color: top3[0].pnlSol >= 0 ? '#22c55e' : '#ef4444', textShadow: '0 0 16px rgba(34,197,94,0.3)' }}>{top3[0].pnlSol >= 0 ? '+' : ''}{Math.round(top3[0].pnlSol)}</span>
+                      <Image src="/sol.png" alt="SOL" width={18} height={18} className="h-[18px] w-auto" />
+                    </div>
+                  ) : (
+                    <div>
+                      <div className="text-[24px] font-black font-mono text-white">{deployerByUsername.get(top3[0].username)?.migratedCount ?? 0}</div>
+                      <div className="text-[8px] font-mono tracking-[2px] text-[rgba(255,255,255,0.45)]">MIGRATED</div>
+                    </div>
+                  )}
                 </div>
               </Link>
             )}
@@ -315,10 +329,16 @@ export function LeaderboardTable({
                   <div className="relative z-1 h-full flex flex-col justify-end p-3">
                     <div className="text-[7px] tracking-[2px] font-mono mb-1" style={{ color: idx === 0 ? '#C0C0C0' : '#CD7F32' }}>{idx === 0 ? '2ND' : '3RD'}</div>
                     <div className="text-[11px] font-black text-white mb-1">@{t.username}</div>
-                    <div className="flex items-center gap-1">
-                      <span className="text-[16px] font-black font-mono" style={{ color: t.pnlSol >= 0 ? '#22c55e' : '#ef4444' }}>{t.pnlSol >= 0 ? '+' : ''}{Math.round(t.pnlSol)}</span>
-                      <Image src="/sol.png" alt="SOL" width={13} height={13} className="h-[13px] w-auto" />
-                    </div>
+                    {mode === 'traders' ? (
+                      <div className="flex items-center gap-1">
+                        <span className="text-[16px] font-black font-mono" style={{ color: t.pnlSol >= 0 ? '#22c55e' : '#ef4444' }}>{t.pnlSol >= 0 ? '+' : ''}{Math.round(t.pnlSol)}</span>
+                        <Image src="/sol.png" alt="SOL" width={13} height={13} className="h-[13px] w-auto" />
+                      </div>
+                    ) : (
+                      <div className="text-[15px] font-black font-mono text-white">
+                        {deployerByUsername.get(t.username)?.migratedCount ?? Math.round(t.pnlSol)}
+                      </div>
+                    )}
                   </div>
                 </Link>
               ))}
@@ -334,8 +354,8 @@ export function LeaderboardTable({
               <span className="w-[22px]">#</span>
               <span className="w-[28px]" />
               <span className="flex-1 pl-2">{mode === 'traders' ? 'TRADER' : 'DEV'}</span>
-              <span className="w-[52px] text-right hidden sm:block">{mode === 'traders' ? 'WR' : 'DEP'}</span>
-              <span className="w-[80px] text-right">PNL</span>
+              <span className="w-[52px] text-right hidden sm:block">{mode === 'traders' ? 'WR' : 'GR%'}</span>
+              <span className="w-[80px] text-right">{mode === 'traders' ? 'PNL' : 'MIG'}</span>
             </div>
             {rest.map((t) => (
               <Link key={t.username} href={`/${t.username}`}
@@ -358,11 +378,17 @@ export function LeaderboardTable({
                 <span className="w-[52px] text-right font-mono text-[10px] text-[#555] hidden sm:block">
                   {mode === 'traders'
                     ? `${Math.round(t.winRate)}%`
-                    : String(deployerByUsername.get(t.username)?.deployCount ?? t.trades)}
+                    : `${Math.round(deployerByUsername.get(t.username)?.graduationRate ?? t.winRate)}%`}
                 </span>
                 <div className="w-[80px] flex items-center justify-end gap-1">
-                  <span className="font-mono text-[13px] font-black" style={{ color: t.pnlSol >= 0 ? '#22c55e' : '#ef4444' }}>{t.pnlSol >= 0 ? '+' : ''}{Math.round(t.pnlSol)}</span>
-                  <Image src="/sol.png" alt="SOL" width={12} height={12} className="h-[12px] w-auto" />
+                  {mode === 'traders' ? (
+                    <>
+                      <span className="font-mono text-[13px] font-black" style={{ color: t.pnlSol >= 0 ? '#22c55e' : '#ef4444' }}>{t.pnlSol >= 0 ? '+' : ''}{Math.round(t.pnlSol)}</span>
+                      <Image src="/sol.png" alt="SOL" width={12} height={12} className="h-[12px] w-auto" />
+                    </>
+                  ) : (
+                    <span className="font-mono text-[13px] font-black text-white">{deployerByUsername.get(t.username)?.migratedCount ?? Math.round(t.pnlSol)}</span>
+                  )}
                 </div>
               </Link>
             ))}
