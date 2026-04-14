@@ -362,7 +362,7 @@ export function LeaderboardTable({
                 style={{ background: 'rgba(8,12,22,0.25)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', borderBottom: '1px solid rgba(255,255,255,0.02)', textDecoration: 'none' }}>
                 <span className="w-[22px] font-mono text-[11px] font-bold text-[#444]">{t.rank}</span>
                 <div className="w-[28px] h-[28px] rounded-full overflow-hidden flex-shrink-0" style={{ border: '1.5px solid rgba(255,255,255,0.08)' }}>
-                  <AvatarImage src={getPublicAvatarUrl(t.username, t.avatarUrl)} alt={t.displayName} width={28} height={28} className="w-full h-full object-cover" />
+                  <AvatarImage src={getPublicAvatarUrl(t.username, t.avatarUrl, { isDeployer: mode === 'deployers' })} alt={t.displayName} width={28} height={28} className="w-full h-full object-cover" />
                 </div>
                 <div className="flex-1 min-w-0 pl-2">
                   <span className="block text-[12px] font-semibold text-white truncate">

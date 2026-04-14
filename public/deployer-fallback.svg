@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
+  <rect width="128" height="128" fill="#0A0E16"/>
+  <!-- Chef hat -->
+  <g transform="translate(64,48)">
+    <!-- Hat top puffs -->
+    <ellipse cx="-18" cy="-16" rx="16" ry="14" fill="#1a2332" stroke="#00D4FF" stroke-width="1.5" opacity="0.8"/>
+    <ellipse cx="0" cy="-22" rx="18" ry="16" fill="#1a2332" stroke="#00D4FF" stroke-width="1.5" opacity="0.9"/>
+    <ellipse cx="18" cy="-16" rx="16" ry="14" fill="#1a2332" stroke="#00D4FF" stroke-width="1.5" opacity="0.8"/>
+    <!-- Hat band -->
+    <rect x="-28" y="-6" width="56" height="14" rx="3" fill="#1a2332" stroke="#00D4FF" stroke-width="1.5"/>
+    <!-- Face circle -->
+    <circle cx="0" cy="16" r="16" fill="#0d1520" stroke="#00D4FF" stroke-width="1.5" opacity="0.6"/>
+  </g>
+</svg>

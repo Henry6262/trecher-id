@@ -172,8 +172,7 @@ function CupCountdown({ label, endDate }: { label: string; endDate: Date }) {
     <div className="text-center">
       <div className="text-[8px] font-mono tracking-[2px] text-[var(--trench-text-muted)] mb-1">{label}</div>
       <div
-        className="text-[16px] sm:text-[18px] font-mono font-black leading-none"
-        style={{ color: timeLeft === 'LIVE' ? '#22c55e' : '#00D4FF' }}
+        className="text-[16px] sm:text-[18px] font-mono font-black leading-none text-white"
       >
         {timeLeft || '—'}
       </div>
@@ -587,7 +586,7 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
                 waveAmount={0.3}
                 blur={8}
                 opacity={1.0}
-                borderRadius="16px"
+                borderRadius="0"
               >
                 <PreviewCardCarousel profiles={featuredProfiles} />
               </ShaderCard>

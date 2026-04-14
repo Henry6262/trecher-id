@@ -114,7 +114,8 @@ export default async function LeaderboardPage() {
 
           <section
             id="trencher-cup"
-            className="cut-sm border border-[rgba(0,212,255,0.08)] bg-[rgba(8,12,18,0.62)] px-4 py-6 sm:px-6 sm:py-8"
+            className="cut-sm border border-[rgba(0,212,255,0.08)] px-4 py-6 sm:px-6 sm:py-8"
+            style={{ background: 'rgba(8,12,18,0.35)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
           >
             <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div>

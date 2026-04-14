@@ -159,7 +159,7 @@ main.sphere-main {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--viewer-pad);
+  padding: 0;
 }
 
 .viewer .frame {

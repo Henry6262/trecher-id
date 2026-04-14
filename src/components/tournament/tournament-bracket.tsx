@@ -38,13 +38,16 @@ export function TournamentBracket({ traders }: { traders: RankedTrader[] }) {
       {/* Champion banner */}
       {champ && (
         <div
-          className="cut-sm flex items-center gap-4 px-5 py-4"
+          className="cut-sm flex items-center justify-between px-5 py-4"
           style={{
-            background: 'linear-gradient(90deg, rgba(255,215,0,0.06) 0%, rgba(8,12,18,0.85) 100%)',
+            background: 'linear-gradient(90deg, rgba(255,215,0,0.04) 0%, rgba(8,12,18,0.4) 100%)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
             border: '1px solid rgba(255,215,0,0.14)',
           }}
         >
-          <div className="relative h-14 w-11 flex-shrink-0">
+          {/* LEFT — Trophy icon */}
+          <div className="relative h-16 w-12 flex-shrink-0">
             <Image
               src="/trencher-cup.png"
               alt="Trencher Cup"
@@ -53,35 +56,31 @@ export function TournamentBracket({ traders }: { traders: RankedTrader[] }) {
               style={{ filter: 'drop-shadow(0 0 12px rgba(0,212,255,0.35))' }}
             />
           </div>
-          <div className="min-w-0 flex-1">
-            <div className="text-[9px] font-mono tracking-[3px] text-[var(--trench-text-muted)] mb-1">
-              SEASON 1 CHAMPION
+
+          {/* MIDDLE — Winner avatar + username + PnL */}
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            <div
+              className="h-10 w-10 rounded-full overflow-hidden flex-shrink-0"
+              style={{ border: '2px solid rgba(255,215,0,0.5)' }}
+            >
+              <AvatarImage
+                src={getPublicAvatarUrl(champ.username, champ.avatarUrl)}
+                alt={champ.username}
+                width={40}
+                height={40}
+                className="h-full w-full object-cover"
+              />
             </div>
-            <div className="flex items-center gap-2">
-              <div
-                className="h-7 w-7 overflow-hidden rounded-full flex-shrink-0"
-                style={{ border: '1.5px solid rgba(255,215,0,0.5)' }}
-              >
-                <AvatarImage
-                  src={getPublicAvatarUrl(champ.username, champ.avatarUrl)}
-                  alt={champ.username}
-                  width={28}
-                  height={28}
-                  className="h-full w-full object-cover"
-                />
-              </div>
-              <span className="text-[15px] font-bold text-white">@{champ.username}</span>
-              <span
-                className="text-[13px] font-mono font-bold"
-                style={{ color: '#7FE17B' }}
-              >
-                {champ.pnlUsd >= 0 ? '+' : ''}$
-                {Math.abs(champ.pnlUsd) >= 1000
-                  ? `${Math.round(champ.pnlUsd / 1000)}K`
-                  : Math.round(champ.pnlUsd)}
-              </span>
-            </div>
+            <span className="text-[14px] font-bold text-white truncate">@{champ.username}</span>
+            <span
+              className="text-[16px] font-mono font-bold flex-shrink-0"
+              style={{ color: '#7FE17B' }}
+            >
+              {champ.pnlUsd >= 0 ? '+' : ''}${Math.round(Math.abs(champ.pnlUsd) >= 1000 ? champ.pnlUsd / 1000 : Math.abs(champ.pnlUsd))}{Math.abs(champ.pnlUsd) >= 1000 ? 'K' : ''}
+            </span>
           </div>
+
+          {/* RIGHT — CTA */}
           <div className="hidden sm:flex flex-col items-center gap-1 text-center flex-shrink-0">
             <div className="text-[9px] font-mono tracking-[2px] text-[rgba(0,212,255,0.7)]">
               JOIN THE NEXT BRACKET

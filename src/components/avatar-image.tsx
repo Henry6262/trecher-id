@@ -12,9 +12,11 @@ interface AvatarImageProps {
   className?: string;
   fallbackSrc?: string;
   priority?: boolean;
+  isDeployer?: boolean;
 }
 
 const DEFAULT_FALLBACK_SRC = '/avatar-fallback.svg';
+const DEPLOYER_FALLBACK_SRC = '/deployer-fallback.svg';
 
 export function AvatarImage({
   src,
@@ -24,18 +26,20 @@ export function AvatarImage({
   className,
   fallbackSrc = DEFAULT_FALLBACK_SRC,
   priority,
+  isDeployer,
 }: AvatarImageProps) {
+  const resolvedFallback = isDeployer ? DEPLOYER_FALLBACK_SRC : fallbackSrc;
   const normalizedSrc = normalizeImageUrl(src);
 
   return (
     <AvatarImageInner
-      key={normalizedSrc ?? fallbackSrc}
-      src={normalizedSrc ?? fallbackSrc}
+      key={normalizedSrc ?? resolvedFallback}
+      src={normalizedSrc ?? resolvedFallback}
       alt={alt}
       width={width}
       height={height}
       className={className}
-      fallbackSrc={fallbackSrc}
+      fallbackSrc={resolvedFallback}
       priority={priority}
     />
   );

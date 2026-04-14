@@ -9,7 +9,9 @@ export function GroupCard({ group }: { group: Group }) {
   return (
     <div
       style={{
-        background: 'rgba(8,12,18,0.9)',
+        background: 'rgba(8,12,18,0.4)',
+        backdropFilter: 'blur(14px)',
+        WebkitBackdropFilter: 'blur(14px)',
         border: '1px solid rgba(0,212,255,0.1)',
         clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)',
       }}
@@ -17,7 +19,7 @@ export function GroupCard({ group }: { group: Group }) {
       {/* Header */}
       <div
         className="flex items-center justify-between px-4 py-2.5"
-        style={{ background: 'rgba(0,212,255,0.04)', borderBottom: '1px solid rgba(0,212,255,0.08)' }}
+        style={{ background: 'rgba(0,212,255,0.06)', borderBottom: '1px solid rgba(0,212,255,0.08)' }}
       >
         <span className="text-[11px] font-mono tracking-[2px] text-[#00D4FF]">
           GROUP {group.name}
@@ -40,7 +42,9 @@ export function GroupCard({ group }: { group: Group }) {
               height: 56,
               opacity: qualified ? 1 : 0.58,
               borderLeft: qualified ? '3px solid #00D4FF' : '3px solid transparent',
-              background: qualified ? 'rgba(0,212,255,0.04)' : 'transparent',
+              background: qualified ? 'rgba(0,212,255,0.05)' : 'transparent',
+              backdropFilter: qualified ? 'blur(6px)' : undefined,
+              WebkitBackdropFilter: qualified ? 'blur(6px)' : undefined,
             }}
           >
             {/* Position */}

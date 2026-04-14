@@ -21,7 +21,7 @@ export async function fetchFxTwitterProfile(username: string): Promise<FxTwitter
 
     return {
       followerCount: user.followers ?? user.followers_count ?? null,
-      avatarUrl: user.avatar_url ?? null,
+      avatarUrl: (user.avatar_url ?? null)?.replace('_normal', '_400x400') ?? null,
       bannerUrl: user.banner_url ?? null,
     };
   } catch {

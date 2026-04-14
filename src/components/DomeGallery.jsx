@@ -135,7 +135,7 @@ export default function DomeGallery({
   openedImageWidth = '250px',
   openedImageHeight = '350px',
   imageBorderRadius = '0',
-  openedImageBorderRadius = '0',
+  openedImageBorderRadius = '8px',
   grayscale = true
 }) {
   const rootRef = useRef(null);

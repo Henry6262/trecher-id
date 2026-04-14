@@ -61,10 +61,18 @@ export function hasStrongAvatarUrl(url?: string | null) {
   return !isWeakAvatarUrl(url);
 }
 
-export function getPublicAvatarUrl(username: string, avatarUrl?: string | null) {
+export function getPublicAvatarUrl(username: string, avatarUrl?: string | null, options?: { isDeployer?: boolean }) {
   const normalized = normalizeImageUrl(avatarUrl);
-  if (normalized && !isWeakAvatarUrl(normalized)) {
+  const isWeak = isWeakAvatarUrl(normalized);
+
+  if (normalized && !isWeak) {
     return normalized;
   }
+
+  // Deployers without PFPs get the chef icon
+  if (options?.isDeployer) {
+    return '/deployer-fallback.svg';
+  }
+
   return buildGeneratedAvatar(username);
 }
