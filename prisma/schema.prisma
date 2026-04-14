@@ -240,11 +240,39 @@ model DeployerSnapshot {
   tokens30d        Int      @default(0)
   validationStatus String   @default("valid")
   validationReason String?
+  enrichmentStatus String   @default("pending")
+  enrichmentError  String?
+  lastEnrichedAt   DateTime?
+  localDeploymentCount Int  @default(0)
   syncedAt         DateTime @default(now())
   rawPayload       Json?
 
   @@index([totalMigrated, tokens7d, totalDeployed])
   @@index([validationStatus, syncedAt])
+  @@index([enrichmentStatus, syncedAt])
+}
+
+model DeployerSyncAudit {
+  id                  String   @id @default(cuid())
+  source              String   @default("dune")
+  status              String
+  attemptedAt         DateTime
+  completedAt         DateTime?
+  limit               Int?
+  skipEnrichment      Boolean  @default(false)
+  deployersFetched    Int      @default(0)
+  deployersValid      Int      @default(0)
+  deployersInvalid    Int      @default(0)
+  usersCreated        Int      @default(0)
+  usersUpdated        Int      @default(0)
+  enrichmentsSucceeded Int     @default(0)
+  enrichmentsFailed   Int      @default(0)
+  snapshotWarnings    Int      @default(0)
+  error               String?
+  createdAt           DateTime @default(now())
+
+  @@index([attemptedAt])
+  @@index([status, attemptedAt])
 }
 
 model Referral {

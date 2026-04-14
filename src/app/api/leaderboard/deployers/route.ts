@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { resolveAvatarRows } from '@/lib/avatar-resolution';
+import { getDeployerFreshnessStatus, getTradeSyncStatus } from '@/lib/deployer-sync-health';
 
 type DeploymentSummary = {
   tokenSymbol: string;
@@ -39,17 +40,28 @@ function mapSnapshotRows(rows: Array<{
   tokens30d: number;
   validationStatus: string;
   validationReason: string | null;
+  enrichmentStatus: string;
+  localDeploymentCount: number;
   syncedAt: Date;
   user: {
     username: string;
     displayName: string;
     avatarUrl: string | null;
     isClaimed: boolean;
+    wallets: Array<{
+      address: string;
+      lastSuccessfulSyncAt: Date | null;
+      lastSyncStatus: string | null;
+    }>;
     tokenDeployments: DeploymentSummary[];
   };
 }>) {
   return rows.map((row) => {
     const deployments = row.user.tokenDeployments;
+    const syncedWallet =
+      row.user.wallets.find((wallet) => wallet.address === row.walletAddress) ??
+      row.user.wallets[0] ??
+      null;
     const totalDevPnlSol = deployments.reduce((sum, deployment) => sum + (deployment.devPnlSol ?? 0), 0);
     const totalDevPnlUsd = deployments.reduce((sum, deployment) => sum + (deployment.devPnlUsd ?? 0), 0);
     const bestDeployment = pickBestDeployment(deployments);
@@ -71,6 +83,12 @@ function mapSnapshotRows(rows: Array<{
       bestTokenPnl: bestDeployment?.devPnlSol ?? 0,
       validationStatus: row.validationStatus,
       validationReason: row.validationReason,
+      enrichmentStatus: row.enrichmentStatus,
+      localDeploymentCount: row.localDeploymentCount,
+      freshnessStatus: getDeployerFreshnessStatus(row.syncedAt),
+      tradeSyncStatus: getTradeSyncStatus(syncedWallet?.lastSuccessfulSyncAt ?? null),
+      tradeSyncLastSuccessfulAt: syncedWallet?.lastSuccessfulSyncAt?.toISOString() ?? null,
+      tradeSyncLastStatus: syncedWallet?.lastSyncStatus ?? null,
       syncedAt: row.syncedAt.toISOString(),
     };
   });
@@ -88,12 +106,19 @@ async function getDuneRankedDeployers(limit: number, offset: number) {
         tokens30d: number;
         validationStatus: string;
         validationReason: string | null;
+        enrichmentStatus: string;
+        localDeploymentCount: number;
         syncedAt: Date;
         user: {
           username: string;
           displayName: string;
           avatarUrl: string | null;
           isClaimed: boolean;
+          wallets: Array<{
+            address: string;
+            lastSuccessfulSyncAt: Date | null;
+            lastSyncStatus: string | null;
+          }>;
           tokenDeployments: DeploymentSummary[];
         };
       }>>;
@@ -111,6 +136,13 @@ async function getDuneRankedDeployers(limit: number, offset: number) {
           displayName: true,
           avatarUrl: true,
           isClaimed: true,
+          wallets: {
+            select: {
+              address: true,
+              lastSuccessfulSyncAt: true,
+              lastSyncStatus: true,
+            },
+          },
           tokenDeployments: {
             select: {
               tokenSymbol: true,
@@ -187,6 +219,12 @@ async function getLegacyDeployers(limit: number, offset: number) {
       bestTokenPnl: bestDeployment?.devPnlSol ?? 0,
       validationStatus: 'legacy',
       validationReason: 'fallback_token_deployments_only',
+      enrichmentStatus: 'legacy',
+      localDeploymentCount: user._count.tokenDeployments,
+      freshnessStatus: 'legacy',
+      tradeSyncStatus: 'legacy',
+      tradeSyncLastSuccessfulAt: null,
+      tradeSyncLastStatus: null,
       syncedAt: null,
     };
   });

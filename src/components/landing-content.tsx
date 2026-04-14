@@ -533,33 +533,35 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
         <ActivityTicker items={ticker} />
 
         {/* Hero */}
-        <section id="hero" className="mx-auto grid max-w-[1000px] scroll-mt-36 grid-cols-1 md:grid-cols-2 items-center gap-6 sm:gap-8 px-4 pt-10 pb-8 sm:pt-14 sm:pb-10 sm:px-6 lg:pt-16 lg:pb-12">
+        <section id="hero" className="mx-auto grid max-w-[1000px] scroll-mt-36 grid-cols-1 md:grid-cols-2 items-center gap-4 sm:gap-6 px-4 pt-10 pb-8 sm:pt-14 sm:pb-10 sm:px-6 lg:pt-16 lg:pb-12">
           <div>
             <div className="cut-xs mb-4 sm:mb-6 inline-flex items-center gap-1.5 border border-[rgba(0,212,255,0.12)] bg-[rgba(0,212,255,0.08)] px-2.5 py-1 sm:px-3 text-[8px] sm:text-[10px] font-mono tracking-[2px] text-[var(--trench-accent)]">
               <Check size={8} strokeWidth={3} className="sm:w-[10px] sm:h-[10px]" />
               <ShinyText text="ON-CHAIN VERIFIED" speed={3} />
             </div>
 
-            <h1 className="mb-3 sm:mb-4 text-3xl sm:text-4xl md:text-5xl lg:text-6xl leading-[1] font-bold tracking-tight text-white">
-              Your{' '}
-              <span className="text-[var(--trench-accent)]">
-                <span className="relative inline-block" style={{ width: '0.35em', verticalAlign: 'baseline' }}>
+            <h1 className="mb-4 sm:mb-5 text-5xl sm:text-6xl md:text-7xl lg:text-8xl leading-[1.0] font-black tracking-tight text-white">
+              <span className="flex items-center gap-3 sm:gap-4 flex-wrap">
+                <span>Your</span>
+                <span className="relative inline-block" style={{ width: '1.05em', height: '0.8em' }}>
                   <Image
                     src="/logo.png"
-                    alt=""
-                    width={100}
-                    height={28}
-                    className="!max-w-none absolute"
-                    style={{ width: '2.5em', height: 'auto', top: '50%', left: -4, transform: 'translateY(-50%)', filter: 'drop-shadow(0 0 8px rgba(0,212,255,0.3))' }}
+                    alt="Web3Me"
+                    fill
+                    className="object-contain"
+                    style={{ filter: 'drop-shadow(0 0 14px rgba(0,212,255,0.55))' }}
                   />
-                  <span style={{ visibility: 'hidden' }}>W</span>
-                </span>eb3
+                </span>
+                <span className="text-[var(--trench-accent)]">ID</span>
               </span>
-              <br />Bio Link
             </h1>
 
+            <p className="mb-3 sm:mb-4 text-base sm:text-lg font-semibold text-white leading-snug max-w-sm">
+              The trading identity the trenches deserve.
+            </p>
+
             <p className="mb-6 sm:mb-8 max-w-sm text-[13px] sm:text-sm leading-relaxed text-[var(--trench-text-muted)]">
-              The landing surface for Web3Me. Check the rankings, inspect the Trencher Cup, then jump into your dashboard to connect wallets and set up your trading identity.
+              Your Solana PnL, verified on-chain and displayed in one shareable link. Compete in the Trencher Cup — 32 traders, one champion, real money on the line.
             </p>
 
             <div className="flex flex-wrap items-center gap-3">
@@ -570,10 +572,10 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
 
           {/* Preview card — shader-backed profile card — only shows in 2-col mode */}
           {featuredProfiles.length > 0 && (
-            <div className="hidden md:flex justify-center md:justify-end">
+            <div className="hidden lg:flex justify-end overflow-hidden" style={{ minWidth: 0 }}>
               <ShaderCard
-                width={420}
-                height={480}
+                width={440}
+                height={520}
                 color="#00D4FF"
                 speed={0.6}
                 positionY={0.35}
@@ -585,7 +587,6 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
                 waveAmount={0.3}
                 blur={8}
                 opacity={1.0}
-                className="rounded-2xl shadow-[0_0_40px_rgba(0,212,255,0.12),0_8px_32px_rgba(0,0,0,0.5)] border border-[rgba(0,212,255,0.2)]"
                 borderRadius="16px"
               >
                 <PreviewCardCarousel profiles={featuredProfiles} />

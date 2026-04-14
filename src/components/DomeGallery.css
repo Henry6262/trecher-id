@@ -88,7 +88,7 @@ main.sphere-main {
   position: absolute;
   display: block;
   inset: 10px;
-  border-radius: 0;
+  border-radius: 0 !important;
   background: transparent;
   overflow: hidden;
   backface-visibility: hidden;

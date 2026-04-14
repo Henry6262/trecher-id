@@ -277,16 +277,16 @@ export function LeaderboardTable({
           {/* LEFT — Top 3 */}
           <div className="w-full lg:w-[280px] flex-shrink-0 flex flex-col gap-2">
             {top3[0] && (
-              <Link href={`/${top3[0].username}`} className="block flex-[1.2] relative overflow-hidden cut-sm group" style={{ minHeight: '120px', background: 'rgba(8,12,22,0.35)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid rgba(255,215,0,0.15)' }}>
+              <Link href={`/${top3[0].username}`} className="block flex-[1.2] relative overflow-hidden cut-sm group" style={{ minHeight: '120px', background: 'rgba(8,12,22,0.35)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid rgba(0,212,255,0.12)' }}>
                 <div className="absolute inset-0 transition-transform duration-500 group-hover:scale-105" style={{
                   backgroundImage: `url(${getPublicAvatarUrl(top3[0].username, top3[0].avatarUrl)})`,
                   backgroundSize: 'cover', backgroundPosition: 'center 20%',
                   filter: 'brightness(0.55) saturate(1.2)',
                 }} />
                 <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(5,5,8,0) 0%, rgba(5,5,8,0.75) 50%, rgba(5,5,8,0.95) 100%)' }} />
-                <div className="absolute inset-0 border border-[rgba(255,215,0,0.25)] cut-sm pointer-events-none" />
+                <div className="absolute inset-0 pointer-events-none" style={{ boxShadow: 'inset 0 0 0 1px rgba(0,212,255,0.06)' }} />
                 <div className="relative z-1 h-full flex flex-col justify-end p-4">
-                  <div className="text-[8px] tracking-[3px] font-mono mb-1" style={{ color: '#FFD700' }}>1ST PLACE</div>
+                  <div className="text-[8px] tracking-[3px] font-mono mb-1" style={{ color: 'rgba(0,212,255,0.7)' }}>1ST PLACE</div>
                   <div className="text-[14px] font-black text-white mb-0.5">@{top3[0].username}</div>
                   <div className="text-[8px] text-[rgba(255,255,255,0.4)] mb-2">
                     {mode === 'traders'
@@ -318,16 +318,15 @@ export function LeaderboardTable({
             )}
             <div className="flex gap-2 flex-1">
               {[top3[1], top3[2]].map((t, idx) => t && (
-                <Link key={t.username} href={`/${t.username}`} className="block flex-1 relative overflow-hidden cut-sm group" style={{ minHeight: '100px', background: 'rgba(8,12,22,0.35)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: `1px solid ${idx === 0 ? 'rgba(192,192,192,0.12)' : 'rgba(205,127,50,0.12)'}` }}>
+                <Link key={t.username} href={`/${t.username}`} className="block flex-1 relative overflow-hidden cut-sm group" style={{ minHeight: '100px', background: 'rgba(8,12,22,0.35)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid rgba(0,212,255,0.08)' }}>
                   <div className="absolute inset-0 transition-transform duration-500 group-hover:scale-105" style={{
                     backgroundImage: `url(${getPublicAvatarUrl(t.username, t.avatarUrl)})`,
                     backgroundSize: 'cover', backgroundPosition: 'center 20%',
                     filter: 'brightness(0.5) saturate(1.1)',
                   }} />
                   <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(5,5,8,0.1) 0%, rgba(5,5,8,0.9) 75%)' }} />
-                  <div className="absolute inset-0 border cut-sm pointer-events-none" style={{ borderColor: idx === 0 ? 'rgba(192,192,192,0.2)' : 'rgba(205,127,50,0.2)' }} />
                   <div className="relative z-1 h-full flex flex-col justify-end p-3">
-                    <div className="text-[7px] tracking-[2px] font-mono mb-1" style={{ color: idx === 0 ? '#C0C0C0' : '#CD7F32' }}>{idx === 0 ? '2ND' : '3RD'}</div>
+                    <div className="text-[7px] tracking-[2px] font-mono mb-1" style={{ color: 'rgba(0,212,255,0.55)' }}>{idx === 0 ? '2ND' : '3RD'}</div>
                     <div className="text-[11px] font-black text-white mb-1">@{t.username}</div>
                     {mode === 'traders' ? (
                       <div className="flex items-center gap-1">
