@@ -74,5 +74,8 @@
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
+  },
+  "overrides": {
+    "utf-8-validate": "6.0.6"
   }
 }
