@@ -1,10 +1,10 @@
 /**
  * NUKE & RECALC — Delete all fake data, rebuild from Helius
  *
- * Usage: npx tsx scripts/nuke-and-recalc.ts
+ * Usage: npx tsx scripts/nuke-and-recalc.ts [--wallet=address] [--skip-nuke]
  *
  * This script:
- * 1. Deletes ALL WalletTrade, UserRanking, PinnedTrade, TokenDeployment records
+ * 1. Deletes ALL WalletTrade, UserRanking, PinnedTrade, TokenDeployment records (unless --skip-nuke)
  * 2. Resets all wallet cursors (lastSignature, lastFetchedAt)
  * 3. Resets all wallet stats (totalPnlUsd, winRate, totalTrades)
  * 4. For each wallet, fetches real transactions from Helius
@@ -105,25 +105,52 @@ function sleep(ms: number) {
 // ─── Helius fetching ────────────────────────────────────────
 
 async function fetchWithRetry(url: string, opts?: RequestInit, retries = 5): Promise<Response> {
+  let lastStatus = 0;
+  
   for (let attempt = 0; attempt < retries; attempt++) {
-    const res = await fetch(url, opts);
+    // Inject current rotating key into URL if it's a Helius URL
+    let targetUrl = url;
+    if (url.includes('api.helius.xyz') || url.includes('mainnet.helius-rpc.com')) {
+      const currentKey = nextKey();
+      const urlObj = new URL(url);
+      urlObj.searchParams.set('api-key', currentKey);
+      targetUrl = urlObj.toString();
+    }
+
+    const res = await fetch(targetUrl, opts);
+    lastStatus = res.status;
+
     if (res.status === 429) {
-      const wait = 5000 * (attempt + 1);
-      process.stdout.write(`⏳${Math.round(wait/1000)}s `);
+      const wait = 2000 * (attempt + 1);
+      process.stdout.write(`⏳${Math.round(wait/1000)}s (429) `);
       await sleep(wait);
       continue;
     }
+    
+    if (res.status === 400) {
+       // Often means the 'before' cursor is invalid or wallet doesn't exist anymore
+       return res;
+    }
+
+    if (!res.ok) {
+      const wait = 1000 * (attempt + 1);
+      process.stdout.write(`⏳${Math.round(wait/1000)}s (${res.status}) `);
+      await sleep(wait);
+      continue;
+    }
+
     return res;
   }
-  throw new Error(`Rate limited after ${retries} retries`);
+  throw new Error(`Helius API failed after ${retries} retries (last status: ${lastStatus})`);
 }
 
-async function getWalletTransactions(walletAddress: string, apiKey: string, maxPages = 30) {
+async function getWalletTransactions(walletAddress: string, maxPages = 30) {
   const allTxns: HeliusTransaction[] = [];
   let before: string | null | undefined;
 
   for (let page = 0; page < maxPages; page++) {
-    let url = `${HELIUS_BASE}/addresses/${walletAddress}/transactions?api-key=${apiKey}&limit=100`;
+    // API key will be injected by fetchWithRetry
+    let url = `${HELIUS_BASE}/addresses/${walletAddress}/transactions?limit=100`;
     if (before) url += `&before=${before}`;
 
     const res = await fetchWithRetry(url);
@@ -136,7 +163,8 @@ async function getWalletTransactions(walletAddress: string, apiKey: string, maxP
     before = txns[txns.length - 1].signature;
 
     if (txns.length < 100) break;
-    await sleep(1500);
+    // Lower sleep since we rotate keys
+    await sleep(500);
   }
 
   const newestSig = allTxns[0]?.signature || null;
@@ -294,36 +322,50 @@ async function getSolPrice(): Promise<number> {
 
 // ─── Main ───────────────────────────────────────────────────
 
+const TARGET_WALLET = process.argv.find(a => a.startsWith('--wallet='))?.split('=')[1];
+const SKIP_NUKE = process.argv.includes('--skip-nuke');
+
 async function main() {
   console.log('\n🔥 NUKE & RECALC — Replacing all fake data with real Helius data\n');
 
-  // Step 1: Nuke all fake data
-  console.log('💣 Step 1: Deleting all trade data...');
-  const deletedTrades = await prisma.walletTrade.deleteMany({});
-  console.log(`   Deleted ${deletedTrades.count} WalletTrade records`);
+  if (TARGET_WALLET) {
+    console.log(`🎯 Targeting single wallet: ${TARGET_WALLET}`);
+    // If targeting single wallet, we only delete data for that wallet
+    const wallet = await prisma.wallet.findFirst({ where: { address: TARGET_WALLET } });
+    if (wallet) {
+      console.log(`🧹 Deleting existing data for wallet ${wallet.address.slice(0, 8)}...`);
+      await prisma.walletTrade.deleteMany({ where: { walletId: wallet.id } });
+      // We don't nuke rankings or deployments for single wallet since they might overlap
+    }
+  } else if (!SKIP_NUKE) {
+    // Step 1: Nuke all fake data
+    console.log('💣 Step 1: Deleting all trade data...');
+    const deletedTrades = await prisma.walletTrade.deleteMany({});
+    console.log(`   Deleted ${deletedTrades.count} WalletTrade records`);
 
-  const deletedRankings = await prisma.userRanking.deleteMany({});
-  console.log(`   Deleted ${deletedRankings.count} UserRanking records`);
+    const deletedRankings = await prisma.userRanking.deleteMany({});
+    console.log(`   Deleted ${deletedRankings.count} UserRanking records`);
 
-  const deletedPinned = await prisma.pinnedTrade.deleteMany({});
-  console.log(`   Deleted ${deletedPinned.count} PinnedTrade records`);
+    const deletedPinned = await prisma.pinnedTrade.deleteMany({});
+    console.log(`   Deleted ${deletedPinned.count} PinnedTrade records`);
 
-  const deletedDeployments = await prisma.tokenDeployment.deleteMany({});
-  console.log(`   Deleted ${deletedDeployments.count} TokenDeployment records`);
+    const deletedDeployments = await prisma.tokenDeployment.deleteMany({});
+    console.log(`   Deleted ${deletedDeployments.count} TokenDeployment records`);
 
-  // Step 2: Reset all wallet cursors and stats
-  console.log('\n🔄 Step 2: Resetting wallet cursors and stats...');
-  await prisma.wallet.updateMany({
-    data: {
-      lastSignature: null,
-      lastFetchedAt: null,
-      totalPnlUsd: 0,
-      winRate: 0,
-      totalTrades: 0,
-    },
-  });
-  const walletCount = await prisma.wallet.count();
-  console.log(`   Reset ${walletCount} wallets`);
+    // Step 2: Reset all wallet cursors and stats
+    console.log('\n🔄 Step 2: Resetting wallet cursors and stats...');
+    await prisma.wallet.updateMany({
+      data: {
+        lastSignature: null,
+        lastFetchedAt: null,
+        totalPnlUsd: 0,
+        winRate: 0,
+        totalTrades: 0,
+      },
+    });
+    const walletCount = await prisma.wallet.count();
+    console.log(`   Reset ${walletCount} wallets`);
+  }
 
   // Step 3: Get SOL price
   const solPrice = await getSolPrice();
@@ -331,6 +373,7 @@ async function main() {
 
   // Step 4: Fetch all wallets with user info
   const wallets = await prisma.wallet.findMany({
+    where: TARGET_WALLET ? { address: TARGET_WALLET } : {},
     include: { user: true },
     orderBy: { id: 'asc' },
   });
@@ -348,8 +391,7 @@ async function main() {
 
     try {
       // Fetch transactions from Helius
-      const apiKey = nextKey();
-      const { txns, newestSignature } = await getWalletTransactions(wallet.address, apiKey, 5);
+      const { txns, newestSignature } = await getWalletTransactions(wallet.address, 5);
       process.stdout.write(`${txns.length} txns `);
 
       // Parse swaps
@@ -360,7 +402,7 @@ async function main() {
 
       // Get token metadata for swaps + deployments
       const allMints = [...swapMap.keys(), ...deployMap.keys()];
-      const metadata = allMints.length > 0 ? await getTokenMetadata([...new Set(allMints)], apiKey) : new Map();
+      const metadata = allMints.length > 0 ? await getTokenMetadata([...new Set(allMints)], nextKey()) : new Map();
 
       // Write WalletTrade records
       for (const [tokenMint, data] of swapMap) {
@@ -430,6 +472,7 @@ async function main() {
   console.log(`\n📊 Step 4: Rebuilding rankings for all users...`);
 
   const users = await prisma.user.findMany({
+    where: TARGET_WALLET ? { wallets: { some: { address: TARGET_WALLET } } } : {},
     include: { wallets: true },
   });
 
