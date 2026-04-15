@@ -6,7 +6,7 @@ interface PinnedTradeData {
   tokenSymbol: string;
   tokenName?: string | null;
   tokenImage?: string | null;
-  totalPnlPercent: number;
+  totalPnlPercent: number | null;
   totalPnlSol?: number;
   transactions: { type: 'BUY' | 'SELL'; mcap: number; amountSol: number }[];
 }

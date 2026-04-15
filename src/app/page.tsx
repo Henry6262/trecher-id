@@ -114,6 +114,7 @@ export default async function LandingPage({ searchParams }: { searchParams: Prom
         include: {
           wallets: true,
           pinnedTrades: { orderBy: [{ totalPnlPercent: 'desc' }, { totalPnlSol: 'desc' }], take: 3 },
+          tokenDeployments: { orderBy: { mcapAthUsd: 'desc' }, take: 3 },
         },
       })
     : [];
@@ -169,12 +170,23 @@ export default async function LandingPage({ searchParams }: { searchParams: Prom
             token: trade.tokenSymbol,
             tokenMint: trade.tokenMint,
             tokenImage: resolvedTokenImage,
-            pnlPercent: `${trade.totalPnlPercent >= 0 ? '+' : ''}${trade.totalPnlPercent.toFixed(0)}%`,
-            pnlPercentValue: trade.totalPnlPercent,
+            pnlPercent: trade.totalPnlPercent !== null
+              ? `${trade.totalPnlPercent >= 0 ? '+' : ''}${trade.totalPnlPercent.toFixed(0)}%`
+              : `${trade.totalPnlSol >= 0 ? '+' : ''}${trade.totalPnlSol.toFixed(1)} SOL`,
+            pnlPercentValue: trade.totalPnlPercent ?? trade.totalPnlSol,
             buy: transactions?.find((t) => t.type === 'BUY')?.amountSol.toFixed(1) ?? null,
             sell: transactions?.find((t) => t.type === 'SELL')?.amountSol.toFixed(1) ?? null,
           };
         }),
+        topDeployments: user.tokenDeployments.map((dep) => ({
+          id: dep.id,
+          tokenSymbol: dep.tokenSymbol,
+          tokenImageUrl: dep.tokenImageUrl ?? null,
+          status: dep.status,
+          mcapAthUsd: dep.mcapAthUsd ?? null,
+          devPnlSol: dep.devPnlSol ?? null,
+        })),
+        isDeployer: user.tokenDeployments.length > user.pinnedTrades.length,
       };
     })
     .filter((trader): trader is NonNullable<typeof trader> => trader !== null);

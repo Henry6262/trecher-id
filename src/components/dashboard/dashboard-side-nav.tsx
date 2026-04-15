@@ -1,10 +1,10 @@
 import Link from 'next/link';
 import type { LucideIcon } from 'lucide-react';
-import { ArrowRight, BarChart3, Link2, Palette, ShieldCheck, Sparkles, Wallet } from 'lucide-react';
+import { ArrowRight, BarChart3, Coins, Link2, Palette, ShieldCheck, Sparkles, Wallet } from 'lucide-react';
 import { GlassCard } from '@/components/glass-card';
 import { cn } from '@/lib/utils';
 
-type DashboardPanel = 'overview' | 'wallets' | 'trades' | 'referrals';
+type DashboardPanel = 'overview' | 'wallets' | 'trades' | 'referrals' | 'rewards';
 
 interface DashboardAnchor {
   id: string;
@@ -70,6 +70,14 @@ const NAV_ITEMS: NavItem[] = [
     href: '/dashboard?panel=referrals',
     icon: Link2,
     stat: 'Growth',
+  },
+  {
+    key: 'rewards',
+    label: 'Rewards',
+    description: 'Claim your share of the vault.',
+    href: '/dashboard?panel=rewards',
+    icon: Coins,
+    stat: 'Vault',
   },
 ];
 

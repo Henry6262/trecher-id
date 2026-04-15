@@ -49,9 +49,9 @@ export function ActivityTicker({ items }: ActivityTickerProps) {
           }}
         >
           {doubled.map((item, i) => {
-            const isGain = item.pnlPercent >= 0;
+            const solSign = item.totalPnlSol >= 0 ? 1 : -1;
+            const isGain = item.pnlPercent !== null ? item.pnlPercent >= 0 : solSign >= 0;
             const pnlColor = isGain ? 'var(--trench-green)' : 'var(--trench-red)';
-            const sign = isGain ? '+' : '';
 
             return (
               <span
@@ -75,9 +75,16 @@ export function ActivityTicker({ items }: ActivityTickerProps) {
                 <span>·</span>
                 <span style={{ color: 'var(--trench-text)' }}>${item.tokenSymbol}</span>
                 <span>·</span>
-                <span style={{ color: pnlColor, fontWeight: 700 }}>
-                  {sign}{item.pnlPercent.toFixed(0)}%
-                </span>
+                {item.pnlPercent !== null && item.pnlPercent !== 0 && (
+                  <span style={{ color: pnlColor, fontWeight: 700 }}>
+                    {item.pnlPercent >= 0 ? '+' : ''}{item.pnlPercent.toFixed(0)}%
+                  </span>
+                )}
+                {item.pnlPercent === null && item.totalPnlSol !== 0 && (
+                  <span style={{ color: pnlColor, fontWeight: 700 }}>
+                    {item.totalPnlSol >= 0 ? '+' : ''}{item.totalPnlSol.toFixed(1)} SOL
+                  </span>
+                )}
               </span>
             );
           })}

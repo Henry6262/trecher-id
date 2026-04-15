@@ -13,6 +13,8 @@ import { prisma } from '@/lib/prisma';
 import { getSolPrice } from '@/lib/sol-price';
 import { sendTournamentNotification, type TournamentEvent } from '@/lib/cup-notifications';
 
+export const MIN_TRADE_SOL = 0.2; // Minimum SOL amount per trade to qualify
+
 // ──────────────────────────────────────────────────────────────
 // SEASON MANAGEMENT
 // ──────────────────────────────────────────────────────────────
@@ -108,25 +110,17 @@ export async function getQualifiers(
   endDate: Date,
   limit: number = 32,
 ) {
-  // Get all wallets with trades in the qualification window
-  const wallets = await prisma.wallet.findMany({
+  // Get all wallets with trade events in the qualification window meeting min amount
+  const events = await prisma.walletTradeEvent.findMany({
     where: {
-      trades: {
-        some: {
-          firstTradeAt: { gte: startDate },
-          lastTradeAt: { lte: endDate },
-        },
-      },
+      timestamp: { gte: startDate, lte: endDate },
+      amountSol: { gte: MIN_TRADE_SOL },
     },
     include: {
-      user: true,
-      trades: {
-        where: {
-          firstTradeAt: { gte: startDate },
-          lastTradeAt: { lte: endDate },
-        },
-      },
-    },
+      wallet: {
+        include: { user: true }
+      }
+    }
   });
 
   // Aggregate PnL per user
@@ -136,26 +130,28 @@ export async function getQualifiers(
     displayName: string;
     pnlSol: number;
     trades: number;
-    walletIds: string[];
+    walletIds: Set<string>;
   }>();
 
-  for (const wallet of wallets) {
-    const existing = userStats.get(wallet.userId);
-    const pnlSol = wallet.trades.reduce((sum, t) => sum + t.pnlSol, 0);
-    const tradeCount = wallet.trades.reduce((sum, t) => sum + t.tradeCount, 0);
+  for (const event of events) {
+    const userId = event.wallet.userId;
+    const existing = userStats.get(userId);
+    
+    // PnL: sell is positive, buy is negative
+    const eventPnl = event.type === 'SELL' ? event.amountSol : -event.amountSol;
 
     if (existing) {
-      existing.pnlSol += pnlSol;
-      existing.trades += tradeCount;
-      existing.walletIds.push(wallet.id);
+      existing.pnlSol += eventPnl;
+      existing.trades += 1;
+      existing.walletIds.add(event.walletId);
     } else {
-      userStats.set(wallet.userId, {
-        userId: wallet.userId,
-        username: wallet.user.username,
-        displayName: wallet.user.displayName,
-        pnlSol,
-        trades: tradeCount,
-        walletIds: [wallet.id],
+      userStats.set(userId, {
+        userId,
+        username: event.wallet.user.username,
+        displayName: event.wallet.user.displayName,
+        pnlSol: eventPnl,
+        trades: 1,
+        walletIds: new Set([event.walletId]),
       });
     }
   }
@@ -523,18 +519,22 @@ export async function getParticipantPnlInWindow(
 
   if (walletIds.length === 0) return { pnlUsd: 0, pnlSol: 0, trades: 0 };
 
-  // Get trades within the window
-  const trades = await prisma.walletTrade.findMany({
+  // Get individual trade events within the window meeting min amount
+  const events = await prisma.walletTradeEvent.findMany({
     where: {
       walletId: { in: walletIds },
-      firstTradeAt: { lte: windowEnd },
-      lastTradeAt: { gte: windowStart },
+      timestamp: { gte: windowStart, lte: windowEnd },
+      amountSol: { gte: MIN_TRADE_SOL },
     },
   });
 
-  const pnlSol = trades.reduce((sum, t) => sum + t.pnlSol, 0);
-  const tradeCount = trades.reduce((sum, t) => sum + t.tradeCount, 0);
+  // Calculate PnL: sum of (SELL.amountSol - BUY.amountSol)
+  const pnlSol = events.reduce((sum, e) => {
+    const amount = e.type === 'SELL' ? e.amountSol : -e.amountSol;
+    return sum + amount;
+  }, 0);
 
+  const tradeCount = events.length;
   const solPrice = await getSolPrice();
 
   return {

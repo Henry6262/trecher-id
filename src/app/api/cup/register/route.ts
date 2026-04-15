@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getSessionUser } from '@/lib/auth';
+import { getSolPrice } from '@/lib/sol-price';
+import { MIN_TRADE_SOL } from '@/lib/cup-engine';
 
 export const dynamic = 'force-dynamic';
 
@@ -50,14 +52,14 @@ export async function GET() {
       });
     }
 
-    // Check qualification: count trades in qualification window
+    // Check qualification: count trade events in qualification window meeting min amount
     const userWallets = await prisma.wallet.findMany({
       where: { userId: session.id },
       include: {
-        trades: {
+        tradeEvents: {
           where: {
-            firstTradeAt: { gte: season.qualificationStart },
-            lastTradeAt: { lte: season.qualificationEnd },
+            timestamp: { gte: season.qualificationStart, lte: season.qualificationEnd },
+            amountSol: { gte: MIN_TRADE_SOL },
           },
         },
       },
@@ -67,13 +69,14 @@ export async function GET() {
     let totalTrades = 0;
 
     for (const wallet of userWallets) {
-      for (const trade of wallet.trades) {
-        totalPnlSol += trade.pnlSol;
-        totalTrades += trade.tradeCount;
+      for (const event of wallet.tradeEvents) {
+        const pnl = event.type === 'SELL' ? event.amountSol : -event.amountSol;
+        totalPnlSol += pnl;
+        totalTrades += 1;
       }
     }
 
-    const solPrice = 150; // Fallback, would normally fetch from API
+    const solPrice = await getSolPrice();
     const pnlUsd = totalPnlSol * solPrice;
 
     // Check eligibility: need at least 10 trades
@@ -87,9 +90,10 @@ export async function GET() {
       pnlSol: totalPnlSol,
       walletCount: userWallets.length,
       minTradesRequired: 10,
+      minTradeAmountSol: MIN_TRADE_SOL,
       message: eligible
         ? 'You qualify! Click register to join Season 1.'
-        : `Need ${10 - totalTrades} more trades to qualify. Keep trading!`,
+        : `Need ${10 - totalTrades} more trades (min ${MIN_TRADE_SOL} SOL) to qualify. Keep trading!`,
     });
   } catch (error) {
     console.error('[cup/register] Error:', error);
@@ -145,14 +149,14 @@ export async function POST() {
       );
     }
 
-    // Check qualification
+    // Check qualification: count trade events in qualification window meeting min amount
     const userWallets = await prisma.wallet.findMany({
       where: { userId: session.id },
       include: {
-        trades: {
+        tradeEvents: {
           where: {
-            firstTradeAt: { gte: season.qualificationStart },
-            lastTradeAt: { lte: season.qualificationEnd },
+            timestamp: { gte: season.qualificationStart, lte: season.qualificationEnd },
+            amountSol: { gte: MIN_TRADE_SOL },
           },
         },
       },
@@ -169,20 +173,21 @@ export async function POST() {
     let totalTrades = 0;
 
     for (const wallet of userWallets) {
-      for (const trade of wallet.trades) {
-        totalPnlSol += trade.pnlSol;
-        totalTrades += trade.tradeCount;
+      for (const event of wallet.tradeEvents) {
+        const pnl = event.type === 'SELL' ? event.amountSol : -event.amountSol;
+        totalPnlSol += pnl;
+        totalTrades += 1;
       }
     }
 
     if (totalTrades < 10) {
       return NextResponse.json(
-        { error: 'Not enough trades', message: `Need 10 trades to qualify. You have ${totalTrades}.` },
+        { error: 'Not enough trades', message: `Need 10 trades (min ${MIN_TRADE_SOL} SOL) to qualify. You have ${totalTrades}.` },
         { status: 400 }
       );
     }
 
-    const solPrice = 150;
+    const solPrice = await getSolPrice();
     const pnlUsd = totalPnlSol * solPrice;
 
     // Register the user

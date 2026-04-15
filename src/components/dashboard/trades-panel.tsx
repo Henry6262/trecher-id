@@ -19,7 +19,7 @@ interface Trade {
   walletAddress: string;
   transactions: TradeTransaction[];
   totalPnlSol: number;
-  totalPnlPercent: number;
+  totalPnlPercent: number | null;
 }
 
 interface PinnedTrade {
@@ -28,19 +28,20 @@ interface PinnedTrade {
   tokenSymbol: string;
   tokenName: string | null;
   walletAddress: string;
-  totalPnlPercent: number;
+  totalPnlPercent: number | null;
   totalPnlSol: number;
   transactions: TradeTransaction[];
 }
 
-function pnlColor(pct: number) {
+function pnlColor(pct: number | null) {
+  if (pct === null) return 'text-[var(--trench-text-muted)]';
   if (pct > 0) return 'text-green-400';
   if (pct < 0) return 'text-red-400';
   return 'text-[var(--trench-text-muted)]';
 }
 
-function pnlSign(pct: number) {
-  return pct > 0 ? '+' : '';
+function pnlSign(pct: number | null) {
+  return pct !== null && pct > 0 ? '+' : '';
 }
 
 export function TradesPanel({ embedded = false }: { embedded?: boolean }) {
@@ -180,7 +181,7 @@ export function TradesPanel({ embedded = false }: { embedded?: boolean }) {
                 </div>
                 <div className="text-right shrink-0">
                   <p className={`text-sm font-mono font-bold ${pnlColor(trade.totalPnlPercent)}`}>
-                    {pnlSign(trade.totalPnlPercent)}{trade.totalPnlPercent.toFixed(1)}%
+                    {trade.totalPnlPercent !== null ? `${pnlSign(trade.totalPnlPercent)}${trade.totalPnlPercent.toFixed(1)}%` : '—'}
                   </p>
                   <p className="text-xs font-mono text-[var(--trench-text-muted)]">
                     {pnlSign(trade.totalPnlSol)}{trade.totalPnlSol.toFixed(3)} SOL
@@ -226,7 +227,7 @@ export function TradesPanel({ embedded = false }: { embedded?: boolean }) {
                     </div>
                     <div className="text-right shrink-0">
                       <p className={`text-sm font-mono font-bold ${pnlColor(trade.totalPnlPercent)}`}>
-                        {pnlSign(trade.totalPnlPercent)}{trade.totalPnlPercent.toFixed(1)}%
+                        {trade.totalPnlPercent !== null ? `${pnlSign(trade.totalPnlPercent)}${trade.totalPnlPercent.toFixed(1)}%` : '—'}
                       </p>
                       <p className="text-xs font-mono text-[var(--trench-text-muted)]">
                         {pnlSign(trade.totalPnlSol)}{trade.totalPnlSol.toFixed(3)} SOL

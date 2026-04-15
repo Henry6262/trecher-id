@@ -27,10 +27,10 @@ function readDatabaseUrlFromEnvFile(): string | undefined {
 export const prisma: PrismaClient = new Proxy({} as PrismaClient, {
   get(_target, prop: string | symbol) {
     if (!globalForPrisma.prisma) {
-      let url = process.env.DATABASE_URL;
+      let url = process.env.DATABASE_URL?.replace(/\\n/g, '').trim();
       if (!url) {
         loadEnvConfig(process.cwd(), true);
-        url = process.env.DATABASE_URL;
+        url = process.env.DATABASE_URL?.replace(/\\n/g, '').trim();
       }
       if (!url) {
         url = readDatabaseUrlFromEnvFile();

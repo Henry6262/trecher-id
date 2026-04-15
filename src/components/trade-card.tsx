@@ -13,13 +13,13 @@ interface TradeCardProps {
   tokenSymbol: string;
   tokenName?: string | null;
   tokenImage?: string | null;
-  totalPnlPercent: number;
+  totalPnlPercent: number | null;
   totalPnlSol?: number;
   transactions: Transaction[];
 }
 
 export function TradeCard({ tokenMint, tokenSymbol, tokenName, tokenImage, totalPnlPercent, totalPnlSol, transactions }: TradeCardProps) {
-  const isWin = totalPnlPercent >= 0;
+  const isWin = totalPnlPercent !== null ? totalPnlPercent >= 0 : (totalPnlSol ?? 0) >= 0;
   const dexUrl = tokenMint ? `https://dexscreener.com/solana/${tokenMint}` : null;
   const buyTx = transactions.find((tx) => tx.type === 'BUY');
   const sellTx = transactions.find((tx) => tx.type === 'SELL');
@@ -53,9 +53,16 @@ export function TradeCard({ tokenMint, tokenSymbol, tokenName, tokenImage, total
         <div className="flex items-baseline justify-between mb-0.5">
           <span className="text-sm font-bold text-[var(--trench-text)] truncate group-hover:text-[var(--trench-accent)] transition-colors">${tokenSymbol}</span>
           <div className="flex items-center gap-1.5 flex-shrink-0 ml-2">
-            <span className={`text-[13px] font-bold font-mono ${isWin ? 'text-[var(--trench-green)]' : 'text-[var(--trench-red)]'}`}>
-              {formatPercent(totalPnlPercent)}
-            </span>
+            {totalPnlPercent !== null && totalPnlPercent !== 0 && (
+              <span className={`text-[13px] font-bold font-mono ${isWin ? 'text-[var(--trench-green)]' : 'text-[var(--trench-red)]'}`}>
+                {formatPercent(totalPnlPercent)}
+              </span>
+            )}
+            {totalPnlPercent === null && totalPnlSol != null && totalPnlSol !== 0 && (
+              <span className={`text-[13px] font-bold font-mono ${isWin ? 'text-[var(--trench-green)]' : 'text-[var(--trench-red)]'}`}>
+                {totalPnlSol >= 0 ? '+' : ''}{totalPnlSol.toFixed(1)} SOL
+              </span>
+            )}
             {dexUrl && <ExternalLink size={10} className="text-[var(--trench-text-muted)] opacity-0 group-hover:opacity-100 transition-opacity" />}
           </div>
         </div>

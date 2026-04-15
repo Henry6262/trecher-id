@@ -18,7 +18,8 @@ interface OGWallet {
 interface OGPinnedTrade {
   id: string;
   tokenSymbol: string;
-  totalPnlPercent: number;
+  totalPnlPercent: number | null;
+  totalPnlSol: number;
 }
 
 export default async function Image({ params }: { params: Promise<{ username: string }> }) {
@@ -190,7 +191,7 @@ export default async function Image({ params }: { params: Promise<{ username: st
                     width: 36,
                     height: 36,
                     borderRadius: '50%',
-                    background: t.totalPnlPercent >= 0 ? '#22c55e' : '#ef4444',
+                    background: (t.totalPnlPercent ?? t.totalPnlSol) >= 0 ? '#22c55e' : '#ef4444',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -209,11 +210,13 @@ export default async function Image({ params }: { params: Promise<{ username: st
                     style={{
                       fontSize: 14,
                       fontWeight: 700,
-                      color: t.totalPnlPercent >= 0 ? '#22c55e' : '#ef4444',
+                      color: (t.totalPnlPercent ?? t.totalPnlSol) >= 0 ? '#22c55e' : '#ef4444',
                     }}
                   >
-                    {t.totalPnlPercent >= 0 ? '+' : ''}
-                    {t.totalPnlPercent.toFixed(0)}%
+                    {t.totalPnlPercent !== null
+                      ? `${t.totalPnlPercent >= 0 ? '+' : ''}${t.totalPnlPercent.toFixed(0)}%`
+                      : `${t.totalPnlSol >= 0 ? '+' : ''}${t.totalPnlSol.toFixed(1)} SOL`
+                    }
                   </div>
                 </div>
               </div>

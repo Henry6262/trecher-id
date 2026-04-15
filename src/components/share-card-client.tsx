@@ -14,7 +14,7 @@ import { getPublicAvatarUrl } from '@/lib/images';
 
 interface PinnedTradePill {
   tokenSymbol: string;
-  totalPnlPercent: number;
+  totalPnlPercent: number | null;
 }
 
 interface ShareCardClientProps {
@@ -53,8 +53,11 @@ export function ShareCardClient({ user, stats, degenScore, pinnedTrades, shareUr
       const html2canvas = (await import('html2canvas-pro')).default;
       const canvas = await html2canvas(cardRef.current, {
         backgroundColor: '#050508',
-        scale: 2,
+        scale: 4,
         useCORS: true,
+        allowTaint: false,
+        imageTimeout: 0,
+        logging: false,
       });
       const link = document.createElement('a');
       link.download = `${user.username}-web3me.png`;
@@ -209,7 +212,7 @@ export function ShareCardClient({ user, stats, degenScore, pinnedTrades, shareUr
                 <div className="text-[7px] font-mono tracking-[2px] text-[var(--trench-text-muted)] mb-2">PINNED TRADES</div>
                 <div className="flex flex-wrap gap-2">
                   {pinnedTrades.slice(0, 3).map((trade, i) => {
-                    const isGain = trade.totalPnlPercent >= 0;
+                    const isGain = trade.totalPnlPercent !== null ? trade.totalPnlPercent >= 0 : true;
                     return (
                       <CutCorner
                         key={i}
@@ -220,12 +223,14 @@ export function ShareCardClient({ user, stats, degenScore, pinnedTrades, shareUr
                       >
                         <div className="px-3 py-2 flex items-center gap-1.5">
                           <span className="font-mono text-[11px] font-bold text-white">${trade.tokenSymbol}</span>
-                          <span
-                            className="font-mono text-[11px] font-bold"
-                            style={{ color: isGain ? 'var(--trench-green)' : 'var(--trench-red)' }}
-                          >
-                            {isGain ? '+' : ''}{trade.totalPnlPercent.toFixed(0)}%
-                          </span>
+                          {trade.totalPnlPercent !== null && (
+                            <span
+                              className="font-mono text-[11px] font-bold"
+                              style={{ color: isGain ? 'var(--trench-green)' : 'var(--trench-red)' }}
+                            >
+                              {isGain ? '+' : ''}{trade.totalPnlPercent.toFixed(0)}%
+                            </span>
+                          )}
                         </div>
                       </CutCorner>
                     );

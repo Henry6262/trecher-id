@@ -4,6 +4,7 @@ import { ProfileCard } from '@/components/profile-card';
 import type { Metadata } from 'next';
 import { buildProfileMetadata, getPublicProfileData } from '@/lib/profile';
 import { SynapticBackgroundLayer } from '@/components/synaptic-background-layer';
+import { BackButton } from '@/components/back-button';
 
 interface Props {
   params: Promise<{ username: string }>;
@@ -28,6 +29,9 @@ export default async function ProfilePage({ params }: Props) {
     <div className="min-h-screen relative" style={{ background: 'transparent' }}>
       <SynapticBackgroundLayer />
       <div className="relative py-10 px-4" style={{ zIndex: 1 }}>
+        <div className="mx-auto max-w-2xl mb-4">
+          <BackButton />
+        </div>
         <ProfileCard
           user={profile.user}
           accentColor={profile.accentColor}
@@ -41,6 +45,7 @@ export default async function ProfilePage({ params }: Props) {
           traderStats={profile.traderStats}
           wallets={profile.wallets}
           deployments={profile.deployments}
+          deployerSnapshot={profile.deployerSnapshot}
           allTrades={profile.allTrades}
           degenScore={profile.degenScore}
           isOwner={isOwner}

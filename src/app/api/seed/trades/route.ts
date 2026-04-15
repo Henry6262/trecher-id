@@ -44,13 +44,13 @@ export async function POST(req: Request) {
         // Only pin winners (positive PnL SOL), sorted by biggest gain
         const winners = trades
           .filter(t => t.totalPnlSol > 0.01 && t.transactions.length >= 1)
-          .sort((a, b) => b.totalPnlPercent - a.totalPnlPercent)
+          .sort((a, b) => (b.totalPnlPercent ?? b.totalPnlSol) - (a.totalPnlPercent ?? a.totalPnlSol))
           .slice(0, pinCount);
 
-        // If no winners, take top trades by % gain
+        // If no winners, take top trades by % gain (fall back to SOL when percent unavailable)
         const toPinn = winners.length > 0
           ? winners
-          : trades.sort((a, b) => b.totalPnlPercent - a.totalPnlPercent).slice(0, pinCount);
+          : trades.sort((a, b) => (b.totalPnlPercent ?? b.totalPnlSol) - (a.totalPnlPercent ?? a.totalPnlSol)).slice(0, pinCount);
 
         for (let i = 0; i < toPinn.length; i++) {
           const trade = toPinn[i];

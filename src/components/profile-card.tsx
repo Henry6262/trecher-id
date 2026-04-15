@@ -17,6 +17,7 @@ import { computeAchievements } from '@/lib/achievements';
 import { buildTradeCalendar } from '@/lib/trade-calendar';
 import { PnlChart } from './pnl-chart';
 import { PortfolioView } from './portfolio-view';
+import type { CalendarWeek } from '@/lib/trade-calendar';
 
 interface ProfileCardProps {
   user: {
@@ -52,19 +53,40 @@ interface ProfileCardProps {
     tokenSymbol: string;
     tokenName?: string | null;
     tokenImage?: string | null;
-    totalPnlPercent: number;
+    totalPnlPercent: number | null;
     totalPnlSol?: number;
     transactions: { type: 'BUY' | 'SELL'; mcap: number; amountSol: number }[];
   }[];
   wallets: { address: string; verified: boolean; isMain?: boolean }[];
   traderStats?: TraderStats | null;
   deployments?: DeploymentData[];
+  deployerSnapshot?: {
+    totalDeployed: number;
+    totalMigrated: number;
+    graduationRate: number;
+    tokens7d: number;
+    tokens30d: number;
+    syncedAt: string;
+  } | null;
   allTrades?: TokenTrade[];
   degenScore?: DegenScoreResult | null;
   followerCount?: number | null;
   isOwner?: boolean;
   accentColor?: string | null;
   bannerUrl?: string | null;
+}
+
+interface HeroTradeHighlight {
+  symbol: string;
+  pnlPercent: number | null;
+  pnlSol: number | null;
+  source: 'exact' | 'pinned';
+}
+
+interface HeroDeploymentHighlight {
+  symbol: string;
+  label: string;
+  metric: string;
 }
 
 function formatLastComputedAt(value: string | null): string {
@@ -81,7 +103,80 @@ function formatLastComputedAt(value: string | null): string {
   });
 }
 
-export function ProfileCard({ user, stats, leaderboard, dataProvenance, links, pinnedTrades, wallets, traderStats, deployments, allTrades, degenScore, followerCount, isOwner, accentColor, bannerUrl }: ProfileCardProps) {
+function buildTradeHighlightScore(pnlPercent: number | null, pnlSol: number | null): number {
+  if (pnlPercent != null) return pnlPercent;
+  if (pnlSol != null) return pnlSol * 10;
+  return Number.NEGATIVE_INFINITY;
+}
+
+function buildHeroTradeHighlights(
+  allTrades: TokenTrade[] | undefined,
+  pinnedTrades: ProfileCardProps['pinnedTrades'],
+): HeroTradeHighlight[] {
+  const highlights = [
+    ...(allTrades ?? []).map((trade) => ({
+      symbol: trade.tokenSymbol,
+      pnlPercent: trade.totalPnlPercent,
+      pnlSol: trade.totalPnlSol,
+      source: 'exact' as const,
+    })),
+    ...pinnedTrades.map((trade) => ({
+      symbol: trade.tokenSymbol,
+      pnlPercent: trade.totalPnlPercent,
+      pnlSol: trade.totalPnlSol ?? null,
+      source: 'pinned' as const,
+    })),
+  ];
+
+  const bestBySymbol = new Map<string, HeroTradeHighlight>();
+
+  for (const highlight of highlights) {
+    const existing = bestBySymbol.get(highlight.symbol);
+    if (!existing || buildTradeHighlightScore(highlight.pnlPercent, highlight.pnlSol) > buildTradeHighlightScore(existing.pnlPercent, existing.pnlSol)) {
+      bestBySymbol.set(highlight.symbol, highlight);
+    }
+  }
+
+  return Array.from(bestBySymbol.values())
+    .filter((highlight) => highlight.pnlPercent != null || highlight.pnlSol != null)
+    .sort((a, b) => buildTradeHighlightScore(b.pnlPercent, b.pnlSol) - buildTradeHighlightScore(a.pnlPercent, a.pnlSol))
+    .slice(0, 3);
+}
+
+function buildHeroDeploymentHighlights(deployments: DeploymentData[] | undefined): HeroDeploymentHighlight[] {
+  if (!deployments || deployments.length === 0) return [];
+
+  const formatCompactUsd = (value: number): string => {
+    if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`;
+    if (value >= 1_000) return `$${Math.round(value / 1_000)}K`;
+    return `$${Math.round(value)}`;
+  };
+
+  return [...deployments]
+    .sort((a, b) => {
+      const aScore = a.mcapAthUsd ?? a.devPnlUsd ?? a.volumeUsd ?? 0;
+      const bScore = b.mcapAthUsd ?? b.devPnlUsd ?? b.volumeUsd ?? 0;
+      return bScore - aScore;
+    })
+    .slice(0, 3)
+    .map((deployment) => ({
+      symbol: deployment.tokenSymbol,
+      label: deployment.status.toUpperCase(),
+      metric: deployment.mcapAthUsd != null
+        ? `${formatCompactUsd(deployment.mcapAthUsd)} ATH`
+        : deployment.devPnlUsd != null
+          ? `${deployment.devPnlUsd >= 0 ? '+' : '-'}$${Math.round(Math.abs(deployment.devPnlUsd)).toLocaleString()} DEV`
+          : deployment.volumeUsd != null
+            ? `$${Math.round(deployment.volumeUsd).toLocaleString()} VOL`
+            : 'Tracked',
+    }));
+}
+
+function buildHeroCalendarWeeks(weeks: CalendarWeek[]): CalendarWeek[] {
+  return weeks.slice(-16);
+}
+
+export function ProfileCard({ user, stats, leaderboard, dataProvenance, links, pinnedTrades, wallets, traderStats, deployments, deployerSnapshot, allTrades, degenScore, followerCount, isOwner, accentColor, bannerUrl }: ProfileCardProps) {
   const hasWallets = wallets.length > 0;
   const achievements = traderStats && degenScore
     ? computeAchievements(stats, traderStats, degenScore)
@@ -96,6 +191,9 @@ export function ProfileCard({ user, stats, leaderboard, dataProvenance, links, p
   const showTradeSection = showBehavioralAnalytics || pinnedTrades.length > 0;
   const showPortfolioSection = true;
   const showDeploymentsSection = !!(deployments && deployments.length > 0);
+  const heroTradeHighlights = buildHeroTradeHighlights(allTrades, pinnedTrades);
+  const heroDeploymentHighlights = buildHeroDeploymentHighlights(deployments);
+  const heroCalendarWeeks = buildHeroCalendarWeeks(calendarWeeks);
   const notableTrades = traderStats
     ? [
         traderStats.bestTrade
@@ -174,6 +272,11 @@ export function ProfileCard({ user, stats, leaderboard, dataProvenance, links, p
           degenScore={degenScore}
           isOwner={isOwner}
           accentColor={accent}
+          tradeHighlights={heroTradeHighlights}
+          deploymentHighlights={heroDeploymentHighlights}
+          deployerSnapshot={deployerSnapshot}
+          historyPreviewWeeks={heroCalendarWeeks}
+          historyPreviewMode={dataProvenance.eventSource}
         />
 
         {/* Divider */}

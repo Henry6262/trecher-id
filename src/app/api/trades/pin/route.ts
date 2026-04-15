@@ -44,7 +44,7 @@ export async function POST(req: Request) {
       tokenMint,
       tokenSymbol,
       tokenName: tokenName ?? null,
-      totalPnlPercent: totalPnlPercent ?? 0,
+      totalPnlPercent: totalPnlPercent ?? null,
       totalPnlSol: totalPnlSol ?? 0,
       order: (maxOrder._max.order ?? -1) + 1,
       transactions: transactions ?? [],

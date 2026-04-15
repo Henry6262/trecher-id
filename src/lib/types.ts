@@ -6,7 +6,7 @@ export interface TickerItem {
   username: string;
   avatarUrl: string | null;
   tokenSymbol: string;
-  pnlPercent: number;
+  pnlPercent: number | null;
   totalPnlSol: number;
   pinnedAt: string; // ISO string
 }

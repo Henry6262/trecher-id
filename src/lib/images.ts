@@ -1,6 +1,10 @@
 export function normalizeImageUrl(url?: string | null) {
   if (!url) return null;
   if (url.startsWith('//')) return `https:${url}`;
+  // Upgrade Twitter _normal (48×48) to _400x400 wherever it slips through
+  if (url.includes('pbs.twimg.com') && url.includes('_normal')) {
+    return url.replace(/_normal(\.\w+)$/, '_400x400$1').replace(/_normal$/, '_400x400');
+  }
   return url;
 }
 

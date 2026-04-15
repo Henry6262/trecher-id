@@ -17,7 +17,7 @@ interface OGWallet {
 interface OGPinnedTrade {
   id: string;
   tokenSymbol: string;
-  totalPnlPercent: number;
+  totalPnlPercent: number | null;
   totalPnlSol: number;
 }
 
@@ -271,7 +271,7 @@ export default async function Image({
         {pinnedTrades.length > 0 && (
           <div style={{ display: 'flex', gap: 16, marginBottom: 40 }}>
             {pinnedTrades.map((t: OGPinnedTrade) => {
-              const positive = t.totalPnlPercent >= 0;
+              const positive = (t.totalPnlPercent ?? t.totalPnlSol) >= 0;
               return (
                 <div
                   key={t.id}
@@ -296,8 +296,10 @@ export default async function Image({
                       color: positive ? '#22c55e' : '#ef4444',
                     }}
                   >
-                    {positive ? '+' : ''}
-                    {t.totalPnlPercent.toFixed(0)}%
+                    {t.totalPnlPercent !== null
+                      ? `${positive ? '+' : ''}${t.totalPnlPercent.toFixed(0)}%`
+                      : `${t.totalPnlSol >= 0 ? '+' : ''}${t.totalPnlSol.toFixed(1)} SOL`
+                    }
                   </div>
                 </div>
               );

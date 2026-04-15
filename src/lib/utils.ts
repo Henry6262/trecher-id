@@ -26,7 +26,8 @@ export function formatPnlFull(value: number): string {
   return `${prefix}${Math.round(Math.abs(value)).toLocaleString()}`;
 }
 
-export function formatPercent(value: number): string {
+export function formatPercent(value: number, hideZero = false): string {
+  if (hideZero && value === 0) return '';
   const prefix = value >= 0 ? '+' : '';
   return `${prefix}${value.toFixed(0)}%`;
 }

@@ -329,7 +329,56 @@ export interface TokenTrade {
     timestamp: number;
   }[];
   totalPnlSol: number;
-  totalPnlPercent: number;
+  totalPnlPercent: number | null;
+}
+
+/**
+ * When the main wallet history window doesn't include the original BUY for a token,
+ * query the Associated Token Account (ATA) directly. The ATA only touches one mint,
+ * so its transaction history is bounded — same API budget, deeper time coverage.
+ */
+async function fetchBuyCostViaAtaHistory(walletAddress: string, tokenMint: string): Promise<number> {
+  try {
+    const rpcResponse = await fetchHeliusJsonWithKeyRotation<{
+      result?: { value?: Array<{ pubkey?: string }> };
+    }>((apiKey) => ({
+      url: getHeliusRpcUrl(apiKey),
+      init: {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          id: 'ata-lookup',
+          method: 'getTokenAccountsByOwner',
+          params: [walletAddress, { mint: tokenMint }, { encoding: 'base64' }],
+        }),
+      },
+    }));
+
+    const ataAddress = rpcResponse.result?.value?.[0]?.pubkey;
+    if (!ataAddress) return 0;
+
+    const txns = await fetchHeliusJsonWithKeyRotation<HeliusTransaction[]>((apiKey) => {
+      const params = new URLSearchParams({ 'api-key': apiKey, limit: '100' });
+      return { url: `${HELIUS_BASE}/addresses/${ataAddress}/transactions?${params}` };
+    });
+
+    let buySol = 0;
+    for (const tx of txns) {
+      const walletData = tx.accountData.find((d) => d.account === walletAddress);
+      const netSol = walletData ? walletData.nativeBalanceChange / 1e9 : 0;
+      const tokenReceived = tx.tokenTransfers.some(
+        (t) => t.mint === tokenMint && t.toUserAccount === walletAddress,
+      );
+      if (tokenReceived && netSol < -0.0001) {
+        buySol += Math.abs(netSol);
+      }
+    }
+
+    return buySol;
+  } catch {
+    return 0;
+  }
 }
 
 export async function aggregateTradesByToken(
@@ -402,6 +451,23 @@ export async function aggregateTradesByToken(
     }
   }
 
+  // For tokens with sell activity but no buy found in the main window,
+  // attempt a targeted ATA history fetch to recover the cost basis.
+  const missingBuyMints = Array.from(tokenMap.entries())
+    .filter(([, d]) => d.buySol <= 0.001 && d.sellSol > 0.001)
+    .map(([mint]) => mint);
+
+  if (missingBuyMints.length > 0) {
+    await Promise.all(
+      missingBuyMints.map(async (mint) => {
+        const recovered = await fetchBuyCostViaAtaHistory(walletAddress, mint);
+        if (recovered > 0.001) {
+          tokenMap.get(mint)!.buySol = recovered;
+        }
+      }),
+    );
+  }
+
   // Fetch token metadata via DAS
   const allMints = Array.from(tokenMap.keys());
   const metadata = await getTokenMetadata(allMints);
@@ -411,9 +477,10 @@ export async function aggregateTradesByToken(
     if (data.txns.length === 0) continue;
     const meta = metadata.get(mint) || { symbol: mint.slice(0, 6), name: '', image: null };
     const pnlSol = data.sellSol - data.buySol;
+    // null = no cost basis found (buy predates our history window); 0 = genuine break-even
     const pnlPercent = data.buySol > 0.001
       ? ((data.sellSol - data.buySol) / data.buySol) * 100
-      : 0;
+      : null;
     trades.push({
       tokenMint: mint,
       tokenSymbol: meta.symbol,

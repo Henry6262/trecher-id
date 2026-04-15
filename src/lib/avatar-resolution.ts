@@ -9,6 +9,7 @@ function isWeakAvatarUrl(url: string | null): boolean {
 export async function resolveAvatarUrl(input: {
   username: string;
   avatarUrl?: string | null;
+  isDeployer?: boolean;
 }): Promise<string> {
   const normalized = normalizeImageUrl(input.avatarUrl);
   if (normalized && !isWeakAvatarUrl(normalized)) {
@@ -28,7 +29,7 @@ export async function resolveAvatarUrl(input: {
     return normalized;
   }
 
-  return getPublicAvatarUrl(input.username, null);
+  return getPublicAvatarUrl(input.username, null, { isDeployer: input.isDeployer });
 }
 
 export async function resolveAvatarRows<T extends { username: string; avatarUrl: string | null }>(

@@ -85,7 +85,7 @@ export interface PublicProfileData {
     tokenSymbol: string;
     tokenName: string | null;
     tokenImage: string | null;
-    totalPnlPercent: number;
+    totalPnlPercent: number | null;
     totalPnlSol: number;
     transactions: { type: 'BUY' | 'SELL'; mcap: number; amountSol: number }[];
   }[];
@@ -103,6 +103,14 @@ export interface PublicProfileData {
     devPnlUsd: number | null;
     deployedAt: string;
   }[];
+  deployerSnapshot: {
+    totalDeployed: number;
+    totalMigrated: number;
+    graduationRate: number;
+    tokens7d: number;
+    tokens30d: number;
+    syncedAt: string;
+  } | null;
   allTrades: TokenTrade[];
   traderStats: TraderStats | null;
   degenScore: DegenScoreResult | null;
@@ -237,7 +245,7 @@ function walletTradeToTokenTrade(trade: WalletTradeRow): TokenTrade | null {
 
   const totalPnlPercent = trade.buySol > 0.001
     ? ((trade.sellSol - trade.buySol) / trade.buySol) * 100
-    : 0;
+    : null;
 
   return {
     tokenMint: trade.tokenMint,
@@ -310,6 +318,16 @@ async function buildPublicProfileData(username: string): Promise<PublicProfileDa
         },
         orderBy: { deployedAt: 'desc' },
       },
+      deployerSnapshot: {
+        select: {
+          totalDeployed: true,
+          totalMigrated: true,
+          graduationRate: true,
+          tokens7d: true,
+          tokens30d: true,
+          syncedAt: true,
+        },
+      },
       rankings: {
         where: { period: '7d' },
         select: {
@@ -355,7 +373,7 @@ async function buildPublicProfileData(username: string): Promise<PublicProfileDa
     && exactTradeResolution.trades.length > 0
     && exactTradeResolution.exactWalletCoverage >= tradedWalletCount;
 
-  const allTrades = hasCompleteExactCoverage ? exactTradeResolution.trades : [];
+  const allTrades = hasCompleteExactCoverage ? exactTradeResolution.trades : derivedTrades;
 
   const eventSource: PublicProfileData['dataProvenance']['eventSource'] =
     hasCompleteExactCoverage
@@ -375,9 +393,11 @@ async function buildPublicProfileData(username: string): Promise<PublicProfileDa
   );
   const traderStats = eventSource === 'exact_helius' ? computeTraderStats(allTrades) : null;
   const degenScore = traderStats ? computeDegenScore(traderStats, stats) : null;
+  const isDeployer = user.tokenDeployments.length > user.pinnedTrades.length;
   const resolvedAvatarUrl = await resolveAvatarUrl({
     username: user.username,
     avatarUrl: user.avatarUrl,
+    isDeployer,
   });
 
   return {
@@ -432,6 +452,16 @@ async function buildPublicProfileData(username: string): Promise<PublicProfileDa
       devPnlUsd: deployment.devPnlUsd,
       deployedAt: deployment.deployedAt.toISOString(),
     })),
+    deployerSnapshot: user.deployerSnapshot
+      ? {
+          totalDeployed: user.deployerSnapshot.totalDeployed,
+          totalMigrated: user.deployerSnapshot.totalMigrated,
+          graduationRate: user.deployerSnapshot.graduationRate,
+          tokens7d: user.deployerSnapshot.tokens7d,
+          tokens30d: user.deployerSnapshot.tokens30d,
+          syncedAt: user.deployerSnapshot.syncedAt.toISOString(),
+        }
+      : null,
     allTrades,
     traderStats,
     degenScore,

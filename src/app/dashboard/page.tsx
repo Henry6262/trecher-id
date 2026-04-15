@@ -13,6 +13,7 @@ import { AvatarImage } from '@/components/avatar-image';
 import { WalletsPanel } from '@/components/dashboard/wallets-panel';
 import { TradesPanel } from '@/components/dashboard/trades-panel';
 import { ReferralsPanel } from '@/components/dashboard/referrals-panel';
+import { RewardsPanel } from '@/components/dashboard/rewards-panel';
 import { DashboardSideNav } from '@/components/dashboard/dashboard-side-nav';
 import { getPublicAvatarUrl } from '@/lib/images';
 import { ArrowRight, CheckCircle2, Circle, Gift, Palette, Sparkles } from 'lucide-react';
@@ -59,10 +60,10 @@ const ICON_OPTIONS = [
   { key: 'globe', label: '🌐 Website' },
 ] as const;
 
-type DashboardPanel = 'overview' | 'wallets' | 'trades' | 'referrals';
+type DashboardPanel = 'overview' | 'wallets' | 'trades' | 'referrals' | 'rewards';
 
 function resolveDashboardPanel(value: string | null): DashboardPanel {
-  if (value === 'wallets' || value === 'trades' || value === 'referrals') {
+  if (value === 'wallets' || value === 'trades' || value === 'referrals' || value === 'rewards') {
     return value;
   }
   return 'overview';
@@ -190,6 +191,7 @@ export default function DashboardPage() {
     { key: 'wallets', label: 'WALLETS' },
     { key: 'trades', label: 'TRADES' },
     { key: 'referrals', label: 'REFERRALS' },
+    { key: 'rewards', label: 'REWARDS' },
   ];
 
   const setupItems = [
@@ -230,7 +232,6 @@ export default function DashboardPage() {
               7D RANK #{profile.leaderboardRank}
             </Link>
           )}
-          <span className="text-[var(--trench-text-muted)]">PRIVATE BUILD</span>
         </div>
       </div>
 
@@ -352,8 +353,8 @@ export default function DashboardPage() {
                         className="w-10 h-10 rounded-full object-cover"
                       />
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <p className="text-sm font-mono font-bold text-[var(--trench-text)] truncate">{profile.displayName ?? profile.username}</p>
+                        <div className="flex items-center gap-2 min-w-0 overflow-hidden">
+                          <p className="text-sm font-mono font-bold text-[var(--trench-text)] truncate min-w-0">{profile.displayName ?? profile.username}</p>
                           <div className="w-3 h-3 rounded-full shrink-0" style={{ background: accentColor }} />
                           {profile.leaderboardRank != null && (
                             <span
@@ -562,6 +563,7 @@ export default function DashboardPage() {
           {activePanel === 'wallets' && <WalletsPanel embedded />}
           {activePanel === 'trades' && <TradesPanel embedded />}
           {activePanel === 'referrals' && <ReferralsPanel embedded />}
+          {activePanel === 'rewards' && <RewardsPanel />}
         </div>
 
         <DashboardSideNav

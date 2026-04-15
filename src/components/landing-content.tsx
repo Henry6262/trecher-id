@@ -1,14 +1,17 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Check, Globe, ChevronRight, ExternalLink, Info, X } from 'lucide-react';
+import { useAuthStore } from '@/stores/auth';
 import { AvatarImage } from '@/components/avatar-image';
 import { CutButton } from '@/components/cut-button';
 import { PublicNav } from '@/components/public-nav';
 import ShinyText from '@/components/shiny-text';
+import DecryptedText from '@/components/decrypted-text';
 import { LeaderboardTable } from '@/components/leaderboard-table';
 import { ActivityTicker } from '@/components/activity-ticker';
 import { JourneySection } from '@/components/journey-section';
@@ -31,6 +34,7 @@ interface TraderData {
   winRateValue: number;
   trades: string;
   tradeCount: number;
+  isDeployer?: boolean;
   topTrades: {
     id: string;
     token: string;
@@ -40,6 +44,14 @@ interface TraderData {
     pnlPercentValue: number;
     buy: string | null;
     sell: string | null;
+  }[];
+  topDeployments?: {
+    id: string;
+    tokenSymbol: string;
+    tokenImageUrl: string | null;
+    status: string;
+    mcapAthUsd: number | null;
+    devPnlSol: number | null;
   }[];
 }
 
@@ -211,24 +223,38 @@ function buildPreviewCalendar(featured: TraderData) {
 }
 
 function MiniCalendar({ featured }: { featured: TraderData }) {
+  const [tooltip, setTooltip] = useState<{ label: string; pnl: number; trades: number; x: number; y: number } | null>(null);
   const calendarData = buildPreviewCalendar(featured);
+
   return (
-    <div className="grid gap-[1.5px]" style={{ gridTemplateColumns: 'repeat(14, 1fr)', gridTemplateRows: 'repeat(4, 1fr)' }}>
-      {calendarData.map((cell, i) => (
-        <div key={i} className="aspect-square rounded-[1px] relative group cursor-default" style={{ background: cell.pnl >= 0 ? `rgba(34,197,94,${cell.opacity})` : `rgba(239,68,68,${Math.max(0.08, cell.opacity)})`, minWidth: 4, minHeight: 4 }}>
-          {cell.trades > 0 && (
-            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover:block z-50 pointer-events-none">
-              <div className="px-2.5 py-1.5 whitespace-nowrap text-center" style={{ background: 'rgba(8,12,18,0.95)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 4, boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }}>
-                <div className="text-[8px] font-mono text-[#888] mb-0.5">{cell.label}</div>
-                <div className="text-[9px] font-mono font-bold" style={{ color: cell.pnl >= 0 ? '#22c55e' : '#ef4444' }}>{cell.pnl >= 0 ? '+' : ''}{cell.pnl} SOL</div>
-                <div className="text-[8px] font-mono text-[#666]">{cell.trades} trades</div>
-              </div>
-              <div className="w-0 h-0 mx-auto" style={{ borderLeft: '4px solid transparent', borderRight: '4px solid transparent', borderTop: '4px solid rgba(255,255,255,0.1)' }} />
-            </div>
-          )}
-        </div>
-      ))}
-    </div>
+    <>
+      <div className="grid gap-[1.5px]" style={{ gridTemplateColumns: 'repeat(14, 1fr)', gridTemplateRows: 'repeat(4, 1fr)' }}>
+        {calendarData.map((cell, i) => (
+          <div
+            key={i}
+            className="aspect-square rounded-[1px] cursor-default"
+            style={{ background: cell.pnl >= 0 ? `rgba(34,197,94,${cell.opacity})` : `rgba(239,68,68,${Math.max(0.08, cell.opacity)})`, minWidth: 4, minHeight: 4 }}
+            onMouseEnter={(e) => {
+              if (!cell.trades) return;
+              const rect = e.currentTarget.getBoundingClientRect();
+              setTooltip({ label: cell.label, pnl: cell.pnl, trades: cell.trades, x: rect.left + rect.width / 2, y: rect.top });
+            }}
+            onMouseLeave={() => setTooltip(null)}
+          />
+        ))}
+      </div>
+      {tooltip && typeof document !== 'undefined' && createPortal(
+        <div className="pointer-events-none fixed -translate-x-1/2" style={{ left: tooltip.x, top: tooltip.y - 10, zIndex: 9999 }}>
+          <div className="px-2.5 py-1.5 whitespace-nowrap text-center" style={{ background: 'rgba(8,12,18,0.95)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 4, boxShadow: '0 4px 12px rgba(0,0,0,0.5)', transform: 'translateY(-100%)' }}>
+            <div className="text-[8px] font-mono text-[#888] mb-0.5">{tooltip.label}</div>
+            <div className="text-[9px] font-mono font-bold" style={{ color: tooltip.pnl >= 0 ? '#22c55e' : '#ef4444' }}>{tooltip.pnl >= 0 ? '+' : ''}{tooltip.pnl} SOL</div>
+            <div className="text-[8px] font-mono text-[#666]">{tooltip.trades} trades</div>
+          </div>
+          <div className="w-0 h-0 mx-auto" style={{ borderLeft: '4px solid transparent', borderRight: '4px solid transparent', borderTop: '4px solid rgba(255,255,255,0.1)' }} />
+        </div>,
+        document.body
+      )}
+    </>
   );
 }
 
@@ -242,6 +268,8 @@ function PreviewCardInner({ featured }: { featured: TraderData }) {
   const featuredProfileLabel = `web3me.fun/${featured.username}`;
   const profileHref = `/${featured.username}`;
   const pnlTone = getValueTone(featured.pnlValue);
+  const hasTopTrades = featured.topTrades.length > 0;
+  const hasTopDeployments = (featured.topDeployments?.length ?? 0) > 0;
 
   return (
     <div className="w-full h-full flex flex-col" style={{ transform: 'perspective(1000px) rotateY(-4deg) rotateX(2deg)' }}>
@@ -253,7 +281,7 @@ function PreviewCardInner({ featured }: { featured: TraderData }) {
             <div className="relative flex-shrink-0">
               <div className="overflow-hidden" style={{ width: 56, height: 56, clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)', border: '2px solid rgba(0,212,255,0.35)', boxShadow: '0 0 20px rgba(0,212,255,0.15)' }}>
                 <AvatarImage
-                  src={getPublicAvatarUrl(featured.username, featured.avatarUrl)}
+                  src={getPublicAvatarUrl(featured.username, featured.avatarUrl, { isDeployer: featured.isDeployer })}
                   alt={featured.name}
                   width={56}
                   height={56}
@@ -307,81 +335,155 @@ function PreviewCardInner({ featured }: { featured: TraderData }) {
         {/* Divider */}
         <div className="mx-5" style={{ height: '1px', background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)' }} />
 
-        <div className="py-3">
-          <div className="px-5 text-[7px] font-mono tracking-[2px] text-[var(--trench-text-muted)] mb-2">TOP TRADES</div>
-          <div className="px-5">
-            <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2">
-              {featured.topTrades.map((trade) => {
-                const tradeTone = getValueTone(trade.pnlPercentValue);
-                const tradeHref = trade.tokenMint ? `https://dexscreener.com/solana/${trade.tokenMint}` : profileHref;
-                const opensExternally = !!trade.tokenMint;
-                return (
-                  <a
-                    key={trade.id}
-                    href={tradeHref}
-                    target={opensExternally ? '_blank' : undefined}
-                    rel={opensExternally ? 'noopener noreferrer' : undefined}
-                    className="group min-w-[210px] shrink-0 px-3 py-2.5 transition-colors"
+        {/* Trades + Deployments sections — only rendered if data exists */}
+        {(hasTopTrades || hasTopDeployments) && (
+          <div className="py-3">
+            {/* TOP TRADES */}
+            {hasTopTrades && (
+              <>
+                <div className="px-5 text-[7px] font-mono tracking-[2px] text-[var(--trench-text-muted)] mb-2">TOP TRADES</div>
+                <div className="px-5">
+                  <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2">
+                    {featured.topTrades.map((trade) => {
+                      const tradeTone = getValueTone(trade.pnlPercentValue);
+                      const tradeHref = trade.tokenMint ? `https://dexscreener.com/solana/${trade.tokenMint}` : profileHref;
+                      const opensExternally = !!trade.tokenMint;
+                      return (
+                        <a
+                          key={trade.id}
+                          href={tradeHref}
+                          target={opensExternally ? '_blank' : undefined}
+                          rel={opensExternally ? 'noopener noreferrer' : undefined}
+                          className="group min-w-[210px] shrink-0 px-3 py-2.5 transition-colors"
+                          style={{
+                            background: 'rgba(255,255,255,0.02)',
+                            border: '1px solid rgba(255,255,255,0.05)',
+                            clipPath: 'polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px)',
+                            textDecoration: 'none',
+                          }}
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <div
+                              className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full flex-shrink-0"
+                              style={{ background: 'rgba(0,212,255,0.1)', border: '1px solid rgba(0,212,255,0.18)' }}
+                            >
+                              {trade.tokenImage ? (
+                                <div className="relative h-full w-full">
+                                  <Image src={trade.tokenImage} alt={trade.token} fill className="object-cover" unoptimized />
+                                </div>
+                              ) : (
+                                <span className="text-[10px] font-bold text-white">{trade.token.replace('$', '').slice(0, 2)}</span>
+                              )}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="truncate text-[11px] font-bold text-white transition-colors group-hover:text-[var(--trench-accent)]">{trade.token}</div>
+                              {trade.pnlPercentValue !== 0 && (
+                                <div className="flex items-center gap-1.5 text-[10px] font-mono font-bold" style={{ color: tradeTone.color }}>
+                                  <span>{trade.pnlPercent}</span>
+                                  <ExternalLink size={10} className="text-[rgba(255,255,255,0.28)] opacity-0 transition-opacity group-hover:opacity-100" />
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex flex-col gap-1 flex-shrink-0 ml-auto">
+                              {trade.buy && (
+                                <div className="rounded-[3px] border border-white/5 bg-white/[0.02] px-2 py-1 text-[8px] font-mono text-[var(--trench-text-muted)] whitespace-nowrap">
+                                  BUY <span className="text-white">{trade.buy}</span>
+                                </div>
+                              )}
+                              {trade.sell && (
+                                <div className="rounded-[3px] border border-white/5 bg-white/[0.02] px-2 py-1 text-[8px] font-mono text-[var(--trench-text-muted)] whitespace-nowrap">
+                                  SELL <span style={{ color: tradeTone.color }}>{trade.sell}</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </a>
+                      );
+                    })}
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* TOP DEPLOYMENTS */}
+            {hasTopDeployments && (
+              <>
+                <div className={`px-5 text-[7px] font-mono tracking-[2px] text-[var(--trench-text-muted)] mb-2 ${hasTopTrades ? 'mt-3' : ''}`}>TOKEN DEPLOYMENTS</div>
+                <div className="px-5">
+                  <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2">
+                    {featured.topDeployments!.map((dep) => {
+                      const isGraduated = dep.status === 'graduated' || dep.status === 'migrated';
+                      return (
+                        <div
+                          key={dep.id}
+                          className="min-w-[180px] shrink-0 px-3 py-2.5"
+                          style={{
+                            background: 'rgba(255,255,255,0.02)',
+                            border: '1px solid rgba(255,255,255,0.05)',
+                            clipPath: 'polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px)',
+                          }}
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <div
+                              className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full flex-shrink-0"
+                              style={{ background: 'rgba(0,212,255,0.1)', border: '1px solid rgba(0,212,255,0.18)' }}
+                            >
+                              {dep.tokenImageUrl ? (
+                                <div className="relative h-full w-full">
+                                  <Image src={dep.tokenImageUrl} alt={dep.tokenSymbol} fill className="object-cover" unoptimized />
+                                </div>
+                              ) : (
+                                <span className="text-[10px] font-bold text-white">{dep.tokenSymbol.replace('$', '').slice(0, 2)}</span>
+                              )}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="truncate text-[11px] font-bold text-white">{dep.tokenSymbol}</div>
+                              <div className="flex items-center gap-1.5 mt-0.5">
+                                <span
+                                  className="text-[8px] font-mono px-1.5 py-0.5 rounded-[2px]"
+                                  style={{
+                                    background: isGraduated ? 'rgba(34,197,94,0.12)' : 'rgba(0,212,255,0.08)',
+                                    color: isGraduated ? '#22c55e' : 'rgba(0,212,255,0.7)',
+                                  }}
+                                >
+                                  {dep.status.toUpperCase()}
+                                </span>
+                                {dep.mcapAthUsd != null && dep.mcapAthUsd > 0 && (
+                                  <span className="text-[8px] font-mono text-[var(--trench-text-muted)]">
+                                    ATH ${dep.mcapAthUsd >= 1000 ? `${(dep.mcapAthUsd / 1000).toFixed(0)}K` : dep.mcapAthUsd.toFixed(0)}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* TRADE HISTORY — only show for non-deployer traders with trade data */}
+            {hasTopTrades && (
+              <>
+                <div className="px-5 mt-1 text-[7px] font-mono tracking-[2px] text-[var(--trench-text-muted)] mb-2">TRADE HISTORY</div>
+                <div className="px-5">
+                  <div
+                    className="px-3 py-2.5"
                     style={{
                       background: 'rgba(255,255,255,0.02)',
                       border: '1px solid rgba(255,255,255,0.05)',
                       clipPath: 'polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px)',
-                      textDecoration: 'none',
                     }}
                   >
-                    <div className="flex items-center gap-2.5">
-                      <div
-                        className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full flex-shrink-0"
-                        style={{ background: 'rgba(0,212,255,0.1)', border: '1px solid rgba(0,212,255,0.18)' }}
-                      >
-                        {trade.tokenImage ? (
-                          <div className="relative h-full w-full">
-                            <Image src={trade.tokenImage} alt={trade.token} fill className="object-cover" unoptimized />
-                          </div>
-                        ) : (
-                          <span className="text-[10px] font-bold text-white">{trade.token.replace('$', '').slice(0, 2)}</span>
-                        )}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="truncate text-[11px] font-bold text-white transition-colors group-hover:text-[var(--trench-accent)]">{trade.token}</div>
-                        <div className="flex items-center gap-1.5 text-[10px] font-mono font-bold" style={{ color: tradeTone.color }}>
-                          <span>{trade.pnlPercent}</span>
-                          <ExternalLink size={10} className="text-[rgba(255,255,255,0.28)] opacity-0 transition-opacity group-hover:opacity-100" />
-                        </div>
-                      </div>
-                      <div className="flex flex-col gap-1 flex-shrink-0 ml-auto">
-                        {trade.buy && (
-                          <div className="rounded-[3px] border border-white/5 bg-white/[0.02] px-2 py-1 text-[8px] font-mono text-[var(--trench-text-muted)] whitespace-nowrap">
-                            BUY <span className="text-white">{trade.buy}</span>
-                          </div>
-                        )}
-                        {trade.sell && (
-                          <div className="rounded-[3px] border border-white/5 bg-white/[0.02] px-2 py-1 text-[8px] font-mono text-[var(--trench-text-muted)] whitespace-nowrap">
-                            SELL <span style={{ color: tradeTone.color }}>{trade.sell}</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </a>
-                );
-              })}
-            </div>
+                    <MiniCalendar featured={featured} />
+                  </div>
+                </div>
+              </>
+            )}
           </div>
-
-          <div className="px-5 mt-1 text-[7px] font-mono tracking-[2px] text-[var(--trench-text-muted)] mb-2">TRADE HISTORY</div>
-          <div className="px-5">
-            <div
-              className="px-3 py-2.5"
-              style={{
-                background: 'rgba(255,255,255,0.02)',
-                border: '1px solid rgba(255,255,255,0.05)',
-                clipPath: 'polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px)',
-              }}
-            >
-              <MiniCalendar featured={featured} />
-            </div>
-          </div>
-        </div>
+        )}
 
         {/* Footer */}
         <div className="mt-auto flex justify-center py-2.5 border-t border-[rgba(255,255,255,0.04)]">
@@ -444,6 +546,7 @@ function PreviewCardCarousel({ profiles }: { profiles: TraderData[] }) {
 export function LandingContent({ traders, featuredProfiles, ticker, leaderboardData, refCode }: LandingContentProps) {
   const [cupView, setCupView] = useState<CupView>('bracket');
   const [showInfoModal, setShowInfoModal] = useState(false);
+  const authUser = useAuthStore((s) => s.user);
   const [cupSchedule, setCupSchedule] = useState<{
     qualifyEnd: Date;
     groupsEnd: Date;
@@ -510,6 +613,24 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
     <div className="relative min-h-screen" style={{ background: '#050508' }}>
       <PublicNav />
       <SectionRailNav />
+
+      {/* Logged-in indicator */}
+      {authUser && (
+        <div
+          className="fixed bottom-5 right-5 z-50 flex items-center gap-2 px-3 py-2"
+          style={{
+            background: 'rgba(8,12,18,0.9)',
+            border: '1px solid rgba(0,212,255,0.2)',
+            clipPath: 'polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px)',
+            backdropFilter: 'blur(8px)',
+          }}
+        >
+          <div className="h-1.5 w-1.5 rounded-full bg-[#22c55e]" style={{ boxShadow: '0 0 6px rgba(34,197,94,0.6)' }} />
+          <span className="text-[10px] font-mono text-[var(--trench-text-muted)]">
+            Logged in as <Link href="/dashboard" className="text-[var(--trench-accent)] hover:opacity-80 transition-opacity">@{authUser.username}</Link>
+          </span>
+        </div>
+      )}
 
       <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }}>
         <Lightspeed

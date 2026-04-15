@@ -39,6 +39,10 @@ model User {
 
   // Cup tournament participation
   cupParticipations CupParticipant[]
+
+  // Rewards system
+  rewardAccount   UserRewardAccount?
+  payouts         VaultPayout[]
 }
 
 model Link {
@@ -177,7 +181,7 @@ model PinnedTrade {
   tokenSymbol     String
   tokenName       String?
   tokenImageUrl   String?
-  totalPnlPercent Float
+  totalPnlPercent Float?
   totalPnlSol     Float
   order           Int      @default(0)
   transactions    Json
@@ -403,4 +407,48 @@ model CupPrizeDistribution {
 
   @@unique([seasonId, rank])
   @@index([seasonId])
+}
+
+// ──────────────────────────────────────────────────────────────
+// REWARD VAULT & PAYOUT SYSTEM
+// ──────────────────────────────────────────────────────────────
+
+model VaultDeposit {
+  id          String   @id @default(cuid())
+  amountUsd   Float
+  amountSol   Float
+  source      String   // "trading_fees" | "manual" | "injection"
+  description String?
+  timestamp   DateTime @default(now())
+
+  @@index([timestamp])
+}
+
+model VaultPayout {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amountUsd   Float
+  amountSol   Float
+  type        String   // "weekly_leaderboard" | "cup_prize" | "referral_bonus"
+  status      String   @default("pending") // pending, paid, failed
+  txSignature String?  // Solana transaction signature
+  paidAt      DateTime?
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model UserRewardAccount {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  totalEarnedUsd Float    @default(0)
+  totalPaidUsd   Float    @default(0)
+  pendingUsd     Float    @default(0)
+  updatedAt      DateTime @updatedAt
+
+  @@index([userId])
 }

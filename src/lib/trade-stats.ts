@@ -58,11 +58,13 @@ export function computeTraderStats(trades: TokenTrade[]): TraderStats {
   let worstTrade: TraderStats['worstTrade'] = null;
 
   for (const trade of trades) {
-    if (!bestTrade || trade.totalPnlPercent > bestTrade.pnlPercent) {
-      bestTrade = { symbol: trade.tokenSymbol, pnlPercent: trade.totalPnlPercent };
+    const pct = trade.totalPnlPercent;
+    if (pct === null) continue;
+    if (!bestTrade || pct > bestTrade.pnlPercent) {
+      bestTrade = { symbol: trade.tokenSymbol, pnlPercent: pct };
     }
-    if (!worstTrade || trade.totalPnlPercent < worstTrade.pnlPercent) {
-      worstTrade = { symbol: trade.tokenSymbol, pnlPercent: trade.totalPnlPercent };
+    if (!worstTrade || pct < worstTrade.pnlPercent) {
+      worstTrade = { symbol: trade.tokenSymbol, pnlPercent: pct };
     }
   }
 
@@ -100,9 +102,9 @@ export function computeTraderStats(trades: TokenTrade[]): TraderStats {
   const avgHoldTime = holdCount > 0 ? formatHoldTime(totalHoldMs / holdCount) : '0m';
 
   // Consistency — 100 - min(stddev of pnl percents, 100)
-  const pnlPercents = trades.map((t) => t.totalPnlPercent);
-  const mean = pnlPercents.reduce((s, v) => s + v, 0) / pnlPercents.length;
-  const variance = pnlPercents.reduce((s, v) => s + (v - mean) ** 2, 0) / pnlPercents.length;
+  const pnlPercents = trades.map((t) => t.totalPnlPercent).filter((v): v is number => v !== null);
+  const mean = pnlPercents.length > 0 ? pnlPercents.reduce((s, v) => s + v, 0) / pnlPercents.length : 0;
+  const variance = pnlPercents.length > 0 ? pnlPercents.reduce((s, v) => s + (v - mean) ** 2, 0) / pnlPercents.length : 0;
   const stddev = Math.sqrt(variance);
   const consistency = Math.max(0, 100 - Math.min(stddev, 100));
 

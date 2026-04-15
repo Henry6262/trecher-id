@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma';
 import { getWalletTransactions } from '@/lib/helius';
 import { parseWalletTrades } from '@/lib/wallet-trade-parser';
 
+import { getSolPrice } from '@/lib/sol-price';
+
 export const dynamic = 'force-dynamic';
 
 /**
@@ -161,7 +163,7 @@ async function getParticipantLivePnl(
       }
     }
 
-    const solPrice = 150; // Fallback, would fetch from API in production
+    const solPrice = await getSolPrice(); // Fetch live price from Redis/API
 
     return {
       id: participantId,

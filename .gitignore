@@ -47,6 +47,7 @@ next-env.d.ts
 pnpm-lock.yaml
 .env.vercel
 .env.vercel-prod
+.env.vercel-live
 test-results/
 .aider.chat.history.md
 .aider.input.history

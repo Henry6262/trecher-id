@@ -68,9 +68,8 @@ function CardShell({
 
   return (
     <section className="space-y-3">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center">
         <div className="text-[11px] font-mono tracking-[3px] text-[rgba(0,212,255,0.75)]">{label}</div>
-        <div className="text-[10px] font-mono tracking-[2px] text-[rgba(255,255,255,0.38)]">BANNER-BACKED PREVIEW</div>
       </div>
       <div
         className="relative overflow-hidden"

@@ -9,6 +9,8 @@ import { useState } from 'react';
 import { AvatarImage } from './avatar-image';
 import { getPublicAvatarUrl } from '@/lib/images';
 import Image from 'next/image';
+import type { CalendarWeek } from '@/lib/trade-calendar';
+import { getDayColor } from '@/lib/trade-calendar';
 
 function ShareButtons({ username, accent }: { username: string; accent: string }) {
   const [copied, setCopied] = useState(false);
@@ -75,6 +77,58 @@ interface ProfileHeaderProps {
   degenScore?: DegenScoreResult | null;
   isOwner?: boolean;
   accentColor?: string | null;
+  tradeHighlights?: {
+    symbol: string;
+    pnlPercent: number | null;
+    pnlSol: number | null;
+    source: 'exact' | 'pinned';
+  }[];
+  deploymentHighlights?: {
+    symbol: string;
+    label: string;
+    metric: string;
+  }[];
+  deployerSnapshot?: {
+    totalDeployed: number;
+    totalMigrated: number;
+    graduationRate: number;
+    tokens7d: number;
+    tokens30d: number;
+    syncedAt: string;
+  } | null;
+  historyPreviewWeeks?: CalendarWeek[];
+  historyPreviewMode?: 'exact_helius' | 'derived_aggregates' | 'unavailable';
+}
+
+function formatSolDelta(value: number): string {
+  const prefix = value >= 0 ? '+' : '-';
+  const abs = Math.abs(value);
+  if (abs >= 100) return `${prefix}${Math.round(abs)} SOL`;
+  return `${prefix}${abs.toFixed(1)} SOL`;
+}
+
+function renderTradeHighlightValue(highlight: NonNullable<ProfileHeaderProps['tradeHighlights']>[number]): string {
+  if (highlight.pnlPercent != null) {
+    return `${highlight.pnlPercent >= 0 ? '+' : ''}${Math.round(highlight.pnlPercent)}%`;
+  }
+
+  return formatSolDelta(highlight.pnlSol ?? 0);
+}
+
+function buildHistorySummary(weeks: CalendarWeek[]) {
+  const days = weeks.flatMap((week) => week.days).filter((day): day is NonNullable<CalendarWeek['days'][number]> => day !== null);
+  const activeDays = days.filter((day) => day.tradeCount > 0);
+  const totalTransactions = activeDays.reduce((sum, day) => sum + day.tradeCount, 0);
+  const bestDay = activeDays.reduce<typeof activeDays[number] | null>((best, day) => {
+    if (!best) return day;
+    return day.pnlSol > best.pnlSol ? day : best;
+  }, null);
+
+  return {
+    activeDays: activeDays.length,
+    totalTransactions,
+    bestDay,
+  };
 }
 
 export function ProfileHeader({
@@ -92,6 +146,11 @@ export function ProfileHeader({
   degenScore,
   isOwner,
   accentColor,
+  tradeHighlights = [],
+  deploymentHighlights = [],
+  deployerSnapshot,
+  historyPreviewWeeks = [],
+  historyPreviewMode = 'unavailable',
 }: ProfileHeaderProps) {
   const accent = accentColor || '#00D4FF';
   const resolvedAvatarUrl = getPublicAvatarUrl(username, avatarUrl);
@@ -100,6 +159,7 @@ export function ProfileHeader({
   );
   const [walletOpen, setWalletOpen] = useState(false);
   const walletSelectorOffset = isClaimed ? '-top-1' : 'top-3';
+  const historySummary = buildHistorySummary(historyPreviewWeeks);
 
   const renderWalletSelector = (className: string) => (
     <div className={className}>
@@ -147,6 +207,7 @@ export function ProfileHeader({
       )}
     </div>
   );
+  const showHeroIntel = tradeHighlights.length > 0 || deploymentHighlights.length > 0 || deployerSnapshot || historyPreviewWeeks.length > 0 || historyPreviewMode !== 'unavailable';
 
   return (
     <div
@@ -324,6 +385,270 @@ export function ProfileHeader({
       <div className="flex flex-wrap gap-4 mt-3 justify-center sm:justify-start">
         <ShareButtons username={username} accent={accent} />
       </div>
+
+      {showHeroIntel && (
+        <div className="mt-5 grid gap-3 lg:grid-cols-12">
+          <section
+            className="cut-sm px-4 py-4 lg:col-span-7"
+            style={{
+              background: `linear-gradient(135deg, ${accent}14 0%, rgba(255,255,255,0.03) 38%, rgba(255,255,255,0.02) 100%)`,
+              border: '1px solid rgba(0,212,255,0.1)',
+              boxShadow: '0 18px 40px rgba(0,0,0,0.28)',
+            }}
+          >
+            <div className="mb-3 flex items-center gap-2 text-[8px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">
+              TRADE HISTORY
+              <div className="flex-1 h-px" style={{ background: 'rgba(0,212,255,0.08)' }} />
+              <span>{historyPreviewMode === 'exact_helius' ? 'EXACT' : historyPreviewMode === 'derived_aggregates' ? 'SYNCING' : 'EMPTY'}</span>
+            </div>
+            <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <div className="text-[18px] font-black tracking-tight text-[var(--trench-text)] sm:text-[22px]">
+                  GitHub-style activity tape
+                </div>
+                <p className="mt-1 max-w-[420px] text-[10px] leading-relaxed text-[var(--trench-text-muted)]">
+                  {historyPreviewMode === 'exact_helius'
+                    ? 'Exact indexed swap events are live in the hero, so this profile opens with real activity context instead of a blank shell.'
+                    : historyPreviewMode === 'derived_aggregates'
+                      ? `${stats?.totalTrades ?? 0} aggregate trades are indexed, but the event-level backfill is still incomplete, so the heatmap remains locked until exact sync finishes.`
+                      : 'This profile does not have event-level trade history yet, so the hero can only show headline stats for now.'}
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-1.5 text-[8px] font-mono tracking-[1.5px] text-[var(--trench-text-muted)]">
+                <span className="cut-xs px-2 py-1" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                  {historySummary.activeDays} ACTIVE DAYS
+                </span>
+                <span className="cut-xs px-2 py-1" style={{ background: `${accent}14`, border: `1px solid ${accent}26`, color: accent }}>
+                  {historySummary.totalTransactions} TXNS
+                </span>
+                {historySummary.bestDay && historyPreviewMode === 'exact_helius' && (
+                  <span className="cut-xs px-2 py-1" style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)', color: 'var(--trench-green)' }}>
+                    BEST {historySummary.bestDay.pnlSol >= 0 ? '+' : ''}{Math.round(historySummary.bestDay.pnlSol)} SOL
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {historyPreviewWeeks.length > 0 && historyPreviewMode === 'exact_helius' ? (
+              <>
+                <div
+                  className="overflow-x-auto no-scrollbar cut-sm px-3 py-3"
+                  style={{
+                    background: 'rgba(8,12,22,0.52)',
+                    border: '1px solid rgba(0,212,255,0.08)',
+                  }}
+                >
+                  <div className="min-w-max" style={{ display: 'flex', gap: '3px' }}>
+                    {historyPreviewWeeks.map((week, weekIndex) => (
+                      <div key={weekIndex} style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                        {week.days.map((day, dayIndex) => (
+                          <div
+                            key={dayIndex}
+                            title={day ? `${day.date} · ${day.tradeCount} tx` : undefined}
+                            style={{
+                              width: '11px',
+                              height: '11px',
+                              clipPath: 'polygon(2px 0%, 100% 0%, 100% calc(100% - 2px), calc(100% - 2px) 100%, 0% 100%, 0% 2px)',
+                              background: day ? getDayColor(day.pnlSol) : 'transparent',
+                              boxShadow: day && day.tradeCount > 0 ? '0 0 12px rgba(0,0,0,0.18)' : 'none',
+                              flexShrink: 0,
+                            }}
+                          />
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="mt-3 grid gap-2 sm:grid-cols-3">
+                  <div className="cut-xs px-3 py-2" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                    <div className="text-[8px] font-mono tracking-[1.5px] text-[var(--trench-text-muted)]">SOURCE</div>
+                    <div className="mt-1 text-[12px] font-bold text-[var(--trench-text)]">Helius exact events</div>
+                  </div>
+                  <div className="cut-xs px-3 py-2" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                    <div className="text-[8px] font-mono tracking-[1.5px] text-[var(--trench-text-muted)]">WINDOW</div>
+                    <div className="mt-1 text-[12px] font-bold text-[var(--trench-text)]">Last 16 weeks in hero</div>
+                  </div>
+                  <div className="cut-xs px-3 py-2" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                    <div className="text-[8px] font-mono tracking-[1.5px] text-[var(--trench-text-muted)]">READ</div>
+                    <div className="mt-1 text-[12px] font-bold text-[var(--trench-text)]">Density + PnL intensity</div>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div
+                className="cut-sm px-4 py-4"
+                style={{
+                  background: 'rgba(8,12,22,0.45)',
+                  border: '1px solid rgba(0,212,255,0.08)',
+                }}
+              >
+                <div className="grid grid-cols-12 gap-1.5 opacity-45">
+                  {Array.from({ length: 72 }).map((_, index) => (
+                    <div
+                      key={index}
+                      style={{
+                        width: '100%',
+                        aspectRatio: '1 / 1',
+                        clipPath: 'polygon(2px 0%, 100% 0%, 100% calc(100% - 2px), calc(100% - 2px) 100%, 0% 100%, 0% 2px)',
+                        background: index % 7 === 0 ? `${accent}26` : 'rgba(255,255,255,0.05)',
+                      }}
+                    />
+                  ))}
+                </div>
+                <p className="mt-3 text-[10px] leading-relaxed text-[var(--trench-text-muted)]">
+                  {historyPreviewMode === 'derived_aggregates'
+                    ? 'Exact event history exists only partially. Keep the hero honest: no fake heatmap until full wallet coverage is synced.'
+                    : 'No event-level history has been indexed yet for this trader.'}
+                </p>
+              </div>
+            )}
+          </section>
+
+          <div className="grid gap-3 lg:col-span-5">
+            <section
+              className="cut-sm px-4 py-4"
+              style={{
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px solid rgba(0,212,255,0.08)',
+              }}
+            >
+              <div className="mb-2 flex items-center gap-2 text-[8px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">
+                TOP TRADES
+                <div className="flex-1 h-px" style={{ background: 'rgba(0,212,255,0.08)' }} />
+                <span>{tradeHighlights.length}</span>
+              </div>
+              {tradeHighlights.length > 0 ? (
+                <div className="space-y-2.5">
+                  {tradeHighlights.map((highlight, index) => (
+                    <div
+                      key={`${highlight.symbol}-${highlight.source}`}
+                      className="cut-xs flex items-center gap-3 px-3 py-2.5"
+                      style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.05)' }}
+                    >
+                      <div
+                        className="flex h-7 w-7 items-center justify-center text-[10px] font-black font-mono"
+                        style={{ color: accent, background: `${accent}14`, border: `1px solid ${accent}26` }}
+                      >
+                        {index + 1}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate text-[14px] font-bold text-[var(--trench-text)]">
+                          ${highlight.symbol}
+                        </div>
+                        <div className="text-[8px] font-mono tracking-[1.5px] text-[var(--trench-text-muted)]">
+                          {highlight.source === 'exact' ? 'EXACTLY INDEXED' : 'PROFILE PINNED'}
+                        </div>
+                      </div>
+                      <div
+                        className="text-[18px] font-black font-mono leading-none"
+                        style={{
+                          color: (highlight.pnlPercent ?? highlight.pnlSol ?? 0) >= 0 ? 'var(--trench-green)' : 'var(--trench-red)',
+                        }}
+                      >
+                        {renderTradeHighlightValue(highlight)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-[10px] leading-relaxed text-[var(--trench-text-muted)]">
+                  No standout trades surfaced yet.
+                </p>
+              )}
+            </section>
+
+            {deployerSnapshot && (
+              <section
+                className="cut-sm px-4 py-4"
+                style={{
+                  background: `linear-gradient(135deg, rgba(34,197,94,0.06) 0%, rgba(255,255,255,0.03) 45%, rgba(255,255,255,0.02) 100%)`,
+                  border: '1px solid rgba(34,197,94,0.12)',
+                }}
+              >
+                <div className="mb-2 flex items-center gap-2 text-[8px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">
+                  DEPLOYER PULSE
+                  <div className="flex-1 h-px" style={{ background: 'rgba(34,197,94,0.16)' }} />
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="cut-xs px-3 py-2" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    <div className="text-[8px] font-mono tracking-[1.5px] text-[var(--trench-text-muted)]">MIGRATED</div>
+                    <div className="mt-1 text-[16px] font-black text-[var(--trench-text)]">{deployerSnapshot.totalMigrated}</div>
+                  </div>
+                  <div className="cut-xs px-3 py-2" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    <div className="text-[8px] font-mono tracking-[1.5px] text-[var(--trench-text-muted)]">GR RATE</div>
+                    <div className="mt-1 text-[16px] font-black text-[var(--trench-green)]">{Math.round(deployerSnapshot.graduationRate)}%</div>
+                  </div>
+                  <div className="cut-xs px-3 py-2" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    <div className="text-[8px] font-mono tracking-[1.5px] text-[var(--trench-text-muted)]">7D OUTPUT</div>
+                    <div className="mt-1 text-[16px] font-black text-[var(--trench-text)]">{deployerSnapshot.tokens7d}</div>
+                  </div>
+                  <div className="cut-xs px-3 py-2" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    <div className="text-[8px] font-mono tracking-[1.5px] text-[var(--trench-text-muted)]">30D OUTPUT</div>
+                    <div className="mt-1 text-[16px] font-black text-[var(--trench-text)]">{deployerSnapshot.tokens30d}</div>
+                  </div>
+                </div>
+              </section>
+            )}
+          </div>
+
+          <section
+            className="cut-sm px-4 py-4 lg:col-span-12"
+            style={{
+              background: 'rgba(255,255,255,0.03)',
+              border: '1px solid rgba(0,212,255,0.08)',
+            }}
+          >
+            <div className="mb-3 flex items-center gap-2 text-[8px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">
+              BEST DEPLOYMENTS
+              <div className="flex-1 h-px" style={{ background: 'rgba(0,212,255,0.08)' }} />
+              <span>{deploymentHighlights.length} RANKED</span>
+            </div>
+            {deploymentHighlights.length > 0 ? (
+              <ol className="grid gap-2.5 lg:grid-cols-3">
+                {deploymentHighlights.map((deployment, index) => (
+                  <li
+                    key={`${deployment.symbol}-${deployment.label}`}
+                    className="cut-sm px-3.5 py-3"
+                    style={{
+                      background: index === 0 ? `${accent}10` : 'rgba(255,255,255,0.02)',
+                      border: index === 0 ? `1px solid ${accent}2e` : '1px solid rgba(255,255,255,0.05)',
+                    }}
+                  >
+                    <div className="mb-2 flex items-center justify-between gap-3">
+                      <div
+                        className="flex h-7 w-7 items-center justify-center text-[10px] font-black font-mono"
+                        style={{
+                          color: index === 0 ? accent : 'var(--trench-text-muted)',
+                          background: index === 0 ? `${accent}18` : 'rgba(255,255,255,0.04)',
+                          border: index === 0 ? `1px solid ${accent}2e` : '1px solid rgba(255,255,255,0.05)',
+                        }}
+                      >
+                        {index + 1}
+                      </div>
+                      <span className="text-[8px] font-mono tracking-[1.5px] text-[var(--trench-text-muted)]">
+                        {deployment.label}
+                      </span>
+                    </div>
+                    <div className="text-[17px] font-black tracking-tight text-[var(--trench-text)]">
+                      ${deployment.symbol}
+                    </div>
+                    <div className="mt-1 text-[11px] font-mono text-[var(--trench-text)]">
+                      {deployment.metric}
+                    </div>
+                    <div className="mt-3 text-[8px] font-mono tracking-[1.5px] text-[var(--trench-text-muted)]">
+                      Hero-ranked deployment highlight
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            ) : (
+              <p className="text-[10px] leading-relaxed text-[var(--trench-text-muted)]">
+                Deployment data exists in the profile, but no standout launches have been ranked yet.
+              </p>
+            )}
+          </section>
+        </div>
+      )}
 
       {/* Edit button — own profiles only */}
       {isOwner && (

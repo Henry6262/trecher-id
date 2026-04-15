@@ -35,7 +35,10 @@ export async function POST(req: NextRequest) {
 
   const username = twitter.username ?? twitter.subject;
   const displayName = twitter.name ?? username;
-  const avatarUrl = twitter.profilePictureUrl ?? null;
+  // Twitter returns _normal (48×48) by default — upgrade to _400x400 for display quality
+  const avatarUrl = twitter.profilePictureUrl
+    ? twitter.profilePictureUrl.replace(/_normal(\.\w+)$/, '_400x400$1').replace(/_normal$/, '_400x400')
+    : null;
 
   // Stage 1: already claimed — find by privyUserId
   let user = await prisma.user.findUnique({
