@@ -113,6 +113,20 @@ async function createTestTrade(walletId: string, pnlSol: number, tradeCount: num
   });
 }
 
+async function createTestTradeEvent(walletId: string, amountSol: number, type: 'BUY' | 'SELL', timestamp: Date) {
+  return prisma.walletTradeEvent.create({
+    data: {
+      walletId,
+      type,
+      amountSol,
+      timestamp,
+      signature: `test_sig_${Date.now()}_${Math.random()}`,
+      slot: 123456,
+      tokenMint: 'test_mint',
+    },
+  });
+}
+
 // ──────────────────────────────────────────────────────────────
 // CLEANUP
 // ──────────────────────────────────────────────────────────────
@@ -267,12 +281,12 @@ describe('Qualification Engine', () => {
         const user = await createTestUser(`qualifier_${i}`, `Qualifier ${i}`);
         const wallet = await createTestWallet(user.id, `0xTestWallet_${i}_${Date.now()}`);
         // Create trades with varying PnL (descending order)
-        await createTestTrade(
+        // Production top is ~2100 SOL, so we start at 10000 SOL
+        await createTestTradeEvent(
           wallet.id,
-          (40 - i) * 10, // Trader 0 gets 400 SOL, Trader 1 gets 390 SOL, etc.
-          50,
-          startDate,
-          endDate,
+          (40 - i) * 10 + 10000, 
+          'SELL',
+          new Date(startDate.getTime() + 1000),
         );
         return { user, wallet };
       })
@@ -299,31 +313,27 @@ describe('Qualification Engine', () => {
     const wallet = await createTestWallet(user.id, `0xWindowTest_${Date.now()}`);
 
     // Trade OUTSIDE window (before)
-    await createTestTrade(
+    await createTestTradeEvent(
       wallet.id,
-      500, // Big PnL but outside window
-      100,
-      new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000),
+      5000, 
+      'SELL',
       new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000),
     );
 
     // Trade INSIDE window
-    await createTestTrade(
+    await createTestTradeEvent(
       wallet.id,
-      50, // Smaller PnL but inside window
-      10,
-      windowStart,
-      windowEnd,
+      10000, // Massive PnL inside window to guarantee qualification
+      'SELL',
+      new Date(windowStart.getTime() + 1000),
     );
 
     const qualifiers = await getQualifiers(windowStart, windowEnd, 32);
-
     // Should only see the inside-window trade
     const userQual = qualifiers.find((q) => q.username === user.username);
-    if (userQual) {
-      expect(userQual.pnlSol).toBe(50);
-      expect(userQual.trades).toBe(10);
-    }
+    expect(userQual).toBeDefined();
+    expect(userQual!.pnlSol).toBe(10000);
+    expect(userQual!.trades).toBe(1);
   });
 
   it('should aggregate PnL across multiple wallets per user', async () => {
@@ -335,19 +345,20 @@ describe('Qualification Engine', () => {
     const wallet1 = await createTestWallet(user.id, `0xMulti1_${Date.now()}`);
     const wallet2 = await createTestWallet(user.id, `0xMulti2_${Date.now()}`);
 
-    await createTestTrade(wallet1.id, 100, 20, startDate, endDate);
-    await createTestTrade(wallet2.id, 200, 30, startDate, endDate);
+    // Create trade events (SELL gives positive PnL in our engine)
+    await createTestTradeEvent(wallet1.id, 100, 'SELL', new Date(startDate.getTime() + 1000));
+    await createTestTradeEvent(wallet2.id, 200, 'SELL', new Date(startDate.getTime() + 2000));
+
+    // We need enough users to ensure our test user is in the top 32
+    // Or we just give them a massive PnL
+    await createTestTradeEvent(wallet1.id, 5000, 'SELL', new Date(startDate.getTime() + 3000));
 
     const qualifiers = await getQualifiers(startDate, endDate, 32);
-    console.log('QUALIFIERS COUNT:', qualifiers.length);
-    if (qualifiers.length > 0) {
-      console.log('FIRST QUALIFIER:', qualifiers[0]);
-    }
     const userQual = qualifiers.find((q) => q.username === user.username);
 
     expect(userQual).toBeDefined();
-    expect(userQual!.pnlSol).toBe(300); // 100 + 200
-    expect(userQual!.trades).toBe(50); // 20 + 30
+    expect(userQual!.pnlSol).toBe(5300); // 100 + 200 + 5000
+    expect(userQual!.trades).toBe(3);
   });
 
   it('should reject if fewer than 32 qualifiers', async () => {
@@ -415,13 +426,7 @@ describe('Season Population', () => {
       Array.from({ length: 32 }, async (_, i) => {
         const user = await createTestUser(`pop_${i}`, `Pop ${i}`);
         const wallet = await createTestWallet(user.id, `0xPopWallet_${i}_${Date.now()}`);
-        await createTestTrade(
-          wallet.id,
-          (32 - i) * 10,
-          50,
-          startDate,
-          endDate,
-        );
+        await createTestTradeEvent(wallet.id, (32 - i) * 10 + 10000, 'SELL', new Date(startDate.getTime() + 1000));
         return user;
       })
     );
@@ -479,13 +484,7 @@ describe('Group Draw', () => {
       Array.from({ length: 32 }, async (_, i) => {
         const user = await createTestUser(`grp_${i}`, `Grp ${i}`);
         const wallet = await createTestWallet(user.id, `0xGrpWallet_${i}_${Date.now()}`);
-        await createTestTrade(
-          wallet.id,
-          (32 - i) * 10,
-          50,
-          startDate,
-          endDate,
-        );
+        await createTestTradeEvent(wallet.id, (32 - i) * 10 + 10000, 'SELL', new Date(startDate.getTime() + 1000));
       })
     );
 
@@ -545,7 +544,7 @@ describe('Group Draw', () => {
       Array.from({ length: 32 }, async (_, i) => {
         const user = await createTestUser(`grpupd_${i}`, `GrpUpd ${i}`);
         const wallet = await createTestWallet(user.id, `0xGrpUpdWallet_${i}_${Date.now()}`);
-        await createTestTrade(wallet.id, (32 - i) * 10, 50, startDate, endDate);
+        await createTestTradeEvent(wallet.id, (32 - i) * 10 + 10000, 'SELL', new Date(startDate.getTime() + 1000));
       })
     );
 
@@ -602,7 +601,7 @@ describe('Knockout Round Creation', () => {
       Array.from({ length: 32 }, async (_, i) => {
         const user = await createTestUser(`r16_${i}`, `R16 ${i}`);
         const wallet = await createTestWallet(user.id, `0xR16Wallet_${i}_${Date.now()}`);
-        await createTestTrade(wallet.id, (32 - i) * 10, 50, startDate, endDate);
+        await createTestTradeEvent(wallet.id, (32 - i) * 10 + 10000, 'SELL', new Date(startDate.getTime() + 1000));
       })
     );
 
@@ -761,7 +760,7 @@ describe('Round Advancement', () => {
       Array.from({ length: 32 }, async (_, i) => {
         const user = await createTestUser(`adv_${i}`, `Adv ${i}`);
         const wallet = await createTestWallet(user.id, `0xAdvWallet_${i}_${Date.now()}`);
-        await createTestTrade(wallet.id, (32 - i) * 10, 50, startDate, endDate);
+        await createTestTradeEvent(wallet.id, (32 - i) * 10 + 10000, 'SELL', new Date(startDate.getTime() + 1000));
       })
     );
 

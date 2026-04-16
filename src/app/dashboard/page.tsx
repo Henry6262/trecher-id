@@ -14,6 +14,7 @@ import { WalletsPanel } from '@/components/dashboard/wallets-panel';
 import { TradesPanel } from '@/components/dashboard/trades-panel';
 import { ReferralsPanel } from '@/components/dashboard/referrals-panel';
 import { RewardsPanel } from '@/components/dashboard/rewards-panel';
+import { TradingAnalyticsPanel } from '@/components/dashboard/trading-analytics-panel';
 import { DashboardSideNav } from '@/components/dashboard/dashboard-side-nav';
 import { getPublicAvatarUrl } from '@/lib/images';
 import { ArrowRight, CheckCircle2, Circle, Gift, Palette, Sparkles } from 'lucide-react';
@@ -334,6 +335,12 @@ export default function DashboardPage() {
                     <ArrowRight size={12} />
                   </Link>
                 </GlassCard>
+              </section>
+
+              {/* Trading Analytics */}
+              <section id="analytics">
+                <h2 className="text-xl font-bold text-white mb-4">Trading Analytics</h2>
+                <TradingAnalyticsPanel username={profile?.username} />
               </section>
 
               <section id="profile">
