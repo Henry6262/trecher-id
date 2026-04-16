@@ -164,9 +164,9 @@ export default async function LandingPage({ searchParams }: { searchParams: Prom
     }
   ];
   
-  const users = heroUsernames.length > 0
+  const users = rankedUsernames.length > 0
     ? await prisma.user.findMany({
-        where: { username: { in: heroUsernames } },
+        where: { username: { in: rankedUsernames } },
         include: {
           wallets: true,
           pinnedTrades: { orderBy: [{ totalPnlPercent: 'desc' }, { totalPnlSol: 'desc' }], take: 3 },
