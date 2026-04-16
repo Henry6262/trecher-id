@@ -39,6 +39,7 @@ export default async function LandingPage({ searchParams }: { searchParams: Prom
     winRateValue: number;
     trades: string;
     tradeCount: number;
+    isDeployer: boolean;
     topTrades: {
       id: string;
       token: string;
@@ -48,6 +49,14 @@ export default async function LandingPage({ searchParams }: { searchParams: Prom
       pnlPercentValue: number;
       buy: string | null;
       sell: string | null;
+    }[];
+    topDeployments: {
+      id: string;
+      tokenSymbol: string;
+      tokenImageUrl: string | null;
+      status: string;
+      mcapAthUsd: number | null;
+      devPnlSol: number | null;
     }[];
   }[] = [];
   let ticker: TickerItem[] = [];
