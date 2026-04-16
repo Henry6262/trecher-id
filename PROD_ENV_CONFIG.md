@@ -2,7 +2,7 @@
 > Generated: 2026-04-16
 > Source: .env.vercel-prod
 
-This document contains the production environment variables used for the Trecher-ID / web3me project. 
+This document contains the production environment variables used for the Trecher-ID / web3me project, which is built on the **DevPrint Core** infrastructure.
 
 ### 1. Database Infrastructure
 | Key | Description | Value (Redacted) |
@@ -12,10 +12,15 @@ This document contains the production environment variables used for the Trecher
 | `PRISMA_DATABASE_URL` | Prisma Data Proxy Connection | `postgres://[REDACTED]@db.prisma.io:5432/postgres?sslmode=require` |
 | `REDIS_URL` | Redis Cache (Railway) | `redis://default:[REDACTED]@crossover.proxy.rlwy.net:34102` |
 
-### 2. Public Application URL
+### 2. Core DevPrint / Ponzinomics Endpoints
 | Key | Description | Production URL |
 | :--- | :--- | :--- |
 | `NEXT_PUBLIC_APP_URL` | Main Frontend | `https://trecher-id.vercel.app` |
+| `NEXT_PUBLIC_API_URL` | Core Backend API (Monolith) | `https://core-api-production-20f7.up.railway.app` |
+| `NEXT_PUBLIC_CHAIN_API_URL` | Chain/On-chain Data API | `https://chain-api-production-c23e.up.railway.app` |
+| `NEXT_PUBLIC_AI_API_URL` | AI & Signal Intelligence API | `https://ai-api-production-97cd.up.railway.app` |
+| `NEXT_PUBLIC_LEARNING_API_URL` | Training/Learning API | `https://learning-api-production-51d5.up.railway.app` |
+| `PONZINOMICS_BASE_URL` | Sypher Reputation API | `https://api.sypher.io` |
 
 ### 3. Third-Party Integrations
 | Key | Description | Value / Status |
@@ -42,8 +47,7 @@ This document contains the production environment variables used for the Trecher
 | `TURBO_CACHE` | `remote:rw` |
 
 ---
-**Cleanup Note:** 
-- Removed `NEXT_PUBLIC_AI_API_URL`, `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_CHAIN_API_URL`, and `NEXT_PUBLIC_LEARNING_API_URL` which were found to be leaked from another project and are not used in this repository.
-- Fixed a malformed variable name `NEXT_PUBLIC_API_URLPUBLIC_APP_URL`.
+**Core Integration Note:** 
+Trench-ID (web3me) serves as the identity and social layer for the DevPrint engine. It leverages shared services for token parsing, AI concept generation, and cross-chain reputation (Ponzinomics).
 
 **Warning:** Never commit unredacted versions of these variables to public source control.

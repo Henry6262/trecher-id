@@ -339,6 +339,10 @@ describe('Qualification Engine', () => {
     await createTestTrade(wallet2.id, 200, 30, startDate, endDate);
 
     const qualifiers = await getQualifiers(startDate, endDate, 32);
+    console.log('QUALIFIERS COUNT:', qualifiers.length);
+    if (qualifiers.length > 0) {
+      console.log('FIRST QUALIFIER:', qualifiers[0]);
+    }
     const userQual = qualifiers.find((q) => q.username === user.username);
 
     expect(userQual).toBeDefined();
