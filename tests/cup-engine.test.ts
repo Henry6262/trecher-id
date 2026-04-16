@@ -121,8 +121,8 @@ async function createTestTradeEvent(walletId: string, amountSol: number, type: '
       amountSol,
       timestamp,
       signature: `test_sig_${Date.now()}_${Math.random()}`,
-      slot: 123456,
       tokenMint: 'test_mint',
+      tokenSymbol: 'TEST',
     },
   });
 }
