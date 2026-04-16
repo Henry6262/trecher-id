@@ -141,7 +141,7 @@ export function TradesPanel({ embedded = false }: { embedded?: boolean }) {
 
       {!loading && !hasWallets && (
         <CutCorner cut="md" className="w-full">
-          <div className="p-6 text-center space-y-3">
+          <div className="pt-7 pr-7 pb-7 pl-9 text-center space-y-3">
             <p className="text-sm font-mono text-[var(--trench-text-muted)]">
               No wallets linked yet.
             </p>
@@ -170,7 +170,7 @@ export function TradesPanel({ embedded = false }: { embedded?: boolean }) {
               borderColor="var(--trench-accent)"
               className="w-full"
             >
-              <div className="p-4 flex items-center justify-between gap-3">
+              <div className="pt-5 pr-5 pb-5 pl-7 flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <p className="text-sm font-mono font-bold text-[var(--trench-text)]">
                     {trade.tokenSymbol}
@@ -212,7 +212,7 @@ export function TradesPanel({ embedded = false }: { embedded?: boolean }) {
             const isPinned = pinnedMints.has(key);
             return (
               <CutCorner key={key} cut="sm" className="w-full">
-                <div className="p-4 space-y-3">
+                <div className="pt-5 pr-5 pb-5 pl-7 space-y-3">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="text-sm font-mono font-bold text-[var(--trench-text)]">
@@ -279,7 +279,7 @@ export function TradesPanel({ embedded = false }: { embedded?: boolean }) {
 
       {!loading && hasWallets && trades.length === 0 && (
         <CutCorner cut="md" className="w-full">
-          <div className="p-6 text-center">
+          <div className="pt-7 pr-7 pb-7 pl-9 text-center">
             <p className="text-sm font-mono text-[var(--trench-text-muted)]">
               No trades found for your wallets.
             </p>

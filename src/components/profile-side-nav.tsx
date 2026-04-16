@@ -37,7 +37,7 @@ export function ProfileSideNav({
 }: ProfileSideNavProps) {
   return (
     <div className="space-y-4 lg:sticky lg:top-24">
-      <GlassCard className="p-4" cut={12}>
+      <GlassCard className="pt-5 pr-5 pb-5 pl-7" cut={12}>
         <p className="text-[9px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">PROFILE MAP</p>
 
         <div className="mt-4 grid grid-cols-2 gap-2">
@@ -80,7 +80,7 @@ export function ProfileSideNav({
         </div>
       </GlassCard>
 
-      <GlassCard className="p-4" cut={12} glow={false}>
+      <GlassCard className="pt-5 pr-5 pb-5 pl-7" cut={12} glow={false}>
         <p className="text-[9px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">SECTIONS</p>
         <div className="mt-3 space-y-1">
           {sections.map((section) => {

@@ -252,7 +252,7 @@ export default function DashboardPage() {
           {activePanel === 'overview' && (
             <>
               <section id="progress" className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_260px]">
-                <GlassCard className="p-5" cut={12}>
+                <GlassCard className="pt-6 pr-6 pb-6 pl-8" cut={12}>
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <p className="text-[9px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">BUILD YOUR ID</p>
@@ -305,7 +305,7 @@ export default function DashboardPage() {
                   </div>
                 </GlassCard>
 
-                <GlassCard className="p-5" cut={12} glow={false}>
+                <GlassCard className="pt-6 pr-6 pb-6 pl-8" cut={12} glow={false}>
                   <p className="text-[9px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">REFERRAL MOMENTUM</p>
                   <div className="mt-3 flex items-start justify-between gap-3">
                     <div>
@@ -338,9 +338,9 @@ export default function DashboardPage() {
 
               <section id="profile">
                 {profile && (
-                  <GlassCard className="p-5 overflow-hidden" cut={12}>
+                  <GlassCard className="pt-6 pr-6 pb-6 pl-8 overflow-hidden" cut={12}>
                     {bannerUrl && (
-                      <div className="relative w-full h-12 overflow-hidden mb-3 -mt-5 -mx-5" style={{ width: 'calc(100% + 40px)' }}>
+                      <div className="relative w-full h-12 overflow-hidden mb-3 -mt-6 -ml-8 -mr-6" style={{ width: 'calc(100% + 56px)' }}>
                         <Image src={bannerUrl} alt="" fill className="object-cover opacity-50" unoptimized />
                       </div>
                     )}
@@ -392,7 +392,7 @@ export default function DashboardPage() {
               </section>
 
               <section id="customize" className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-                <GlassCard className="p-5 space-y-4" cut={12}>
+                <GlassCard className="pt-6 pr-6 pb-6 pl-8 space-y-4" cut={12}>
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="text-[9px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">CUSTOMIZE</p>
@@ -438,7 +438,7 @@ export default function DashboardPage() {
                 </GlassCard>
 
                 <CutCorner cut="md" className="w-full">
-                  <div className="p-5 space-y-4">
+                  <div className="pt-6 pr-6 pb-6 pl-8 space-y-4">
                     <p className="text-xs font-mono text-[var(--trench-text-muted)] tracking-widest uppercase">
                       Profile
                     </p>
@@ -483,7 +483,7 @@ export default function DashboardPage() {
 
               <section id="links">
                 <CutCorner cut="md" className="w-full">
-                  <div className="p-5 space-y-4">
+                  <div className="pt-6 pr-6 pb-6 pl-8 space-y-4">
                     <p className="text-xs font-mono text-[var(--trench-text-muted)] tracking-widest uppercase">
                       Links
                     </p>

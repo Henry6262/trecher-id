@@ -5,6 +5,7 @@ import { formatPnl } from '@/lib/utils';
 import { cached } from '@/lib/redis';
 import { resolveAvatarRows } from '@/lib/avatar-resolution';
 import type { TickerItem } from '@/lib/types';
+import { SynapticBackgroundLayer } from '@/components/synaptic-background-layer';
 
 export const dynamic = 'force-dynamic';
 
@@ -207,5 +208,18 @@ export default async function LandingPage({ searchParams }: { searchParams: Prom
         .sort((a, b) => b.winRateValue - a.winRateValue)
         .slice(0, 3);
 
-  return <LandingContent traders={traders} featuredProfiles={fallbackProfiles} ticker={ticker} leaderboardData={leaderboardData} refCode={refCode} />;
+  return (
+    <div className="min-h-screen relative" style={{ background: 'transparent' }}>
+      <SynapticBackgroundLayer />
+      <div className="relative" style={{ zIndex: 1 }}>
+        <LandingContent
+          traders={traders}
+          featuredProfiles={fallbackProfiles}
+          ticker={ticker}
+          leaderboardData={leaderboardData}
+          refCode={refCode}
+        />
+      </div>
+    </div>
+  );
 }

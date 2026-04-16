@@ -20,7 +20,6 @@ import { SectionRailNav } from '@/components/section-rail-nav';
 import { getPublicAvatarUrl } from '@/lib/images';
 import type { TickerItem } from '@/lib/types';
 
-const Lightspeed = dynamic(() => import('@/components/lightspeed'), { ssr: false });
 const ShaderCard = dynamic(() => import('@/components/shader-card'), { ssr: false });
 const DomeGallery = dynamic(() => import('@/components/DomeGallery'), { ssr: false });
 
@@ -631,22 +630,6 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
           </span>
         </div>
       )}
-
-      <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }}>
-        <Lightspeed
-          primaryColor="#00D4FF"
-          secondaryColor="#0066AA"
-          tertiaryColor="#00A3CC"
-          speed={0.38}
-          streakCount={140}
-          stretchFactor={0.045}
-          intensity={1.1}
-          fadePower={2.0}
-          opacity={1.0}
-          quality="medium"
-          interactionEnabled={false}
-        />
-      </div>
 
       <div className="relative" style={{ zIndex: 2 }}>
         {/* Activity Ticker */}

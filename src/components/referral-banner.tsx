@@ -39,7 +39,7 @@ export function ReferralBanner() {
   // Variant C: Max tier
   if (isMaxTier) {
     return (
-      <GlassCard className="p-5 relative overflow-hidden" cut={12}>
+      <GlassCard className="pt-6 pr-6 pb-6 pl-8 relative overflow-hidden" cut={12}>
         <div
           className="absolute -top-10 -right-10 w-[200px] h-[200px] rounded-full pointer-events-none"
           style={{ background: 'radial-gradient(circle, rgba(34,197,94,0.12) 0%, transparent 70%)' }}
@@ -78,7 +78,7 @@ export function ReferralBanner() {
   if (hasReferrals) {
     return (
       <Link href="/dashboard?panel=referrals" className="block">
-        <GlassCard className="p-5 relative overflow-hidden" cut={12}>
+        <GlassCard className="pt-6 pr-6 pb-6 pl-8 relative overflow-hidden" cut={12}>
           <div
             className="absolute -top-10 -right-10 w-[200px] h-[200px] rounded-full pointer-events-none"
             style={{ background: 'radial-gradient(circle, rgba(0,212,255,0.12) 0%, transparent 70%)' }}
@@ -118,7 +118,7 @@ export function ReferralBanner() {
 
   // Variant B: No referrals yet
   return (
-    <GlassCard className="p-5 relative overflow-hidden" cut={12}>
+    <GlassCard className="pt-6 pr-6 pb-6 pl-8 relative overflow-hidden" cut={12}>
       <div
         className="absolute -top-10 -right-10 w-[200px] h-[200px] rounded-full pointer-events-none"
         style={{ background: 'radial-gradient(circle, rgba(0,212,255,0.12) 0%, transparent 70%)' }}

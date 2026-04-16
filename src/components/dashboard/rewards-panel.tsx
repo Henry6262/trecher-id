@@ -44,7 +44,7 @@ export function RewardsPanel() {
   return (
     <div className="space-y-6">
       <section className="grid gap-4 md:grid-cols-3">
-        <GlassCard className="p-5" cut={12}>
+        <GlassCard className="pt-6 pr-6 pb-6 pl-8" cut={12}>
           <div className="flex items-center gap-3 mb-3">
             <div className="p-2 rounded-lg bg-[var(--trench-accent)]/10 border border-[var(--trench-accent)]/20">
               <Sparkles size={16} className="text-[var(--trench-accent)]" />
@@ -55,7 +55,7 @@ export function RewardsPanel() {
           <p className="mt-1 text-[10px] font-mono text-[var(--trench-text-muted)]">ALL-TIME REWARDS</p>
         </GlassCard>
 
-        <GlassCard className="p-5" cut={12}>
+        <GlassCard className="pt-6 pr-6 pb-6 pl-8" cut={12}>
           <div className="flex items-center gap-3 mb-3">
             <div className="p-2 rounded-lg bg-green-500/10 border border-green-500/20">
               <TrendingUp size={16} className="text-green-400" />
@@ -66,7 +66,7 @@ export function RewardsPanel() {
           <p className="mt-1 text-[10px] font-mono text-[var(--trench-text-muted)]">AWAITING PAYOUT</p>
         </GlassCard>
 
-        <GlassCard className="p-5" cut={12}>
+        <GlassCard className="pt-6 pr-6 pb-6 pl-8" cut={12}>
           <div className="flex items-center gap-3 mb-3">
             <div className="p-2 rounded-lg bg-blue-500/10 border border-blue-500/20">
               <Wallet size={16} className="text-blue-400" />
@@ -78,7 +78,7 @@ export function RewardsPanel() {
         </GlassCard>
       </section>
 
-      <GlassCard className="p-6" cut={16}>
+      <GlassCard className="pt-7 pr-7 pb-7 pl-9" cut={16}>
         <div className="flex items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-3">
             <History size={18} className="text-[var(--trench-text-muted)]" />
@@ -142,7 +142,7 @@ export function RewardsPanel() {
         )}
       </GlassCard>
 
-      <section className="p-6 cut-lg bg-[var(--trench-accent)]/5 border border-[var(--trench-accent)]/10">
+      <section className="pt-7 pr-7 pb-7 pl-9 cut-lg bg-[var(--trench-accent)]/5 border border-[var(--trench-accent)]/10">
         <div className="flex flex-col md:flex-row items-center gap-6">
           <div className="flex-1">
             <h3 className="text-lg font-mono font-bold text-white mb-2">HOW IT WORKS</h3>

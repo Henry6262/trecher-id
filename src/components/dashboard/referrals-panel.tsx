@@ -79,7 +79,7 @@ export function ReferralsPanel({ embedded = false }: { embedded?: boolean }) {
         <div className="text-sm font-mono text-red-400 text-center py-12">Failed to load referral data.</div>
       ) : (
         <>
-          <GlassCard className="p-5" cut={12}>
+          <GlassCard className="pt-6 pr-6 pb-6 pl-8" cut={12}>
             <p className="text-[9px] font-mono tracking-[2px] text-[var(--trench-text-muted)] mb-3">YOUR REFERRAL LINK</p>
             <div className="flex items-center gap-3">
               <div
@@ -100,7 +100,7 @@ export function ReferralsPanel({ embedded = false }: { embedded?: boolean }) {
               { label: 'PENDING', value: String(stats.pendingCount), icon: TrendingUp },
               { label: 'BOOST', value: stats.currentBoost > 0 ? `${stats.currentBoost}%` : '—', icon: Gift },
             ].map((stat) => (
-              <GlassCard key={stat.label} className="p-4 text-center" cut={8} glow={false}>
+              <GlassCard key={stat.label} className="pt-5 pr-5 pb-5 pl-6 text-center" cut={8} glow={false}>
                 <stat.icon size={16} className="mx-auto mb-1.5 text-[var(--trench-accent)]" />
                 <p className="text-lg font-mono font-bold text-[var(--trench-text)]">{stat.value}</p>
                 <p className="text-[9px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">{stat.label}</p>
@@ -108,7 +108,7 @@ export function ReferralsPanel({ embedded = false }: { embedded?: boolean }) {
             ))}
           </div>
 
-          <GlassCard className="p-5" cut={12}>
+          <GlassCard className="pt-6 pr-6 pb-6 pl-8" cut={12}>
             <p className="text-[9px] font-mono tracking-[2px] text-[var(--trench-text-muted)] mb-4">TIER PROGRESS</p>
 
             {stats.nextTier ? (
@@ -167,7 +167,7 @@ export function ReferralsPanel({ embedded = false }: { embedded?: boolean }) {
           </GlassCard>
 
           <CutCorner cut="md" className="w-full">
-            <div className="p-5 space-y-3">
+            <div className="pt-6 pr-6 pb-6 pl-8 space-y-3">
               <p className="text-[9px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">RECENT REFERRALS</p>
               {stats.recentReferrals.length > 0 ? (
                 <div className="space-y-2">

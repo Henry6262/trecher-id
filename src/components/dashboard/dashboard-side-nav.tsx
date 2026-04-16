@@ -94,7 +94,7 @@ export function DashboardSideNav({
   return (
     <aside className="hidden xl:block">
       <div className="sticky top-24 space-y-4">
-        <GlassCard className="p-5" cut={12}>
+        <GlassCard className="pt-6 pr-6 pb-6 pl-8" cut={12}>
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-[9px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">BUILD STATUS</p>
@@ -141,7 +141,7 @@ export function DashboardSideNav({
           </div>
         </GlassCard>
 
-        <GlassCard className="p-3" cut={12}>
+        <GlassCard className="pt-5 pr-4 pb-4 pl-6" cut={12}>
           <div className="mb-2 px-2 pt-1">
             <p className="text-[9px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">SECTIONS</p>
           </div>
@@ -187,7 +187,7 @@ export function DashboardSideNav({
         </GlassCard>
 
         {activePanel === 'overview' && overviewAnchors.length > 0 && (
-          <GlassCard className="p-4" cut={12} glow={false}>
+          <GlassCard className="pt-5 pr-5 pb-5 pl-7" cut={12} glow={false}>
             <div className="mb-2">
               <p className="text-[9px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">THIS PAGE</p>
             </div>
@@ -207,7 +207,7 @@ export function DashboardSideNav({
           </GlassCard>
         )}
 
-        <GlassCard className="p-4" cut={12} glow={false}>
+        <GlassCard className="pt-5 pr-5 pb-5 pl-7" cut={12} glow={false}>
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-[9px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">REFERRAL LOOP</p>
