@@ -510,7 +510,7 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
     href: `/${trader.username}`,
   }));
   return (
-    <div className="relative min-h-screen" style={{ background: '#050508' }}>
+    <div className="relative min-h-screen" style={{ background: 'transparent' }}>
       <PublicNav />
       <SectionRailNav />
 

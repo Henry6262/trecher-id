@@ -93,7 +93,7 @@ export function DashboardSideNav({
 }: DashboardSideNavProps) {
   return (
     <aside className="hidden xl:block">
-      <div className="sticky top-24 space-y-4">
+      <div className="sticky top-24 space-y-3">
         <GlassCard className="pt-6 pr-6 pb-6 pl-8" cut={12}>
           <div className="flex items-start justify-between gap-3">
             <div>

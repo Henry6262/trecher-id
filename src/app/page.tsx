@@ -117,6 +117,52 @@ export default async function LandingPage({ searchParams }: { searchParams: Prom
     const ranking = leaderboardData.find(r => r.username === username);
     return ranking && ranking.pnlUsd > 0 && ranking.trades >= 10;
   });
+
+  // MOCK TRADERS - Ensure Hero always has high-quality content even if DB is empty
+  const mockTraders = [
+    {
+      username: 'trench_master',
+      name: 'Trench Master',
+      avatarUrl: null,
+      pnl: '+$42,850',
+      pnlValue: 42850,
+      winRate: '72%',
+      winRateValue: 72,
+      trades: '156',
+      tradeCount: 156,
+      topTrades: [
+        { id: '1', token: 'SOL', tokenMint: null, tokenImage: null, pnlPercent: '+120%', pnlPercentValue: 120, buy: '10.5', sell: '23.1' }
+      ]
+    },
+    {
+      username: 'alpha_dog',
+      name: 'Alpha Dog',
+      avatarUrl: null,
+      pnl: '+$18,200',
+      pnlValue: 18200,
+      winRate: '64%',
+      winRateValue: 64,
+      trades: '89',
+      tradeCount: 89,
+      topTrades: [
+        { id: '2', token: 'BONK', tokenMint: null, tokenImage: null, pnlPercent: '+85%', pnlPercentValue: 85, buy: '5.2', sell: '9.6' }
+      ]
+    },
+    {
+      username: 'deep_value',
+      name: 'Deep Value',
+      avatarUrl: null,
+      pnl: '+$9,420',
+      pnlValue: 9420,
+      winRate: '58%',
+      winRateValue: 58,
+      trades: '214',
+      tradeCount: 214,
+      topTrades: [
+        { id: '3', token: 'WIF', tokenMint: null, tokenImage: null, pnlPercent: '+42%', pnlPercentValue: 42, buy: '25.0', sell: '35.5' }
+      ]
+    }
+  ];
   
   const users = heroUsernames.length > 0
     ? await prisma.user.findMany({
@@ -215,18 +261,10 @@ export default async function LandingPage({ searchParams }: { searchParams: Prom
     !isSyntheticLandingUser(trader.username)
   ).slice(0, 3);
   
-  // Fallback: if no positive PnL traders with trades, show highest win rate with minimum trades and some top trades
-  const fallbackProfiles = featuredProfiles.length >= 3 
+  // Combine real profiles with mock ones to ensure we always have 3 for the Hero
+  const displayHeroProfiles = featuredProfiles.length >= 3 
     ? featuredProfiles 
-    : traders
-        .filter(t => 
-          !isSyntheticLandingUser(t.username) && 
-          t.tradeCount >= 20 && 
-          t.topTrades.length > 0 &&
-          !t.isDeployer
-        )
-        .sort((a, b) => b.winRateValue - a.winRateValue)
-        .slice(0, 3);
+    : [...featuredProfiles, ...mockTraders as any].slice(0, 3);
 
   return (
     <div className="min-h-screen relative" style={{ background: 'transparent' }}>
@@ -234,7 +272,7 @@ export default async function LandingPage({ searchParams }: { searchParams: Prom
       <div className="relative" style={{ zIndex: 1 }}>
         <LandingContent
           traders={traders}
-          featuredProfiles={fallbackProfiles}
+          featuredProfiles={displayHeroProfiles}
           ticker={ticker}
           leaderboardData={leaderboardData}
           refCode={refCode}

@@ -58,7 +58,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div className="min-h-screen relative">
       <SynapticBackgroundLayer />
-      <div className="relative z-10 max-w-2xl mx-auto px-4 py-6">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 py-6">
         <div
           className="mb-6 flex items-center justify-between gap-3 cut-sm px-3 py-3"
           style={{

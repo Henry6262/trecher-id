@@ -247,7 +247,7 @@ export default function DashboardPage() {
           </CutButton>
         ))}
       </div>
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_296px]">
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_296px]">
         <div className="space-y-6">
           {activePanel === 'overview' && (
             <>

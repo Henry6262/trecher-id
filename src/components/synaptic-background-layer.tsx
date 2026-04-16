@@ -21,7 +21,7 @@ export function SynapticBackgroundLayer() {
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            'radial-gradient(circle at 50% 18%, rgba(0, 212, 250, 0.14) 0%, rgba(0, 212, 250, 0.04) 24%, transparent 52%), linear-gradient(180deg, rgba(5,5,8,0.16) 0%, rgba(5,5,8,0.34) 100%)',
+            'radial-gradient(circle at 50% 18%, rgba(0, 212, 250, 0.12) 0%, rgba(0, 212, 250, 0.03) 24%, transparent 52%), linear-gradient(180deg, rgba(5,5,8,0) 0%, rgba(5,5,8,0.4) 100%)',
         }}
       />
     </div>
