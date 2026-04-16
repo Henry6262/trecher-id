@@ -90,6 +90,7 @@ model Wallet {
 
   trades WalletTrade[]
   tradeEvents WalletTradeEvent[]
+  holdings TokenHolding[]
   syncAudits WalletSyncAudit[]
 
   @@unique([userId, address])
@@ -170,6 +171,25 @@ model WalletTradeEvent {
   @@unique([walletId, signature, tokenMint, type])
   @@index([walletId, timestamp])
   @@index([walletId, tokenMint, timestamp])
+}
+
+model TokenHolding {
+  id        String   @id @default(cuid())
+  walletId  String
+  wallet    Wallet   @relation(fields: [walletId], references: [id], onDelete: Cascade)
+
+  tokenMint String
+  tokenSymbol String
+  tokenName String?
+  tokenImageUrl String?
+  amount    Float
+  valueUsd  Float?
+
+  lastUpdated DateTime @default(now()) @updatedAt
+
+  @@unique([walletId, tokenMint])
+  @@index([walletId])
+  @@index([walletId, valueUsd])
 }
 
 model PinnedTrade {

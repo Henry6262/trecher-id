@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSessionUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { getTokenMetadata, getWalletTransactions } from '@/lib/helius';
+import { getTokenMetadata, getWalletTransactions, getAssetsByOwner } from '@/lib/helius';
 import { getSolPrice } from '@/lib/sol-price';
 import { invalidatePublicProfileCache } from '@/lib/profile';
 import { parseWalletTrades } from '@/lib/wallet-trade-parser';
@@ -135,6 +135,41 @@ export async function POST(req: Request) {
                 tokenImageUrl: meta?.image || null,
                 amountSol: event.amountSol,
                 timestamp: new Date(event.timestamp * 1000),
+              },
+            });
+          }
+        }
+
+        // Fetch current holdings via Helius DAS API
+        const holdings = await getAssetsByOwner(wallet.address);
+        if (holdings.length > 0) {
+          const holdingMints = holdings.map((h) => h.mint);
+          const holdingMetadata = await getTokenMetadata(holdingMints);
+
+          for (const holding of holdings) {
+            const meta = holdingMetadata.get(holding.mint);
+            const valueUsd = holding.mint === 'So11111111111111111111111111111111111111112'
+              ? (holding.amount / 1e9) * solPrice
+              : null; // Only calculate USD for SOL; other tokens need price feeds
+
+            await prisma.tokenHolding.upsert({
+              where: { walletId_tokenMint: { walletId: wallet.id, tokenMint: holding.mint } },
+              create: {
+                walletId: wallet.id,
+                tokenMint: holding.mint,
+                tokenSymbol: meta?.symbol || holding.symbol,
+                tokenName: meta?.name || holding.name,
+                tokenImageUrl: meta?.image || holding.image,
+                amount: holding.amount / Math.pow(10, holding.decimals),
+                valueUsd,
+              },
+              update: {
+                tokenSymbol: meta?.symbol || holding.symbol,
+                tokenName: meta?.name || holding.name,
+                tokenImageUrl: meta?.image || holding.image,
+                amount: holding.amount / Math.pow(10, holding.decimals),
+                valueUsd,
+                lastUpdated: new Date(),
               },
             });
           }

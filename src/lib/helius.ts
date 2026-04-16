@@ -381,6 +381,98 @@ async function fetchBuyCostViaAtaHistory(walletAddress: string, tokenMint: strin
   }
 }
 
+// ─── Holdings Fetching ────────────────────────────────
+
+export interface TokenAsset {
+  mint: string;
+  symbol: string;
+  name: string;
+  image: string | null;
+  amount: number; // raw amount (not decimals-adjusted)
+  decimals: number;
+}
+
+/**
+ * Fetch current token holdings for a wallet using Helius DAS API
+ * Returns all SPL tokens, NFTs, and native SOL
+ */
+export async function getAssetsByOwner(walletAddress: string): Promise<TokenAsset[]> {
+  try {
+    const data = await fetchHeliusJsonWithKeyRotation<{
+      result?: {
+        items?: Array<{
+          id?: string;
+          content?: {
+            metadata?: {
+              symbol?: string;
+              name?: string;
+            };
+            links?: {
+              image?: string | null;
+            };
+          };
+          token_info?: {
+            decimals?: number;
+            balance?: number;
+          };
+        }>;
+      };
+      error?: HeliusJsonRpcError;
+    }>((apiKey) => ({
+      url: getHeliusRpcUrl(apiKey),
+      init: {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          id: 'web3me-holdings',
+          method: 'getAssetsByOwner',
+          params: {
+            ownerAddress: walletAddress,
+            page: 1,
+            limit: 1000,
+            displayOptions: {
+              showFungible: true,
+              showNativeBalance: true,
+            },
+          },
+        }),
+      },
+    }));
+
+    const assets: TokenAsset[] = [];
+    const items = data.result?.items || [];
+
+    for (const item of items) {
+      if (!item?.id) continue;
+
+      const mint = item.id;
+      const symbol =
+        (item.content?.metadata?.symbol || mint.slice(0, 6)).toUpperCase();
+      const name = item.content?.metadata?.name || '';
+      const image = item.content?.links?.image || null;
+      const decimals = item.token_info?.decimals || 0;
+      const balance = item.token_info?.balance || 0;
+
+      if (balance > 0) {
+        assets.push({
+          mint,
+          symbol,
+          name,
+          image,
+          amount: balance,
+          decimals,
+        });
+      }
+    }
+
+    return assets;
+  } catch (error) {
+    console.error('[getAssetsByOwner] Error:', error);
+    return [];
+  }
+}
+
 export async function aggregateTradesByToken(
   txns: HeliusTransaction[],
   walletAddress: string,
