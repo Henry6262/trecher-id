@@ -161,6 +161,9 @@ export default async function LandingPage({ searchParams }: { searchParams: Prom
         tradeCount: ranking.trades,
         topTrades: user.pinnedTrades.map((trade) => {
           const transactions = trade.transactions as { type: string; amountSol: number }[] | undefined;
+          const totalBuy = transactions?.filter(t => t.type === 'BUY').reduce((sum, t) => sum + t.amountSol, 0) ?? 0;
+          const totalSell = transactions?.filter(t => t.type === 'SELL').reduce((sum, t) => sum + t.amountSol, 0) ?? 0;
+
           const resolvedTokenImage =
             trade.tokenImageUrl
             ?? tradeImageByUserAndMint.get(`${user.username}:${trade.tokenMint}`)
@@ -175,8 +178,8 @@ export default async function LandingPage({ searchParams }: { searchParams: Prom
               ? `${trade.totalPnlPercent >= 0 ? '+' : ''}${trade.totalPnlPercent.toFixed(0)}%`
               : `${trade.totalPnlSol >= 0 ? '+' : ''}${trade.totalPnlSol.toFixed(1)} SOL`,
             pnlPercentValue: trade.totalPnlPercent ?? trade.totalPnlSol,
-            buy: transactions?.find((t) => t.type === 'BUY')?.amountSol.toFixed(1) ?? null,
-            sell: transactions?.find((t) => t.type === 'SELL')?.amountSol.toFixed(1) ?? null,
+            buy: totalBuy > 0 ? totalBuy.toFixed(1) : null,
+            sell: totalSell > 0 ? totalSell.toFixed(1) : null,
           };
         }),
         topDeployments: user.tokenDeployments.map((dep) => ({
@@ -187,7 +190,7 @@ export default async function LandingPage({ searchParams }: { searchParams: Prom
           mcapAthUsd: dep.mcapAthUsd ?? null,
           devPnlSol: dep.devPnlSol ?? null,
         })),
-        isDeployer: user.tokenDeployments.length > user.pinnedTrades.length,
+        isDeployer: user.tokenDeployments.length >= 5 && user.tokenDeployments.length > user.pinnedTrades.length,
       };
     })
     .filter((trader): trader is NonNullable<typeof trader> => trader !== null);
@@ -197,14 +200,22 @@ export default async function LandingPage({ searchParams }: { searchParams: Prom
   }
 
   const featuredProfiles = traders.filter((trader) => 
-    trader.pnlValue > 0 && !isSyntheticLandingUser(trader.username)
+    trader.pnlValue > 0 && 
+    trader.topTrades.length > 0 && 
+    !trader.isDeployer &&
+    !isSyntheticLandingUser(trader.username)
   ).slice(0, 3);
   
-  // Fallback: if no positive PnL traders, show highest win rate with minimum trades
+  // Fallback: if no positive PnL traders with trades, show highest win rate with minimum trades and some top trades
   const fallbackProfiles = featuredProfiles.length >= 3 
     ? featuredProfiles 
     : traders
-        .filter(t => !isSyntheticLandingUser(t.username) && t.tradeCount >= 20)
+        .filter(t => 
+          !isSyntheticLandingUser(t.username) && 
+          t.tradeCount >= 20 && 
+          t.topTrades.length > 0 &&
+          !t.isDeployer
+        )
         .sort((a, b) => b.winRateValue - a.winRateValue)
         .slice(0, 3);
 

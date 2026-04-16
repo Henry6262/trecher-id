@@ -268,7 +268,11 @@ function PreviewCardInner({ featured }: { featured: TraderData }) {
   const profileHref = `/${featured.username}`;
   const pnlTone = getValueTone(featured.pnlValue);
   const hasTopTrades = featured.topTrades.length > 0;
-  const hasTopDeployments = (featured.topDeployments?.length ?? 0) > 0;
+  
+  // Find the single best trade to highlight prominently
+  const bestTrade = hasTopTrades 
+    ? [...featured.topTrades].sort((a, b) => b.pnlPercentValue - a.pnlPercentValue)[0] 
+    : null;
 
   return (
     <div className="w-full h-full flex flex-col" style={{ transform: 'perspective(1000px) rotateY(-4deg) rotateX(2deg)' }}>
@@ -317,172 +321,69 @@ function PreviewCardInner({ featured }: { featured: TraderData }) {
         {/* Divider */}
         <div className="mx-5" style={{ height: '1px', background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.06) 30%, rgba(255,255,255,0.06) 70%, transparent)' }} />
 
-        {/* Link — single */}
-        <div className="px-5 py-3">
-          <div className="text-[7px] font-mono tracking-[2px] text-[var(--trench-text-muted)] mb-2">LINKS</div>
-          <Link
-            href={profileHref}
-            className="group flex items-center gap-2.5 px-3 py-2 transition-colors"
-            style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', clipPath: 'polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px)' }}
-          >
-            <Globe size={14} className="flex-shrink-0 text-[rgba(0,212,255,0.7)]" />
-            <span className="text-[11px] text-white font-medium flex-1 truncate transition-colors group-hover:text-[var(--trench-accent)]">{featuredProfileLabel}</span>
-            <ChevronRight size={14} className="text-[rgba(255,255,255,0.2)] flex-shrink-0 transition-colors group-hover:text-[var(--trench-accent)]" />
-          </Link>
-        </div>
-
-        {/* Divider */}
-        <div className="mx-5" style={{ height: '1px', background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)' }} />
-
-        {/* Trades + Deployments sections — only rendered if data exists */}
-        {(hasTopTrades || hasTopDeployments) && (
-          <div className="py-3">
-            {/* TOP TRADES */}
-            {hasTopTrades && (
-              <>
-                <div className="px-5 text-[7px] font-mono tracking-[2px] text-[var(--trench-text-muted)] mb-2">TOP TRADES</div>
-                <div className="px-5">
-                  <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2">
-                    {featured.topTrades.map((trade) => {
-                      const tradeTone = getValueTone(trade.pnlPercentValue);
-                      const tradeHref = trade.tokenMint ? `https://dexscreener.com/solana/${trade.tokenMint}` : profileHref;
-                      const opensExternally = !!trade.tokenMint;
-                      return (
-                        <a
-                          key={trade.id}
-                          href={tradeHref}
-                          target={opensExternally ? '_blank' : undefined}
-                          rel={opensExternally ? 'noopener noreferrer' : undefined}
-                          className="group min-w-[210px] shrink-0 px-3 py-2.5 transition-colors"
-                          style={{
-                            background: 'rgba(255,255,255,0.02)',
-                            border: '1px solid rgba(255,255,255,0.05)',
-                            clipPath: 'polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px)',
-                            textDecoration: 'none',
-                          }}
-                        >
-                          <div className="flex items-center gap-2.5">
-                            <div
-                              className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full flex-shrink-0"
-                              style={{ background: 'rgba(0,212,255,0.1)', border: '1px solid rgba(0,212,255,0.18)' }}
-                            >
-                              {trade.tokenImage ? (
-                                <div className="relative h-full w-full">
-                                  <Image src={trade.tokenImage} alt={trade.token} fill className="object-cover" unoptimized />
-                                </div>
-                              ) : (
-                                <span className="text-[10px] font-bold text-white">{trade.token.replace('$', '').slice(0, 2)}</span>
-                              )}
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <div className="truncate text-[11px] font-bold text-white transition-colors group-hover:text-[var(--trench-accent)]">{trade.token}</div>
-                              {trade.pnlPercentValue !== 0 && (
-                                <div className="flex items-center gap-1.5 text-[10px] font-mono font-bold" style={{ color: tradeTone.color }}>
-                                  <span>{trade.pnlPercent}</span>
-                                  <ExternalLink size={10} className="text-[rgba(255,255,255,0.28)] opacity-0 transition-opacity group-hover:opacity-100" />
-                                </div>
-                              )}
-                            </div>
-                            <div className="flex flex-col gap-1 flex-shrink-0 ml-auto">
-                              {trade.buy && (
-                                <div className="rounded-[3px] border border-white/5 bg-white/[0.02] px-2 py-1 text-[8px] font-mono text-[var(--trench-text-muted)] whitespace-nowrap">
-                                  BUY <span className="text-white">{trade.buy}</span>
-                                </div>
-                              )}
-                              {trade.sell && (
-                                <div className="rounded-[3px] border border-white/5 bg-white/[0.02] px-2 py-1 text-[8px] font-mono text-[var(--trench-text-muted)] whitespace-nowrap">
-                                  SELL <span style={{ color: tradeTone.color }}>{trade.sell}</span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </a>
-                      );
-                    })}
+        {/* TOP TRADE HIGHLIGHT — More visible singular component */}
+        {bestTrade && (
+          <div className="px-5 py-4">
+            <div className="text-[7px] font-mono tracking-[2px] text-[var(--trench-accent)] mb-2 uppercase">Best Verified Trade</div>
+            <div 
+              className="group relative px-4 py-3 transition-all hover:bg-white/[0.04]"
+              style={{ 
+                background: 'rgba(0,212,255,0.04)', 
+                border: '1px solid rgba(0,212,255,0.15)',
+                clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)'
+              }}
+            >
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 overflow-hidden rounded-full border border-[rgba(0,212,255,0.3)] bg-black/40 flex-shrink-0">
+                  {bestTrade.tokenImage ? (
+                    <Image src={bestTrade.tokenImage} alt={bestTrade.token} width={40} height={40} className="h-full w-full object-cover" unoptimized />
+                  ) : (
+                    <div className="h-full w-full flex items-center justify-center text-xs font-bold text-white">{bestTrade.token.slice(0,2)}</div>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[14px] font-black text-white truncate">{bestTrade.token}</span>
+                    <span className="text-[16px] font-black font-mono text-[var(--trench-green)]">{bestTrade.pnlPercent}</span>
+                  </div>
+                  <div className="flex items-center gap-3 mt-1 text-[9px] font-mono">
+                    {bestTrade.buy && <div className="text-[var(--trench-text-muted)]">IN <span className="text-white">{bestTrade.buy} SOL</span></div>}
+                    {bestTrade.sell && <div className="text-[var(--trench-text-muted)]">OUT <span className="text-[var(--trench-green)]">{bestTrade.sell} SOL</span></div>}
                   </div>
                 </div>
-              </>
-            )}
-
-            {/* TOP DEPLOYMENTS */}
-            {hasTopDeployments && (
-              <>
-                <div className={`px-5 text-[7px] font-mono tracking-[2px] text-[var(--trench-text-muted)] mb-2 ${hasTopTrades ? 'mt-3' : ''}`}>TOKEN DEPLOYMENTS</div>
-                <div className="px-5">
-                  <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2">
-                    {featured.topDeployments!.map((dep) => {
-                      const isGraduated = dep.status === 'graduated' || dep.status === 'migrated';
-                      return (
-                        <div
-                          key={dep.id}
-                          className="min-w-[180px] shrink-0 px-3 py-2.5"
-                          style={{
-                            background: 'rgba(255,255,255,0.02)',
-                            border: '1px solid rgba(255,255,255,0.05)',
-                            clipPath: 'polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px)',
-                          }}
-                        >
-                          <div className="flex items-center gap-2.5">
-                            <div
-                              className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full flex-shrink-0"
-                              style={{ background: 'rgba(0,212,255,0.1)', border: '1px solid rgba(0,212,255,0.18)' }}
-                            >
-                              {dep.tokenImageUrl ? (
-                                <div className="relative h-full w-full">
-                                  <Image src={dep.tokenImageUrl} alt={dep.tokenSymbol} fill className="object-cover" unoptimized />
-                                </div>
-                              ) : (
-                                <span className="text-[10px] font-bold text-white">{dep.tokenSymbol.replace('$', '').slice(0, 2)}</span>
-                              )}
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <div className="truncate text-[11px] font-bold text-white">{dep.tokenSymbol}</div>
-                              <div className="flex items-center gap-1.5 mt-0.5">
-                                <span
-                                  className="text-[8px] font-mono px-1.5 py-0.5 rounded-[2px]"
-                                  style={{
-                                    background: isGraduated ? 'rgba(34,197,94,0.12)' : 'rgba(0,212,255,0.08)',
-                                    color: isGraduated ? '#22c55e' : 'rgba(0,212,255,0.7)',
-                                  }}
-                                >
-                                  {dep.status.toUpperCase()}
-                                </span>
-                                {dep.mcapAthUsd != null && dep.mcapAthUsd > 0 && (
-                                  <span className="text-[8px] font-mono text-[var(--trench-text-muted)]">
-                                    ATH ${dep.mcapAthUsd >= 1000 ? `${(dep.mcapAthUsd / 1000).toFixed(0)}K` : dep.mcapAthUsd.toFixed(0)}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </>
-            )}
-
-            {/* TRADE HISTORY — only show for non-deployer traders with trade data */}
-            {hasTopTrades && (
-              <>
-                <div className="px-5 mt-1 text-[7px] font-mono tracking-[2px] text-[var(--trench-text-muted)] mb-2">TRADE HISTORY</div>
-                <div className="px-5">
-                  <div
-                    className="px-3 py-2.5"
-                    style={{
-                      background: 'rgba(255,255,255,0.02)',
-                      border: '1px solid rgba(255,255,255,0.05)',
-                      clipPath: 'polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px)',
-                    }}
-                  >
-                    <MiniCalendar featured={featured} />
-                  </div>
-                </div>
-              </>
-            )}
+              </div>
+            </div>
           </div>
         )}
+
+        {/* TRADE HISTORY — GitHub style heatmap, more visible */}
+        <div className="px-5 py-3">
+          <div className="text-[7px] font-mono tracking-[2px] text-[var(--trench-text-muted)] mb-2 uppercase">16-Week Trading Pulse</div>
+          <div 
+            className="px-3 py-3"
+            style={{ 
+              background: 'rgba(255,255,255,0.02)', 
+              border: '1px solid rgba(255,255,255,0.05)',
+              clipPath: 'polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px)'
+            }}
+          >
+            <MiniCalendar featured={featured} />
+          </div>
+          <div className="mt-2 flex items-center justify-between">
+            <div className="text-[8px] font-mono text-[var(--trench-text-muted)] flex items-center gap-1.5">
+              <span>Less</span>
+              <div className="flex gap-1">
+                {[0.1, 0.4, 0.7, 1.0].map(o => (
+                  <div key={o} className="w-2 h-2 rounded-[1px]" style={{ background: `rgba(34,197,94,${o})` }} />
+                ))}
+              </div>
+              <span>More</span>
+            </div>
+            <Link href={profileHref} className="text-[9px] font-bold text-[var(--trench-accent)] hover:underline flex items-center gap-1">
+              FULL PROFILE <ChevronRight size={10} />
+            </Link>
+          </div>
+        </div>
 
         {/* Footer */}
         <div className="mt-auto flex justify-center py-2.5 border-t border-[rgba(255,255,255,0.04)]">
