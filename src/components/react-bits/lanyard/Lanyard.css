@@ -1,8 +1,9 @@
-.lanyard-canvas {
-  position: absolute;
-  inset: -60px -40px;
-  width: calc(100% + 80px);
-  height: calc(100% + 120px);
-  touch-action: none;
-  overflow: visible;
+.lanyard-wrapper {
+  position: relative;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
