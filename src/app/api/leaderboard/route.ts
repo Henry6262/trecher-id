@@ -2,89 +2,103 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { resolveAvatarRows } from '@/lib/avatar-resolution';
 import { cached } from '@/lib/redis';
+import { rateLimit, getClientIp } from '@/lib/rate-limit';
+import { logger } from '@/lib/logger';
 
 const VALID_PERIODS = ['1d', '3d', '7d', '14d', 'all'] as const;
 
 export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
+  try {
+    const ip = getClientIp(req);
+    const { allowed } = await rateLimit(`leaderboard:${ip}`, 30, 60);
+    if (!allowed) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
 
-  const periodParam = searchParams.get('period') ?? '7d';
-  const period = VALID_PERIODS.includes(periodParam as (typeof VALID_PERIODS)[number])
-    ? periodParam
-    : '7d';
-  const limit = Math.min(Math.max(parseInt(searchParams.get('limit') ?? '50', 10) || 50, 1), 100);
-  const offset = Math.max(parseInt(searchParams.get('offset') ?? '0', 10) || 0, 0);
+    const { searchParams } = new URL(req.url);
+    const periodParam = searchParams.get('period') ?? '7d';
+    const period = VALID_PERIODS.includes(periodParam as (typeof VALID_PERIODS)[number])
+      ? periodParam
+      : '7d';
+    const limit = Math.min(Math.max(parseInt(searchParams.get('limit') ?? '50', 10) || 50, 1), 100);
+    const offset = Math.max(parseInt(searchParams.get('offset') ?? '0', 10) || 0, 0);
 
-  const data = await cached(`leaderboard:${period}:${offset}:${limit}`, 120, async () => {
-    // Filter out dev bots, dev accounts, and axiom seeded accounts from public view
-    const devBotUsernames = ['dev-bot'];
-    const devPrefixes = ['dev_', 'dev-', 'deployer_'];
-    const devPatterns = ['_axiom', '_trader'];
+    const data = await cached(`leaderboard:${period}:${offset}:${limit}`, 120, async () => {
+      // Filter out dev bots, dev accounts, and axiom seeded accounts from public view
+      const devBotUsernames = ['dev-bot'];
+      const devPrefixes = ['dev_', 'dev-', 'deployer_'];
+      const devPatterns = ['_axiom', '_trader'];
 
-    const rankedRows = await prisma.userRanking.findMany({
-      where: { period, trades: { gt: 0 }, rank: { not: null } },
-      orderBy: { rank: 'asc' },
-      take: limit,
-      skip: offset,
-      include: {
-        user: {
-          select: {
-            username: true,
-            displayName: true,
-            avatarUrl: true,
-            isClaimed: true,
-          },
-        },
-      },
-    });
-
-    // Filter out dev accounts client-side (Prisma doesn't support complex NOT OR well)
-    const isDevAccount = (username: string) => {
-      if (devBotUsernames.includes(username)) return true;
-      if (devPrefixes.some(prefix => username.startsWith(prefix))) return true;
-      if (devPatterns.some(pattern => username.includes(pattern))) return true;
-      return false;
-    };
-
-    const filteredRows = rankedRows.filter(r => !isDevAccount(r.user.username));
-
-    const rows = filteredRows.length > 0
-      ? filteredRows
-      : await prisma.userRanking.findMany({
-          where: { period, trades: { gt: 0 } },
-          orderBy: [
-            { pnlUsd: 'desc' },
-            { winRate: 'desc' },
-            { trades: 'desc' },
-            { userId: 'asc' },
-          ],
-          take: limit,
-          skip: offset,
-          include: {
-            user: {
-              select: {
-                username: true,
-                displayName: true,
-                avatarUrl: true,
-                isClaimed: true,
-              },
+      const rankedRows = await prisma.userRanking.findMany({
+        where: { period, trades: { gt: 0 }, rank: { not: null } },
+        orderBy: { rank: 'asc' },
+        take: limit,
+        skip: offset,
+        include: {
+          user: {
+            select: {
+              username: true,
+              displayName: true,
+              avatarUrl: true,
+              isClaimed: true,
             },
           },
-        }).then(rows => rows.filter(r => !isDevAccount(r.user.username)));
+        },
+      });
 
-    return resolveAvatarRows(rows.map((r, i) => ({
-      rank: r.rank ?? (offset + i + 1),
-      username: r.user.username,
-      displayName: r.user.displayName,
-      avatarUrl: r.user.avatarUrl,
-      isClaimed: r.user.isClaimed,
-      pnlUsd: r.pnlUsd,
-      pnlSol: r.pnlSol,
-      winRate: r.winRate,
-      trades: r.trades,
-      updatedAt: r.updatedAt,
-    })));
-  });
+      // Filter out dev accounts client-side (Prisma doesn't support complex NOT OR well)
+      const isDevAccount = (username: string) => {
+        if (devBotUsernames.includes(username)) return true;
+        if (devPrefixes.some(prefix => username.startsWith(prefix))) return true;
+        if (devPatterns.some(pattern => username.includes(pattern))) return true;
+        return false;
+      };
 
-  return NextResponse.json(data);
+      const filteredRows = rankedRows.filter(r => !isDevAccount(r.user.username));
+
+      const rows = filteredRows.length > 0
+        ? filteredRows
+        : await prisma.userRanking.findMany({
+            where: { period, trades: { gt: 0 } },
+            orderBy: [
+              { pnlUsd: 'desc' },
+              { winRate: 'desc' },
+              { trades: 'desc' },
+              { userId: 'asc' },
+            ],
+            take: limit,
+            skip: offset,
+            include: {
+              user: {
+                select: {
+                  username: true,
+                  displayName: true,
+                  avatarUrl: true,
+                  isClaimed: true,
+                },
+              },
+            },
+          }).then(rows => rows.filter(r => !isDevAccount(r.user.username)));
+
+      return resolveAvatarRows(rows.map((r, i) => ({
+        rank: r.rank ?? (offset + i + 1),
+        username: r.user.username,
+        displayName: r.user.displayName,
+        avatarUrl: r.user.avatarUrl,
+        isClaimed: r.user.isClaimed,
+        pnlUsd: r.pnlUsd,
+        pnlSol: r.pnlSol,
+        winRate: r.winRate,
+        trades: r.trades,
+        updatedAt: r.updatedAt,
+      })));
+    });
+
+    const response = NextResponse.json(data);
+    response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=120');
+    return response;
+  } catch (err) {
+    logger.error('api/leaderboard', 'Failed to fetch leaderboard', err);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
 }

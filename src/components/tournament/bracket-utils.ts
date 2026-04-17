@@ -39,7 +39,7 @@ const GROUP_NAMES = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
  * Seeds 25-32: H G F E D C B A  (reverse)
  */
 export function seedGroups(traders: RankedTrader[]): Group[] {
-  const groups: RankedTrader[][] = Array.from({ length: 8 }, () => []);
+  const groups: (RankedTrader | null)[][] = Array.from({ length: 8 }, () => []);
 
   const sorted = [...traders].sort((a, b) => b.pnlUsd - a.pnlUsd).slice(0, 32);
 
@@ -47,12 +47,16 @@ export function seedGroups(traders: RankedTrader[]): Group[] {
     const row = Math.floor(i / 8);
     const col = i % 8;
     const groupIdx = row % 2 === 0 ? col : 7 - col;
-    groups[groupIdx].push(sorted[i]);
+    groups[groupIdx].push(sorted[i] || null);
   }
 
   return groups.map((traders, i) => ({
     name: GROUP_NAMES[i],
-    traders: [...traders].sort((a, b) => b.pnlUsd - a.pnlUsd),
+    traders: [...traders].sort((a, b) => {
+      if (!a) return 1;
+      if (!b) return -1;
+      return b.pnlUsd - a.pnlUsd;
+    }) as RankedTrader[],
   }));
 }
 
@@ -60,7 +64,11 @@ export function seedGroups(traders: RankedTrader[]): Group[] {
  * Resolve a matchup: higher pnlUsd wins.
  * Ties: winRate -> trades -> rank (lower rank = better).
  */
-export function resolveMatchup(t1: RankedTrader, t2: RankedTrader): RankedTrader {
+export function resolveMatchup(t1: RankedTrader | null, t2: RankedTrader | null): RankedTrader | null {
+  if (!t1 && !t2) return null;
+  if (!t1) return t2;
+  if (!t2) return t1;
+  
   if (t1.pnlUsd !== t2.pnlUsd) return t1.pnlUsd > t2.pnlUsd ? t1 : t2;
   if (t1.winRate !== t2.winRate) return t1.winRate > t2.winRate ? t1 : t2;
   if (t1.trades !== t2.trades) return t1.trades > t2.trades ? t1 : t2;
@@ -75,8 +83,8 @@ export function buildBracket(traders: RankedTrader[]): BracketData {
   const groups = seedGroups(traders);
 
   // Top 2 per group (already sorted by pnlUsd within each group)
-  const firsts = groups.map((g) => g.traders[0]);
-  const seconds = groups.map((g) => g.traders[1]);
+  const firsts = groups.map((g) => g.traders[0] || null);
+  const seconds = groups.map((g) => g.traders[1] || null);
 
   // R16 matchups:
   // R16-1: 1stA vs 2ndB, R16-2: 1stC vs 2ndD, R16-3: 1stE vs 2ndF, R16-4: 1stG vs 2ndH
@@ -101,8 +109,8 @@ export function buildBracket(traders: RankedTrader[]): BracketData {
   // QF: R16-1 vs R16-2, R16-3 vs R16-4, R16-5 vs R16-6, R16-7 vs R16-8
   const qf: Matchup[] = [];
   for (let i = 0; i < 4; i++) {
-    const t1 = r16[i * 2].winner!;
-    const t2 = r16[i * 2 + 1].winner!;
+    const t1 = r16[i * 2].winner;
+    const t2 = r16[i * 2 + 1].winner;
     qf.push({
       id: `QF-${i + 1}`,
       round: 'QF',
@@ -115,8 +123,8 @@ export function buildBracket(traders: RankedTrader[]): BracketData {
   // SF: QF-1 vs QF-2, QF-3 vs QF-4
   const sf: Matchup[] = [];
   for (let i = 0; i < 2; i++) {
-    const t1 = qf[i * 2].winner!;
-    const t2 = qf[i * 2 + 1].winner!;
+    const t1 = qf[i * 2].winner;
+    const t2 = qf[i * 2 + 1].winner;
     sf.push({
       id: `SF-${i + 1}`,
       round: 'SF',
@@ -127,12 +135,14 @@ export function buildBracket(traders: RankedTrader[]): BracketData {
   }
 
   // Final
+  const t1Final = sf[0]?.winner || null;
+  const t2Final = sf[1]?.winner || null;
   const finalMatchup: Matchup = {
     id: 'FINAL',
     round: 'FINAL',
-    trader1: sf[0].winner!,
-    trader2: sf[1].winner!,
-    winner: resolveMatchup(sf[0].winner!, sf[1].winner!),
+    trader1: t1Final,
+    trader2: t2Final,
+    winner: resolveMatchup(t1Final, t2Final),
   };
 
   return {

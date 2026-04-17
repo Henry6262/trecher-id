@@ -1,4 +1,5 @@
 import { redis } from './redis';
+import './config'; // Ensures validation runs
 
 const HELIUS_API_KEY = process.env.HELIUS_API_KEY;
 const HELIUS_BASE = 'https://api.helius.xyz/v0';

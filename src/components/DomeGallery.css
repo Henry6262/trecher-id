@@ -165,7 +165,7 @@ main.sphere-main {
 .viewer .frame {
   height: 100%;
   aspect-ratio: 1;
-  border-radius: var(--enlarge-radius, 32px);
+  border-radius: 0;
   display: flex;
 }
 
@@ -195,7 +195,7 @@ main.sphere-main {
 .viewer .enlarge {
   position: absolute;
   z-index: 30;
-  border-radius: var(--enlarge-radius, 32px);
+  border-radius: 0;
   overflow: hidden;
   transition:
     transform 500ms ease,

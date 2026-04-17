@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { rateLimit, getClientIp } from '@/lib/rate-limit';
+import { logger } from '@/lib/logger';
 
 /**
  * Smart Money API for the web3me Twitter extension.
@@ -10,6 +12,12 @@ export async function GET(
   { params }: { params: Promise<{ mint: string }> }
 ) {
   try {
+    const ip = getClientIp(request);
+    const { allowed } = await rateLimit(`token_trades:${ip}`, 60, 60);
+    if (!allowed) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
+
     const { mint } = await params;
 
     if (!mint) {
@@ -59,13 +67,17 @@ export async function GET(
       lastTradeAt: t.lastTradeAt
     }));
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       mint,
       traderCount: smartMoney.length,
       traders: smartMoney
     });
+    
+    // Cache for 5 minutes (extension-friendly)
+    response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600');
+    return response;
   } catch (error) {
-    console.error('[API_TRADES_TOKEN_GET] Error:', error);
+    logger.error('api/trades/token/[mint]', 'Failed to fetch token trades', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

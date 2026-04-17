@@ -6,9 +6,17 @@ import { getSolPrice } from '@/lib/sol-price';
 import { invalidatePublicProfileCache } from '@/lib/profile';
 import { parseWalletTrades } from '@/lib/wallet-trade-parser';
 import { recordWalletSyncFailure, recordWalletSyncSuccess } from '@/lib/wallet-sync-health';
+import { rateLimit, getClientIp } from '@/lib/rate-limit';
+import { logger } from '@/lib/logger';
 
 export async function POST(req: Request) {
   try {
+    const ip = getClientIp(req);
+    const { allowed } = await rateLimit(`wallet_sync:${ip}`, 10, 300); // Strict rate limit for sync
+    if (!allowed) {
+      return NextResponse.json({ error: 'Too many sync requests' }, { status: 429 });
+    }
+
     const session = await getSessionUser();
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -31,12 +39,13 @@ export async function POST(req: Request) {
     let solPrice = 150; // fallback
     try {
       solPrice = await getSolPrice();
-    } catch {
-      // use fallback
+    } catch (err) {
+      logger.warn('api/wallets/sync', 'Failed to fetch SOL price, using fallback', { error: String(err) });
     }
 
     let walletsUpdated = 0;
     let newTrades = 0;
+    const failures: { address: string; error: string }[] = [];
 
     for (const wallet of wallets) {
       try {
@@ -197,13 +206,14 @@ export async function POST(req: Request) {
         walletsUpdated++;
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown wallet sync error';
+        logger.error('api/wallets/sync', `Failed to sync wallet ${wallet.address}`, error);
         await recordWalletSyncFailure({
           walletId: wallet.id,
           syncMode: 'incremental',
           error: message,
           previousSignature: wallet.lastSignature,
         });
-        throw error;
+        failures.push({ address: wallet.address, error: message });
       }
     }
 
@@ -238,10 +248,14 @@ export async function POST(req: Request) {
 
     await invalidatePublicProfileCache(session.username);
 
-    return NextResponse.json({ ok: true, walletsUpdated, newTrades });
+    return NextResponse.json({ 
+      ok: failures.length < wallets.length, 
+      walletsUpdated, 
+      newTrades,
+      failures: failures.length > 0 ? failures : undefined
+    });
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error';
-    console.error('[wallets/sync] Error:', err);
-    return NextResponse.json({ ok: false, error: message }, { status: 500 });
+    logger.error('api/wallets/sync', 'Critical failure during wallet sync', err);
+    return NextResponse.json({ ok: false, error: 'Internal server error' }, { status: 500 });
   }
 }

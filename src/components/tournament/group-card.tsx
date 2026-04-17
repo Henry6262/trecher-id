@@ -33,6 +33,29 @@ export function GroupCard({ group }: { group: Group }) {
       <div className="relative z-10">
       {group.traders.map((trader, i) => {
         const qualified = i < 2;
+        
+        if (!trader) {
+          return (
+            <div
+              key={`empty-${i}`}
+              className="flex items-center gap-2.5 px-3.5"
+              style={{
+                height: 56,
+                opacity: 0.2,
+                borderLeft: '3px solid transparent',
+              }}
+            >
+              <span className="text-[12px] font-mono font-bold text-[var(--trench-text-muted)] w-5 text-center flex-shrink-0">
+                {i + 1}
+              </span>
+              <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex-shrink-0" />
+              <div className="min-w-0 flex-1">
+                <span className="block text-[11px] font-mono text-[var(--trench-text-muted)]">TBA</span>
+              </div>
+            </div>
+          );
+        }
+
         return (
           <Link
             key={trader.username}
