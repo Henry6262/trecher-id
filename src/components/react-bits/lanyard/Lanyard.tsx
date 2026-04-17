@@ -105,7 +105,7 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }: { maxSpeed?: nu
     ctx.fillStyle = '#080c12';
     ctx.fillRect(0, 0, 500, 700);
 
-    const logoImg = logo.image;
+    const logoImg = logo.image as HTMLImageElement;
     const logoSize = 200;
     const aspect = logoImg.width / logoImg.height;
     const logoW = logoSize;
@@ -127,7 +127,7 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }: { maxSpeed?: nu
     ctx.fillStyle = '#050508';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    const logoImg = logo.image;
+    const logoImg = logo.image as HTMLImageElement;
     const logoHeight = 100;
     const logoWidth = logoHeight * (logoImg.width / logoImg.height);
 
