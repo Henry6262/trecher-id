@@ -22,7 +22,6 @@ import { getPublicAvatarUrl } from '@/lib/images';
 import type { TickerItem } from '@/lib/types';
 
 const DomeGallery = dynamic(() => import('@/components/DomeGallery'), { ssr: false });
-const Lanyard = dynamic(() => import('@/components/react-bits/lanyard/Lanyard'), { ssr: false });
 
 interface TraderData {
   username: string;
