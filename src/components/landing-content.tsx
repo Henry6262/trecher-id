@@ -17,6 +17,7 @@ import { ActivityTicker } from '@/components/activity-ticker';
 import { JourneySection } from '@/components/journey-section';
 import { ReferralSection } from '@/components/referral-section';
 import { SectionRailNav } from '@/components/section-rail-nav';
+import { SocialRail } from '@/components/social-rail';
 import { getPublicAvatarUrl } from '@/lib/images';
 import type { TickerItem } from '@/lib/types';
 
@@ -513,6 +514,7 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
     <div className="relative min-h-screen" style={{ background: 'transparent' }}>
       <PublicNav />
       <SectionRailNav />
+      <SocialRail />
 
       {/* Logged-in indicator */}
       {authUser && (
@@ -547,9 +549,9 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
             <h1 className="mb-4 sm:mb-5 text-5xl sm:text-6xl md:text-7xl lg:text-8xl leading-[1.0] font-black tracking-tight text-white">
               <span className="flex items-center gap-3 sm:gap-4 flex-wrap">
                 <span>Your</span>
-                <span className="relative inline-block" style={{ width: '1.05em', height: '0.8em' }}>
+                <span className="relative inline-block" style={{ width: '1em', height: '1em' }}>
                   <Image
-                    src="/logo.png"
+                    src="/hero-logo.png"
                     alt="Web3Me"
                     fill
                     className="object-contain"
@@ -576,7 +578,13 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
 
           {/* Lanyard identity card — physics rope card in hero right column */}
           <div className="relative hidden md:flex md:items-stretch" style={{ height: 640, minWidth: 0 }}>
-            <Lanyard position={[0, 0, 18]} gravity={[0, -40, 0]} fov={22} transparent />
+            <Lanyard 
+              position={[0, 0, 18]} 
+              gravity={[0, -40, 0]} 
+              fov={22} 
+              transparent 
+              traderData={featuredProfiles[0]} 
+            />
           </div>
         </section>
 
