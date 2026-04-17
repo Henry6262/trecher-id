@@ -1,6 +1,6 @@
 import { fetchFxTwitterProfile } from '@/lib/fxtwitter';
 import { cached } from '@/lib/redis';
-import { getPublicAvatarUrl, normalizeImageUrl } from '@/lib/images';
+import { getPublicAvatarUrl, isDeployerUsername, normalizeImageUrl } from '@/lib/images';
 
 function isWeakAvatarUrl(url: string | null): boolean {
   return !!url && url.includes('unavatar.io/');
@@ -11,9 +11,14 @@ export async function resolveAvatarUrl(input: {
   avatarUrl?: string | null;
   isDeployer?: boolean;
 }): Promise<string> {
+  const isDeployer = input.isDeployer ?? isDeployerUsername(input.username);
   const normalized = normalizeImageUrl(input.avatarUrl);
   if (normalized && !isWeakAvatarUrl(normalized)) {
     return normalized;
+  }
+
+  if (isDeployer) {
+    return getPublicAvatarUrl(input.username, null, { isDeployer: true });
   }
 
   const profile = await cached(`avatar:${input.username.toLowerCase()}`, 60 * 60 * 6, async () =>
@@ -29,7 +34,7 @@ export async function resolveAvatarUrl(input: {
     return normalized;
   }
 
-  return getPublicAvatarUrl(input.username, null, { isDeployer: input.isDeployer });
+  return getPublicAvatarUrl(input.username, null, { isDeployer });
 }
 
 export async function resolveAvatarRows<T extends { username: string; avatarUrl: string | null }>(

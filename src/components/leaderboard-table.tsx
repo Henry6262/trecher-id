@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { AvatarImage } from '@/components/avatar-image';
 import { GlassCard } from '@/components/glass-card';
-import { getPublicAvatarUrl } from '@/lib/images';
+import { getPublicAvatarUrl, isDeployerUsername } from '@/lib/images';
 import { ChampionCrown } from '@/components/champion-badge';
 import { TournamentBracket } from './tournament/tournament-bracket';
 
@@ -117,6 +117,8 @@ export function LeaderboardTable({
     () => new Map(deployers.map((deployer) => [deployer.username, deployer])),
     [deployers],
   );
+  const shouldUseDeployerAvatar = (username: string) =>
+    mode === 'deployers' || isDeployerUsername(username);
 
   const activeList = mode === 'traders' ? traders : deployerAsTraders;
   const top3 = activeList.slice(0, 3);
@@ -279,7 +281,7 @@ export function LeaderboardTable({
             {top3[0] && (
               <Link href={`/${top3[0].username}`} className="block flex-[1.2] relative overflow-hidden cut-sm group" style={{ minHeight: '120px', background: 'rgba(8,12,22,0.35)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid rgba(0,212,255,0.12)' }}>
                 <div className="absolute inset-0 transition-transform duration-500 group-hover:scale-105" style={{
-                  backgroundImage: `url(${getPublicAvatarUrl(top3[0].username, top3[0].avatarUrl)})`,
+                  backgroundImage: `url(${getPublicAvatarUrl(top3[0].username, top3[0].avatarUrl, { isDeployer: shouldUseDeployerAvatar(top3[0].username) })})`,
                   backgroundSize: 'cover', backgroundPosition: 'center 20%',
                   filter: 'brightness(0.55) saturate(1.2)',
                 }} />
@@ -320,7 +322,7 @@ export function LeaderboardTable({
               {[top3[1], top3[2]].map((t, idx) => t && (
                 <Link key={t.username} href={`/${t.username}`} className="block flex-1 relative overflow-hidden cut-sm group" style={{ minHeight: '100px', background: 'rgba(8,12,22,0.35)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid rgba(0,212,255,0.08)' }}>
                   <div className="absolute inset-0 transition-transform duration-500 group-hover:scale-105" style={{
-                    backgroundImage: `url(${getPublicAvatarUrl(t.username, t.avatarUrl)})`,
+                    backgroundImage: `url(${getPublicAvatarUrl(t.username, t.avatarUrl, { isDeployer: shouldUseDeployerAvatar(t.username) })})`,
                     backgroundSize: 'cover', backgroundPosition: 'center 20%',
                     filter: 'brightness(0.5) saturate(1.1)',
                   }} />
@@ -362,7 +364,14 @@ export function LeaderboardTable({
                 style={{ background: 'rgba(8,12,22,0.25)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', borderBottom: '1px solid rgba(255,255,255,0.02)', textDecoration: 'none' }}>
                 <span className="w-[22px] font-mono text-[11px] font-bold text-[#444]">{t.rank}</span>
                 <div className="w-[28px] h-[28px] rounded-full overflow-hidden flex-shrink-0" style={{ border: '1.5px solid rgba(255,255,255,0.08)' }}>
-                  <AvatarImage src={getPublicAvatarUrl(t.username, t.avatarUrl, { isDeployer: mode === 'deployers' })} alt={t.displayName} width={28} height={28} className="w-full h-full object-cover" />
+                  <AvatarImage
+                    src={getPublicAvatarUrl(t.username, t.avatarUrl, { isDeployer: shouldUseDeployerAvatar(t.username) })}
+                    alt={t.displayName}
+                    width={28}
+                    height={28}
+                    className="w-full h-full object-cover"
+                    isDeployer={shouldUseDeployerAvatar(t.username)}
+                  />
                 </div>
                 <div className="flex-1 min-w-0 pl-2">
                   <span className="block text-[12px] font-semibold text-white truncate">

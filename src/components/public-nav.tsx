@@ -67,6 +67,17 @@ const NAV_CARDS: NavCard[] = [
     ],
   },
   {
+    label: 'Token',
+    description: 'View the token contract and trading data on Dexscreener.',
+    href: 'https://dexscreener.com/solana/HU5uzDSaiDYBkoHQikf2mRXEEWquRY9xNYM2ErkNpump',
+    accent: '#00ff88',
+    eyebrow: 'Contract',
+    external: true,
+    links: [
+      { label: 'Dexscreener', href: 'https://dexscreener.com/solana/HU5uzDSaiDYBkoHQikf2mRXEEWquRY9xNYM2ErkNpump', icon: BarChart3, external: true },
+    ],
+  },
+  {
     label: 'X',
     description: 'Follow launch updates, ranking posts, product drops, and account announcements from the main Web3Me feed.',
     href: X_URL,
