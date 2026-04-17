@@ -516,16 +516,6 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
       <SectionRailNav />
       <SocialRail />
 
-      {/* Lanyard — right-half fixed layer, highest z-index */}
-      <div className="fixed right-0 top-0 h-screen w-1/2 z-[9999] overflow-hidden">
-        <Lanyard
-          position={[0, 0, 26]}
-          gravity={[0, -40, 0]}
-          fov={24}
-          transparent
-          traderData={featuredProfiles?.[0]}
-        />
-      </div>
 
       {/* Logged-in indicator */}
       {authUser && (
@@ -550,14 +540,14 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
         <ActivityTicker items={ticker} />
 
         {/* Hero */}
-        <section id="hero" className="mx-auto grid max-w-[1000px] scroll-mt-36 grid-cols-1 md:grid-cols-2 items-stretch gap-4 sm:gap-6 px-4 pt-10 pb-8 sm:pt-14 sm:pb-10 sm:px-6 lg:pt-16 lg:pb-12 pointer-events-none">
-          <div className="pointer-events-auto">
+        <section id="hero" className="mx-auto flex flex-col items-center justify-center scroll-mt-36 px-4 pt-10 pb-8 sm:pt-14 sm:pb-10 sm:px-6 lg:pt-16 lg:pb-12 pointer-events-none min-h-screen">
+          <div className="pointer-events-auto text-center">
             <div className="cut-xs mb-4 sm:mb-6 inline-flex items-center gap-1.5 border border-[rgba(0,212,255,0.12)] bg-[rgba(0,212,255,0.08)] px-2.5 py-1 sm:px-3 text-[8px] sm:text-[10px] font-mono tracking-[2px] text-[var(--trench-accent)]">
               <Check size={8} strokeWidth={3} className="sm:w-[10px] sm:h-[10px]" />
               <ShinyText text="ON-CHAIN VERIFIED" speed={3} />
             </div>
 
-            <h1 className="mb-4 sm:mb-5 text-5xl sm:text-6xl md:text-7xl lg:text-8xl leading-[1.0] font-black tracking-tight text-white">
+            <h1 className="mb-4 sm:mb-5 text-7xl sm:text-8xl md:text-9xl lg:text-[150px] leading-[1.0] font-black tracking-tight text-white">
               <span className="flex items-center gap-3 sm:gap-4 flex-wrap">
                 <span>Your</span>
                 <span className="relative inline-block" style={{ width: '1.3em', height: '1.3em' }}>
