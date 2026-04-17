@@ -14,7 +14,7 @@ const SOCIAL_LINKS = [
   {
     id: 'dex',
     icon: <Image src="/icons/dexscreener.webp" alt="Dex" width={18} height={18} />,
-    href: '#', // Placeholder
+    href: 'https://dexscreener.com/solana/HU5uzDSaiDYBkoHQikf2mRXEEWquRY9xNYM2ErkNpump',
     label: 'DexScreener',
   },
   {
@@ -27,7 +27,7 @@ const SOCIAL_LINKS = [
 
 export function SocialRail() {
   const [copied, setMounted] = useState(false);
-  const CA = 'COMINGSOON'; // Placeholder for Contract Address
+  const CA = 'HU5uzDSaiDYBkoHQikf2mRXEEWquRY9xNYM2ErkNpump';
 
   const copyCA = () => {
     navigator.clipboard.writeText(CA);
