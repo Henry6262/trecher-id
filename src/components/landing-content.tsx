@@ -540,7 +540,7 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
         <ActivityTicker items={ticker} />
 
         {/* Hero */}
-        <section id="hero" className="mx-auto flex flex-col items-center justify-center scroll-mt-36 px-4 pt-16 pb-12 sm:pt-20 sm:pb-16 sm:px-6 lg:pt-24 lg:pb-20 pointer-events-none">
+        <section id="hero" className="mx-auto flex flex-col items-center justify-center scroll-mt-36 px-4 pt-16 pb-12 sm:pt-20 sm:pb-16 sm:px-6 lg:pt-24 lg:pb-20 pointer-events-none relative z-10">
           <div className="pointer-events-auto text-center">
             <div className="cut-xs mb-4 sm:mb-6 inline-flex items-center gap-1.5 border border-[rgba(0,212,255,0.12)] bg-[rgba(0,212,255,0.08)] px-2.5 py-1 sm:px-3 text-[8px] sm:text-[10px] font-mono tracking-[2px] text-[var(--trench-accent)]">
               <Check size={8} strokeWidth={3} className="sm:w-[10px] sm:h-[10px]" />
