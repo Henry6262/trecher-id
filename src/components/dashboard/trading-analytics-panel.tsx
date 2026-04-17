@@ -36,9 +36,10 @@ export function TradingAnalyticsPanel({ username }: { username?: string }) {
         setLoading(true);
         setError(null);
 
-        const [statsRes, tradesRes] = await Promise.all([
+        const [statsRes, tradesRes, pnlRes] = await Promise.all([
           fetch(`/api/profile/stats?username=${username}&period=${period}`),
           fetch(`/api/profile/recent-trades?username=${username}&limit=15`),
+          fetch(`/api/profile/pnl-history?username=${username}`),
         ]);
 
         if (!statsRes.ok || !tradesRes.ok) {
@@ -47,9 +48,14 @@ export function TradingAnalyticsPanel({ username }: { username?: string }) {
 
         const stats = await statsRes.json();
         const trades = await tradesRes.json();
+        const pnlHistory = pnlRes.ok ? await pnlRes.json() : { series: [] };
 
-        // TODO: Fetch daily PnL from /api/profile/pnl-history or generate from trades
-        const dailyPnL: AnalyticsData['dailyPnL'] = [];
+        // Convert cumulative SOL series → per-day deltas for the calendar heatmap
+        const cumulativeSeries: { time: string; value: number }[] = pnlHistory.series ?? [];
+        const dailyPnL: AnalyticsData['dailyPnL'] = cumulativeSeries.map((point, i) => ({
+          date: new Date(point.time),
+          pnlUsd: i === 0 ? point.value : point.value - cumulativeSeries[i - 1].value,
+        }));
 
         setData({
           totalPnlUsd: stats.pnlUsd,

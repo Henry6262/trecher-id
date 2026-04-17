@@ -8,7 +8,7 @@ import { resolveAvatarRows } from '@/lib/avatar-resolution';
 export const dynamic = 'force-dynamic';
 
 const DEV_BOT_USERNAMES = new Set(['dev-bot']);
-const DEV_PREFIXES = ['dev_', 'dev-'];
+const DEV_PREFIXES = ['dev_', 'dev-', 'deployer_'];
 const DEV_PATTERNS = ['_axiom', '_trader'];
 
 function isDevAccount(username: string): boolean {

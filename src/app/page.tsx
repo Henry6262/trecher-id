@@ -14,6 +14,7 @@ function isSyntheticLandingUser(username: string) {
     username === 'dev-bot' ||
     username.startsWith('dev_') ||
     username.startsWith('dev-') ||
+    username.startsWith('deployer_') ||
     username.includes('_axiom') ||
     username.includes('_trader')
   );
@@ -62,6 +63,9 @@ export default async function LandingPage({ searchParams }: { searchParams: Prom
   let ticker: TickerItem[] = [];
   let leaderboardData: { rank: number; username: string; displayName: string; avatarUrl: string | null; isClaimed: boolean; pnlUsd: number; pnlSol: number; winRate: number; trades: number }[] = [];
 
+  // MOCK TRADERS - Ensure Hero always has high-quality content even if DB is empty
+  let mockTraders: typeof traders = [];
+
   try {
   // Fetch ticker items directly (no internal HTTP — same Prisma call as /api/ticker)
   ticker = await cached<TickerItem[]>('ticker:recent', 60, async () => {
@@ -82,14 +86,14 @@ export default async function LandingPage({ searchParams }: { searchParams: Prom
 
   // Fetch leaderboard server-side for instant render
   const rankedRows = await prisma.userRanking.findMany({
-    where: { period: '7d', trades: { gt: 0 }, rank: { not: null } },
+    where: { period: 'all', trades: { gt: 0 }, rank: { not: null } },
     orderBy: { rank: 'asc' },
     include: { user: { select: { username: true, displayName: true, avatarUrl: true, isClaimed: true } } },
   });
   const rankings = rankedRows.length > 0
     ? rankedRows
     : await prisma.userRanking.findMany({
-        where: { period: '7d', trades: { gt: 0 } },
+        where: { period: 'all', trades: { gt: 0 } },
         orderBy: [
           { pnlUsd: 'desc' },
           { winRate: 'desc' },
@@ -111,15 +115,15 @@ export default async function LandingPage({ searchParams }: { searchParams: Prom
   })));
 
   const rankedUsernames = pickLandingGalleryUsernames(leaderboardData);
-  
+
   // Filter for traders with positive PnL and real activity for hero section
   const heroUsernames = rankedUsernames.filter(username => {
     const ranking = leaderboardData.find(r => r.username === username);
     return ranking && ranking.pnlUsd > 0 && ranking.trades >= 10;
   });
 
-  // MOCK TRADERS - Ensure Hero always has high-quality content even if DB is empty
-  const mockTraders = [
+  // Initialize mock traders
+  mockTraders = [
     {
       username: 'trench_master',
       name: 'Trench Master',
@@ -130,9 +134,11 @@ export default async function LandingPage({ searchParams }: { searchParams: Prom
       winRateValue: 72,
       trades: '156',
       tradeCount: 156,
+      isDeployer: false,
       topTrades: [
         { id: '1', token: 'SOL', tokenMint: null, tokenImage: null, pnlPercent: '+120%', pnlPercentValue: 120, buy: '10.5', sell: '23.1' }
-      ]
+      ],
+      topDeployments: []
     },
     {
       username: 'alpha_dog',
@@ -144,9 +150,11 @@ export default async function LandingPage({ searchParams }: { searchParams: Prom
       winRateValue: 64,
       trades: '89',
       tradeCount: 89,
+      isDeployer: false,
       topTrades: [
         { id: '2', token: 'BONK', tokenMint: null, tokenImage: null, pnlPercent: '+85%', pnlPercentValue: 85, buy: '5.2', sell: '9.6' }
-      ]
+      ],
+      topDeployments: []
     },
     {
       username: 'deep_value',
@@ -158,9 +166,11 @@ export default async function LandingPage({ searchParams }: { searchParams: Prom
       winRateValue: 58,
       trades: '214',
       tradeCount: 214,
+      isDeployer: false,
       topTrades: [
         { id: '3', token: 'WIF', tokenMint: null, tokenImage: null, pnlPercent: '+42%', pnlPercentValue: 42, buy: '25.0', sell: '35.5' }
-      ]
+      ],
+      topDeployments: []
     }
   ];
   

@@ -5,6 +5,7 @@ import type { Metadata } from 'next';
 import { buildProfileMetadata, getPublicProfileData } from '@/lib/profile';
 import { SynapticBackgroundLayer } from '@/components/synaptic-background-layer';
 import { BackButton } from '@/components/back-button';
+import { TradingAnalyticsPanel } from '@/components/dashboard/trading-analytics-panel';
 
 interface Props {
   params: Promise<{ username: string }>;
@@ -50,6 +51,9 @@ export default async function ProfilePage({ params }: Props) {
           degenScore={profile.degenScore}
           isOwner={isOwner}
         />
+        <div className="mx-auto max-w-2xl mt-6">
+          <TradingAnalyticsPanel username={profile.user.username} />
+        </div>
       </div>
     </div>
   );

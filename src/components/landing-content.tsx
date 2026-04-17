@@ -623,7 +623,7 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
           </div>
 
           <LeaderboardTable
-            initialPeriod="7d"
+            initialPeriod="all"
             initialTraders={leaderboardData}
             variant="full"
             availableModes={['traders']}
@@ -692,7 +692,7 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
           </div>
 
           <LeaderboardTable
-            initialPeriod="7d"
+            initialPeriod="all"
             initialTraders={leaderboardData}
             variant={cupView === 'bracket' ? 'bracket' : 'full'}
             availableModes={['traders']}

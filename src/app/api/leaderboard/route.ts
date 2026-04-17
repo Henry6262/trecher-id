@@ -18,7 +18,7 @@ export async function GET(req: Request) {
   const data = await cached(`leaderboard:${period}:${offset}:${limit}`, 120, async () => {
     // Filter out dev bots, dev accounts, and axiom seeded accounts from public view
     const devBotUsernames = ['dev-bot'];
-    const devPrefixes = ['dev_', 'dev-'];
+    const devPrefixes = ['dev_', 'dev-', 'deployer_'];
     const devPatterns = ['_axiom', '_trader'];
 
     const rankedRows = await prisma.userRanking.findMany({
