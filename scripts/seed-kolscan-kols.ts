@@ -14,13 +14,10 @@ const pool = new pg.Pool({ connectionString: url });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
-// 4 Helius API keys for rotation
-const HELIUS_KEYS = [
-  process.env.HELIUS_API_KEY || '6f853f8e-1c23-40c7-9a2d-f14977331725',
-  '6f853f8e-1c23-40c7-9a2d-f14977331725',
-  '8020970f-a413-450c-99bc-e516c06860a5',
-  'a70cdbc1-8fd1-4d30-ac3d-762d1f35102f',
-];
+// Helius API key (required)
+const HELIUS_KEY = process.env.HELIUS_API_KEY;
+if (!HELIUS_KEY) throw new Error('HELIUS_API_KEY is not set');
+const HELIUS_KEYS = [HELIUS_KEY];
 const HELIUS_BASE = 'https://api.helius.xyz/v0';
 const SOL_PRICE = 86; // approximate
 

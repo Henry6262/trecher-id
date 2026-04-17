@@ -29,13 +29,8 @@ const pool = new pg.Pool({ connectionString: DATABASE_URL });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
-// Round-robin Helius API keys to avoid rate limits
-const HELIUS_KEYS = [
-  process.env.HELIUS_API_KEY,
-  '6f853f8e-1c23-40c7-9a2d-f14977331725',
-  '8020970f-a413-450c-99bc-e516c06860a5',
-  'a70cdbc1-8fd1-4d30-ac3d-762d1f35102f',
-].filter(Boolean) as string[];
+// Helius API key (required)
+const HELIUS_KEYS = process.env.HELIUS_API_KEY ? [process.env.HELIUS_API_KEY] : [];
 
 if (HELIUS_KEYS.length === 0) { console.error('❌ No HELIUS_API_KEY found'); process.exit(1); }
 console.log(`🔑 Using ${HELIUS_KEYS.length} Helius API keys for rotation`);

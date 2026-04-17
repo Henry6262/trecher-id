@@ -7,7 +7,8 @@
  * Run: npx tsx scripts/scrape-kols.ts
  */
 
-const HELIUS_API_KEY = process.env.HELIUS_API_KEY || '6f853f8e-1c23-40c7-9a2d-f14977331725';
+const HELIUS_API_KEY = process.env.HELIUS_API_KEY;
+if (!HELIUS_API_KEY) throw new Error('HELIUS_API_KEY is not set');
 const HELIUS_BASE = 'https://api.helius.xyz/v0';
 
 // Known Solana CT traders — these are public figures with known trading wallets

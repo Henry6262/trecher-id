@@ -3,18 +3,7 @@ import { redis } from './redis';
 const HELIUS_API_KEY = process.env.HELIUS_API_KEY;
 const HELIUS_BASE = 'https://api.helius.xyz/v0';
 const TOKEN_METADATA_TTL_SECONDS = 60 * 60 * 24;
-const BUILTIN_HELIUS_FALLBACK_KEYS = [
-  '6f853f8e-1c23-40c7-9a2d-f14977331725',
-  '8020970f-a413-450c-99bc-e516c06860a5',
-  'a70cdbc1-8fd1-4d30-ac3d-762d1f35102f',
-];
-const HELIUS_API_KEYS = Array.from(
-  new Set(
-    [HELIUS_API_KEY, ...BUILTIN_HELIUS_FALLBACK_KEYS].filter(
-      (apiKey): apiKey is string => Boolean(apiKey),
-    ),
-  ),
-);
+const HELIUS_API_KEYS = HELIUS_API_KEY ? [HELIUS_API_KEY] : [];
 
 // ─── Token Metadata via Helius DAS ────────────────────────────
 
