@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Check, Globe, ChevronRight, ExternalLink, Info, X } from 'lucide-react';
+import { Check, Globe, ChevronRight, ExternalLink, Info, X, Copy } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth';
 import { AvatarImage } from '@/components/avatar-image';
 import { CutButton } from '@/components/cut-button';
@@ -571,11 +571,15 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
 
             <div className="flex flex-wrap items-center justify-center gap-3">
               <button
-                onClick={() => navigator.clipboard.writeText('HU5uzDSaiDYBkoHQikf2mRXEEWquRY9xNYM2ErkNpump')}
-                className="p-2 hover:opacity-70 transition-opacity"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigator.clipboard.writeText('HU5uzDSaiDYBkoHQikf2mRXEEWquRY9xNYM2ErkNpump');
+                }}
+                className="p-2 hover:opacity-70 transition-opacity text-[var(--trench-accent)]"
                 title="Copy contract address"
+                type="button"
               >
-                📋
+                <Copy size={20} />
               </button>
               <CutButton href="/dashboard" size="lg">Participate</CutButton>
             </div>
