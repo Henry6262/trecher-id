@@ -100,7 +100,7 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }: { maxSpeed?: nu
     canvas.width = 500;
     canvas.height = 700;
     const ctx = canvas.getContext('2d');
-    if (!ctx) return materials.base.map;
+    if (!ctx) return logo;
 
     ctx.fillStyle = '#080c12';
     ctx.fillRect(0, 0, 500, 700);
@@ -115,7 +115,7 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }: { maxSpeed?: nu
     const tex = new THREE.CanvasTexture(canvas);
     tex.flipY = false;
     return tex;
-  }, [logo, materials.base.map]);
+  }, [logo]);
 
   const strapTexture = useMemo(() => {
     const canvas = document.createElement('canvas');
