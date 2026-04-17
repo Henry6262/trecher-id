@@ -87,6 +87,7 @@ export default function Lanyard({
 function CardContent({ data }: { data?: TraderData }) {
   const pfp = useTexture(data?.avatarUrl || '/avatar-fallback.svg');
   const logo = useTexture('/hero-logo.png');
+  const showTrader = process.env.NEXT_PUBLIC_DEBUG_LANYARD_TRADER === 'true';
   
   // Heatmap calculation logic adapted from LandingContent
   const heatmapCells = useMemo(() => {
@@ -110,37 +111,37 @@ function CardContent({ data }: { data?: TraderData }) {
       </mesh>
       
       {/* PFP with Web3Me fallback */}
-      <mesh position={[-1.4, 1.8, 0.01]}>
-        <planeGeometry args={[1.5, 1.5]} />
-        <meshBasicMaterial map={data?.avatarUrl ? pfp : logo} transparent />
+      <mesh position={[-1.2, 1.6, 0.01]}>
+        <planeGeometry args={[1.2, 1.2]} />
+        <meshBasicMaterial map={showTrader && data?.avatarUrl ? pfp : logo} transparent />
       </mesh>
       
       {/* Name + Handle */}
-      <Text position={[0.2, 2.2, 0.01]} fontSize={0.35} color="white" anchorX="left">
-        {data?.name || 'TRADER'}
+      <Text position={[0.2, 2.0, 0.01]} fontSize={0.28} color="white" anchorX="left">
+        {showTrader ? (data?.name || 'TRADER') : 'WEB3ME'}
       </Text>
-      <Text position={[0.2, 1.8, 0.01]} fontSize={0.25} color="#888" anchorX="left">
-        @{data?.username || 'unknown'}
+      <Text position={[0.2, 1.6, 0.01]} fontSize={0.2} color="#888" anchorX="left">
+        {showTrader ? `@${data?.username || 'unknown'}` : '@web3meid'}
       </Text>
-      <Text position={[0.2, 1.4, 0.01]} fontSize={0.45} color={data?.pnlValue && data.pnlValue >= 0 ? '#22c55e' : '#ef4444'} anchorX="left">
-        {data?.pnl || '$0'}
+      <Text position={[0.2, 1.2, 0.01]} fontSize={0.38} color={data?.pnlValue && data.pnlValue >= 0 ? '#22c55e' : '#ef4444'} anchorX="left">
+        {showTrader ? (data?.pnl || '$0') : 'BORN IN THE TRENCHES'}
       </Text>
 
       {/* Stats */}
-      <group position={[-1.7, 0.2, 0.01]}>
-        <Text position={[0, 0, 0]} fontSize={0.18} color="#555" anchorX="left">WIN RATE</Text>
-        <Text position={[0, -0.25, 0]} fontSize={0.3} color="white" anchorX="left">{data?.winRate || '0%'}</Text>
+      <group position={[-1.5, 0.1, 0.01]}>
+        <Text position={[0, 0, 0]} fontSize={0.15} color="#555" anchorX="left">{showTrader ? 'WIN RATE' : 'SUPPLY'}</Text>
+        <Text position={[0, -0.22, 0]} fontSize={0.25} color="white" anchorX="left">{showTrader ? (data?.winRate || '0%') : '1,000,000,000'}</Text>
         
-        <Text position={[2, 0, 0]} fontSize={0.18} color="#555" anchorX="left">TRADES</Text>
-        <Text position={[2, -0.25, 0]} fontSize={0.3} color="white" anchorX="left">{data?.trades || '0'}</Text>
+        <Text position={[1.8, 0, 0]} fontSize={0.15} color="#555" anchorX="left">{showTrader ? 'TRADES' : 'SYMBOL'}</Text>
+        <Text position={[1.8, -0.22, 0]} fontSize={0.25} color="white" anchorX="left">{showTrader ? (data?.trades || '0') : '$W3ME'}</Text>
       </group>
 
       {/* Heatmap */}
-      <group position={[-1.8, -1.2, 0.01]}>
-        <Text position={[0, 0.4, 0]} fontSize={0.15} color="#444" anchorX="left" letterSpacing={0.1}>16-WEEK TRADING PULSE</Text>
+      <group position={[-1.6, -1.2, 0.01]}>
+        <Text position={[0, 0.35, 0]} fontSize={0.13} color="#444" anchorX="left" letterSpacing={0.1}>16-WEEK TRADING PULSE</Text>
         {heatmapCells.map((cell, i) => (
-          <mesh key={i} position={[(i % 14) * 0.28, -Math.floor(i / 14) * 0.28, 0]}>
-            <planeGeometry args={[0.22, 0.22]} />
+          <mesh key={i} position={[(i % 14) * 0.25, -Math.floor(i / 14) * 0.25, 0]}>
+            <planeGeometry args={[0.2, 0.2]} />
             <meshBasicMaterial color={cell.color} transparent opacity={cell.opacity} />
           </mesh>
         ))}
@@ -301,8 +302,9 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false, traderData }: { m
         <RigidBody position={[2, 0, 0]} ref={card} {...segmentProps} type={dragged ? 'kinematicPosition' : 'dynamic'}>
           <CuboidCollider args={[0.8, 1.125, 0.01]} />
           <group
-            scale={2.25}
-            position={[0, -1.2, -0.05]}
+            scale={2.85}
+            position={[0, -1.4, -0.05]}
+            rotation={[0, Math.PI, 0]}
             onPointerOver={() => hover(true)}
             onPointerOut={() => hover(false)}
             onPointerUp={(e) => {
