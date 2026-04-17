@@ -519,7 +519,7 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
       {/* Global Full-Screen Lanyard Physics Layer */}
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
         <Lanyard 
-          position={[0, 0, 18]} 
+          position={[-5, 0, 18]} 
           gravity={[0, -40, 0]} 
           fov={24} 
           transparent 
@@ -550,8 +550,8 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
         <ActivityTicker items={ticker} />
 
         {/* Hero */}
-        <section id="hero" className="mx-auto grid max-w-[1000px] scroll-mt-36 grid-cols-1 md:grid-cols-2 items-stretch gap-4 sm:gap-6 px-4 pt-10 pb-8 sm:pt-14 sm:pb-10 sm:px-6 lg:pt-16 lg:pb-12">
-          <div>
+        <section id="hero" className="mx-auto grid max-w-[1000px] scroll-mt-36 grid-cols-1 md:grid-cols-2 items-stretch gap-4 sm:gap-6 px-4 pt-10 pb-8 sm:pt-14 sm:pb-10 sm:px-6 lg:pt-16 lg:pb-12 pointer-events-none">
+          <div className="pointer-events-auto">
             <div className="cut-xs mb-4 sm:mb-6 inline-flex items-center gap-1.5 border border-[rgba(0,212,255,0.12)] bg-[rgba(0,212,255,0.08)] px-2.5 py-1 sm:px-3 text-[8px] sm:text-[10px] font-mono tracking-[2px] text-[var(--trench-accent)]">
               <Check size={8} strokeWidth={3} className="sm:w-[10px] sm:h-[10px]" />
               <ShinyText text="ON-CHAIN VERIFIED" speed={3} />
@@ -586,6 +586,9 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
             </div>
             <p className="mt-3 sm:mt-4 text-[7px] sm:text-[9px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">LANDING &middot; LEADERBOARD &middot; DASHBOARD</p>
           </div>
+          
+          {/* Right Column Spacer */}
+          <div className="hidden md:block" />
         </section>
 
         {/* Divider */}
