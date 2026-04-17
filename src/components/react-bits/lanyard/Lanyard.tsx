@@ -1,8 +1,8 @@
 /* eslint-disable react/no-unknown-property */
 'use client';
-import { useEffect, useRef, useState, useMemo, Suspense } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import { Canvas, extend, useFrame } from '@react-three/fiber';
-import { useGLTF, useTexture, Environment, Lightformer, RenderTexture, PerspectiveCamera, Text } from '@react-three/drei';
+import { useGLTF, useTexture, Environment, Lightformer } from '@react-three/drei';
 import { BallCollider, CuboidCollider, Physics, RigidBody, useRopeJoint, useSphericalJoint } from '@react-three/rapier';
 import { MeshLineGeometry, MeshLineMaterial } from 'meshline';
 import * as THREE from 'three';
@@ -10,220 +10,134 @@ import './Lanyard.css';
 
 extend({ MeshLineGeometry, MeshLineMaterial });
 
-interface TraderData {
-  username: string;
-  name: string;
-  avatarUrl: string | null;
-  pnl: string;
-  pnlValue: number;
-  winRate: string;
-  winRateValue: number;
-  trades: string;
-  tradeCount: number;
-  isDeployer?: boolean;
-  topTrades: {
-    id: string;
-    token: string;
-    pnlPercent: string;
-    tokenImage: string | null;
-  }[];
-}
-
-interface LanyardProps {
-  position?: [number, number, number];
-  gravity?: [number, number, number];
-  fov?: number;
-  transparent?: boolean;
-  traderData?: TraderData;
-}
-
 export default function Lanyard({
   position = [0, 0, 30],
   gravity = [0, -40, 0],
   fov = 20,
   transparent = true,
-  traderData,
-}: LanyardProps) {
-  const [isMobile, setIsMobile] = useState(false);
-  const [mounted, setMounted] = useState(false);
+}: {
+  position?: [number, number, number];
+  gravity?: [number, number, number];
+  fov?: number;
+  transparent?: boolean;
+}) {
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
 
   useEffect(() => {
-    setMounted(true);
-    const check = () => setIsMobile(window.innerWidth < 768);
-    check();
-    window.addEventListener('resize', check);
-    return () => window.removeEventListener('resize', check);
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
-
-  if (!mounted) return <div className="lanyard-wrapper" />;
 
   return (
     <div className="lanyard-wrapper">
       <Canvas
         camera={{ position, fov }}
         dpr={[1, isMobile ? 1.5 : 2]}
-        gl={{ alpha: transparent, powerPreference: 'high-performance' }}
-        onCreated={({ gl }) => {
-          gl.setClearColor(new THREE.Color(0x000000), transparent ? 0 : 1);
-        }}
+        gl={{ alpha: transparent }}
+        onCreated={({ gl }) => gl.setClearColor(new THREE.Color(0x000000), transparent ? 0 : 1)}
       >
-        <Suspense fallback={null}>
-          <ambientLight intensity={Math.PI} />
-          <Physics gravity={gravity} timeStep={isMobile ? 1 / 30 : 1 / 60}>
-            <Band isMobile={isMobile} traderData={traderData} />
-          </Physics>
-          <Environment blur={0.75}>
-            <Lightformer intensity={2} color="white" position={[0, -1, 5]} rotation={[0, 0, Math.PI / 3]} scale={[100, 0.1, 1]} />
-            <Lightformer intensity={3} color="white" position={[-1, -1, 1]} rotation={[0, 0, Math.PI / 3]} scale={[100, 0.1, 1]} />
-            <Lightformer intensity={3} color="white" position={[1, 1, 1]} rotation={[0, 0, Math.PI / 3]} scale={[100, 0.1, 1]} />
-            <Lightformer intensity={10} color="white" position={[-10, 0, 14]} rotation={[0, Math.PI / 2, Math.PI / 3]} scale={[100, 10, 1]} />
-          </Environment>
-        </Suspense>
+        <ambientLight intensity={Math.PI} />
+        <Physics gravity={gravity} timeStep={isMobile ? 1 / 30 : 1 / 60}>
+          <Band isMobile={isMobile} />
+        </Physics>
+        <Environment blur={0.75}>
+          <Lightformer
+            intensity={2}
+            color="white"
+            position={[0, -1, 5]}
+            rotation={[0, 0, Math.PI / 3]}
+            scale={[100, 0.1, 1]}
+          />
+          <Lightformer
+            intensity={3}
+            color="white"
+            position={[-1, -1, 1]}
+            rotation={[0, 0, Math.PI / 3]}
+            scale={[100, 0.1, 1]}
+          />
+          <Lightformer
+            intensity={3}
+            color="white"
+            position={[1, 1, 1]}
+            rotation={[0, 0, Math.PI / 3]}
+            scale={[100, 0.1, 1]}
+          />
+          <Lightformer
+            intensity={10}
+            color="white"
+            position={[-10, 0, 14]}
+            rotation={[0, Math.PI / 2, Math.PI / 3]}
+            scale={[100, 10, 1]}
+          />
+        </Environment>
       </Canvas>
     </div>
   );
 }
 
-function CardContent({ data }: { data?: TraderData }) {
-  const pfp = useTexture(data?.avatarUrl || '/avatar-fallback.svg');
-  const logo = useTexture('/hero-logo.png');
-  const showTrader = process.env.NEXT_PUBLIC_DEBUG_LANYARD_TRADER === 'true';
-  
-  // Heatmap calculation logic adapted from LandingContent
-  const heatmapCells = useMemo(() => {
-    if (!data) return [];
-    const seed = data.username.split('').reduce((sum, char, i) => sum + char.charCodeAt(0) * (i + 1), 0);
-    return Array.from({ length: 56 }, (_, i) => {
-      const wave = Math.sin((seed + i) * 0.73) * 0.5 + 0.5;
-      const burst = Math.cos((seed + i * 3) * 0.41) * 0.5 + 0.5;
-      const weighted = wave * 0.65 + burst * 0.35;
-      const opacity = weighted > 0.72 ? 0.8 : weighted > 0.42 ? 0.4 : 0.1;
-      const isGain = (weighted + (data.winRateValue - 50) / 50 * 0.35) > 0.5;
-      return { opacity, color: isGain ? '#22c55e' : '#ef4444' };
-    });
-  }, [data]);
-
-  return (
-    <group>
-      <mesh>
-        <planeGeometry args={[5, 7]} />
-        <meshBasicMaterial color="#080c12" />
-      </mesh>
-      
-      {/* PFP with Web3Me fallback */}
-      <mesh position={[-1.2, 1.6, 0.01]}>
-        <planeGeometry args={[1.2, 1.2]} />
-        <meshBasicMaterial map={showTrader && data?.avatarUrl ? pfp : logo} transparent />
-      </mesh>
-      
-      {/* Name + Handle */}
-      <Text position={[0.2, 2.0, 0.01]} fontSize={0.28} color="white" anchorX="left">
-        {showTrader ? (data?.name || 'TRADER') : 'WEB3ME'}
-      </Text>
-      <Text position={[0.2, 1.6, 0.01]} fontSize={0.2} color="#888" anchorX="left">
-        {showTrader ? `@${data?.username || 'unknown'}` : '@web3meid'}
-      </Text>
-      <Text position={[0.2, 1.2, 0.01]} fontSize={0.38} color={data?.pnlValue && data.pnlValue >= 0 ? '#22c55e' : '#ef4444'} anchorX="left">
-        {showTrader ? (data?.pnl || '$0') : 'BORN IN THE TRENCHES'}
-      </Text>
-
-      {/* Stats */}
-      <group position={[-1.5, 0.1, 0.01]}>
-        <Text position={[0, 0, 0]} fontSize={0.15} color="#555" anchorX="left">{showTrader ? 'WIN RATE' : 'SUPPLY'}</Text>
-        <Text position={[0, -0.22, 0]} fontSize={0.25} color="white" anchorX="left">{showTrader ? (data?.winRate || '0%') : '1,000,000,000'}</Text>
-        
-        <Text position={[1.8, 0, 0]} fontSize={0.15} color="#555" anchorX="left">{showTrader ? 'TRADES' : 'SYMBOL'}</Text>
-        <Text position={[1.8, -0.22, 0]} fontSize={0.25} color="white" anchorX="left">{showTrader ? (data?.trades || '0') : '$W3ME'}</Text>
-      </group>
-
-      {/* Heatmap */}
-      <group position={[-1.6, -1.2, 0.01]}>
-        <Text position={[0, 0.35, 0]} fontSize={0.13} color="#444" anchorX="left" letterSpacing={0.1}>16-WEEK TRADING PULSE</Text>
-        {heatmapCells.map((cell, i) => (
-          <mesh key={i} position={[(i % 14) * 0.25, -Math.floor(i / 14) * 0.25, 0]}>
-            <planeGeometry args={[0.2, 0.2]} />
-            <meshBasicMaterial color={cell.color} transparent opacity={cell.opacity} />
-          </mesh>
-        ))}
-      </group>
-
-      {/* Footer Logo */}
-      <mesh position={[0, -2.8, 0.01]}>
-        <planeGeometry args={[0.5, 0.5]} />
-        <meshBasicMaterial map={logo} transparent opacity={0.5} />
-      </mesh>
-    </group>
-  );
-}
-
-function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false, traderData }: { maxSpeed?: number; minSpeed?: number; isMobile?: boolean, traderData?: TraderData }) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const band = useRef<any>(null!);
-  const fixed = useRef<any>(null!);
-  const j1 = useRef<any>(null!);
-  const j2 = useRef<any>(null!);
-  const j3 = useRef<any>(null!);
-  const card = useRef<any>(null!);
+function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }: { maxSpeed?: number; minSpeed?: number; isMobile?: boolean }) {
+  const band = useRef();
+  const fixed = useRef();
+  const j1 = useRef();
+  const j2 = useRef();
+  const j3 = useRef();
+  const card = useRef();
 
   const vec = new THREE.Vector3();
   const ang = new THREE.Vector3();
   const rot = new THREE.Vector3();
   const dir = new THREE.Vector3();
 
-  const segmentProps = { type: 'dynamic' as const, canSleep: true, colliders: false as const, angularDamping: 4, linearDamping: 4 };
+  const segmentProps = { type: 'dynamic', canSleep: true, colliders: false, angularDamping: 4, linearDamping: 4 };
 
-  const { nodes, materials } = useGLTF('/lanyard/card.glb') as any;
+  const { nodes, materials } = useGLTF('/lanyard/card.glb');
   const originalTexture = useTexture('/lanyard/lanyard.png');
   const logo = useTexture('/hero-logo.png');
 
-  // Create branded strap texture
-  const brandedStrap = useMemo(() => {
+  const cardTexture = useMemo(() => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 500;
+    canvas.height = 700;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return materials.base.map;
+
+    ctx.fillStyle = '#080c12';
+    ctx.fillRect(0, 0, 500, 700);
+
+    const logoImg = logo.image;
+    const logoSize = 200;
+    const aspect = logoImg.width / logoImg.height;
+    const logoW = logoSize;
+    const logoH = logoSize / aspect;
+    ctx.drawImage(logoImg, 250 - logoW / 2, 350 - logoH / 2, logoW, logoH);
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.flipY = false;
+    return tex;
+  }, [logo, materials.base.map]);
+
+  const strapTexture = useMemo(() => {
     const canvas = document.createElement('canvas');
     canvas.width = 1024;
     canvas.height = 128;
     const ctx = canvas.getContext('2d');
     if (!ctx) return originalTexture;
 
-    // Dark background with subtle glow
     ctx.fillStyle = '#050508';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    // Add subtle accent lines at the edges
-    ctx.strokeStyle = 'rgba(0, 212, 255, 0.3)';
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.moveTo(0, 4); ctx.lineTo(1024, 4);
-    ctx.moveTo(0, 124); ctx.lineTo(1024, 124);
-    ctx.stroke();
 
-    const logoImg = logo.image as HTMLImageElement;
-    const logoAspect = logoImg.width / logoImg.height;
-    const logoHeight = 80;
-    const logoWidth = logoHeight * logoAspect;
-    
-    // Draw repeated logos with branding text
+    const logoImg = logo.image;
+    const logoHeight = 100;
+    const logoWidth = logoHeight * (logoImg.width / logoImg.height);
+
     for (let i = 0; i < 4; i++) {
-      const centerX = i * 256 + 128;
-      
-      // Calculate logo position to be to the left of the text
-      const totalWidth = logoWidth + 120; // logo + gap + text
-      const startX = centerX - totalWidth / 2;
-      
-      // Draw Logo
-      ctx.globalAlpha = 1.0;
-      ctx.drawImage(logoImg, startX, (128 - logoHeight) / 2, logoWidth, logoHeight);
-      
-      // Draw "WEB3ME" text
-      ctx.fillStyle = '#00D4FF';
-      ctx.font = 'bold 44px sans-serif'; // Larger font for impact
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('WEB3ME', startX + logoWidth + 20, 64);
+      const x = i * 256 + (256 - logoWidth) / 2;
+      ctx.drawImage(logoImg, x, (128 - logoHeight) / 2, logoWidth, logoHeight);
     }
-    
+
     const tex = new THREE.CanvasTexture(canvas);
     tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-    tex.repeat.set(1, 1);
     return tex;
   }, [logo, originalTexture]);
 
@@ -236,7 +150,7 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false, traderData }: { m
     ])
   );
 
-  const [dragged, drag] = useState<THREE.Vector3 | false>(false);
+  const [dragged, drag] = useState(false);
   const [hovered, hover] = useState(false);
 
   useRopeJoint(fixed, j1, [[0, 0, 0], [0, 0, 0], 1]);
@@ -247,9 +161,8 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false, traderData }: { m
   useEffect(() => {
     if (hovered) {
       document.body.style.cursor = dragged ? 'grabbing' : 'grab';
-      return () => { document.body.style.cursor = 'auto'; };
+      return () => void (document.body.style.cursor = 'auto');
     }
-    return undefined;
   }, [hovered, dragged]);
 
   useFrame((state, delta) => {
@@ -257,15 +170,11 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false, traderData }: { m
       vec.set(state.pointer.x, state.pointer.y, 0.5).unproject(state.camera);
       dir.copy(vec).sub(state.camera.position).normalize();
       vec.add(dir.multiplyScalar(state.camera.position.length()));
-      [card, j1, j2, j3, fixed].forEach((ref) => ref.current?.wakeUp());
-      card.current?.setNextKinematicTranslation({
-        x: vec.x - (dragged as THREE.Vector3).x,
-        y: vec.y - (dragged as THREE.Vector3).y,
-        z: vec.z - (dragged as THREE.Vector3).z,
-      });
+      [card, j1, j2, j3, fixed].forEach(ref => ref.current?.wakeUp());
+      card.current?.setNextKinematicTranslation({ x: vec.x - dragged.x, y: vec.y - dragged.y, z: vec.z - dragged.z });
     }
     if (fixed.current) {
-      [j1, j2].forEach((ref) => {
+      [j1, j2].forEach(ref => {
         if (!ref.current.lerped) ref.current.lerped = new THREE.Vector3().copy(ref.current.translation());
         const clampedDistance = Math.max(0.1, Math.min(1, ref.current.lerped.distanceTo(ref.current.translation())));
         ref.current.lerped.lerp(
@@ -273,14 +182,14 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false, traderData }: { m
           delta * (minSpeed + clampedDistance * (maxSpeed - minSpeed))
         );
       });
-      curve.points[0]!.copy(j3.current.translation());
-      curve.points[1]!.copy(j2.current.lerped);
-      curve.points[2]!.copy(j1.current.lerped);
-      curve.points[3]!.copy(fixed.current.translation());
+      curve.points[0].copy(j3.current.translation());
+      curve.points[1].copy(j2.current.lerped);
+      curve.points[2].copy(j1.current.lerped);
+      curve.points[3].copy(fixed.current.translation());
       band.current.geometry.setPoints(curve.getPoints(isMobile ? 16 : 32));
       ang.copy(card.current.angvel());
       rot.copy(card.current.rotation());
-      card.current.setAngvel({ x: ang.x, y: ang.y - rot.y * 0.25, z: ang.z }, true);
+      card.current.setAngvel({ x: ang.x, y: ang.y - rot.y * 0.25, z: ang.z });
     }
   });
 
@@ -302,32 +211,25 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false, traderData }: { m
         <RigidBody position={[2, 0, 0]} ref={card} {...segmentProps} type={dragged ? 'kinematicPosition' : 'dynamic'}>
           <CuboidCollider args={[0.8, 1.125, 0.01]} />
           <group
-            scale={2.85}
-            position={[0, -1.4, -0.05]}
-            rotation={[0, Math.PI, 0]}
+            scale={3.0}
+            position={[-0.3, -1.5, -0.05]}
             onPointerOver={() => hover(true)}
             onPointerOut={() => hover(false)}
-            onPointerUp={(e) => {
-              (e.target as HTMLElement).releasePointerCapture?.(e.pointerId);
-              drag(false);
-            }}
-            onPointerDown={(e) => {
-              (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
-              drag(new THREE.Vector3().copy(e.point).sub(vec.copy(card.current.translation())));
-            }}
+            onPointerUp={e => (e.target.releasePointerCapture(e.pointerId), drag(false))}
+            onPointerDown={e => (
+              e.target.setPointerCapture(e.pointerId),
+              drag(new THREE.Vector3().copy(e.point).sub(vec.copy(card.current.translation())))
+            )}
           >
             <mesh geometry={nodes.card.geometry}>
               <meshPhysicalMaterial
+                map={cardTexture}
+                map-anisotropy={16}
                 clearcoat={isMobile ? 0 : 1}
                 clearcoatRoughness={0.15}
                 roughness={0.9}
                 metalness={0.8}
-              >
-                <RenderTexture attach="map">
-                  <PerspectiveCamera makeDefault manual aspect={5 / 7} position={[0, 0, 5]} />
-                  <CardContent data={traderData} />
-                </RenderTexture>
-              </meshPhysicalMaterial>
+              />
             </mesh>
             <mesh geometry={nodes.clip.geometry} material={materials.metal} material-roughness={0.3} />
             <mesh geometry={nodes.clamp.geometry} material={materials.metal} />
@@ -335,15 +237,13 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false, traderData }: { m
         </RigidBody>
       </group>
       <mesh ref={band}>
-        {/* @ts-expect-error meshline extends THREE namespace at runtime */}
         <meshLineGeometry />
-        {/* @ts-expect-error meshline extends THREE namespace at runtime */}
         <meshLineMaterial
           color="white"
           depthTest={false}
           resolution={isMobile ? [1000, 2000] : [1000, 1000]}
           useMap
-          map={brandedStrap}
+          map={strapTexture}
           repeat={[-4, 1]}
           lineWidth={1}
         />

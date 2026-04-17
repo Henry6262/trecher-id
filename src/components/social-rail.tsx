@@ -18,12 +18,6 @@ const SOCIAL_LINKS = [
     label: 'DexScreener',
   },
   {
-    id: 'github',
-    icon: <Image src="/icons/github.png" alt="GitHub" width={18} height={18} />,
-    href: 'https://github.com/Henry6262/trecher-id',
-    label: 'GitHub',
-  },
-  {
     id: 'gitbook',
     icon: <Image src="/icons/gitbook.webp" alt="Docs" width={18} height={18} />,
     href: 'https://docs.web3me.fun/',
