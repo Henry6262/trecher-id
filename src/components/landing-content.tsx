@@ -575,7 +575,7 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
                   e.stopPropagation();
                   navigator.clipboard.writeText('HU5uzDSaiDYBkoHQikf2mRXEEWquRY9xNYM2ErkNpump');
                 }}
-                className="p-2 hover:opacity-70 transition-opacity text-[var(--trench-accent)]"
+                className="p-2 cursor-pointer transition-all border border-[rgba(0,212,255,0.4)] bg-[rgba(0,212,255,0.08)] backdrop-blur-sm hover:bg-[rgba(0,212,255,0.15)] hover:border-[rgba(0,212,255,0.6)] text-[var(--trench-accent)] rounded"
                 title="Copy contract address"
                 type="button"
               >
