@@ -33,10 +33,10 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files
+# env files — never commit secrets
 .env
-.env.local
-.env*.local
+.env.*
+!.env.example
 
 # vercel
 .vercel
@@ -45,9 +45,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 pnpm-lock.yaml
-.env.vercel
-.env.vercel-prod
-.env.vercel-live
 test-results/
 .aider.chat.history.md
 .aider.input.history
