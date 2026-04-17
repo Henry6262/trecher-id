@@ -577,7 +577,7 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
           </div>
 
           {/* Lanyard identity card — physics rope card in hero right column */}
-          <div className="relative hidden md:flex md:items-stretch" style={{ height: 640, minWidth: 0 }}>
+          <div className="relative md:flex md:items-stretch" style={{ height: 640, minWidth: 0 }}>
             <Lanyard 
               position={[0, 0, 18]} 
               gravity={[0, -40, 0]} 
