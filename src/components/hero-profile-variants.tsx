@@ -101,7 +101,7 @@ function CardShell({
 function Identity({ featured }: { featured: HeroProfileData }) {
   return (
     <div className="flex items-start gap-4">
-      <div className="relative h-16 w-16 overflow-hidden rounded-[18px]" style={{ border: '2px solid rgba(0,212,255,0.35)', boxShadow: '0 0 24px rgba(0,212,255,0.18)' }}>
+      <div className="relative h-16 w-16 overflow-hidden rounded-[18px]" style={{ border: '2px solid rgba(0,212,255,0.35)' }}>
         <AvatarImage
           src={getPublicAvatarUrl(featured.username, featured.avatarUrl)}
           alt={featured.name}

@@ -516,14 +516,14 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
       <SectionRailNav />
       <SocialRail />
 
-      {/* Global Full-Screen Lanyard Physics Layer */}
-      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-        <Lanyard 
-          position={[-5, 0, 18]} 
-          gravity={[0, -40, 0]} 
-          fov={24} 
-          transparent 
-          traderData={featuredProfiles?.[0]} 
+      {/* Lanyard — right-half fixed layer, highest z-index */}
+      <div className="fixed right-0 top-0 h-screen w-1/2 z-[9999] overflow-hidden">
+        <Lanyard
+          position={[0, 0, 26]}
+          gravity={[0, -40, 0]}
+          fov={24}
+          transparent
+          traderData={featuredProfiles?.[0]}
         />
       </div>
 
@@ -560,13 +560,12 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
             <h1 className="mb-4 sm:mb-5 text-5xl sm:text-6xl md:text-7xl lg:text-8xl leading-[1.0] font-black tracking-tight text-white">
               <span className="flex items-center gap-3 sm:gap-4 flex-wrap">
                 <span>Your</span>
-                <span className="relative inline-block" style={{ width: '1em', height: '1em' }}>
+                <span className="relative inline-block" style={{ width: '1.3em', height: '1.3em' }}>
                   <Image
                     src="/hero-logo.png"
                     alt="Web3Me"
                     fill
                     className="object-contain"
-                    style={{ filter: 'drop-shadow(0 0 14px rgba(0,212,255,0.55))' }}
                   />
                 </span>
                 <span className="text-[var(--trench-accent)]">ID</span>
