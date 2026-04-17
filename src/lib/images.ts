@@ -8,6 +8,19 @@ export function normalizeImageUrl(url?: string | null) {
   return url;
 }
 
+export function isDeployerUsername(username?: string | null) {
+  if (!username) return false;
+
+  const normalized = username.trim().toLowerCase();
+  return (
+    normalized.startsWith('deployer_') ||
+    normalized.startsWith('deployer-') ||
+    normalized.startsWith('dev_') ||
+    normalized.startsWith('dev-') ||
+    normalized === 'dev-bot'
+  );
+}
+
 function hashString(value: string) {
   let hash = 0;
   for (let i = 0; i < value.length; i += 1) {
@@ -58,7 +71,11 @@ function buildGeneratedAvatar(username: string) {
 export function isWeakAvatarUrl(url?: string | null) {
   const normalized = normalizeImageUrl(url);
   if (!normalized) return true;
-  return normalized.includes('unavatar.io/') || normalized === '/avatar-fallback.svg';
+  return (
+    normalized.includes('unavatar.io/') ||
+    normalized === '/avatar-fallback.svg' ||
+    normalized.startsWith('data:image/svg+xml')
+  );
 }
 
 export function hasStrongAvatarUrl(url?: string | null) {
@@ -68,13 +85,14 @@ export function hasStrongAvatarUrl(url?: string | null) {
 export function getPublicAvatarUrl(username: string, avatarUrl?: string | null, options?: { isDeployer?: boolean }) {
   const normalized = normalizeImageUrl(avatarUrl);
   const isWeak = isWeakAvatarUrl(normalized);
+  const isDeployer = options?.isDeployer ?? isDeployerUsername(username);
 
   if (normalized && !isWeak) {
     return normalized;
   }
 
   // Deployers without PFPs get the chef icon
-  if (options?.isDeployer) {
+  if (isDeployer) {
     return '/deployer-fallback.svg';
   }
 

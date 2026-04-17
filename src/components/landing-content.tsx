@@ -571,6 +571,13 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
 
             <div className="flex flex-wrap items-center justify-center gap-3">
               <CutButton href="/dashboard" size="lg">Participate</CutButton>
+              <CutButton href="https://dexscreener.com/solana/HU5uzDSaiDYBkoHQikf2mRXEEWquRY9xNYM2ErkNpump" target="_blank" size="lg">View on Dex</CutButton>
+              <button
+                onClick={() => navigator.clipboard.writeText('HU5uzDSaiDYBkoHQikf2mRXEEWquRY9xNYM2ErkNpump')}
+                className="cut-button cut-button-lg border border-[rgba(0,212,255,0.3)] bg-[rgba(0,212,255,0.1)] px-4 py-2 hover:bg-[rgba(0,212,255,0.2)] transition-colors"
+              >
+                Copy Address
+              </button>
             </div>
             <p className="mt-3 sm:mt-4 text-[7px] sm:text-[9px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">LANDING &middot; LEADERBOARD &middot; DASHBOARD</p>
           </div>
