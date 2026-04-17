@@ -577,11 +577,11 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
           </div>
 
           {/* Lanyard identity card — physics rope card in hero right column */}
-          <div className="relative md:flex md:items-stretch" style={{ height: 640, width: 480, minWidth: 0 }}>
+          <div className="relative flex items-center justify-center md:items-stretch" style={{ height: 640, width: 480, minWidth: 320 }}>
             <Lanyard 
               position={[0, 0, 18]} 
               gravity={[0, -40, 0]} 
-              fov={22} 
+              fov={24} 
               transparent 
               traderData={featuredProfiles?.[0]} 
             />

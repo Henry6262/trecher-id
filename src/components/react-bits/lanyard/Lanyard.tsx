@@ -107,20 +107,20 @@ function CardContent({ data }: { data?: TraderData }) {
         <meshBasicMaterial color="#080c12" />
       </mesh>
       
-      {/* PFP */}
+      {/* PFP with Web3Me fallback */}
       <mesh position={[-1.4, 1.8, 0.01]}>
         <planeGeometry args={[1.5, 1.5]} />
-        <meshBasicMaterial map={pfp} transparent />
+        <meshBasicMaterial map={data?.avatarUrl ? pfp : logo} transparent />
       </mesh>
       
       {/* Name + Handle */}
-      <Text position={[0.2, 2.2, 0.01]} fontSize={0.35} color="white" anchorX="left" font="/fonts/Geist-Black.woff">
+      <Text position={[0.2, 2.2, 0.01]} fontSize={0.35} color="white" anchorX="left">
         {data?.name || 'TRADER'}
       </Text>
-      <Text position={[0.2, 1.8, 0.01]} fontSize={0.25} color="#888" anchorX="left" font="/fonts/Geist-Medium.woff">
+      <Text position={[0.2, 1.8, 0.01]} fontSize={0.25} color="#888" anchorX="left">
         @{data?.username || 'unknown'}
       </Text>
-      <Text position={[0.2, 1.4, 0.01]} fontSize={0.45} color={data?.pnlValue && data.pnlValue >= 0 ? '#22c55e' : '#ef4444'} anchorX="left" font="/fonts/Geist-Bold.woff">
+      <Text position={[0.2, 1.4, 0.01]} fontSize={0.45} color={data?.pnlValue && data.pnlValue >= 0 ? '#22c55e' : '#ef4444'} anchorX="left">
         {data?.pnl || '$0'}
       </Text>
 
@@ -202,15 +202,20 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false, traderData }: { m
     for (let i = 0; i < 4; i++) {
       const centerX = i * 256 + 128;
       
+      // Calculate logo position to be to the left of the text
+      const totalWidth = logoWidth + 120; // logo + gap + text
+      const startX = centerX - totalWidth / 2;
+      
       // Draw Logo
-      ctx.globalAlpha = 0.9;
-      ctx.drawImage(logoImg, centerX - logoWidth / 2 - 40, (128 - logoHeight) / 2, logoWidth, logoHeight);
+      ctx.globalAlpha = 1.0;
+      ctx.drawImage(logoImg, startX, (128 - logoHeight) / 2, logoWidth, logoHeight);
       
       // Draw "WEB3ME" text
-      ctx.globalAlpha = 1.0;
       ctx.fillStyle = '#00D4FF';
-      ctx.font = 'bold 32px Geist, sans-serif';
-      ctx.fillText('WEB3ME', centerX + 10, 80);
+      ctx.font = 'bold 44px sans-serif'; // Larger font for impact
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('WEB3ME', startX + logoWidth + 20, 64);
     }
     
     const tex = new THREE.CanvasTexture(canvas);
