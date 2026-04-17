@@ -8,7 +8,7 @@ const SOCIAL_LINKS = [
   {
     id: 'twitter',
     icon: <X size={18} />,
-    href: 'https://x.com/web3me_fun', // Placeholder or update if known
+    href: 'https://x.com/web3meid',
     label: 'Twitter',
   },
   {

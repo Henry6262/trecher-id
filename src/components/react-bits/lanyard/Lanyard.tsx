@@ -84,7 +84,7 @@ export default function Lanyard({
 
 function CardContent({ data }: { data?: TraderData }) {
   const pfp = useTexture(data?.avatarUrl || '/avatar-fallback.svg');
-  const logo = useTexture('/logo.png');
+  const logo = useTexture('/hero-logo.png');
   
   // Heatmap calculation logic adapted from LandingContent
   const heatmapCells = useMemo(() => {
@@ -146,8 +146,8 @@ function CardContent({ data }: { data?: TraderData }) {
 
       {/* Footer Logo */}
       <mesh position={[0, -2.8, 0.01]}>
-        <planeGeometry args={[1.5, 0.4]} />
-        <meshBasicMaterial map={logo} transparent opacity={0.4} />
+        <planeGeometry args={[0.5, 0.5]} />
+        <meshBasicMaterial map={logo} transparent opacity={0.5} />
       </mesh>
     </group>
   );
@@ -171,7 +171,7 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false, traderData }: { m
 
   const { nodes, materials } = useGLTF('/lanyard/card.glb') as any;
   const originalTexture = useTexture('/lanyard/lanyard.png');
-  const logo = useTexture('/logo.png');
+  const logo = useTexture('/hero-logo.png');
 
   // Create branded strap texture
   const brandedStrap = useMemo(() => {
@@ -181,17 +181,36 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false, traderData }: { m
     const ctx = canvas.getContext('2d');
     if (!ctx) return originalTexture;
 
+    // Dark background with subtle glow
     ctx.fillStyle = '#050508';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Add subtle accent lines at the edges
+    ctx.strokeStyle = 'rgba(0, 212, 255, 0.3)';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(0, 4); ctx.lineTo(1024, 4);
+    ctx.moveTo(0, 124); ctx.lineTo(1024, 124);
+    ctx.stroke();
 
     const logoImg = logo.image as HTMLImageElement;
     const logoAspect = logoImg.width / logoImg.height;
-    const logoHeight = 60;
+    const logoHeight = 80;
     const logoWidth = logoHeight * logoAspect;
     
+    // Draw repeated logos with branding text
     for (let i = 0; i < 4; i++) {
-      ctx.globalAlpha = 0.8;
-      ctx.drawImage(logoImg, i * 256 + (256 - logoWidth) / 2, (128 - logoHeight) / 2, logoWidth, logoHeight);
+      const centerX = i * 256 + 128;
+      
+      // Draw Logo
+      ctx.globalAlpha = 0.9;
+      ctx.drawImage(logoImg, centerX - logoWidth / 2 - 40, (128 - logoHeight) / 2, logoWidth, logoHeight);
+      
+      // Draw "WEB3ME" text
+      ctx.globalAlpha = 1.0;
+      ctx.fillStyle = '#00D4FF';
+      ctx.font = 'bold 32px Geist, sans-serif';
+      ctx.fillText('WEB3ME', centerX + 10, 80);
     }
     
     const tex = new THREE.CanvasTexture(canvas);
