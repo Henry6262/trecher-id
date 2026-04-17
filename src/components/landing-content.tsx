@@ -540,7 +540,7 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
         <ActivityTicker items={ticker} />
 
         {/* Hero */}
-        <section id="hero" className="mx-auto flex flex-col items-center justify-center scroll-mt-36 px-4 pt-10 pb-8 sm:pt-14 sm:pb-10 sm:px-6 lg:pt-16 lg:pb-12 pointer-events-none min-h-screen">
+        <section id="hero" className="mx-auto flex flex-col items-center justify-center scroll-mt-36 px-4 pt-16 pb-12 sm:pt-20 sm:pb-16 sm:px-6 lg:pt-24 lg:pb-20 pointer-events-none">
           <div className="pointer-events-auto text-center">
             <div className="cut-xs mb-4 sm:mb-6 inline-flex items-center gap-1.5 border border-[rgba(0,212,255,0.12)] bg-[rgba(0,212,255,0.08)] px-2.5 py-1 sm:px-3 text-[8px] sm:text-[10px] font-mono tracking-[2px] text-[var(--trench-accent)]">
               <Check size={8} strokeWidth={3} className="sm:w-[10px] sm:h-[10px]" />
@@ -570,14 +570,11 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
               Your Solana PnL, verified on-chain and displayed in one shareable link. Compete in the Trencher Cup — 32 traders, one champion, real money on the line.
             </p>
 
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-wrap items-center justify-center gap-3">
               <CutButton href="/dashboard" size="lg">Open Dashboard</CutButton>
             </div>
             <p className="mt-3 sm:mt-4 text-[7px] sm:text-[9px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">LANDING &middot; LEADERBOARD &middot; DASHBOARD</p>
           </div>
-          
-          {/* Right Column Spacer */}
-          <div className="hidden md:block" />
         </section>
 
         {/* Divider */}
