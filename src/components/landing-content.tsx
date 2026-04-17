@@ -571,7 +571,7 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
             </p>
 
             <div className="flex flex-wrap items-center justify-center gap-3">
-              <CutButton href="/dashboard" size="lg">Open Dashboard</CutButton>
+              <CutButton href="/dashboard" size="lg">Participate</CutButton>
             </div>
             <p className="mt-3 sm:mt-4 text-[7px] sm:text-[9px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">LANDING &middot; LEADERBOARD &middot; DASHBOARD</p>
           </div>
