@@ -77,12 +77,12 @@ export default function Lanyard({
 }
 
 function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }: { maxSpeed?: number; minSpeed?: number; isMobile?: boolean }) {
-  const band = useRef();
-  const fixed = useRef();
-  const j1 = useRef();
-  const j2 = useRef();
-  const j3 = useRef();
-  const card = useRef();
+  const band = useRef(null);
+  const fixed = useRef(null);
+  const j1 = useRef(null);
+  const j2 = useRef(null);
+  const j3 = useRef(null);
+  const card = useRef(null);
 
   const vec = new THREE.Vector3();
   const ang = new THREE.Vector3();
