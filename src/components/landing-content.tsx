@@ -516,6 +516,17 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
       <SectionRailNav />
       <SocialRail />
 
+      {/* Global Full-Screen Lanyard Physics Layer */}
+      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        <Lanyard 
+          position={[0, 0, 18]} 
+          gravity={[0, -40, 0]} 
+          fov={24} 
+          transparent 
+          traderData={featuredProfiles?.[0]} 
+        />
+      </div>
+
       {/* Logged-in indicator */}
       {authUser && (
         <div
@@ -574,17 +585,6 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
               <CutButton href="/dashboard" size="lg">Open Dashboard</CutButton>
             </div>
             <p className="mt-3 sm:mt-4 text-[7px] sm:text-[9px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">LANDING &middot; LEADERBOARD &middot; DASHBOARD</p>
-          </div>
-
-          {/* Lanyard identity card — physics rope card in hero right column */}
-          <div className="relative flex items-center justify-center md:items-stretch" style={{ height: 640, width: 480, minWidth: 320 }}>
-            <Lanyard 
-              position={[0, 0, 18]} 
-              gravity={[0, -40, 0]} 
-              fov={24} 
-              transparent 
-              traderData={featuredProfiles?.[0]} 
-            />
           </div>
         </section>
 
