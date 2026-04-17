@@ -5,7 +5,7 @@ import { formatPnl } from '@/lib/utils';
 import { cached } from '@/lib/redis';
 import { resolveAvatarRows } from '@/lib/avatar-resolution';
 import type { TickerItem } from '@/lib/types';
-import { SynapticBackgroundLayer } from '@/components/synaptic-background-layer';
+import { LandingBackground } from '@/components/landing-background';
 
 export const dynamic = 'force-dynamic';
 
@@ -279,7 +279,7 @@ export default async function LandingPage({ searchParams }: { searchParams: Prom
 
   return (
     <div className="min-h-screen relative" style={{ background: 'transparent' }}>
-      <SynapticBackgroundLayer />
+      <LandingBackground />
       <div className="relative" style={{ zIndex: 1 }}>
         <LandingContent
           traders={traders}

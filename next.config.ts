@@ -1,6 +1,7 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
+  transpilePackages: ['@react-three/fiber', '@react-three/drei', '@react-three/rapier', 'meshline', 'three', 'ogl'],
   turbopack: {
     root: process.cwd(),
   },

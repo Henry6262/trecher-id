@@ -3,7 +3,6 @@ import { getSessionUser } from '@/lib/auth';
 import { ProfileCard } from '@/components/profile-card';
 import type { Metadata } from 'next';
 import { buildProfileMetadata, getPublicProfileData } from '@/lib/profile';
-import { SynapticBackgroundLayer } from '@/components/synaptic-background-layer';
 import { BackButton } from '@/components/back-button';
 import { TradingAnalyticsPanel } from '@/components/dashboard/trading-analytics-panel';
 
@@ -28,7 +27,6 @@ export default async function ProfilePage({ params }: Props) {
 
   return (
     <div className="min-h-screen relative" style={{ background: 'transparent' }}>
-      <SynapticBackgroundLayer />
       <div className="relative py-10 px-4" style={{ zIndex: 1 }}>
         <div className="mx-auto max-w-2xl mb-4">
           <BackButton />

@@ -7,7 +7,7 @@ const FaultyTerminal = dynamic(
   { ssr: false }
 );
 
-export function SynapticBackgroundLayer() {
+export function LandingBackground() {
   return (
     <div className="fixed inset-0 overflow-hidden" style={{ zIndex: 0, background: '#050508' }}>
       <FaultyTerminal
@@ -31,7 +31,7 @@ export function SynapticBackgroundLayer() {
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            'radial-gradient(circle at 50% 18%, rgba(0, 212, 250, 0.12) 0%, rgba(0, 212, 250, 0.03) 24%, transparent 52%), linear-gradient(180deg, rgba(5,5,8,0) 0%, rgba(5,5,8,0.4) 100%)',
+            'radial-gradient(circle at 50% 18%, rgba(0, 212, 250, 0.12) 0%, rgba(0, 212, 250, 0.03) 24%, transparent 52%), linear-gradient(180deg, rgba(5,5,8,0) 0%, rgba(5,5,8,0.5) 100%)',
         }}
       />
     </div>

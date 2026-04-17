@@ -20,7 +20,6 @@ import { SectionRailNav } from '@/components/section-rail-nav';
 import { getPublicAvatarUrl } from '@/lib/images';
 import type { TickerItem } from '@/lib/types';
 
-const ShaderCard = dynamic(() => import('@/components/shader-card'), { ssr: false });
 const DomeGallery = dynamic(() => import('@/components/DomeGallery'), { ssr: false });
 const Lanyard = dynamic(() => import('@/components/react-bits/lanyard/Lanyard'), { ssr: false });
 

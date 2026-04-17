@@ -5,7 +5,6 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { CutButton } from '@/components/cut-button';
-import { SynapticBackgroundLayer } from '@/components/synaptic-background-layer';
 import { Input } from '@/components/ui/input';
 
 const TEST_AUTH_BYPASS = process.env.NEXT_PUBLIC_TEST_AUTH_BYPASS === '1';
@@ -83,7 +82,6 @@ export default function LoginPage() {
   if (TEST_AUTH_BYPASS) {
     return (
       <div className="min-h-screen relative flex items-center justify-center">
-        <SynapticBackgroundLayer />
         <div className="relative z-10 w-full max-w-md space-y-6 px-6 text-center">
           <Image
             src="/logo.png"
@@ -128,7 +126,6 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen relative flex items-center justify-center">
-      <SynapticBackgroundLayer />
       <div className="relative z-10 text-[var(--trench-text-muted)] text-sm font-mono">Redirecting...</div>
     </div>
   );

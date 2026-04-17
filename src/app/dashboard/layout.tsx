@@ -4,7 +4,6 @@ import { usePrivy } from '@privy-io/react-auth';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { SynapticBackgroundLayer } from '@/components/synaptic-background-layer';
 import { CutButton } from '@/components/cut-button';
 
 const TEST_AUTH_BYPASS = process.env.NEXT_PUBLIC_TEST_AUTH_BYPASS === '1';
@@ -49,7 +48,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   if (!authReady || !isAuthenticated) {
     return (
       <div className="min-h-screen relative flex items-center justify-center">
-        <SynapticBackgroundLayer />
         <div className="relative z-10 text-[var(--trench-text-muted)] text-sm font-mono">Loading...</div>
       </div>
     );
@@ -57,7 +55,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-screen relative">
-      <SynapticBackgroundLayer />
       <div className="relative z-10 max-w-7xl mx-auto px-4 py-6">
         <div
           className="mb-6 flex items-center justify-between gap-3 cut-sm px-3 py-3"

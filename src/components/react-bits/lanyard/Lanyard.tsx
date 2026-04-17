@@ -24,21 +24,31 @@ export default function Lanyard({
   transparent = true,
 }: LanyardProps) {
   const [isMobile, setIsMobile] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const check = () => setIsMobile(window.innerWidth < 768);
     check();
     window.addEventListener('resize', check);
     return () => window.removeEventListener('resize', check);
   }, []);
 
+  if (!mounted) return <div className="lanyard-wrapper" />;
+
   return (
     <div className="lanyard-wrapper">
       <Canvas
         camera={{ position, fov }}
         dpr={[1, isMobile ? 1.5 : 2]}
-        gl={{ alpha: transparent }}
-        onCreated={({ gl }) => gl.setClearColor(new THREE.Color(0x000000), transparent ? 0 : 1)}
+        gl={{ alpha: transparent, powerPreference: 'high-performance' }}
+        onCreated={({ gl }) => {
+          gl.setClearColor(new THREE.Color(0x000000), transparent ? 0 : 1);
+        }}
+        onPointerMissed={() => {
+          // Explicitly cleanup on unmount is handled by R3F Canvas
+          // but we can add extra hooks if needed.
+        }}
       >
         <ambientLight intensity={Math.PI} />
         <Physics gravity={gravity} timeStep={isMobile ? 1 / 30 : 1 / 60}>
