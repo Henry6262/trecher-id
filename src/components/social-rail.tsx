@@ -49,16 +49,12 @@ export function SocialRail() {
           href={link.href}
           target="_blank"
           rel="noopener noreferrer"
-          className="group relative flex h-10 w-10 items-center justify-center transition-all hover:scale-110"
+          className="group relative flex h-10 w-10 items-center justify-center transition-all hover:scale-110 rounded-lg"
           style={{
-            background: 'rgba(8,12,18,0.72)',
-            border: '1px solid rgba(0,212,255,0.15)',
-            backdropFilter: 'blur(12px)',
-            WebkitBackdropFilter: 'blur(12px)',
-            clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)',
+            background: 'white',
           }}
         >
-          <div className="text-[var(--trench-text-muted)] group-hover:text-[var(--trench-accent)]">
+          <div className="text-gray-600 group-hover:text-cyan-500">
             {link.icon}
           </div>
           
@@ -71,18 +67,14 @@ export function SocialRail() {
       {/* Copy CA Button */}
       <button
         onClick={copyCA}
-        className="group relative flex h-10 w-10 items-center justify-center transition-all hover:scale-110 cursor-pointer"
+        className="group relative flex h-10 w-10 items-center justify-center transition-all hover:scale-110 cursor-pointer rounded-lg"
         style={{
-          background: 'rgba(8,12,18,0.72)',
-          border: '1px solid rgba(0,212,255,0.15)',
-          backdropFilter: 'blur(12px)',
-          WebkitBackdropFilter: 'blur(12px)',
-          clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)',
+          background: 'white',
         }}
       >
-        <div className="text-[var(--trench-text-muted)] group-hover:text-[var(--trench-accent)] flex items-center justify-center">
+        <div className="text-gray-600 group-hover:text-cyan-500 flex items-center justify-center">
           {copied ? (
-            <Check size={18} className="text-green-400" />
+            <Check size={18} className="text-green-500" />
           ) : (
             <Image src="/icons/CA.jpg" alt="CA" width={20} height={20} className="rounded-sm grayscale group-hover:grayscale-0 transition-all" />
           )}
