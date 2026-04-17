@@ -7,21 +7,17 @@ import Link from 'next/link';
 type CutButtonVariant = 'primary' | 'secondary' | 'ghost';
 type CutButtonSize = 'sm' | 'md' | 'lg';
 
-const SIZE: Record<CutButtonSize, { cut: string; px: string; py: string; text: string }> = {
-  sm: { cut: '6px', px: '12px', py: '6px', text: 'text-xs' },
-  md: { cut: '10px', px: '20px', py: '10px', text: 'text-sm' },
-  lg: { cut: '14px', px: '28px', py: '14px', text: 'text-base' },
+const SIZE: Record<CutButtonSize, { px: string; py: string; text: string; radius: string }> = {
+  sm: { px: '12px', py: '6px',  text: 'text-xs',   radius: '4px' },
+  md: { px: '20px', py: '10px', text: 'text-sm',   radius: '6px' },
+  lg: { px: '28px', py: '14px', text: 'text-base', radius: '6px' },
 };
 
 const VARIANT: Record<CutButtonVariant, { border: string; bg: string; text: string }> = {
-  primary: { border: 'var(--trench-accent)', bg: 'var(--trench-accent)', text: 'text-black font-bold' },
-  secondary: { border: 'var(--trench-border)', bg: 'var(--trench-surface-elevated)', text: 'text-[var(--trench-text)]' },
-  ghost: { border: 'transparent', bg: 'transparent', text: 'text-[var(--trench-text-muted)]' },
+  primary:   { border: 'var(--trench-accent)',         bg: 'var(--trench-accent)',           text: 'text-black font-bold' },
+  secondary: { border: 'var(--trench-border)',          bg: 'var(--trench-surface-elevated)', text: 'text-[var(--trench-text)]' },
+  ghost:     { border: 'transparent',                   bg: 'transparent',                    text: 'text-[var(--trench-text-muted)]' },
 };
-
-function clipPath(cut: string) {
-  return `polygon(${cut} 0%, 100% 0%, 100% calc(100% - ${cut}), calc(100% - ${cut}) 100%, 0% 100%, 0% ${cut})`;
-}
 
 interface BaseCutButtonProps {
   children: ReactNode;
@@ -46,22 +42,30 @@ export function CutButton({
 }: CutButtonProps) {
   const s = SIZE[size];
   const v = VARIANT[variant];
-  const clip = clipPath(s.cut);
+
+  const wrapStyle: React.CSSProperties = {
+    borderRadius: s.radius,
+    border: `1px solid ${v.border}`,
+    background: v.bg,
+    padding: `${s.py} ${s.px}`,
+    position: 'relative',
+    display: 'inline-flex',
+    alignItems: 'center',
+  };
 
   const outer = cn(
-    'relative inline-block cursor-pointer transition-all active:scale-[0.97]',
+    'relative inline-block cursor-pointer transition-all active:scale-[0.97] hover:opacity-90',
     disabled && 'opacity-50 pointer-events-none',
     className,
   );
 
   const inner = (
-    <>
-      <div aria-hidden className="absolute inset-0 pointer-events-none" style={{ background: v.border }} />
+    <div style={wrapStyle}>
       {variant !== 'ghost' && (
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 overflow-hidden"
-          style={{ '--cut-button-rail-color': 'var(--trench-accent)' } as React.CSSProperties}
+          style={{ borderRadius: s.radius, '--cut-button-rail-color': 'var(--trench-accent)' } as React.CSSProperties}
         >
           <span className="cut-button-rail cut-button-rail-top" />
           <span className="cut-button-rail cut-button-rail-bottom" />
@@ -69,40 +73,22 @@ export function CutButton({
           <span className="cut-button-rail cut-button-rail-right" />
         </div>
       )}
-      <div style={{ margin: 1, clipPath: clip, background: v.bg, padding: `${s.py} ${s.px}` }}>
-        <span
-          className={cn(
-            'flex items-center gap-2 font-mono font-semibold leading-none whitespace-nowrap',
-            s.text,
-            v.text,
-          )}
-        >
-          {children}
-        </span>
-      </div>
-    </>
+      <span className={cn('flex items-center gap-2 font-mono font-semibold leading-none whitespace-nowrap', s.text, v.text)}>
+        {children}
+      </span>
+    </div>
   );
 
   if (href) {
     return (
-      <Link
-        href={href}
-        className={outer}
-        style={{ clipPath: clip }}
-        {...(rest as AnchorHTMLAttributes<HTMLAnchorElement>)}
-      >
+      <Link href={href} className={outer} {...(rest as AnchorHTMLAttributes<HTMLAnchorElement>)}>
         {inner}
       </Link>
     );
   }
 
   return (
-    <button
-      disabled={disabled}
-      className={outer}
-      style={{ clipPath: clip }}
-      {...(rest as ButtonHTMLAttributes<HTMLButtonElement>)}
-    >
+    <button disabled={disabled} className={outer} {...(rest as ButtonHTMLAttributes<HTMLButtonElement>)}>
       {inner}
     </button>
   );

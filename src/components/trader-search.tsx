@@ -25,7 +25,7 @@ export function TraderSearch() {
         style={{
           background: 'rgba(0,212,255,0.03)',
           border: '1px solid rgba(0,212,255,0.1)',
-          clipPath: 'polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px)',
+          borderRadius: '6px',
         }}
       />
     </form>

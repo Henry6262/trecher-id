@@ -333,7 +333,7 @@ export function JourneySection() {
                   background: 'linear-gradient(135deg, rgba(5,10,18,0.96) 0%, rgba(8,12,22,0.86) 100%)',
                   border: '1px solid rgba(0,212,255,0.18)',
                   boxShadow: '0 0 18px rgba(0,212,255,0.08)',
-                  clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)',
+                  borderRadius: '6px',
                 }}
               >
                 <span className="h-1.5 w-1.5 rounded-full" style={{ background: '#00D4FF', boxShadow: '0 0 10px rgba(0,212,255,0.45)' }} />

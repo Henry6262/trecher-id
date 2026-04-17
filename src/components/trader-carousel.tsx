@@ -78,7 +78,7 @@ export function TraderCarousel({ traders }: TraderCarouselProps) {
             <Link
               href={`/${t.username}`}
               className="block relative group"
-              style={{ clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)' }}
+              style={{ borderRadius: '6px' }}
             >
               {/* Top section — padded right to clear the PnL pill */}
               <div className="p-4 pr-[76px]">
@@ -111,14 +111,14 @@ export function TraderCarousel({ traders }: TraderCarouselProps) {
                 <div className="flex gap-2">
                   <div
                     className="flex-1 flex items-center justify-between px-2.5 py-1.5"
-                    style={{ background: 'rgba(0,212,255,0.04)', border: '1px solid rgba(0,212,255,0.08)', clipPath: 'polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px)' }}
+                    style={{ background: 'rgba(0,212,255,0.04)', border: '1px solid rgba(0,212,255,0.08)', borderRadius: '6px' }}
                   >
                     <span className="text-[12px] font-bold font-mono text-[var(--trench-accent)]">{t.winRate}</span>
                     <span className="text-[7px] text-[var(--trench-text-muted)] tracking-[1px]">WIN</span>
                   </div>
                   <div
                     className="flex-1 flex items-center justify-between px-2.5 py-1.5"
-                    style={{ background: 'rgba(0,212,255,0.04)', border: '1px solid rgba(0,212,255,0.08)', clipPath: 'polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px)' }}
+                    style={{ background: 'rgba(0,212,255,0.04)', border: '1px solid rgba(0,212,255,0.08)', borderRadius: '6px' }}
                   >
                     <span className="text-[12px] font-bold font-mono text-[var(--trench-text)]">{t.trades}</span>
                     <span className="text-[7px] text-[var(--trench-text-muted)] tracking-[1px]">TRADES</span>
@@ -168,7 +168,7 @@ export function TraderCarousel({ traders }: TraderCarouselProps) {
                   style={{
                     background: 'rgba(8,12,18,0.92)',
                     border: '1px solid rgba(0,212,255,0.2)',
-                    clipPath: 'polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px)',
+                    borderRadius: '6px',
                   }}
                 >
                   <div className="text-center">

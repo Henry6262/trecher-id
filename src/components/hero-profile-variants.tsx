@@ -75,7 +75,7 @@ function CardShell({
         className="relative overflow-hidden"
         style={{
           minHeight: 470,
-          clipPath: 'polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px)',
+          borderRadius: '6px',
           border: '1px solid rgba(255,255,255,0.08)',
           background: 'rgba(8,12,18,0.88)',
           boxShadow: '0 30px 80px rgba(0,0,0,0.4)',
@@ -130,7 +130,7 @@ function StatBlock({ label, value, valueTone, note }: { label: string; value: st
     <div
       className="px-4 py-3"
       style={{
-        clipPath: 'polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px)',
+        borderRadius: '6px',
         background: 'rgba(7,10,16,0.72)',
         border: '1px solid rgba(255,255,255,0.08)',
         backdropFilter: 'blur(12px)',
@@ -148,7 +148,7 @@ function TradeChip({ trade }: { trade: HeroProfileData['topTrades'][number] }) {
     <div
       className="min-w-[210px] px-3 py-3"
       style={{
-        clipPath: 'polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px)',
+        borderRadius: '6px',
         background: 'rgba(7,10,16,0.74)',
         border: '1px solid rgba(255,255,255,0.08)',
         backdropFilter: 'blur(12px)',
@@ -235,7 +235,7 @@ function VariantB({ featured }: { featured: HeroProfileData }) {
           <div
             className="px-4 py-3"
             style={{
-              clipPath: 'polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px)',
+              borderRadius: '6px',
               background: 'rgba(7,10,16,0.76)',
               border: '1px solid rgba(255,255,255,0.08)',
               backdropFilter: 'blur(12px)',
@@ -255,7 +255,7 @@ function VariantB({ featured }: { featured: HeroProfileData }) {
               key={trade.id}
               className="grid items-center gap-4 px-4 py-3 sm:grid-cols-[44px_minmax(0,1fr)_110px_110px]"
               style={{
-                clipPath: 'polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px)',
+                borderRadius: '6px',
                 background: 'rgba(7,10,16,0.76)',
                 border: '1px solid rgba(255,255,255,0.08)',
                 backdropFilter: 'blur(12px)',
@@ -309,7 +309,7 @@ function VariantC({ featured }: { featured: HeroProfileData }) {
           <div
             className="px-4 py-4"
             style={{
-              clipPath: 'polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px)',
+              borderRadius: '6px',
               background: 'rgba(7,10,16,0.76)',
               border: '1px solid rgba(255,255,255,0.08)',
               backdropFilter: 'blur(12px)',

@@ -1,0 +1,8 @@
+.lanyard-canvas {
+  position: absolute;
+  inset: -60px -40px;
+  width: calc(100% + 80px);
+  height: calc(100% + 120px);
+  touch-action: none;
+  overflow: visible;
+}

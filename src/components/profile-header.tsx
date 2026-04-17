@@ -279,7 +279,7 @@ export function ProfileHeader({
           <div
             className="relative w-[110px] h-[110px] animate-[pulseGlow_3s_ease-in-out_infinite]"
             style={{
-              clipPath: 'polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px)',
+              borderRadius: '6px',
               background: `linear-gradient(135deg, ${accent}80, ${accent}26, ${accent}66)`,
               padding: '2px',
             }}
@@ -287,7 +287,7 @@ export function ProfileHeader({
             <div
               className="w-full h-full overflow-hidden"
               style={{
-                clipPath: 'polygon(13px 0, 100% 0, 100% calc(100% - 13px), calc(100% - 13px) 100%, 0 100%, 0 13px)',
+                borderRadius: '6px',
                 background: '#0a0a0f',
               }}
             >
@@ -324,7 +324,7 @@ export function ProfileHeader({
                   </div>
                 )}
                 {isClaimed && (
-                  <span style={{ clipPath: 'polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px)', color: accent, border: `1px solid ${accent}4d`, background: `${accent}14` }} className="inline-flex items-center px-1.5 py-0.5 font-mono text-[10px] tracking-widest ml-2">
+                  <span style={{ borderRadius: '6px', color: accent, border: `1px solid ${accent}4d`, background: `${accent}14` }} className="inline-flex items-center px-1.5 py-0.5 font-mono text-[10px] tracking-widest ml-2">
                     ✓ VERIFIED
                   </span>
                 )}
@@ -448,7 +448,7 @@ export function ProfileHeader({
                             style={{
                               width: '11px',
                               height: '11px',
-                              clipPath: 'polygon(2px 0%, 100% 0%, 100% calc(100% - 2px), calc(100% - 2px) 100%, 0% 100%, 0% 2px)',
+                              borderRadius: '6px',
                               background: day ? getDayColor(day.pnlSol) : 'transparent',
                               boxShadow: day && day.tradeCount > 0 ? '0 0 12px rgba(0,0,0,0.18)' : 'none',
                               flexShrink: 0,
@@ -489,7 +489,7 @@ export function ProfileHeader({
                       style={{
                         width: '100%',
                         aspectRatio: '1 / 1',
-                        clipPath: 'polygon(2px 0%, 100% 0%, 100% calc(100% - 2px), calc(100% - 2px) 100%, 0% 100%, 0% 2px)',
+                        borderRadius: '6px',
                         background: index % 7 === 0 ? `${accent}26` : 'rgba(255,255,255,0.05)',
                       }}
                     />

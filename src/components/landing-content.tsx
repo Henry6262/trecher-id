@@ -22,6 +22,7 @@ import type { TickerItem } from '@/lib/types';
 
 const ShaderCard = dynamic(() => import('@/components/shader-card'), { ssr: false });
 const DomeGallery = dynamic(() => import('@/components/DomeGallery'), { ssr: false });
+const Lanyard = dynamic(() => import('@/components/react-bits/lanyard/Lanyard'), { ssr: false });
 
 interface TraderData {
   username: string;
@@ -537,7 +538,7 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
         <ActivityTicker items={ticker} />
 
         {/* Hero */}
-        <section id="hero" className="mx-auto grid max-w-[1000px] scroll-mt-36 grid-cols-1 md:grid-cols-2 items-center gap-4 sm:gap-6 px-4 pt-10 pb-8 sm:pt-14 sm:pb-10 sm:px-6 lg:pt-16 lg:pb-12">
+        <section id="hero" className="mx-auto grid max-w-[1000px] scroll-mt-36 grid-cols-1 md:grid-cols-2 items-stretch gap-4 sm:gap-6 px-4 pt-10 pb-8 sm:pt-14 sm:pb-10 sm:px-6 lg:pt-16 lg:pb-12">
           <div>
             <div className="cut-xs mb-4 sm:mb-6 inline-flex items-center gap-1.5 border border-[rgba(0,212,255,0.12)] bg-[rgba(0,212,255,0.08)] px-2.5 py-1 sm:px-3 text-[8px] sm:text-[10px] font-mono tracking-[2px] text-[var(--trench-accent)]">
               <Check size={8} strokeWidth={3} className="sm:w-[10px] sm:h-[10px]" />
@@ -574,29 +575,10 @@ export function LandingContent({ traders, featuredProfiles, ticker, leaderboardD
             <p className="mt-3 sm:mt-4 text-[7px] sm:text-[9px] font-mono tracking-[2px] text-[var(--trench-text-muted)]">LANDING &middot; LEADERBOARD &middot; DASHBOARD</p>
           </div>
 
-          {/* Preview card — shader-backed profile card — only shows in 2-col mode */}
-          {featuredProfiles.length > 0 && (
-            <div className="hidden lg:flex justify-end overflow-hidden" style={{ minWidth: 0 }}>
-              <ShaderCard
-                width={440}
-                height={520}
-                color="#00D4FF"
-                speed={0.6}
-                positionY={0.35}
-                scale={2.5}
-                branchIntensity={0.8}
-                verticalExtent={1.0}
-                horizontalExtent={1.2}
-                effectRadius={1.2}
-                waveAmount={0.3}
-                blur={8}
-                opacity={1.0}
-                borderRadius="0"
-              >
-                <PreviewCardCarousel profiles={featuredProfiles} />
-              </ShaderCard>
-            </div>
-          )}
+          {/* Lanyard identity card — physics rope card in hero right column */}
+          <div className="relative hidden md:flex md:items-stretch" style={{ height: 640, minWidth: 0 }}>
+            <Lanyard position={[0, 0, 18]} gravity={[0, -40, 0]} fov={22} transparent />
+          </div>
         </section>
 
         {/* Divider */}

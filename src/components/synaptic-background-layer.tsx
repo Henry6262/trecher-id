@@ -2,20 +2,30 @@
 
 import dynamic from 'next/dynamic';
 
-const SynapticShift = dynamic(() => import('@/components/react-bits/synaptic-shift'), { ssr: false });
+const FaultyTerminal = dynamic(
+  () => import('@/components/react-bits/faulty-terminal/FaultyTerminal'),
+  { ssr: false }
+);
 
 export function SynapticBackgroundLayer() {
   return (
     <div className="fixed inset-0 overflow-hidden" style={{ zIndex: 0, background: '#050508' }}>
-      <SynapticShift
-        speed={0.5}
-        scale={0.9}
-        intensity={3}
-        color="#00D4FA"
-        falloff={1.36}
-        complexity={10}
-        breathing={false}
-        className="h-full w-full opacity-90"
+      <FaultyTerminal
+        scale={1.5}
+        gridMul={[2, 1]}
+        digitSize={1.2}
+        timeScale={0.3}
+        scanlineIntensity={0.3}
+        glitchAmount={1}
+        flickerAmount={1}
+        noiseAmp={0}
+        chromaticAberration={0}
+        curvature={0}
+        tint="#00D4FA"
+        mouseReact={true}
+        mouseStrength={0.3}
+        pageLoadAnimation={false}
+        brightness={0.15}
       />
       <div
         className="pointer-events-none absolute inset-0"

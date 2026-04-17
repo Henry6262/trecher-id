@@ -67,29 +67,31 @@ export default async function LandingPage({ searchParams }: { searchParams: Prom
   let mockTraders: typeof traders = [];
 
   try {
-  // Fetch ticker items directly (no internal HTTP — same Prisma call as /api/ticker)
-  ticker = await cached<TickerItem[]>('ticker:recent', 60, async () => {
-    const rows = await prisma.pinnedTrade.findMany({
-      orderBy: { pinnedAt: 'desc' },
-      take: 20,
-      include: { user: { select: { username: true, avatarUrl: true } } },
-    });
-    return rows.map((r) => ({
-      username: r.user.username,
-      avatarUrl: r.user.avatarUrl,
-      tokenSymbol: r.tokenSymbol,
-      pnlPercent: r.totalPnlPercent,
-      totalPnlSol: r.totalPnlSol,
-      pinnedAt: r.pinnedAt.toISOString(),
-    }));
-  });
+  // Fetch ticker + leaderboard in parallel
+  const [tickerResult, rankedRows] = await Promise.all([
+    cached<TickerItem[]>('ticker:recent', 60, async () => {
+      const rows = await prisma.pinnedTrade.findMany({
+        orderBy: { pinnedAt: 'desc' },
+        take: 20,
+        include: { user: { select: { username: true, avatarUrl: true } } },
+      });
+      return rows.map((r) => ({
+        username: r.user.username,
+        avatarUrl: r.user.avatarUrl,
+        tokenSymbol: r.tokenSymbol,
+        pnlPercent: r.totalPnlPercent,
+        totalPnlSol: r.totalPnlSol,
+        pinnedAt: r.pinnedAt.toISOString(),
+      }));
+    }),
+    prisma.userRanking.findMany({
+      where: { period: 'all', trades: { gt: 0 }, rank: { not: null } },
+      orderBy: { rank: 'asc' },
+      include: { user: { select: { username: true, displayName: true, avatarUrl: true, isClaimed: true } } },
+    }),
+  ]);
+  ticker = tickerResult;
 
-  // Fetch leaderboard server-side for instant render
-  const rankedRows = await prisma.userRanking.findMany({
-    where: { period: 'all', trades: { gt: 0 }, rank: { not: null } },
-    orderBy: { rank: 'asc' },
-    include: { user: { select: { username: true, displayName: true, avatarUrl: true, isClaimed: true } } },
-  });
   const rankings = rankedRows.length > 0
     ? rankedRows
     : await prisma.userRanking.findMany({
@@ -174,31 +176,30 @@ export default async function LandingPage({ searchParams }: { searchParams: Prom
     }
   ];
   
-  const users = rankedUsernames.length > 0
-    ? await prisma.user.findMany({
-        where: { username: { in: rankedUsernames } },
-        include: {
-          wallets: true,
-          pinnedTrades: { orderBy: [{ totalPnlPercent: 'desc' }, { totalPnlSol: 'desc' }], take: 3 },
-          tokenDeployments: { orderBy: { mcapAthUsd: 'desc' }, take: 3 },
-        },
-      })
-    : [];
-
-  const tokenImageRows = rankedUsernames.length > 0
-    ? await prisma.walletTrade.findMany({
-        where: {
-          wallet: { user: { username: { in: rankedUsernames } } },
-          tokenImageUrl: { not: null },
-        },
-        select: {
-          tokenMint: true,
-          tokenSymbol: true,
-          tokenImageUrl: true,
-          wallet: { select: { user: { select: { username: true } } } },
-        },
-      })
-    : [];
+  const [users, tokenImageRows] = rankedUsernames.length > 0
+    ? await Promise.all([
+        prisma.user.findMany({
+          where: { username: { in: rankedUsernames } },
+          include: {
+            wallets: true,
+            pinnedTrades: { orderBy: [{ totalPnlPercent: 'desc' }, { totalPnlSol: 'desc' }], take: 3 },
+            tokenDeployments: { orderBy: { mcapAthUsd: 'desc' }, take: 3 },
+          },
+        }),
+        prisma.walletTrade.findMany({
+          where: {
+            wallet: { user: { username: { in: rankedUsernames } } },
+            tokenImageUrl: { not: null },
+          },
+          select: {
+            tokenMint: true,
+            tokenSymbol: true,
+            tokenImageUrl: true,
+            wallet: { select: { user: { select: { username: true } } } },
+          },
+        }),
+      ])
+    : [[], []];
 
   const usersWithResolvedAvatars = await resolveAvatarRows(users);
   const userByUsername = new Map(usersWithResolvedAvatars.map((user) => [user.username, user]));
