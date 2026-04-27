@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { ArrowUpRight, BarChart3, ExternalLink, Globe2, LayoutDashboard, Lock } from 'lucide-react';
+import { ArrowUpRight, BarChart3, Check, Copy, ExternalLink, Globe2, LayoutDashboard, Lock } from 'lucide-react';
 
 type NavCard = {
   label: string;
@@ -29,7 +29,10 @@ function XIcon({ className }: { className?: string }) {
   return <span className={className}>X</span>;
 }
 
+const TOKEN_CA = 'HU5uzDSaiDYBkoHQikf2mRXEEWquRY9xNYM2ErkNpump';
 const X_URL = 'https://x.com/web3me';
+const DOCS_URL = 'https://docs.web3me.fun/';
+const DEXSCREENER_URL = 'https://dexscreener.com/solana/HU5uzDSaiDYBkoHQikf2mRXEEWquRY9xNYM2ErkNpump';
 const NAV_CARDS: NavCard[] = [
   {
     label: 'Home',
@@ -69,12 +72,12 @@ const NAV_CARDS: NavCard[] = [
   {
     label: 'Token',
     description: 'View the token contract and trading data on Dexscreener.',
-    href: 'https://dexscreener.com/solana/HU5uzDSaiDYBkoHQikf2mRXEEWquRY9xNYM2ErkNpump',
+    href: DEXSCREENER_URL,
     accent: '#00ff88',
     eyebrow: 'Contract',
     external: true,
     links: [
-      { label: 'Dexscreener', href: 'https://dexscreener.com/solana/HU5uzDSaiDYBkoHQikf2mRXEEWquRY9xNYM2ErkNpump', icon: BarChart3, external: true },
+      { label: 'Dexscreener', href: DEXSCREENER_URL, icon: BarChart3, external: true },
     ],
   },
   {
@@ -106,6 +109,7 @@ export function PublicNav() {
   const router = useRouter();
   const pathname = usePathname();
   const [isExpanded, setIsExpanded] = useState(false);
+  const [copiedCa, setCopiedCa] = useState(false);
   const [hasScrolledPastHero, setHasScrolledPastHero] = useState(pathname !== '/');
   const [pendingSectionId, setPendingSectionId] = useState<string | null>(null);
 
@@ -184,6 +188,15 @@ export function PublicNav() {
   const accentStyle = (accent: string): CSSProperties =>
     ({ ['--accent' as string]: accent }) as CSSProperties;
   const isNavVisible = pathname !== '/' || hasScrolledPastHero;
+  const copyContractAddress = async () => {
+    try {
+      await navigator.clipboard.writeText(TOKEN_CA);
+      setCopiedCa(true);
+      window.setTimeout(() => setCopiedCa(false), 1800);
+    } catch {
+      setCopiedCa(false);
+    }
+  };
 
   const navigateToHref = (href: string) => {
     const [rawPath, rawHash] = href.split('#');
@@ -518,6 +531,10 @@ export function PublicNav() {
           gap: 12px;
         }
 
+        .web3me-nav-mobile-utility {
+          display: none;
+        }
+
         .web3me-nav-card {
           --accent: var(--trench-accent);
           position: relative;
@@ -726,6 +743,108 @@ export function PublicNav() {
           .web3me-nav-grid {
             grid-template-columns: minmax(0, 1fr);
           }
+
+          .web3me-nav-mobile-utility {
+            display: block;
+            margin-bottom: 14px;
+            padding: 14px;
+            border-radius: 18px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background:
+              linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02)),
+              rgba(6, 8, 12, 0.88);
+          }
+
+          .web3me-nav-mobile-utility-label {
+            margin-bottom: 10px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: rgba(0, 212, 255, 0.74);
+          }
+
+          .web3me-nav-mobile-ca {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            margin-bottom: 12px;
+            padding: 12px 14px;
+            border-radius: 14px;
+            border: 1px solid rgba(0,212,255,0.18);
+            background: rgba(0,212,255,0.08);
+            color: white;
+          }
+
+          .web3me-nav-mobile-ca-copy {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            flex-shrink: 0;
+            border-radius: 999px;
+            border: 1px solid rgba(0,212,255,0.22);
+            background: rgba(255,255,255,0.05);
+            color: #00D4FF;
+          }
+
+          .web3me-nav-mobile-ca-copy.active {
+            color: #22c55e;
+            border-color: rgba(34,197,94,0.28);
+          }
+
+          .web3me-nav-mobile-ca-text {
+            min-width: 0;
+            flex: 1;
+          }
+
+          .web3me-nav-mobile-ca-title {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: rgba(0, 212, 255, 0.72);
+          }
+
+          .web3me-nav-mobile-ca-value {
+            margin-top: 4px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-size: 11px;
+            font-family: var(--font-geist-mono, monospace);
+            color: rgba(255,255,255,0.8);
+          }
+
+          .web3me-nav-mobile-links {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+          }
+
+          .web3me-nav-mobile-link {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 76px;
+            padding: 12px 10px;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.03);
+            color: rgba(255,255,255,0.78);
+            text-align: center;
+          }
+
+          .web3me-nav-mobile-link-label {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+          }
         }
       `}</style>
 
@@ -782,6 +901,35 @@ export function PublicNav() {
           </div>
 
           <div className={`web3me-nav-panel ${isExpanded ? 'active' : ''}`}>
+            <div className="web3me-nav-mobile-utility">
+              <div className="web3me-nav-mobile-utility-label">Token + Socials</div>
+
+              <button type="button" className="web3me-nav-mobile-ca" onClick={copyContractAddress}>
+                <span className={`web3me-nav-mobile-ca-copy ${copiedCa ? 'active' : ''}`} aria-hidden="true">
+                  {copiedCa ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                </span>
+                <span className="web3me-nav-mobile-ca-text">
+                  <span className="web3me-nav-mobile-ca-title">{copiedCa ? 'Contract Copied' : 'Copy CA'}</span>
+                  <span className="web3me-nav-mobile-ca-value">{TOKEN_CA}</span>
+                </span>
+              </button>
+
+              <div className="web3me-nav-mobile-links">
+                <a href={X_URL} target="_blank" rel="noreferrer" className="web3me-nav-mobile-link" onClick={() => setIsExpanded(false)}>
+                  <XIcon className="h-4 w-4" />
+                  <span className="web3me-nav-mobile-link-label">X</span>
+                </a>
+                <a href={DEXSCREENER_URL} target="_blank" rel="noreferrer" className="web3me-nav-mobile-link" onClick={() => setIsExpanded(false)}>
+                  <BarChart3 className="h-4 w-4" />
+                  <span className="web3me-nav-mobile-link-label">Dex</span>
+                </a>
+                <a href={DOCS_URL} target="_blank" rel="noreferrer" className="web3me-nav-mobile-link" onClick={() => setIsExpanded(false)}>
+                  <Globe2 className="h-4 w-4" />
+                  <span className="web3me-nav-mobile-link-label">Docs</span>
+                </a>
+              </div>
+            </div>
+
             <div className="web3me-nav-grid">
               {NAV_CARDS.map((card) => (
                 <section

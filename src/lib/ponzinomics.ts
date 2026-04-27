@@ -11,7 +11,7 @@ import { Ponzinomics } from '@ponzinomics/sdk';
 // SDK Configuration
 const PONZINOMICS_API_KEY = process.env.PONZINOMICS_API_KEY;
 const PONZINOMICS_PROJECT_ID = process.env.PONZINOMICS_PROJECT_ID;
-const PONZINOMICS_BASE_URL = process.env.PONZINOMICS_BASE_URL || 'https://api.sypher.io';
+const PONZINOMICS_BASE_URL = process.env.PONZINOMICS_BASE_URL || 'https://api.ponzinomics.io';
 
 /**
  * Create a configured Ponzinomics SDK instance.

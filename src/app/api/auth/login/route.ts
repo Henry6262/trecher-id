@@ -176,7 +176,7 @@ export async function POST(req: NextRequest) {
       const sdk = new Ponzinomics({
         apiKey: process.env.PONZINOMICS_API_KEY,
         projectId: process.env.PONZINOMICS_PROJECT_ID,
-        baseUrl: process.env.PONZINOMICS_BASE_URL || 'https://api.sypher.io',
+        baseUrl: process.env.PONZINOMICS_BASE_URL || 'https://api.ponzinomics.io',
       });
 
       const authResponse = await sdk.auth!.login({ privyToken: token });

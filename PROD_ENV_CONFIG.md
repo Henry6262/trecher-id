@@ -20,7 +20,7 @@ This document contains the production environment variables used for the Trecher
 | `NEXT_PUBLIC_CHAIN_API_URL` | Chain/On-chain Data API | `https://chain-api-production-c23e.up.railway.app` |
 | `NEXT_PUBLIC_AI_API_URL` | AI & Signal Intelligence API | `https://ai-api-production-97cd.up.railway.app` |
 | `NEXT_PUBLIC_LEARNING_API_URL` | Training/Learning API | `https://learning-api-production-51d5.up.railway.app` |
-| `PONZINOMICS_BASE_URL` | Sypher Reputation API | `https://api.sypher.io` |
+| `PONZINOMICS_BASE_URL` | Ponzinomics Reputation API | `https://api.ponzinomics.io` |
 
 ### 3. Third-Party Integrations
 | Key | Description | Value / Status |

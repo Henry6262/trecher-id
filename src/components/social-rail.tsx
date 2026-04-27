@@ -36,7 +36,7 @@ export function SocialRail() {
   };
 
   return (
-    <div className="fixed top-8 left-6 z-[100] flex flex-col gap-3">
+    <div className="fixed top-8 left-6 z-[100] hidden md:flex flex-col gap-3">
       {SOCIAL_LINKS.map((link) => (
         <a
           key={link.id}
